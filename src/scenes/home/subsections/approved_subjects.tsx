@@ -1,30 +1,35 @@
-import React, {Component} from 'react';
-import MenuOption from './base.ts';
-import FilterNavBarButton from '../filterNavBarButton.tsx';
+import React, { FC } from 'react';
+// import { ActionSheetOptions } from 'react-native-actionsheet';
 import ApprovedSubjectsScreen from '../../approved_subjects';
+import FilterNavBarButton from '../filterNavBarButton';
 
-export default class ApprovedSubjects extends MenuOption {
-  title(): string {
-    return 'Materias aprobadas';
-  }
-
-  initialComponentProps(): object {
-    return {};
-  }
-
-  component(props: object): Component {
-    return <ApprovedSubjectsScreen {...props} />;
-  }
-
-  headerButton(
-    navigation: object,
-    showActionSheet: (
-      options: ActionSheetOptions,
-      callback: (i: number) => void,
-    ) => void,
-    currentProps: object,
-    onChildPropsChanged: (props: object) => void,
-  ): Component {
-    return <FilterNavBarButton onChildPropsChanged={onChildPropsChanged} />;
-  }
+interface ApprovedSubjectsProps {
+  navigation: any;
+  showActionSheet: (options: any, callback: (i: number) => void) => void;
+  // showActionSheet: (options: ActionSheetOptions, callback: (i: number) => void) => void;
+  currentProps: object;
+  onChildPropsChanged: (props: object) => void;
 }
+
+const ApprovedSubjects: FC<ApprovedSubjectsProps> = ({ navigation, showActionSheet, currentProps, onChildPropsChanged }) => {
+  const initialComponentProps = () => {
+    return {};
+  };
+
+  const component = (props: object) => {
+    return <ApprovedSubjectsScreen {...props} />;
+  };
+
+  // const headerButton = () => {
+  //   return <FilterNavBarButton onChildPropsChanged={onChildPropsChanged} showActionSheetWithOptions={} />;
+  // };
+
+  return (
+    <>
+      {component(initialComponentProps())}
+      {/* {headerButton()} */}
+    </>
+  );
+};
+
+export default ApprovedSubjects;

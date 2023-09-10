@@ -4,8 +4,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 // import 'react-native-gesture-handler';
 // import 'moment/locale/es';
-import { SplashScreen, LandingScreen } from './src/scenes';
-// import HomeOptions from './src/scenes/home/subsections';
+import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen } from './src/scenes';
+import HomeOptions from './src/scenes/home/subsections';
 
 const Stack = createStackNavigator();
 
@@ -29,13 +29,19 @@ const App = () => {
               options={{ headerShown: false, title: 'Inicio' }}
             />
 
-            {/* <Stack.Screen
+            <Stack.Screen
               name="PreRegister"
               component={PreRegisterScreen}
               options={{ headerShown: true, title: 'Pre-registro' }}
             />
 
             <Stack.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{ headerShown: true }}
+              initialParams={{ subsection: new HomeOptions.VerifyIdentity() }}
+            />
+            {/* <Stack.Screen
               name="PreRegisterDone"
               component={PreRegisterLastInstructionsScreen}
               options={{ headerShown: false }}
@@ -47,12 +53,6 @@ const App = () => {
               options={({ route }) => ({ title: route.params.title })}
             />
 
-            <Stack.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{ headerShown: true }}
-              initialParams={{ subsection: new HomeOptions.VerifyIdentity() }}
-            />
 
             <Stack.Screen
               name="Materias aprobadas"

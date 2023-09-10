@@ -48,12 +48,16 @@ const Landing = ({ navigation }: Props) => {
           routes: [{ name: 'Home' }],
         });
       }
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{ name: 'Home' }],
+        // });
     } catch (error) {
       if (error instanceof authenticationRepository.NotAStudent) {
         showRoleError();
       } else if (error instanceof authenticationRepository.AccountNotApproved) {
         showAccountNotApprovedError();
-      } else if (!isCancellationError(error)) {
+      } else if (!isCancellationError(error as { message: string })) {
         console.log('Error', error);
         showGenericError();
       }

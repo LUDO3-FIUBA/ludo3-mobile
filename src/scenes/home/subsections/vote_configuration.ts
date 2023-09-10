@@ -1,15 +1,16 @@
-import {InteractionManager} from 'react-native';
-import {RNCamera} from 'react-native-camera';
+import { InteractionManager } from 'react-native';
+// import { RNCamera } from 'react-native-camera';
 import TakePictureStepConfiguration from '../../image_recognition/takePictureStepConfiguration';
 import Type from '../../image_recognition/takePictureStepConfigurationType';
 import VerifyIdentityConfiguration from './vote_identity_configuration';
 
-export default class QRScannerConfiguration extends TakePictureStepConfiguration {
-  constructor(description) {
-    super(description, RNCamera.Constants.Type.back, true);
+class QRScannerConfiguration extends TakePictureStepConfiguration {
+
+  constructor(description: string) {
+    super(description, 'back', true);
   }
 
-  async onDataObtained(data, navigation, disableLoading) {
+  async onDataObtained(data: any, navigation: any, disableLoading: () => void) {
     await navigation.push('TakePicture', {
       configuration: new VerifyIdentityConfiguration(
         'Verifiquemos tu identidad',
@@ -21,10 +22,12 @@ export default class QRScannerConfiguration extends TakePictureStepConfiguration
   }
 
   toObject() {
-    return super.toObject(Type.VoteQR, {});
+    return super.toObject(String(Type.VoteQR), {});
   }
 
-  static fromObject(object) {
+  static fromObject(object: any) {
     return new QRScannerConfiguration(object.description);
   }
 }
+
+export default QRScannerConfiguration;

@@ -2,7 +2,6 @@
 // export LandingScreen from './landing';
 // export PreRegisterScreen from './preregister';
 // export PreRegisterLastInstructionsScreen from './preregister/done';
-// export HomeScreen from './home';
 // export ApprovedSubjectsScreen from './approved_subjects';
 // export PendingSubjectsScreen from './pending_subjects';
 // export TakePictureStepScreen from './image_recognition/takePictureStep';
@@ -10,3 +9,5 @@
 
 export { default as SplashScreen } from './splash';
 export { default as LandingScreen } from './landing';
+export { default as PreRegisterScreen } from './preregister';
+export { default as HomeScreen } from './home';

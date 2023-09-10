@@ -1,12 +1,11 @@
-import React, { useState, useRef, FC } from 'react';
-import { View, TextInput, Text, NativeSyntheticEvent, TextInputChangeEventData } from 'react-native';
+import React, { useState, useRef, forwardRef } from 'react';
+import { View, TextInput, Text } from 'react-native';
 import validate from 'validate.js';
 
 type KeyboardType = 'default' | 'numeric' | 'email-address'; // Add more types if needed
 type ReturnKeyType = 'default' | 'next' | 'send'; // Add more types if needed
 
 interface FormInputProps {
-  ref?: (input: any) => void;
   initialValue?: string;
   placeholder?: string;
   secure?: boolean;
@@ -22,7 +21,7 @@ interface FormInputProps {
   validation?: object;
 }
 
-const FormInput: FC<FormInputProps> = ({
+const FormInput = forwardRef<TextInput, FormInputProps>(({
   initialValue = '',
   placeholder = '',
   secure = false,
@@ -36,10 +35,8 @@ const FormInput: FC<FormInputProps> = ({
   blurOnSubmit = true,
   errorMessageOnEditFinish = true,
   validation,
-}) => {
+}, ref) => {
   const [value, setValue] = useState(initialValue);
-  const textInput = useRef(null);
-
   const validateValue = (val: string): string | null => {
     const formValues = { campo: val };
     const formFields = { campo: validation };
@@ -72,7 +69,7 @@ const FormInput: FC<FormInputProps> = ({
   return (
     <View>
       <TextInput
-        ref={textInput}
+        ref={ref}
         style={style}
         value={value}
         autoCapitalize="none"
@@ -93,6 +90,6 @@ const FormInput: FC<FormInputProps> = ({
       {error ? <Text style={errorStyle}>{error}</Text> : null}
     </View>
   );
-};
+});
 
 export default FormInput;

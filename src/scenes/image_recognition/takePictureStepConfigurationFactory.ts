@@ -8,8 +8,16 @@ import TakePictureStepConfiguration from './takePictureStepConfiguration';
 
 import Type from './takePictureStepConfigurationType';
 
+interface TakePictureStepConfigurationObject {
+  type: number;
+  description?: string;
+  cameraType?: any;  
+  searchForQRCode?: boolean;
+  
+}
+
 export default class TakePictureStepConfigurationFactory {
-  static fromObject(object) {
+  static fromObject(object: TakePictureStepConfigurationObject): TakePictureStepConfiguration | RegisterFacePictureConfiguration | FinalExamQRConfiguration | FinalExamFacePictureConfiguration | VerifyIdentityFacePictureConfiguration | VoteQRConfiguration | VoteFacePictureConfiguration {
     if (object.type === Type.RegisterFace) {
       return RegisterFacePictureConfiguration.fromObject(object);
     } else if (object.type === Type.FinalExamQR) {
@@ -22,7 +30,8 @@ export default class TakePictureStepConfigurationFactory {
       return VoteQRConfiguration.fromObject(object);
     } else if (object.type === Type.VoteFace) {
       return VoteFacePictureConfiguration.fromObject(object);
+    } else {
+      return TakePictureStepConfiguration.fromObject(object);
     }
-    return TakePictureStepConfiguration.fromObject(object);
   }
 }

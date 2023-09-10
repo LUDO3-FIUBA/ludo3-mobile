@@ -1,30 +1,31 @@
-import {Alert} from 'react-native';
+import { Alert } from 'react-native';
 import TakePictureStepConfiguration from '../../image_recognition/takePictureStepConfiguration';
 import Type from '../../image_recognition/takePictureStepConfigurationType';
-import {finalExamsRepository} from '../../../repositories';
-import {makeRequest} from '../../authenticatedComponent';
+import { votingRepository } from '../../../repositories';
+import { makeRequest } from '../../authenticatedComponent';
 
-export default class VerifyIdentityForExamConfiguration extends TakePictureStepConfiguration {
-  constructor(description, token) {
-    super(description);
+class VerifyIdentityConfiguration extends TakePictureStepConfiguration {
+  token: string;
+
+  constructor(description: string, token: string) {
+    super(description, 'back', false);
     this.token = token;
   }
 
-  async onDataObtained(image, navigation, disableLoading) {
+  async onDataObtained(image: any, navigation: any, disableLoading: () => void) {
     await makeRequest(
-      () => finalExamsRepository.submitExam(this.token, image),
+      () => votingRepository.redeemVote(this.token, image),
       navigation,
     )
-      .then(user => {
+      .then(() => {
         Alert.alert(
           'Éxito',
-          `${user.fullName()}\n(${user.id()})\nha entregado su examen.`,
+          'Has votado',
           [
             {
               text: 'OK',
               onPress: () => {
                 disableLoading();
-                navigation.popToTop();
               },
             },
           ],
@@ -33,18 +34,18 @@ export default class VerifyIdentityForExamConfiguration extends TakePictureStepC
           },
         );
       })
-      .catch(error => {
+      .catch((error: any) => {
         disableLoading();
-        if (error instanceof finalExamsRepository.IdentityFail) {
+        if (error instanceof votingRepository.IdentityFail) {
           Alert.alert(
             '¡No sos quien decís ser!',
             'O no hemos podido reconocerte. Intentá de nuevo.',
           );
-        } else if (error instanceof finalExamsRepository.NotAFinal) {
+        } else if (error instanceof votingRepository.NotAVotingTable) {
           Alert.alert(
             'QR inválido',
-            'No encontramos ningún final activo que corresponda a ese QR. ' +
-              'Cualquier cosa, intentá de nuevo.',
+            'No encontramos ninguna mesa de votación activa que corresponda ' +
+              'a ese QR. Cualquier cosa, intentá de nuevo.',
             [
               {
                 text: 'OK',
@@ -61,7 +62,8 @@ export default class VerifyIdentityForExamConfiguration extends TakePictureStepC
           console.log('Error', error);
           Alert.alert(
             'Error',
-            'Hubo un error, no pudimos identificarte a vos o al final.',
+            'Hubo un error, no pudimos identificarte a vos o a la mesa de ' +
+              'votación.',
             [
               {
                 text: 'OK',
@@ -79,15 +81,14 @@ export default class VerifyIdentityForExamConfiguration extends TakePictureStepC
   }
 
   toObject() {
-    return super.toObject(Type.FinalExamFace, {
+    return super.toObject(String(Type.VoteFace), {
       token: this.token,
     });
   }
 
-  static fromObject(object) {
-    return new VerifyIdentityForExamConfiguration(
-      object.description,
-      object.token,
-    );
+  static fromObject(object: any) {
+    return new VerifyIdentityConfiguration(object.description, object.token);
   }
 }
+
+export default VerifyIdentityConfiguration;

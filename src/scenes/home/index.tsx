@@ -52,6 +52,7 @@ const Home: React.FC<HomeProps> = ({ route }) => {
     if (radialMenuLayoutRef && radialMenuLayoutRef.current) {
       const { x, y, width, height } = radialMenuLayoutRef.current
       // const menuOpenerLayout = menuOpenerLayoutRef.current;
+      
       // const expectedX = x + width / 2 - menuOpenerLayout.width / 2;
       // const expectedY = y + height / 2 - menuOpenerLayoutRef.current.height / 2;
 
