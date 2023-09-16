@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 // import 'react-native-gesture-handler';
 // import 'moment/locale/es';
-import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen } from './src/scenes';
+import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, CameraTestScreen } from './src/scenes';
 import HomeOptions from './src/scenes/home/subsections';
 
 const Stack = createStackNavigator();
@@ -14,7 +14,7 @@ const App = () => {
       <ActionSheetProvider>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="Splash"
+            initialRouteName="CameraTest"
             screenOptions={{ gestureEnabled: false }}
           >
             <Stack.Screen
@@ -41,18 +41,27 @@ const App = () => {
               options={{ headerShown: true }}
               initialParams={{ subsection: new HomeOptions.VerifyIdentity() }}
             />
-            {/* <Stack.Screen
-              name="PreRegisterDone"
-              component={PreRegisterLastInstructionsScreen}
-              options={{ headerShown: false }}
-            />
 
             <Stack.Screen
               name="TakePicture"
               component={TakePictureStepScreen}
-              options={({ route }) => ({ title: route.params.title })}
+              options={({ route }) => ({ title: 'Mock Title' })}
+              // options={({ route }) => ({ title: route.params?.title })}
             />
 
+            <Stack.Screen
+              name="CameraTest"
+              component={CameraTestScreen}
+              options={({ route }) => ({ title: 'Mock Title' })}
+              // options={({ route }) => ({ title: route.params?.title })}
+            />
+
+
+              {/* <Stack.Screen
+                name="PreRegisterDone"
+                component={PreRegisterLastInstructionsScreen}
+                options={{ headerShown: false }}
+              />
 
             <Stack.Screen
               name="Materias aprobadas"

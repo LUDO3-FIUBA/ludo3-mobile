@@ -20,7 +20,7 @@ export default class TakePictureStepConfiguration {
 
   constructor(
     description = '',
-    cameraType: any,
+    cameraType: any = 'back',
     searchForQRCode = false,
   ) {
     this.description = description;
