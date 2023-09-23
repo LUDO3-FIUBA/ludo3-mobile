@@ -103,7 +103,6 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
       const photo = await camera.takePhoto();
       const base64 = await photoToBase64(photo);
       const disableLoading = () => setLoading(false);
-      console.log("Sending photo", base64);
       await getConfiguration()?.onDataObtained(base64, navigation, disableLoading);
     } catch (error) {
       setLoading(false);
@@ -112,6 +111,7 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
   };
 
   const config = getConfiguration();
+  console.log(config, configuration)
   if (!config) return null;
 
   return (
