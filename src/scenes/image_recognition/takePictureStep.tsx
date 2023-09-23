@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, SafeAreaView, Text, Alert, AppStateStatus, AppState } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { takePicture as style } from '../../styles';
 import TakePictureStepConfiguration from './takePictureStepConfiguration';
 import TakePictureStepConfigurationFactory from './takePictureStepConfigurationFactory';
-import { Camera, CameraDevice, CameraRuntimeError, useCameraDevices } from 'react-native-vision-camera';
+import { Camera, CameraDevice, CameraRuntimeError, PhotoFile, useCameraDevices } from 'react-native-vision-camera';
 
 Icon.loadFont();
 
@@ -21,9 +21,6 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
 
   const navigation = useNavigation();
   const route = useRoute<RouteProp<{ params: { configuration: any } }, 'params'>>();
-
-  const devices = useCameraDevices();
-  const cameraPermissionGranted = useCameraPermission();
 
   const getConfiguration = useCallback(() => {
     if (configuration) {
@@ -77,23 +74,36 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
     }
   };
 
-  const takePicture = async (camera: any) => {
-    const options = {
-      width: 180,
-      quality: 0.3,
-      base64: true,
-      forceUpOrientation: true,
-      fixOrientation: true,
-      doNotSave: true,
-      orientation: 'portrait',
-    };
+  const takePicture = async (camera: Camera) => {
+    // const options = {
+    //   width: 180,
+    //   quality: 0.3,
+    //   base64: true,
+    //   forceUpOrientation: true,
+    //   fixOrientation: true,
+    //   doNotSave: true,
+    //   orientation: 'portrait',
+    // };
+
+    // setLoading(true);
+
+    // try {
+    //   const data = await camera.takePictureAsync(options);
+    //   const base64 = data.base64;
+    //   const disableLoading = () => setLoading(false);
+    //   await getConfiguration()?.onDataObtained(base64, navigation, disableLoading);
+    // } catch (error) {
+    //   setLoading(false);
+    //   Alert.alert('Hubo un error sacando la foto');
+    // }
 
     setLoading(true);
 
     try {
-      const data = await camera.takePictureAsync(options);
-      const base64 = data.base64;
+      const photo = await camera.takePhoto();
+      const base64 = await photoToBase64(photo);
       const disableLoading = () => setLoading(false);
+      console.log("Sending photo", base64);
       await getConfiguration()?.onDataObtained(base64, navigation, disableLoading);
     } catch (error) {
       setLoading(false);
@@ -108,7 +118,7 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
     <View style={style().view}>
       <SafeAreaView style={style().view}>
         <Text style={style().text}>{config.description}</Text>
-        <CameraViewOrPermissionMessage cameraPermissionGranted={cameraPermissionGranted} device={devices.front} />
+        <CameraViewOrPermissionMessage takePicture={takePicture} />
       </SafeAreaView>
     </View>
   );
@@ -143,19 +153,22 @@ const useIsAppForeground = (): boolean => {
   return isForeground;
 };
 
-
 interface CameraViewOrPermissionMessageProps {
-  cameraPermissionGranted: boolean;
-  device: CameraDevice;
+  takePicture: (camera: Camera) => Promise<void>
 }
 
-const CameraViewOrPermissionMessage = ({ cameraPermissionGranted, device }: CameraViewOrPermissionMessageProps) => {
+const CameraViewOrPermissionMessage = ({ takePicture }: CameraViewOrPermissionMessageProps) => {
+  const devices = useCameraDevices();
+  const cameraPermissionGranted = useCameraPermission();
+  const device = devices.front;
+  const camera = useRef<Camera>(null)
+
   const onError = useCallback((error: CameraRuntimeError) => {
     console.error(error)
   }, [])
 
   const isAppForeground = useIsAppForeground()
-  console.log(cameraPermissionGranted, isAppForeground)
+  console.log(`cameraPermissionGranted: ${cameraPermissionGranted}, isAppForeground: ${isAppForeground}`)
 
   if (!cameraPermissionGranted) {
     return (
@@ -164,15 +177,57 @@ const CameraViewOrPermissionMessage = ({ cameraPermissionGranted, device }: Came
   }
 
   if (device) {
-    return (
+    return (<>
       <Camera
+        ref={camera}
         onError={onError}
         style={{ flex: 1 }}
         device={device}
         isActive={isAppForeground}
+        photo={true}
       />
+      <Icon
+        name="camera"
+        style={style().capture}
+        onPress={async () => {
+          if (camera.current === null) {
+            return;
+          }
+          takePicture(camera.current)
+        }}
+      />
+    </>
     );
   }
 
   return <></>
+}
+
+
+async function photoToBase64(photo: PhotoFile): Promise<string> {
+  const imageBlob = await requestBlob(`file://${photo.path}`);
+  return await blobToBase64(imageBlob);
+}
+
+function blobToBase64(blob: any): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      resolve(String(reader.result));
+    };
+    reader.readAsDataURL(blob);
+  });
+};
+
+function requestBlob(uri: string) {
+  return new Promise((resolve, reject) => {
+    let xhr = new XMLHttpRequest();
+    xhr.onload = () => resolve(xhr.response);
+    xhr.onerror = () => reject(new TypeError('Network request failed'));
+    xhr.responseType = 'blob';
+
+    xhr.open('GET', uri, true);
+    xhr.send(null);
+  });
 }
