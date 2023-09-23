@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, SafeAreaView, Text, ActivityIndicator, Alert } from 'react-native';
+import { View, SafeAreaView, Text, Alert, AppStateStatus, AppState } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { takePicture as style } from '../../styles';
 import TakePictureStepConfiguration from './takePictureStepConfiguration';
 import TakePictureStepConfigurationFactory from './takePictureStepConfigurationFactory';
-import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import { Camera, CameraDevice, CameraRuntimeError, useCameraDevices } from 'react-native-vision-camera';
 
 Icon.loadFont();
 
@@ -129,16 +129,50 @@ const useCameraPermission = () => {
 export default TakePictureStep;
 
 
-const CameraViewOrPermissionMessage = ({ cameraPermissionGranted, device }) => {
-  return (
-    <>
-      {!cameraPermissionGranted && <Text>Se requieren los permisos para acceder a la Cámara para continuar utilizando la aplicación</Text>}
-      {device && cameraPermissionGranted &&
-        <Camera
-          style={{ flex: 1 }}
-          device={device}
-          isActive={true} />}
-    </>
-  );
+const useIsAppForeground = (): boolean => {
+  const [isForeground, setIsForeground] = useState(true);
+
+  useEffect(() => {
+    const onChange = (state: AppStateStatus): void => {
+      setIsForeground(state === 'active');
+    };
+    const listener = AppState.addEventListener('change', onChange);
+    return () => listener.remove();
+  }, [setIsForeground]);
+
+  return isForeground;
+};
+
+
+interface CameraViewOrPermissionMessageProps {
+  cameraPermissionGranted: boolean;
+  device: CameraDevice;
 }
 
+const CameraViewOrPermissionMessage = ({ cameraPermissionGranted, device }: CameraViewOrPermissionMessageProps) => {
+  const onError = useCallback((error: CameraRuntimeError) => {
+    console.error(error)
+  }, [])
+
+  const isAppForeground = useIsAppForeground()
+  console.log(cameraPermissionGranted, isAppForeground)
+
+  if (!cameraPermissionGranted) {
+    return (
+      <Text>Se requieren los permisos de Cámara para continuar utilizando la aplicación</Text>
+    )
+  }
+
+  if (device) {
+    return (
+      <Camera
+        onError={onError}
+        style={{ flex: 1 }}
+        device={device}
+        isActive={isAppForeground}
+      />
+    );
+  }
+
+  return <></>
+}
