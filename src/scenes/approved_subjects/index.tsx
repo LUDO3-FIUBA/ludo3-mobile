@@ -4,6 +4,7 @@ import { FinalExamList, FilterDescriptor } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import { finalExamsRepository } from '../../repositories';
 import { CorrelativeFilter } from './filters';
+import { FinalExam } from '../../models';
 
 interface ApprovedSubjectsProps {
   filter: any; // Replace with a more specific type if available
@@ -17,27 +18,35 @@ const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ filter: initialFilt
     setFilter(initialFilter);
   }, [initialFilter]);
 
-  const fetchExams = () => {
-    if (filter && filter instanceof CorrelativeFilter) {
-      return finalExamsRepository.fetchApprovedCorrelatives(filter.value)
-        .catch(error => {
-          if (error instanceof finalExamsRepository.NotASubject) {
+  const fetchExams = async (): Promise<FinalExam[]> => {
+    try {
+        if (filter && filter instanceof CorrelativeFilter) {
+            const exams = await finalExamsRepository.fetchApprovedCorrelatives(filter.value);
+            console.log('ApprovedSubjects: fetchExams: exams', exams);
+            return exams
+        } else if (filter) {
+            const exams = await finalExamsRepository.fetchApproved(filter.type, filter.value);
+            console.log('ApprovedSubjects: fetchExams: exams', exams);
+            return exams
+        } else {
+            const exams = await finalExamsRepository.fetchApproved();
+            console.log('ApprovedSubjects: fetchExams: exams', exams);
+            return exams
+        }
+    } catch (error) {
+        if (error instanceof finalExamsRepository.NotASubject) {
             Alert.alert(
-              'No existe esa materia',
-              'Chequeá bien el código y asegurate de escribirlo tal cual (con el punto inclusive).',
+                'No existe esa materia',
+                'Chequeá bien el código y asegurate de escribirlo tal cual (con el punto inclusive).'
             );
-            return Promise.resolve([]);
-          } else {
+            return [];
+        } else {
             console.log('Error', error);
-            return Promise.reject(error);
-          }
-        });
-    } else if (filter) {
-      return finalExamsRepository.fetchApproved(filter.type, filter.value);
-    } else {
-      return finalExamsRepository.fetchApproved();
+            throw error;
+        }
     }
-  };
+};
+
 
   return (
     <SafeAreaView style={style().view}>
@@ -48,6 +57,7 @@ const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ filter: initialFilt
         />
       )}
       <FinalExamList
+        id=''
         key={`ApprovedSubjects-${filter ? filter.id() : ''}`}
         navigation={navigation}
         fetch={fetchExams}

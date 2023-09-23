@@ -38,7 +38,7 @@ export function post(
   });
 }
 
-export function get(url: string, queryParams = [], headers = {}): Promise<Object> {
+export function get(url: string, queryParams: any[] = [], headers = {}): Promise<Object> {
   const sessionManager: SessionManager | null = SessionManager.getInstance() 
   const token = sessionManager?.getAuthToken();
   if (!token) {
@@ -91,7 +91,7 @@ function reLogInIfNecessary(error: unknown): Promise<string> {
     const sessionManager: SessionManager | null = SessionManager.getInstance() 
     const refreshToken = sessionManager?.getRefreshToken();
     if (refreshToken) {
-      return refresh(refreshToken).then(async json => {
+      return refresh(refreshToken).then(async (json: any) => {
           json.refresh = refreshToken;
           await sessionManager?.saveCredentials(json);
           return json.access;

@@ -4,7 +4,7 @@ abstract class Filter {
 
   title: string;
 
-  constructor(type, value, title) {
+  constructor(type: string, value: string, title: string) {
     this.type = type;
     this.value = value;
     this.title = title;
@@ -16,19 +16,19 @@ abstract class Filter {
 }
 
 export class YearFilter extends Filter {
-  constructor(year) {
+  constructor(year: string) {
     super('year', year, 'Año');
   }
 }
 
 export class NameFilter extends Filter {
-  constructor(name) {
+  constructor(name: string) {
     super('subject', name, 'Nombre');
   }
 }
 
 export class CorrelativeFilter extends Filter {
-  constructor(subjectCode) {
+  constructor(subjectCode: string) {
     super('correlative', subjectCode, 'Correlativas de');
   }
 }

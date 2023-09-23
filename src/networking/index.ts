@@ -79,7 +79,7 @@ export function post(url: string, body: any, queryParams = [], headers = {}) {
   }).then(res => validate(res));
 }
 
-export function get(url: string, queryParams = [], headers = {}) {
+export function get(url: string, queryParams: any[] = [], headers = {}) {
   const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
   const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
   if (logRequests) {
