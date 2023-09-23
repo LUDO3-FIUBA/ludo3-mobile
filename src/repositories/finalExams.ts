@@ -1,6 +1,6 @@
-import {get, post} from './authenticatedRepository.ts';
-import {getInfo} from './users.ts';
-import {Subject, FinalExam} from '../models';
+import {get, post} from './authenticatedRepository';
+import {getInfo} from './users';
+import {Subject, FinalExam, User} from '../models';
 import {StatusCodeError} from '../networking';
 
 const domainUrl = 'api/final_exams';
@@ -26,23 +26,28 @@ export class NotASubject extends Error {
   }
 }
 
-export function fetchForSubject(id): Promise<FinalExam[]> {
-  return get('api/subjects/history', [
-    {key: 'subject_siu_id', value: id},
-  ]).then(json => Promise.resolve(convertJsonToFinalExamsList(json, true)));
+export async function fetchForSubject(id: string): Promise<FinalExam[]> {
+  const json = await get('api/subjects/history', [
+    {
+      key: 'subject_siu_id', 
+      value: id
+    },
+  ]);
+  return convertJsonToFinalExamsList(json, true);
 }
 
-export function fetchApproved(filterType, filterValue): Promise<Subject[]> {
-  let queryParams = [];
+export async function fetchApproved(filterType?: any, filterValue?: any): Promise<FinalExam[]> {
+  const queryParams: { key: string, value: string }[] = [];
   if (filterType) {
-    queryParams = [{key: filterType, value: filterValue}];
+    queryParams.push({
+      key: filterType, value: filterValue
+    });
   }
-  return get(`${domainUrl}/history`, queryParams).then(json =>
-    Promise.resolve(convertJsonToFinalExamsList(json, false)),
-  );
+  const json = await get(`${domainUrl}/history`, queryParams);
+  return convertJsonToFinalExamsList(json, false);
 }
 
-export function fetchApprovedCorrelatives(subjectCode): Promise<Subject[]> {
+export function fetchApprovedCorrelatives(subjectCode: string): Promise<FinalExam[]> {
   return get(`${domainUrl}/correlatives`, [{key: 'code', value: subjectCode}])
     .catch(error => {
       if (error instanceof StatusCodeError && error.code == 404) {
@@ -53,7 +58,7 @@ export function fetchApprovedCorrelatives(subjectCode): Promise<Subject[]> {
     .then(json => Promise.resolve(convertJsonToFinalExamsList(json, false)));
 }
 
-export function fetchPending(): Promise<Subject[]> {
+export function fetchPending(): Promise<FinalExam[]> {
   return get(`${domainUrl}/pending`).then(json =>
     Promise.resolve(convertJsonToFinalExamsList(json, false)),
   );
@@ -76,10 +81,10 @@ export function submitExam(finalId: string, image: string): Promise<User> {
     .then(json => getInfo());
 }
 
-function convertJsonToFinalExamsList(json, dateAscending = false): Subject[] {
+function convertJsonToFinalExamsList(json: any, dateAscending = false): FinalExam[] {
   return json
     ? json
-        .sort((a, b) => {
+        .sort((a: any, b: any) => {
           const aDate = new Date(a.date);
           const bDate = new Date(b.date);
           if (aDate == bDate) {
@@ -91,7 +96,7 @@ function convertJsonToFinalExamsList(json, dateAscending = false): Subject[] {
           return aDate < bDate ? 1 : -1;
         })
         .map(
-          (exam, index) =>
+          (exam: any, index: string) =>
             new FinalExam(
               exam.id,
               exam.final,

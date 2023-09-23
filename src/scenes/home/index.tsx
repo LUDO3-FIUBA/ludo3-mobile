@@ -35,8 +35,6 @@ const Home: React.FC<any> = () => {
     setOptionProps(selectedOption);
   }, [selectedOption, childProps]);
 
-  console.log("Home");
-  
 
   const getHeaderButton = (option: string) => {
     if (option === HomeOptionsEnum.ApprovedSubjects)
@@ -142,38 +140,41 @@ const Home: React.FC<any> = () => {
               source={require('./img/logo_fiuba.png')}
             />
           </TouchableOpacity>
+
           <TouchableOpacity
             style={style().menuItem}
             onPress={() => {
-              // TODO: Change all this options to the new schema
-              changeOption(HomeOptions.VerifyIdentity({ navigation }));
+              navigation.navigate('VerifyIdentity')
             }}>
             <Icon style={style().itemIcon} name="face-recognition"/>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={style().menuItem}
             onPress={() => {
-              // changeOption(HomeOptions.DeliverFinalExam());
+              navigation.navigate('DeliverFinalExam')
             }}>
             <Icon style={style().itemIcon} name="qrcode-scan"/>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={style().menuItem}
             onPress={() => {
-              // changeOption(new HomeOptions.PendingSubjects());
+              navigation.navigate('PendingSubjects')
             }}>
             <Icon style={style().itemIcon} name="file-question"/>
 
           </TouchableOpacity>
+
           <TouchableOpacity
             style={style().menuItem}
             onPress={() => {
               navigation.navigate('ApprovedSubjects')
-              // changeOption(new HomeOptions.ApprovedSubjects());
             }}>
             <Icon style={style().itemIcon} name="file-check"/>
 
           </TouchableOpacity>
+
           <TouchableOpacity
             style={style().menuItem}
             onPress={async () => {

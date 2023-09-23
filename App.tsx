@@ -7,6 +7,9 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, CameraTestScreen } from './src/scenes';
 import HomeOptions from './src/scenes/home/subsections';
 import ApprovedSubjects from './src/scenes/home/subsections/HomeOptions/ApprovedSubjects';
+import PendingSubjects from './src/scenes/home/subsections/HomeOptions/PendingSubjects';
+import DeliverFinalExam from './src/scenes/home/subsections/HomeOptions/DeliverFinalExam';
+import VerifyIdentity from './src/scenes/home/subsections/HomeOptions/VerifyIdentity';
 
 const Stack = createStackNavigator();
 
@@ -15,7 +18,7 @@ const App = () => {
       <ActionSheetProvider>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="Home"
+            initialRouteName="Splash"
             screenOptions={{ gestureEnabled: false }}
           >
             <Stack.Screen
@@ -62,6 +65,24 @@ const App = () => {
               options={{ headerShown: true }}
             />
 
+            <Stack.Screen
+              name="PendingSubjects"
+              component={PendingSubjects}
+              options={{ headerShown: true }}
+            />
+
+            <Stack.Screen
+              name="DeliverFinalExam"
+              component={DeliverFinalExam}
+              options={{ headerShown: true }}
+            />
+
+            <Stack.Screen
+              name="VerifyIdentity"
+              component={VerifyIdentity}
+              options={{ headerShown: true }}
+            />
+
               {/* <Stack.Screen
                 name="PreRegisterDone"
                 component={PreRegisterLastInstructionsScreen}
@@ -69,12 +90,7 @@ const App = () => {
               />
 
 
-            <Stack.Screen
-              name="Materias pendientes"
-              component={HomeScreen}
-              options={{ headerShown: true }}
-              initialParams={{ subsection: new HomeOptions.PendingSubjects() }}
-            />
+
 
             <Stack.Screen
               name="Historial de una materia"
