@@ -72,8 +72,8 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
             enabled={shouldEnableSignUp()}
             style={style().button}
             onPress={() => {
-              const dni = firstTextInput.current?.state.value;
-              const email = secondTextInput.current?.state.value;
+              const dni = firstTextInput.current?.value;
+              const email = secondTextInput.current?.value;
               navigation.navigate('TakePicture', {
                 configuration: new FacePictureConfiguration(
                   ['Tomate una foto de frente'],
