@@ -35,8 +35,11 @@ const Home: React.FC<any> = () => {
     setOptionProps(selectedOption);
   }, [selectedOption, childProps]);
 
+  console.log("Home");
+  
+
   const getHeaderButton = (option: string) => {
-    if (option === HomeOptionsEnum.ApprovedSubjects) 
+    if (option === HomeOptionsEnum.ApprovedSubjects)
       return <FilterNavBarButton showActionSheetWithOptions={() => ({})} onChildPropsChanged={onChildPropsChanged} />
     return null;
   }
@@ -62,17 +65,17 @@ const Home: React.FC<any> = () => {
   };
 
   const getOptionComponentFromSelectedOption = () => {
-    switch(selectedOption) {
+    switch (selectedOption) {
       case HomeOptionsEnum.VerifyIdentity:
-        return <VerifyIdentity navigation={navigation}/>;
+        return <VerifyIdentity navigation={navigation} />;
       case HomeOptionsEnum.DeliverFinalExam:
-        return <DeliverFinalExam navigation={navigation}/>;
+        return <DeliverFinalExam navigation={navigation} />;
       case HomeOptionsEnum.PendingSubjects:
-        return <PendingSubjects navigation={navigation}/>;
+        return <PendingSubjects navigation={navigation} />;
       case HomeOptionsEnum.ApprovedSubjects:
-        return <ApprovedSubjects navigation={navigation}/>;
+        return <ApprovedSubjects navigation={navigation} />;
       case HomeOptionsEnum.Vote:
-        return <Vote navigation={navigation}/>;
+        return <Vote navigation={navigation} />;
     }
   }
 
@@ -80,7 +83,7 @@ const Home: React.FC<any> = () => {
   const openMenu = () => {
     if (radialMenuLayoutRef.current) { // check if radialMenuLayoutRef.current exists
       const { x, y, width, height } = radialMenuLayoutRef.current;
-      const menuOpenerLayout: { width: number, height: number, x: number, y: number} = menuOpenerLayoutRef.current || { width: 0, height: 0, x: 0, y: 0 };
+      const menuOpenerLayout: { width: number, height: number, x: number, y: number } = menuOpenerLayoutRef.current || { width: 0, height: 0, x: 0, y: 0 };
 
       if (menuOpenerLayout) {
         const expectedX = x + width / 2 - menuOpenerLayout.width / 2;
@@ -121,7 +124,7 @@ const Home: React.FC<any> = () => {
         />
       )}
       <View style={style().mainView}>
-        { getOptionComponentFromSelectedOption() }
+        {getOptionComponentFromSelectedOption()}
       </View>
       {menuOpened && (
         <RadialMenu
@@ -132,61 +135,56 @@ const Home: React.FC<any> = () => {
           }}
           style={style().menu}
         >
-          <View style={style().menuRootImageItem}>
-              <Image
-                style={style().itemImage}
-                source={require('./img/logo_fiuba.png')}
-              />
-            </View>
-            <TouchableOpacity
-              style={style().menuItem}
-              onPress={() => {
-                // TODO: Change all this options to the new schema
-                changeOption(HomeOptions.VerifyIdentity({navigation}));
-              }}>
-              <Icon style={style().itemIcon} name="face-recognition" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={style().menuItem}
-              onPress={() => {
-                // changeOption(HomeOptions.DeliverFinalExam());
-              }}>
-              <Icon style={style().itemIcon} name="qrcode-scan" />
-            </TouchableOpacity>
-            {/*
-            <View
-              style={style().menuItem}
-              onSelect={() => {
-                this.changeOption(new HomeOptions.Vote());
-              }}>
-              <Icon style={style().itemIcon} name="vote" />
-            </View>
-            */}
-            <TouchableOpacity
-              style={style().menuItem}
-              onPress={() => {
-                // changeOption(new HomeOptions.PendingSubjects());
-              }}>
-              <Icon style={style().itemIcon} name="file-question" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={style().menuItem}
-              onPress={() => {
-                // changeOption(new HomeOptions.ApprovedSubjects());
-              }}>
-              <Icon style={style().itemIcon} name="file-check" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={style().menuItem}
-              onPress={async () => {
-                await SessionManager.getInstance()?.clearCredentials();
-                navigation.reset({
-                  index: 0,
-                  routes: [{name: 'Landing'}],
-                });
-              }}>
-              <Icon style={style().itemIcon} name="logout" />
-            </TouchableOpacity>
+          <TouchableOpacity style={style().menuRootImageItem}>
+            
+            <Image
+              style={style().itemImage}
+              source={require('./img/logo_fiuba.png')}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={style().menuItem}
+            onPress={() => {
+              // TODO: Change all this options to the new schema
+              changeOption(HomeOptions.VerifyIdentity({ navigation }));
+            }}>
+            <Icon style={style().itemIcon} name="face-recognition"/>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={style().menuItem}
+            onPress={() => {
+              // changeOption(HomeOptions.DeliverFinalExam());
+            }}>
+            <Icon style={style().itemIcon} name="qrcode-scan"/>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={style().menuItem}
+            onPress={() => {
+              // changeOption(new HomeOptions.PendingSubjects());
+            }}>
+            <Icon style={style().itemIcon} name="file-question"/>
+
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={style().menuItem}
+            onPress={() => {
+              navigation.navigate('ApprovedSubjects')
+              // changeOption(new HomeOptions.ApprovedSubjects());
+            }}>
+            <Icon style={style().itemIcon} name="file-check"/>
+
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={style().menuItem}
+            onPress={async () => {
+              await SessionManager.getInstance()?.clearCredentials();
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Landing' }],
+              });
+            }}>
+            <Icon style={style().itemIcon} name="logout"/>
+          </TouchableOpacity>
         </RadialMenu>
       )}
       {!menuOpened && (
@@ -213,7 +211,7 @@ const Home: React.FC<any> = () => {
         </Animated.View>
       )}
     </View>
-  );  
+  );
 };
 
 export default Home;

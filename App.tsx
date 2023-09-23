@@ -6,6 +6,7 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 // import 'moment/locale/es';
 import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, CameraTestScreen } from './src/scenes';
 import HomeOptions from './src/scenes/home/subsections';
+import ApprovedSubjects from './src/scenes/home/subsections/HomeOptions/ApprovedSubjects';
 
 const Stack = createStackNavigator();
 
@@ -55,6 +56,11 @@ const App = () => {
               // options={({ route }) => ({ title: route.params?.title })}
             />
 
+            <Stack.Screen
+              name="ApprovedSubjects"
+              component={ApprovedSubjects}
+              options={{ headerShown: true }}
+            />
 
               {/* <Stack.Screen
                 name="PreRegisterDone"
@@ -62,12 +68,6 @@ const App = () => {
                 options={{ headerShown: false }}
               />
 
-            <Stack.Screen
-              name="Materias aprobadas"
-              component={HomeScreen}
-              options={{ headerShown: true }}
-              initialParams={{ subsection: new HomeOptions.ApprovedSubjects() }}
-            />
 
             <Stack.Screen
               name="Materias pendientes"
