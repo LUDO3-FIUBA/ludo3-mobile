@@ -14,7 +14,7 @@ const App = () => {
       <ActionSheetProvider>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="CameraTest"
+            initialRouteName="Home"
             screenOptions={{ gestureEnabled: false }}
           >
             <Stack.Screen
@@ -39,7 +39,6 @@ const App = () => {
               name="Home"
               component={HomeScreen}
               options={{ headerShown: true }}
-              initialParams={{ subsection: new HomeOptions.VerifyIdentity() }}
             />
 
             <Stack.Screen

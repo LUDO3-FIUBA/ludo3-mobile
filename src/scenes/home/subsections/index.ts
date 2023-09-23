@@ -1,8 +1,8 @@
-import { default as ApprovedSubjects } from './approved_subjects';
-import { default as PendingSubjects } from './pending_subjects';
-import { default as VerifyIdentity } from './verify_identity';
-import { default as DeliverFinalExam } from './final_exam';
-import { default as Vote } from './vote';
+import { default as ApprovedSubjects } from './HomeOptions/ApprovedSubjects';
+import { default as PendingSubjects } from './HomeOptions/PendingSubjects';
+import { default as VerifyIdentity } from './HomeOptions/VerifyIdentity';
+import { default as DeliverFinalExam } from './HomeOptions/DeliverFinalExam';
+import { default as Vote } from './HomeOptions/Vote';
 
 export default {
   ApprovedSubjects,
