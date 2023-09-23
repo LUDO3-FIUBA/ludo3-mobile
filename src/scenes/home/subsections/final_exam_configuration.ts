@@ -21,7 +21,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
   }
 
   toObject() {
-    return super.toObject(String(Type.FinalExamQR), {});
+    return super.toObject(Type.FinalExamQR, {});
   }
 
   static fromObject(object: any) {

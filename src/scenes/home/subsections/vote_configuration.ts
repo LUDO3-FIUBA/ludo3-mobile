@@ -22,7 +22,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
   }
 
   toObject() {
-    return super.toObject(String(Type.VoteQR), {});
+    return super.toObject(Type.VoteQR, {});
   }
 
   static fromObject(object: any) {

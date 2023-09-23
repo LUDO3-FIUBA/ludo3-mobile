@@ -28,7 +28,7 @@ class VerifyIdentityConfiguration extends TakePictureStepConfiguration {
   }
 
   toObject() {
-    return super.toObject(String(Type.VerifyIdentityFace), {});
+    return super.toObject(Type.VerifyIdentityFace, {});
   }
 
   static fromObject(object: any) {

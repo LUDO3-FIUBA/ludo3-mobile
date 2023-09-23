@@ -81,7 +81,7 @@ class VerifyIdentityForExamConfiguration extends TakePictureStepConfiguration {
   }
 
   toObject() {
-    return super.toObject(String(Type.FinalExamFace), {
+    return super.toObject(Type.FinalExamFace, {
       token: this.token,
     });
   }

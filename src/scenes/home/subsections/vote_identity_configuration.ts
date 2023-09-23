@@ -81,7 +81,7 @@ class VerifyIdentityConfiguration extends TakePictureStepConfiguration {
   }
 
   toObject() {
-    return super.toObject(String(Type.VoteFace), {
+    return super.toObject(Type.VoteFace, {
       token: this.token,
     });
   }

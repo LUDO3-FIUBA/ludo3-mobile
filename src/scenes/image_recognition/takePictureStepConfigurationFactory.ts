@@ -1,4 +1,4 @@
-import RegisterFacePictureConfiguration from '../preregister/face_recognition';
+import FacePictureConfiguration from '../preregister/face_recognition';
 import FinalExamQRConfiguration from '../home/subsections/final_exam_configuration';
 import FinalExamFacePictureConfiguration from '../home/subsections/final_exam_identity_configuration';
 import VerifyIdentityFacePictureConfiguration from '../home/subsections/verify_identity_configuration';
@@ -17,9 +17,9 @@ interface TakePictureStepConfigurationObject {
 }
 
 export default class TakePictureStepConfigurationFactory {
-  static fromObject(object: TakePictureStepConfigurationObject): TakePictureStepConfiguration | RegisterFacePictureConfiguration | FinalExamQRConfiguration | FinalExamFacePictureConfiguration | VerifyIdentityFacePictureConfiguration | VoteQRConfiguration | VoteFacePictureConfiguration {
+  static fromObject(object: TakePictureStepConfigurationObject): TakePictureStepConfiguration | FacePictureConfiguration | FinalExamQRConfiguration | FinalExamFacePictureConfiguration | VerifyIdentityFacePictureConfiguration | VoteQRConfiguration | VoteFacePictureConfiguration {
     if (object.type === Type.RegisterFace) {
-      return RegisterFacePictureConfiguration.fromObject(object);
+      return FacePictureConfiguration.fromObject(object);
     } else if (object.type === Type.FinalExamQR) {
       return FinalExamQRConfiguration.fromObject(object);
     } else if (object.type === Type.FinalExamFace) {

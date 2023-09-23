@@ -10,7 +10,7 @@ interface TakePictureStepConfigurationObject {
   description: string;
   cameraType: any;
   searchForQRCode: boolean;
-  type?: string;
+  type?: number;
 }
 
 export default class TakePictureStepConfiguration {
@@ -34,7 +34,7 @@ export default class TakePictureStepConfiguration {
     disableLoading();
   }
 
-  toObject(type: string, params: TakePictureStepConfigurationParams): TakePictureStepConfigurationObject {
+  toObject(type: number, params: TakePictureStepConfigurationParams): TakePictureStepConfigurationObject {
     return {
       description: this.description,
       cameraType: this.cameraType,
