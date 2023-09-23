@@ -22,6 +22,9 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
   const navigation = useNavigation();
   const route = useRoute<RouteProp<{ params: { configuration: any } }, 'params'>>();
 
+  const devices = useCameraDevices();
+  const cameraPermissionGranted = useCameraPermission();
+
   const getConfiguration = useCallback(() => {
     if (configuration) {
       return configuration;
@@ -105,11 +108,7 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
     <View style={style().view}>
       <SafeAreaView style={style().view}>
         <Text style={style().text}>{config.description}</Text>
-          {/* <Camera 
-            style={{ flex: 1 }}
-            device={device}
-            isActive={true}  
-          /> */}
+        <CameraViewOrPermissionMessage cameraPermissionGranted={cameraPermissionGranted} device={devices.front} />
       </SafeAreaView>
     </View>
   );
@@ -119,4 +118,27 @@ TakePictureStep.defaultProps = {
   configuration: new TakePictureStepConfiguration(),
 };
 
+const useCameraPermission = () => {
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  useEffect(() => {
+    Camera.requestCameraPermission().then((res) => setPermissionGranted(res === 'granted'));
+  }, [])
+  return permissionGranted;
+}
+
 export default TakePictureStep;
+
+
+const CameraViewOrPermissionMessage = ({ cameraPermissionGranted, device }) => {
+  return (
+    <>
+      {!cameraPermissionGranted && <Text>Se requieren los permisos para acceder a la Cámara para continuar utilizando la aplicación</Text>}
+      {device && cameraPermissionGranted &&
+        <Camera
+          style={{ flex: 1 }}
+          device={device}
+          isActive={true} />}
+    </>
+  );
+}
+
