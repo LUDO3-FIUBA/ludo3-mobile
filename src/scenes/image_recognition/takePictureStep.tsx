@@ -6,7 +6,7 @@ import { takePicture as style } from '../../styles';
 import TakePictureStepConfiguration from './takePictureStepConfiguration';
 import TakePictureStepConfigurationFactory from './takePictureStepConfigurationFactory';
 import { Camera, CameraRuntimeError, PhotoFile, useCameraDevices } from 'react-native-vision-camera';
-import RNFS from "react-native-fs";
+import { manipulateAsync, FlipType, SaveFormat, Action } from 'expo-image-manipulator';
 
 Icon.loadFont();
 
@@ -75,8 +75,6 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
     }
   };
 
-  const [debug, setDebug] = useState('')
-
   const takePicture = async (camera: Camera) => {
     // const options = {
     //   width: 180,
@@ -105,11 +103,12 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
     try {
       const photo = await camera.takePhoto();
       console.log(photo.orientation, photo.height, photo.width);
-      const base64 = await photoToBase64(photo)
-      // const photoWithOrientation = await manipulateAsync(photo.path, [{ rotate: -90 }], { compress: 1, base64: true });
-      setDebug(`data:image/jpeg;base64,${base64}`)
+      const photoActions: Action[] = [];
+      addRotationIfWrongOrientation(photo, photoActions);
+      const photoWithOrientation = await manipulateAsync(photo.path, photoActions, { compress: 0.5, base64: true });
+      const base64string = `data:image/jpeg;base64,${photoWithOrientation.base64}`
       const disableLoading = () => setLoading(false);
-      // await getConfiguration()?.onDataObtained(base64, navigation, disableLoading);
+      await getConfiguration()?.onDataObtained(base64string, navigation, disableLoading);
     } catch (error) {
       setLoading(false);
       Alert.alert('Hubo un error sacando la foto');
@@ -123,7 +122,6 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
     <View style={style().view}>
       <SafeAreaView style={style().view}>
         <Text style={style().text}>{config.description}</Text>
-        <Image style={{ flex: 1 }} source={{ uri: debug }} />
         <CameraViewOrPermissionMessage takePicture={takePicture} />
       </SafeAreaView>
     </View>
@@ -191,7 +189,6 @@ const CameraViewOrPermissionMessage = ({ takePicture }: CameraViewOrPermissionMe
         device={device}
         isActive={isAppForeground}
         photo={true}
-        orientation='landscape-right'
       />
       <Icon
         name="camera"
@@ -211,31 +208,15 @@ const CameraViewOrPermissionMessage = ({ takePicture }: CameraViewOrPermissionMe
 }
 
 
-async function photoToBase64(photo: PhotoFile): Promise<string> {
-  // const imageBlob = await requestBlob(`file://${photo.path}`);
-  // return await blobToBase64(imageBlob);
-  return await RNFS.readFile(`file://${photo.path}`, "base64");
-}
-
-function blobToBase64(blob: any): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = () => {
-      resolve(String(reader.result));
-    };
-    reader.readAsDataURL(blob);
-  });
-};
-
-function requestBlob(uri: string) {
-  return new Promise((resolve, reject) => {
-    let xhr = new XMLHttpRequest();
-    xhr.onload = () => resolve(xhr.response);
-    xhr.onerror = () => reject(new TypeError('Network request failed'));
-    xhr.responseType = 'blob';
-
-    xhr.open('GET', uri, true);
-    xhr.send(null);
-  });
+/**
+ * Adds a `rotate` action of +90 degrees for manipulateAsync in case it is needed.
+ * It is added in the case that the photo is `portrait` but its' width is bigger than its' height
+ * This means that the saved photo orientation is incorrect and must be rotated
+ * @param photo photo taken via react-native-vision-camera
+ * @param photoActions 
+ */
+function addRotationIfWrongOrientation(photo: PhotoFile, photoActions: Action[]) {
+  if (photo.orientation === 'portrait' && photo.width > photo.height ) {
+    photoActions.push({ rotate: 90 })
+  }
 }

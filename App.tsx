@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 // import 'react-native-gesture-handler';
 // import 'moment/locale/es';
-import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, CameraTestScreen } from './src/scenes';
+import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, CameraTestScreen, PreRegisterLastInstructionsScreen } from './src/scenes';
 import HomeOptions from './src/scenes/home/subsections';
 import ApprovedSubjects from './src/scenes/home/subsections/HomeOptions/ApprovedSubjects';
 import PendingSubjects from './src/scenes/home/subsections/HomeOptions/PendingSubjects';
@@ -15,83 +15,81 @@ const Stack = createStackNavigator();
 
 const App = () => {
   return (
-      <ActionSheetProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="Splash"
-            screenOptions={{ gestureEnabled: false }}
-          >
-            <Stack.Screen
-              name="Splash"
-              component={SplashScreen}
-              options={{ headerShown: false }}
-            />
+    <ActionSheetProvider>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Splash"
+          screenOptions={{ gestureEnabled: false }}
+        >
+          <Stack.Screen
+            name="Splash"
+            component={SplashScreen}
+            options={{ headerShown: false }}
+          />
 
-            <Stack.Screen
-              name="Landing"
-              component={LandingScreen}
-              options={{ headerShown: false, title: 'Inicio' }}
-            />
+          <Stack.Screen
+            name="Landing"
+            component={LandingScreen}
+            options={{ headerShown: false, title: 'Inicio' }}
+          />
 
-            <Stack.Screen
-              name="PreRegister"
-              component={PreRegisterScreen}
-              options={{ headerShown: true, title: 'Pre-registro' }}
-            />
+          <Stack.Screen
+            name="PreRegister"
+            component={PreRegisterScreen}
+            options={{ headerShown: true, title: 'Pre-registro' }}
+          />
 
-            <Stack.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{ headerShown: true }}
-            />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: true }}
+          />
 
-            <Stack.Screen
-              name="TakePicture"
-              component={TakePictureStepScreen}
-              options={({ route }) => ({ title: 'Mock Title' })}
-              // options={({ route }) => ({ title: route.params?.title })}
-            />
+          <Stack.Screen
+            name="TakePicture"
+            component={TakePictureStepScreen}
+            options={({ route }) => ({ title: 'Mock Title' })}
+          // options={({ route }) => ({ title: route.params?.title })}
+          />
 
-            <Stack.Screen
-              name="CameraTest"
-              component={CameraTestScreen}
-              options={({ route }) => ({ title: 'Mock Title' })}
-              // options={({ route }) => ({ title: route.params?.title })}
-            />
+          <Stack.Screen
+            name="CameraTest"
+            component={CameraTestScreen}
+            options={({ route }) => ({ title: 'Mock Title' })}
+          // options={({ route }) => ({ title: route.params?.title })}
+          />
 
-            <Stack.Screen
-              name="ApprovedSubjects"
-              component={ApprovedSubjects}
-              options={{ headerShown: true }}
-            />
+          <Stack.Screen
+            name="ApprovedSubjects"
+            component={ApprovedSubjects}
+            options={{ headerShown: true }}
+          />
 
-            <Stack.Screen
-              name="PendingSubjects"
-              component={PendingSubjects}
-              options={{ headerShown: true }}
-            />
+          <Stack.Screen
+            name="PendingSubjects"
+            component={PendingSubjects}
+            options={{ headerShown: true }}
+          />
 
-            <Stack.Screen
-              name="DeliverFinalExam"
-              component={DeliverFinalExam}
-              options={{ headerShown: true }}
-            />
+          <Stack.Screen
+            name="DeliverFinalExam"
+            component={DeliverFinalExam}
+            options={{ headerShown: true }}
+          />
 
-            <Stack.Screen
-              name="VerifyIdentity"
-              component={VerifyIdentity}
-              options={{ headerShown: true }}
-            />
+          <Stack.Screen
+            name="VerifyIdentity"
+            component={VerifyIdentity}
+            options={{ headerShown: true }}
+          />
 
-              {/* <Stack.Screen
-                name="PreRegisterDone"
-                component={PreRegisterLastInstructionsScreen}
-                options={{ headerShown: false }}
-              />
+          <Stack.Screen
+            name="PreRegisterDone"
+            component={PreRegisterLastInstructionsScreen}
+            options={{ headerShown: false }}
+          />
 
-
-
-
+          {/* 
             <Stack.Screen
               name="Historial de una materia"
               component={SubjectHistoryScreen}
@@ -100,9 +98,9 @@ const App = () => {
                 headerShown: true,
               })}
             /> */}
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ActionSheetProvider>
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ActionSheetProvider>
   );
 };
 

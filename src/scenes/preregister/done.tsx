@@ -11,7 +11,7 @@ const PreRegisterLastInstructions: FunctionComponent<PreRegisterLastInstructions
   return (
     <View style={style().view}>
       <SafeAreaView style={style().view}>
-        <ScrollView style={style().scrollView}>
+        <ScrollView contentContainerStyle={style().scrollView}>
           <Text style={style().text}>
             ¡Ya has quedado registrado en nuestro sistema!
           </Text>
