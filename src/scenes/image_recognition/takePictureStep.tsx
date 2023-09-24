@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, SafeAreaView, Text, Alert, AppStateStatus, AppState } from 'react-native';
+import { View, SafeAreaView, Text, Alert, AppStateStatus, AppState, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { takePicture as style } from '../../styles';
 import TakePictureStepConfiguration from './takePictureStepConfiguration';
 import TakePictureStepConfigurationFactory from './takePictureStepConfigurationFactory';
-import { Camera, CameraDevice, CameraRuntimeError, PhotoFile, useCameraDevices } from 'react-native-vision-camera';
+import { Camera, CameraRuntimeError, PhotoFile, useCameraDevices } from 'react-native-vision-camera';
+import RNFS from "react-native-fs";
 
 Icon.loadFont();
 
@@ -74,6 +75,8 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
     }
   };
 
+  const [debug, setDebug] = useState('')
+
   const takePicture = async (camera: Camera) => {
     // const options = {
     //   width: 180,
@@ -101,9 +104,12 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
 
     try {
       const photo = await camera.takePhoto();
-      const base64 = await photoToBase64(photo);
+      console.log(photo.orientation, photo.height, photo.width);
+      const base64 = await photoToBase64(photo)
+      // const photoWithOrientation = await manipulateAsync(photo.path, [{ rotate: -90 }], { compress: 1, base64: true });
+      setDebug(`data:image/jpeg;base64,${base64}`)
       const disableLoading = () => setLoading(false);
-      await getConfiguration()?.onDataObtained(base64, navigation, disableLoading);
+      // await getConfiguration()?.onDataObtained(base64, navigation, disableLoading);
     } catch (error) {
       setLoading(false);
       Alert.alert('Hubo un error sacando la foto');
@@ -111,13 +117,13 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
   };
 
   const config = getConfiguration();
-  console.log(config, configuration)
   if (!config) return null;
 
   return (
     <View style={style().view}>
       <SafeAreaView style={style().view}>
         <Text style={style().text}>{config.description}</Text>
+        <Image style={{ flex: 1 }} source={{ uri: debug }} />
         <CameraViewOrPermissionMessage takePicture={takePicture} />
       </SafeAreaView>
     </View>
@@ -185,6 +191,7 @@ const CameraViewOrPermissionMessage = ({ takePicture }: CameraViewOrPermissionMe
         device={device}
         isActive={isAppForeground}
         photo={true}
+        orientation='landscape-right'
       />
       <Icon
         name="camera"
@@ -205,8 +212,9 @@ const CameraViewOrPermissionMessage = ({ takePicture }: CameraViewOrPermissionMe
 
 
 async function photoToBase64(photo: PhotoFile): Promise<string> {
-  const imageBlob = await requestBlob(`file://${photo.path}`);
-  return await blobToBase64(imageBlob);
+  // const imageBlob = await requestBlob(`file://${photo.path}`);
+  // return await blobToBase64(imageBlob);
+  return await RNFS.readFile(`file://${photo.path}`, "base64");
 }
 
 function blobToBase64(blob: any): Promise<string> {
