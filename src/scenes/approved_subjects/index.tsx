@@ -3,49 +3,63 @@ import { SafeAreaView, Alert } from 'react-native';
 import { FinalExamList, FilterDescriptor } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import { finalExamsRepository } from '../../repositories';
-import { CorrelativeFilter } from './filters';
 import { FinalExam } from '../../models';
+import { FiltersEnum } from './FiltersEnum';
+import { Filter } from './IFilter';
+import { useAppSelector } from '../../redux/hooks';
+import { selectActualFilter } from '../../redux/reducers/filterSlice';
 
 interface ApprovedSubjectsProps {
-  filter: any; // Replace with a more specific type if available
   navigation: any; // Replace with a more specific type if available
 }
 
-const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ filter: initialFilter, navigation }) => {
-  const [filter, setFilter] = useState(initialFilter);
+const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ navigation }) => {
+  const filter = useAppSelector(selectActualFilter)
 
   useEffect(() => {
-    setFilter(initialFilter);
-  }, [initialFilter]);
+    console.log("Filter changed");
+  }, [filter])
+  
 
   const fetchExams = async (): Promise<FinalExam[]> => {
     try {
-        if (filter && filter instanceof CorrelativeFilter) {
-            const exams = await finalExamsRepository.fetchApprovedCorrelatives(filter.value);
-            console.log('ApprovedSubjects: fetchExams: exams', exams);
-            return exams
-        } else if (filter) {
-            const exams = await finalExamsRepository.fetchApproved(filter.type, filter.value);
-            console.log('ApprovedSubjects: fetchExams: exams', exams);
-            return exams
-        } else {
-            const exams = await finalExamsRepository.fetchApproved();
-            console.log('ApprovedSubjects: fetchExams: exams', exams);
-            return exams
-        }
+      switch (filter.type) {
+        // Fetch approved correlatives for a given subject
+        case FiltersEnum.Correlative:
+          console.log("Find correlatives for: ", filter.value);
+          return await finalExamsRepository.fetchApprovedCorrelatives(filter.value);
+
+        // Fetch approved subjects for a given year
+        case FiltersEnum.Year:
+          console.log("Filter selected: ", filter);
+          return await finalExamsRepository.fetchApproved(filter.type, filter.value);
+
+        // Fetch approved subjects for a given subject name
+        case FiltersEnum.Name:
+          console.log("Filter selected: ", filter);
+          return await finalExamsRepository.fetchApproved(filter.type, filter.value);
+
+        // Return all approved subjects when no filter selected
+        case FiltersEnum.None:
+          console.log("No filter selected");
+          return await finalExamsRepository.fetchApproved();
+          
+        default:
+          throw new Error('Unknown filter type');
+      }
     } catch (error) {
-        if (error instanceof finalExamsRepository.NotASubject) {
-            Alert.alert(
-                'No existe esa materia',
-                'Chequeá bien el código y asegurate de escribirlo tal cual (con el punto inclusive).'
-            );
-            return [];
-        } else {
-            console.log('Error', error);
-            throw error;
-        }
+      if (error instanceof finalExamsRepository.NotASubject) {
+        Alert.alert(
+          'No existe esa materia',
+          'Chequeá bien el código y asegurate de escribirlo tal cual (con el punto inclusive).'
+        );
+        return [];
+      } else {
+        console.log('Error', error);
+        throw error;
+      }
     }
-};
+  };
 
 
   return (
@@ -53,12 +67,12 @@ const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ filter: initialFilt
       {filter && (
         <FilterDescriptor
           filter={filter}
-          onClose={() => setFilter(null)}
+          onClose={() => setFilter({ type: FiltersEnum.None, title: '', id: '', value: '' })}
         />
       )}
       <FinalExamList
         id=''
-        key={`ApprovedSubjects-${filter ? filter.id() : ''}`}
+        key={`ApprovedSubjects-${filter ? filter.id : ''}`}
         navigation={navigation}
         fetch={fetchExams}
         emptyMessage={`No tenés materias aprobadas aún.${'\n'}No te olvides de rendir los finales.`}

@@ -1,82 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, TouchableHighlight, Animated, Image, LayoutChangeEvent, TouchableOpacity, Easing } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { RadialMenu } from '../../components';
 import { home as style } from '../../styles';
-import HomeOptions from './subsections'
 import { SessionManager } from '../../managers';
-import FacePictureConfiguration from './subsections/verify_identity_configuration';
-import { HomeOptionsEnum } from './subsections/HomeOptions/HomeOptionsEnum';
 import VerifyIdentity from './subsections/HomeOptions/VerifyIdentity';
-import FilterNavBarButton from './filterNavBarButton';
-import PendingSubjects from './subsections/HomeOptions/PendingSubjects';
-import DeliverFinalExam from './subsections/HomeOptions/DeliverFinalExam';
-import ApprovedSubjects from './subsections/HomeOptions/ApprovedSubjects';
-import Vote from './subsections/HomeOptions/Vote';
 
 Icon.loadFont();
 
 
 const Home: React.FC<any> = () => {
-  const initialProps = {
-    configuration: new FacePictureConfiguration('Sacate una foto para poder identificarte')
-  };
-
-  const [selectedOption, setSelectedOption] = useState<HomeOptionsEnum>(HomeOptionsEnum.VerifyIdentity);
-  const [childProps, setChildProps] = useState(initialProps);
   const [menuOpened, setMenuOpened] = useState(false);
   const menuOpenerAnimator = useState(new Animated.ValueXY({ x: 0, y: 0 }))[0];
   const radialMenuLayoutRef = useRef(null);
   const menuOpenerLayoutRef = useRef(null);
   const navigation = useNavigation();
-
-  useEffect(() => {
-    setOptionProps(selectedOption);
-  }, [selectedOption, childProps]);
-
-
-  const getHeaderButton = (option: string) => {
-    if (option === HomeOptionsEnum.ApprovedSubjects)
-      return <FilterNavBarButton showActionSheetWithOptions={() => ({})} onChildPropsChanged={onChildPropsChanged} />
-    return null;
-  }
-
-  const setOptionProps = (option: any) => {
-    const navOptions = {
-      title: "Verificar Identidad",
-      headerRight: (navigation: any) => getHeaderButton(option),
-    };
-    navigation.setOptions(navOptions);
-  };
-
-  const onChildPropsChanged = (newProps: any) => {
-    setChildProps({ ...childProps, ...newProps });
-  };
-
-  const changeOption = (newOption: any) => {
-    if (newOption !== selectedOption) {
-      setSelectedOption(newOption);
-      // Setchildprops was for the classes schema, we should do something similar with the hooks schema
-      // setChildProps(newOption.initialComponentProps());
-    }
-  };
-
-  const getOptionComponentFromSelectedOption = () => {
-    switch (selectedOption) {
-      case HomeOptionsEnum.VerifyIdentity:
-        return <VerifyIdentity navigation={navigation} />;
-      case HomeOptionsEnum.DeliverFinalExam:
-        return <DeliverFinalExam navigation={navigation} />;
-      case HomeOptionsEnum.PendingSubjects:
-        return <PendingSubjects navigation={navigation} />;
-      case HomeOptionsEnum.ApprovedSubjects:
-        return <ApprovedSubjects navigation={navigation} />;
-      case HomeOptionsEnum.Vote:
-        return <Vote navigation={navigation} />;
-    }
-  }
-
 
   const openMenu = () => {
     if (radialMenuLayoutRef.current) { // check if radialMenuLayoutRef.current exists
@@ -122,7 +61,7 @@ const Home: React.FC<any> = () => {
         />
       )}
       <View style={style().mainView}>
-        {getOptionComponentFromSelectedOption()}
+        <VerifyIdentity navigation={navigation} />
       </View>
       {menuOpened && (
         <RadialMenu

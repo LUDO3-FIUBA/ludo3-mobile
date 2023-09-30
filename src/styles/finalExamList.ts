@@ -12,6 +12,6 @@ const sharedStyle = StyleSheet.create({
   },
   text: {
     ...basic().text,
-    fontSize: 15,
+    fontSize: 20,
   },
 });

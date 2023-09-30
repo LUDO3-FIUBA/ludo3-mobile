@@ -1,24 +1,24 @@
-import React, { FC } from 'react';
+import React, { Dispatch, FC, SetStateAction } from 'react';
 import { TouchableHighlight, Alert } from 'react-native';
 import { connectActionSheet } from '@expo/react-native-action-sheet';
 import prompt from 'react-native-prompt-android';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { home as style } from '../../styles';
-import {
-  YearFilter,
-  NameFilter,
-  CorrelativeFilter,
-} from '../approved_subjects/filters';
+import { useActionSheet } from '@expo/react-native-action-sheet';
+import { Filter } from '../approved_subjects/IFilter';
+import { FiltersEnum } from '../approved_subjects/FiltersEnum';
+import { useAppDispatch } from '../../redux/hooks';
+import { setFilter } from '../../redux/reducers/filterSlice';
 
 Icon.loadFont();
 
 interface FilterNavBarButtonProps {
-  onChildPropsChanged: (props: object) => void;
-  showActionSheetWithOptions: any;
 }
 
-const FilterNavBarButton: FC<FilterNavBarButtonProps> = ({ onChildPropsChanged, showActionSheetWithOptions }) => {
-  
+const FilterNavBarButton: FC<FilterNavBarButtonProps> = () => {
+  const dispatch = useAppDispatch()
+  const { showActionSheetWithOptions } = useActionSheet();
+
   const handlePress = () => {
     const options = ['por Año', 'por Nombre', 'Correlativas', 'Cancelar'];
     const cancelButtonIndex = 3;
@@ -27,7 +27,7 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = ({ onChildPropsChanged, 
         options,
         cancelButtonIndex,
       },
-      (buttonIndex: number) => {
+      (buttonIndex: number | undefined) => {
         if (buttonIndex == 0) {
           prompt(
             'Año de aprobación',
@@ -39,13 +39,18 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = ({ onChildPropsChanged, 
               },
               {
                 text: 'Buscar',
-                onPress: year => {
+                onPress: (year: string) => {
                   const currentYear = new Date().getFullYear();
                   const intYear = parseInt(year);
                   if (intYear >= 0 && intYear <= currentYear) {
-                    onChildPropsChanged({
-                      filter: new YearFilter(intYear),
-                    });
+
+                    dispatch(setFilter({
+                      id: '1',
+                      title: 'Year Filter',
+                      type: FiltersEnum.Year,
+                      value: year,
+                    }))
+
                   } else {
                     Alert.alert('Ese no es un año válido');
                   }
@@ -69,8 +74,15 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = ({ onChildPropsChanged, 
               },
               {
                 text: 'Buscar',
-                onPress: name =>
-                  onChildPropsChanged({ filter: new NameFilter(name) }),
+                onPress: (name) => {
+                  dispatch(setFilter({
+                    id: '1',
+                    title: 'Year Filter',
+                    type: FiltersEnum.Name,
+                    value: name,
+                  }))
+                }
+
               },
             ],
             {
@@ -90,10 +102,15 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = ({ onChildPropsChanged, 
               },
               {
                 text: 'Buscar',
-                onPress: code =>
-                  onChildPropsChanged({
-                    filter: new CorrelativeFilter(code),
-                  }),
+                onPress: (code) => {
+                  console.log("Buscar correlativas de la materia con código: " + code);
+                  dispatch(setFilter({
+                    id: '1',
+                    title: 'Correlative filter',
+                    type: FiltersEnum.Correlative,
+                    value: code,
+                  }))
+                }
               },
             ],
             {
@@ -114,6 +131,5 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = ({ onChildPropsChanged, 
   );
 };
 
-const ActionSheetButton = connectActionSheet(FilterNavBarButton);
 
-export default ActionSheetButton;
+export default FilterNavBarButton;

@@ -23,7 +23,7 @@ export function PendingSubjects({ navigation }: PendingSubjectsProps) {
         key="Materias pendientes de final"
         navigation={navigation}
         fetch={() => request(() => finalExamsRepository.fetchPending())}
-        emptyMessage={`No tenés materias pendientes de aprobar aún.${'\n\n\n\n'}El camino recién comienza.`} 
+        emptyMessage={`No tenés materias en instancia de final.${'\n\n'}`} 
         id={''}      
         />
     </SafeAreaView>
