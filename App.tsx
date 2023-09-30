@@ -42,45 +42,43 @@ const App = () => {
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ headerShown: true }}
+            options={{ headerShown: true, title: 'Inicio' }}
           />
 
           <Stack.Screen
             name="TakePicture"
             component={TakePictureStepScreen}
-            options={({ route }) => ({ title: 'Mock Title' })}
-          // options={({ route }) => ({ title: route.params?.title })}
+            options={({ route }) => ({ title: 'Tomar foto' })}
           />
 
           <Stack.Screen
             name="CameraTest"
             component={CameraTestScreen}
-            options={({ route }) => ({ title: 'Mock Title' })}
-          // options={({ route }) => ({ title: route.params?.title })}
+            options={({ route }) => ({ title: 'Prueba de cámara' })}
           />
 
           <Stack.Screen
             name="ApprovedSubjects"
             component={ApprovedSubjects}
-            options={{ headerShown: true }}
+            options={{ headerShown: true, title: 'Materias aprobadas' }}
           />
 
           <Stack.Screen
             name="PendingSubjects"
             component={PendingSubjects}
-            options={{ headerShown: true }}
+            options={{ headerShown: true, title: 'Materias pendientes'}}
           />
 
           <Stack.Screen
             name="DeliverFinalExam"
             component={DeliverFinalExam}
-            options={{ headerShown: true }}
+            options={{ headerShown: true, title: 'Entregar examen final' }}
           />
 
           <Stack.Screen
             name="VerifyIdentity"
             component={VerifyIdentity}
-            options={{ headerShown: true }}
+            options={{ headerShown: true, title: 'Verificar identidad' }}
           />
 
           <Stack.Screen

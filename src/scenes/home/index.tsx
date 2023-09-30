@@ -44,7 +44,7 @@ const Home: React.FC<any> = () => {
 
   const setOptionProps = (option: any) => {
     const navOptions = {
-      title: option,
+      title: "Verificar Identidad",
       headerRight: (navigation: any) => getHeaderButton(option),
     };
     navigation.setOptions(navOptions);
