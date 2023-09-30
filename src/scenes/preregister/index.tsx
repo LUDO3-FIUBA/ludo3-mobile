@@ -10,6 +10,8 @@ interface Props {
 }
 
 const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
+  const [dni, setDni] = useState("")
+  const [email, setEmail] = useState("")
   const [firstValid, setFirstValid] = useState<boolean>(false);
   const [secondValid, setSecondValid] = useState<boolean>(false);
 
@@ -17,6 +19,17 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
   let secondTextInput = useRef<any>(null); // Specify the exact type based on FormInput implementation
 
   const shouldEnableSignUp = () => firstValid && secondValid;
+
+  const onDniChange = (text: string, isValid: boolean) => {
+    setDni(text)
+    setFirstValid(isValid)
+  } 
+
+  const onEmailChange = (text: string, isValid: boolean) => {
+    setEmail(text)
+    setSecondValid(isValid)
+  }
+  
 
   return (
     <View style={style().view}>
@@ -36,7 +49,7 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
               nextField={() => secondTextInput.current}
               placeholder="DNI"
               blurOnSubmit={false}
-              onTextChanged={(text, isValid) => setFirstValid(isValid)}
+              onTextChanged={(text, isValid) => onDniChange(text, isValid)}
               validation={{
                 presence: {
                   allowEmpty: false,
@@ -55,7 +68,7 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
               errorStyle={style().errorInInput}
               keyboardType="email-address"
               placeholder="Email"
-              onTextChanged={(text, isValid) => setSecondValid(isValid)}
+              onTextChanged={(text, isValid) => onEmailChange(text, isValid)}
               validation={{
                 presence: {
                   allowEmpty: false,
@@ -72,8 +85,6 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
             enabled={shouldEnableSignUp()}
             style={style().button}
             onPress={() => {
-              const dni = firstTextInput.current?.value;
-              const email = secondTextInput.current?.value;
               navigation.navigate('TakePicture', {
                 configuration: new FacePictureConfiguration(
                   ['Tomate una foto de frente'],
