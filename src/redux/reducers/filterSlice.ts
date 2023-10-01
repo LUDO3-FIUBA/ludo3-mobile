@@ -10,7 +10,7 @@ interface FilterState {
 
 // Define the initial state using that type
 const initialState: FilterState = {
-  actualFilter: { id: '', title: '', type: FiltersEnum.None, value: '' } as Filter
+  actualFilter: { title: '', type: FiltersEnum.None, value: '' } as Filter
 }
 
 export const filterSlice = createSlice({
@@ -21,11 +21,23 @@ export const filterSlice = createSlice({
     // Use the PayloadAction type to declare the contents of `action.payload`
     setFilter: (state, action: PayloadAction<Filter>) => {
       state.actualFilter = action.payload
+    },
+    setFilterToCorrelative: (state, action: PayloadAction<string>) => {
+      state.actualFilter = { title: '', type: FiltersEnum.Correlative, value: action.payload } as Filter
+    },
+    setFilterToYear: (state, action: PayloadAction<string>) => {
+      state.actualFilter = { title: '', type: FiltersEnum.Year, value: action.payload } as Filter
+    },
+    setFilterToName: (state, action: PayloadAction<string>) => {
+      state.actualFilter = { title: '', type: FiltersEnum.Name, value: action.payload } as Filter
+    },
+    setFilterToNone: (state) => {
+      state.actualFilter = { title: '', type: FiltersEnum.None, value: '' } as Filter
     }
   }
 })
 
-export const { setFilter } = filterSlice.actions
+export const { setFilter, setFilterToCorrelative, setFilterToYear, setFilterToName, setFilterToNone } = filterSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectActualFilter = (state: RootState) => state.filter.actualFilter

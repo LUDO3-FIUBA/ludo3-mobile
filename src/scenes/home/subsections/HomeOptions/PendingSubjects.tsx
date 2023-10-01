@@ -6,8 +6,7 @@ interface Props {
 }
 
 export function PendingSubjects({ navigation }: Props) {
-  const initialProps = {}
-  return <PendingSubjectsScreen navigation={navigation} key="PendingSubjects" {...initialProps}/>
+  return <PendingSubjectsScreen navigation={navigation} key="PendingSubjects"/>
 }
 
 export default PendingSubjects;

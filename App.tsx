@@ -10,7 +10,6 @@ import VerifyIdentity from './src/scenes/home/subsections/HomeOptions/VerifyIden
 import FilterNavBarButton from './src/scenes/home/filterNavBarButton';
 import { Provider, useDispatch } from 'react-redux';
 import store from './src/redux/store';
-import { useAppSelector } from './src/redux/hooks';
 
 const Stack = createStackNavigator();
 
@@ -65,14 +64,18 @@ const App = () => {
               options={{
                 headerShown: true,
                 title: 'Materias aprobadas',
-                header: () => <FilterNavBarButton/>,
+                headerRight: () => <FilterNavBarButton/>,
               }}
             />
 
             <Stack.Screen
               name="PendingSubjects"
               component={PendingSubjects}
-              options={{ headerShown: true, title: 'Materias pendientes' }}
+              options={{ 
+                headerShown: true, 
+                title: 'Materias pendientes', 
+                headerRight: () => <FilterNavBarButton/>,
+              }}
             />
 
             <Stack.Screen

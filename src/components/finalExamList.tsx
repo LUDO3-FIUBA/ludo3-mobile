@@ -4,22 +4,23 @@ import FinalExamCard from './finalExamCard';
 import Loading from './loading';
 import { finalExamList as style } from '../styles';
 import { FinalExam } from '../models';
+import { Filter } from '../scenes/approved_subjects/IFilter';
 
 interface FinalExamListProps {
-  id: string;
+  filter: Filter;
   fetch: () => Promise<FinalExam[]>;
   emptyMessage: string;
   navigation: any; // You can replace 'any' with the actual navigation prop type if available
 }
 
-const FinalExamList: FC<FinalExamListProps> = ({ id, fetch, emptyMessage, navigation }) => {
+const FinalExamList: FC<FinalExamListProps> = ({ filter, fetch, emptyMessage, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [finalExams, setFinalExams] = useState<FinalExam[]>([]);
 
   useEffect(() => {
     fetchData();
-  }, [id]); // Re-fetch data when id changes
+  }, [filter.type, filter.value]); // Re-fetch data when id changes
 
   const fetchData = async (refreshing = false) => {
     if (refreshing) {

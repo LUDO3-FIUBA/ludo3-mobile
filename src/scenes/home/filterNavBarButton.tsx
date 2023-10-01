@@ -8,7 +8,7 @@ import { useActionSheet } from '@expo/react-native-action-sheet';
 import { Filter } from '../approved_subjects/IFilter';
 import { FiltersEnum } from '../approved_subjects/FiltersEnum';
 import { useAppDispatch } from '../../redux/hooks';
-import { setFilter } from '../../redux/reducers/filterSlice';
+import { setFilter, setFilterToCorrelative, setFilterToName, setFilterToYear } from '../../redux/reducers/filterSlice';
 
 Icon.loadFont();
 
@@ -43,14 +43,7 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = () => {
                   const currentYear = new Date().getFullYear();
                   const intYear = parseInt(year);
                   if (intYear >= 0 && intYear <= currentYear) {
-
-                    dispatch(setFilter({
-                      id: '1',
-                      title: 'Year Filter',
-                      type: FiltersEnum.Year,
-                      value: year,
-                    }))
-
+                    dispatch(setFilterToYear(year))
                   } else {
                     Alert.alert('Ese no es un año válido');
                   }
@@ -75,12 +68,7 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = () => {
               {
                 text: 'Buscar',
                 onPress: (name) => {
-                  dispatch(setFilter({
-                    id: '1',
-                    title: 'Year Filter',
-                    type: FiltersEnum.Name,
-                    value: name,
-                  }))
+                  dispatch(setFilterToName(name))
                 }
 
               },
@@ -104,12 +92,7 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = () => {
                 text: 'Buscar',
                 onPress: (code) => {
                   console.log("Buscar correlativas de la materia con código: " + code);
-                  dispatch(setFilter({
-                    id: '1',
-                    title: 'Correlative filter',
-                    type: FiltersEnum.Correlative,
-                    value: code,
-                  }))
+                  dispatch(setFilterToCorrelative(code))
                 }
               },
             ],

@@ -6,8 +6,8 @@ import { finalExamsRepository } from '../../repositories';
 import { FinalExam } from '../../models';
 import { FiltersEnum } from './FiltersEnum';
 import { Filter } from './IFilter';
-import { useAppSelector } from '../../redux/hooks';
-import { selectActualFilter } from '../../redux/reducers/filterSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { selectActualFilter, setFilterToNone } from '../../redux/reducers/filterSlice';
 
 interface ApprovedSubjectsProps {
   navigation: any; // Replace with a more specific type if available
@@ -15,11 +15,7 @@ interface ApprovedSubjectsProps {
 
 const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ navigation }) => {
   const filter = useAppSelector(selectActualFilter)
-
-  useEffect(() => {
-    console.log("Filter changed");
-  }, [filter])
-  
+  const dispatch = useAppDispatch()
 
   const fetchExams = async (): Promise<FinalExam[]> => {
     try {
@@ -67,12 +63,12 @@ const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ navigation }) => {
       {filter && (
         <FilterDescriptor
           filter={filter}
-          onClose={() => setFilter({ type: FiltersEnum.None, title: '', id: '', value: '' })}
+          onClose={() => dispatch(setFilterToNone())}
         />
       )}
       <FinalExamList
-        id=''
-        key={`ApprovedSubjects-${filter ? filter.id : ''}`}
+        filter={filter}
+        key={`ApprovedSubjects-${filter ? filter.type : ''}`}
         navigation={navigation}
         fetch={fetchExams}
         emptyMessage={`No tenés materias aprobadas aún.${'\n'}No te olvides de rendir los finales.`}
