@@ -5,16 +5,17 @@ import { finalExamsRepository } from '../../../repositories';
 import { makeRequest } from '../../authenticatedComponent';
 
 class VerifyIdentityForExamConfiguration extends TakePictureStepConfiguration {
-  token: string;
+  finalId: string;
 
-  constructor(description: string, token: string) {
+  constructor(description: string, finalId: string) {
+    // super(description, 'front', false); // TODO: use front
     super(description, 'back', false);
-    this.token = token;
+    this.finalId = finalId;
   }
 
   async onDataObtained(image: any, navigation: any, disableLoading: () => void) {
     await makeRequest(
-      () => finalExamsRepository.submitExam(this.token, image),
+      () => finalExamsRepository.submitExam(this.finalId, image),
       navigation,
     )
       .then((user: { fullName: () => any; id: () => any; }) => {
@@ -82,14 +83,14 @@ class VerifyIdentityForExamConfiguration extends TakePictureStepConfiguration {
 
   toObject() {
     return super.toObject(Type.FinalExamFace, {
-      token: this.token,
+      finalId: this.finalId,
     });
   }
 
   static fromObject(object: any) {
     return new VerifyIdentityForExamConfiguration(
       object.description,
-      object.token,
+      object.finalId,
     );
   }
 }

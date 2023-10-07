@@ -14,9 +14,8 @@ const sharedStyle = StyleSheet.create({
   },
   text: {
     ...basic().text,
-    flex: 0,
+    flex: 1,
     fontSize: 25,
-    marginBottom: 10,
   },
   preview: {
     flex: 1,
@@ -53,5 +52,6 @@ const sharedStyle = StyleSheet.create({
     color: '#fff',
     padding: 15,
     paddingHorizontal: 20,
+    backgroundColor: '#000'
   },
 });

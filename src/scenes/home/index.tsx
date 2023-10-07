@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, TouchableHighlight, Animated, Image, LayoutChangeEvent, TouchableOpacity, Easing } from 'react-native';
+import { View, TouchableHighlight, Animated, Image, LayoutChangeEvent, TouchableOpacity, Easing, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { RadialMenu } from '../../components';
@@ -61,7 +61,7 @@ const Home: React.FC<any> = () => {
         />
       )}
       <View style={style().mainView}>
-        <VerifyIdentity navigation={navigation} />
+        <Text style={style().text}>Bienvenido al Inicio</Text>
       </View>
       {menuOpened && (
         <RadialMenu
