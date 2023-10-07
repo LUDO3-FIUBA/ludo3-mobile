@@ -37,7 +37,7 @@
     "react-native-safe-area-context": "^0.6.4",
     "react-native-screens": "^2.18.1",
     "react-native-vector-icons": "^10.0.0",
-    "react-native-vision-camera": "^3.0.0",
+    "react-native-vision-camera": "^3.3.1",
     "react-redux": "^8.1.2",
     "redux": "^4.2.1",
     "validate.js": "^0.13.1"
