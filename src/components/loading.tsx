@@ -5,7 +5,7 @@ import { getStyleSheet as style } from '../styles';
 const Loading: FC = () => {
   return (
     <View style={style().loading}>
-      <ActivityIndicator size="large" color={style().loading.color} />
+      <ActivityIndicator size={64} color={style().loading.color} />
     </View>
   );
 };

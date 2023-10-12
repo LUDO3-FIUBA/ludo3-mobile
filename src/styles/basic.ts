@@ -1,5 +1,5 @@
 import { StyleSheet, Appearance } from 'react-native';
-import {lightModeColors, darkModeColors} from './colorPalette';
+import { lightModeColors, darkModeColors } from './colorPalette';
 
 export default function getStyleSheet() {
   return Appearance.getColorScheme() === 'dark' ? darkMode : lightMode;
@@ -59,8 +59,10 @@ const sharedStyle = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    height: '100%',
+    height: '90%',
     backgroundColor: 'transparent',
+    position: 'absolute',
+    zIndex: 999
   },
 });
 

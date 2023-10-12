@@ -209,7 +209,7 @@ const PhotoCamera = ({ device, takePicture }: PhotoCameraProps) => {
         }
         takePicture(camera.current);
       }}
-      style={style().button}
+      style={{MainContainer: style().captureContainer, fontSize: 18, tintColor: 'white'}} // TODO: move this to the src/styles collection
     />
   </>;
 }
