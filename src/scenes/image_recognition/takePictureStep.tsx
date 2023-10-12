@@ -107,7 +107,7 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
         <CameraViewOrPermissionMessage
           takePicture={takePicture}
           onBarCodeRead={onBarCodeRead}
-          cameraType={config.cameraType || 'front'}
+          cameraType={config.cameraType}
           searchForQRCode={config.searchForQRCode}
           ignoreReadings={ignoreReadings} />
       </SafeAreaView>
@@ -190,13 +190,15 @@ const PhotoCamera = ({ device, takePicture }: PhotoCameraProps) => {
   const isAppForeground = useIsAppForeground();
   console.log(`PhotoCamera - isAppForeground: ${isAppForeground}`);
 
+  if (!isAppForeground) return <></>
+
   return <>
     <Camera
       ref={camera}
       onError={onError}
       style={{ flex: 1 }}
       device={device}
-      isActive={true}
+      isActive={isAppForeground}
       orientation='portrait'
       photo={true} />
     <RoundedButton
@@ -225,9 +227,6 @@ const QRScannerCamera = ({ device, onBarCodeRead, ignoreReadings }: QRScannerCam
     console.error(error)
   }, [])
 
-  const isAppForeground = useIsAppForeground();
-  console.log(`QRScannerCamera - isAppForeground: ${isAppForeground}`);
-
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
@@ -237,7 +236,12 @@ const QRScannerCamera = ({ device, onBarCodeRead, ignoreReadings }: QRScannerCam
   }
   )
 
-  return <><Camera
+  const isAppForeground = useIsAppForeground();
+  console.log(`QRScannerCamera - isAppForeground: ${isAppForeground}`);
+
+  if (!isAppForeground) return <></>
+
+  return <Camera
     ref={camera}
     onError={onError}
     style={{ flex: 1 }}
@@ -246,7 +250,6 @@ const QRScannerCamera = ({ device, onBarCodeRead, ignoreReadings }: QRScannerCam
     codeScanner={codeScanner}
     orientation='portrait'
   />
-  </>
 }
 
 /**
