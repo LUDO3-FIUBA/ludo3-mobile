@@ -13,12 +13,6 @@ interface PendingSubjectsProps {
 
 export function PendingSubjects({ navigation }: PendingSubjectsProps) {
 
-  const request = async (callback: () => Promise<any>) => {
-    // if there's any logic inside the request method of AuthenticatedComponent, 
-    // you should reproduce it here or extract it to a custom hook or helper function
-    return callback();
-  };
-
   const filter = useAppSelector(selectActualFilter)
 
   return (
@@ -27,7 +21,7 @@ export function PendingSubjects({ navigation }: PendingSubjectsProps) {
         filter={filter}
         key="Materias pendientes de final"
         navigation={navigation}
-        fetch={() => request(() => finalExamsRepository.fetchPending())}
+        fetch={() => finalExamsRepository.fetchPending()}
         emptyMessage={`No tenés materias en instancia de final.${'\n\n'}`} 
         />
     </SafeAreaView>

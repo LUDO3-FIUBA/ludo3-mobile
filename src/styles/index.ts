@@ -7,6 +7,8 @@ export { default as home } from './home';
 export { default as splash } from './splash';
 export { default as finalExamCard } from './finalExamCard';
 export { default as finalExamList } from './finalExamList';
+export { default as subjectList } from './subjectList';
 export { default as approvedSubjects } from './approvedSubjects';
 export { default as filterDescriptor } from './filterDescriptor';
 export { default as takePicture } from './image_recognition/takePicture';
+export { default as scanQrIcon } from './scanQrIcon';

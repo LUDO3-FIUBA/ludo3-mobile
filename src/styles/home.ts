@@ -27,6 +27,8 @@ const sharedStyle = StyleSheet.create({
   ...basic(),
   mainView: {
     ...basic().view,
+    marginHorizontal: 12,
+    marginBottom: 120,
     alignItems: 'stretch',
     justifyContent: 'center',
   },
@@ -53,8 +55,8 @@ const sharedStyle = StyleSheet.create({
   menuRootItem: menuItem,
   menuRootImageItem: menuImageItem,
   itemIcon: {
-    fontSize: 20,
-    color: 'white',
+    fontSize: 32,
+    color: 'black',
   },
   itemImage: {
     tintColor: 'white',
@@ -68,6 +70,13 @@ const sharedStyle = StyleSheet.create({
   filterButtonIcon: {
     fontSize: 20,
   },
+  header1: {
+    fontSize: 24
+  },
+  text: {
+    ...basic().text,
+    fontSize: 18
+  }
 });
 
 const lightMode = StyleSheet.create({
@@ -96,6 +105,10 @@ const lightMode = StyleSheet.create({
     ...sharedStyle.menuItem,
     backgroundColor: lightModeColors.menuOption,
   },
+  header1: {
+    ...sharedStyle.header1,
+    color: lightModeColors.black
+  }
 });
 
 const darkMode = StyleSheet.create({
@@ -124,4 +137,8 @@ const darkMode = StyleSheet.create({
     ...sharedStyle.menuItem,
     backgroundColor: darkModeColors.menuOption,
   },
+  header1: {
+    ...sharedStyle.header1,
+    color: darkModeColors.lightGray
+  }
 });

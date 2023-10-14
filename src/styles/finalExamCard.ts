@@ -14,13 +14,14 @@ const sharedStyle = StyleSheet.create({
     alignItems: 'stretch',
     flex: 1,
     justifyContent: 'space-between',
-    marginVertical: 10,
-    marginHorizontal: 20,
+    marginVertical: 4,
+    marginHorizontal: 10,
     padding: 15,
+    borderRadius: 12
   },
   subjectName: {
     ...basic().text,
-    fontSize: 25,
+    fontSize: 22,
   },
   professor: {
     ...basic().text,
