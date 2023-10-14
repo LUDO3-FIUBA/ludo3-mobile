@@ -71,7 +71,7 @@ const FinalExamList: FC<FinalExamListProps> = ({ filter, fetch, emptyMessage, na
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('Historial de una materia', {
+                navigation.navigate('SubjectHistoryScreen', {
                   subject: item.subject.toObject(),
                 });
               }}

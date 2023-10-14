@@ -109,11 +109,11 @@ const App = () => {
               options={{ headerShown: false }}
             />
 
-            {/* <Drawer.Screen
+            <Drawer.Screen
               name="TakePicture"
               component={TakePictureStepScreen}
               options={({ route }) => ({ title: 'Tomar foto' })}
-            /> */}
+            />
 
             {/* <Drawer.Screen
               name="CameraTest"
@@ -121,9 +121,8 @@ const App = () => {
               options={({ route }) => ({ title: 'Prueba de cámara' })}
             /> */}
 
-            {/* 
-            <Drawer.Screen
-              name="Historial de una materia"
+            {/* <Drawer.Screen
+              name="SubjectHistoryScreen"
               component={SubjectHistoryScreen}
               options={({ route }) => ({
                 title: route.params.subject.name,
