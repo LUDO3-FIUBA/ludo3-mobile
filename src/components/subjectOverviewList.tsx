@@ -36,7 +36,7 @@ const SubjectOverviewList: FC<SubjectOverviewListProps> = ({ fetch, navigation }
         <TouchableOpacity
           key={`suboverview-${item.id}`}
           onPress={() => {
-            navigation.navigate('SubjectHistoryScreen', {
+            navigation.navigate('ViewCommission', {
               subject: item.toObject(),
             });
           }}

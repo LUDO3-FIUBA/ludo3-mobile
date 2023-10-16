@@ -6,8 +6,6 @@ export default function getStyleSheet() {
     return Appearance.getColorScheme() === 'dark' ? darkMode : lightMode;
 }
 
-import { ViewStyle, TextStyle, ImageStyle, StyleProp } from 'react-native';
-
 const sharedStyle = StyleSheet.create({
     ...basic(),
     container: {

@@ -11,7 +11,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
   }
 
   async onDataObtained(data: any, navigation: any, disableLoading: () => void) {
-    await navigation.push('TakePicture', {
+    await navigation.navigate('TakePicture', {
       configuration: new VerifyIdentityConfiguration(
         'Verifiquemos tu identidad',
         data,

@@ -1,15 +1,17 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { DrawerItemList, DrawerContentScrollView, createDrawerNavigator } from '@react-navigation/drawer';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, CameraTestScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen } from './src/scenes';
+import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, CameraTestScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen } from './src/scenes';
 import DeliverFinalExam from './src/scenes/home/subsections/HomeOptions/DeliverFinalExam';
 import VerifyIdentity from './src/scenes/home/subsections/HomeOptions/VerifyIdentity';
 import FilterNavBarButton from './src/scenes/home/filterNavBarButton';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import InCourseSubjects from './src/scenes/in_course_subjects';
+import { darkModeColors, lightModeColors } from './src/styles/colorPalette';
+import { Appearance } from 'react-native';
 
 const Drawer = createDrawerNavigator();
 
@@ -22,7 +24,7 @@ const TAB_MENU_SHOWN_SCREENS = [
   "VerifyIdentity"
 ]
 
-function CustomDrawerContent(props: any) {
+function FilteredDrawerContent(props: any) {
   const { state, ...rest } = props;
   const newState = {
     ...state, routes: state.routes.filter((route: any) => {
@@ -39,13 +41,15 @@ function CustomDrawerContent(props: any) {
 }
 
 const App = () => {
+  const colors = isDarkTheme() ? darkModeColors : lightModeColors;
   return (
     <Provider store={store}>
       <ActionSheetProvider>
-        <NavigationContainer>
+        <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme}>
           <Drawer.Navigator
             initialRouteName="Landing"
-            drawerContent={props => <CustomDrawerContent {...props} />}
+            screenOptions={{headerTintColor: colors.mainContrastColor}}
+            drawerContent={props => <FilteredDrawerContent {...props} />}
           >
             <Drawer.Screen
               name="Home"
@@ -124,6 +128,12 @@ const App = () => {
               options={({ route }) => ({ title: 'Tomar foto' })}
             />
 
+            <Drawer.Screen
+              name="ViewCommission"
+              component={ViewCommissionScreen}
+              options={{ headerShown: true, title: "Comisión" }}
+            />
+
             {/* <Drawer.Screen
               name="CameraTest"
               component={CameraTestScreen}
@@ -134,7 +144,7 @@ const App = () => {
               name="SubjectHistoryScreen"
               component={SubjectHistoryScreen}
               options={({ route }) => ({
-                title: route.params.subject.name,
+                title: route.params?.subject.name,
                 headerShown: true,
               })}
             /> */}
@@ -146,3 +156,7 @@ const App = () => {
 };
 
 export default App;
+
+function isDarkTheme() {
+  return Appearance.getColorScheme() === 'dark';
+}

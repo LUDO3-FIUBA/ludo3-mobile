@@ -161,7 +161,7 @@ const CameraViewOrPermissionMessage = ({ takePicture, cameraType, onBarCodeRead,
 
   if (!cameraPermissionGranted) {
     return (
-      <Text>Se requieren los permisos de Cámara para continuar utilizando la aplicación</Text>
+      <Text style={{flex: 1, flexGrow: 1}}>Se requieren los permisos de Cámara para continuar utilizando la aplicación</Text>
     )
   }
 

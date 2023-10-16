@@ -1,4 +1,4 @@
-export const baseUrl = 'http://192.168.0.14:8007';
+export const baseUrl = 'http://192.168.1.8:8007';
 
 const logRequests = true;
 

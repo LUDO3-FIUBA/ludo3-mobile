@@ -12,3 +12,5 @@ export { default as approvedSubjects } from './approvedSubjects';
 export { default as filterDescriptor } from './filterDescriptor';
 export { default as takePicture } from './image_recognition/takePicture';
 export { default as scanQrIcon } from './scanQrIcon';
+export { default as viewCommission } from './viewCommission';
+export { default as basicList } from './basicList';

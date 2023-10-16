@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { home as style } from '../../styles';
-import { SessionManager } from '../../managers';
 import { FinalExamOverviewList, RoundedButton, ScanQRIcon, SubjectOverviewList } from '../../components';
 import { useNavigation } from '@react-navigation/native';
 import { finalExamsRepository, subjectsRepository } from '../../repositories';

@@ -65,7 +65,7 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
           }
         });
     } else {
-      navigation.push('TakePicture', {
+      navigation.navigate('TakePicture', {
         configuration: new FacePictureConfiguration(
           this.descriptions,
           this.dni,

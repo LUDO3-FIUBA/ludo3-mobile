@@ -71,7 +71,7 @@ const SubjectList: FC<SubjectListProps> = ({ filter, fetch, emptyMessage, naviga
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate('SubjectHistoryScreen', {
+                navigation.navigate('ViewCommission', {
                   subject: item.toObject(),
                 });
               }}
