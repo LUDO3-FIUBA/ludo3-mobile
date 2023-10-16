@@ -15,10 +15,10 @@ export function fetchInCourse(): Promise<Subject[]> {
     //     })
     //     .then(json => Promise.resolve(convertJsonToFinalExamsList(json, false)));
     return Promise.resolve([
-        new Subject(1, "61.03", "Analisis III", "Juan Martín Sirne"),
-        new Subject(2, "61.03", "Fisica II", "Juan Martín Sirne"),
-        new Subject(3, "61.03", "Probabilidad A", "Juan Martín Sirne"),
-        new Subject(4, "61.03", "Algoritmos II", "Juan Martín Sirne"),
+        new Subject(1, "61.10", "Analisis III", "Juan Martín Sirne"),
+        new Subject(2, "62.03", "Fisica II", "Juan Martín Sirne"),
+        new Subject(3, "61.09", "Probabilidad A", "Juan Martín Sirne"),
+        new Subject(4, "75.41", "Algoritmos y Programación II", "Juan Martín Sirne"),
     ])
 }
 
