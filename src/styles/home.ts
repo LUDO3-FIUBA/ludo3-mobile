@@ -56,7 +56,7 @@ const sharedStyle = StyleSheet.create({
   menuRootItem: menuItem,
   menuRootImageItem: menuImageItem,
   itemIcon: {
-    fontSize: 32,
+    fontSize: 24,
   },
   itemImage: {
     tintColor: 'white',

@@ -1,9 +1,9 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
-import { DrawerItemList, DrawerContentScrollView, createDrawerNavigator } from '@react-navigation/drawer';
+import { DrawerItemList, DrawerContentScrollView, createDrawerNavigator, DrawerItem, DrawerContentComponentProps, DrawerContentOptions } from '@react-navigation/drawer';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, CameraTestScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen } from './src/scenes';
+import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen } from './src/scenes';
 import DeliverFinalExam from './src/scenes/home/subsections/HomeOptions/DeliverFinalExam';
 import VerifyIdentity from './src/scenes/home/subsections/HomeOptions/VerifyIdentity';
 import FilterNavBarButton from './src/scenes/home/filterNavBarButton';
@@ -12,10 +12,12 @@ import store from './src/redux/store';
 import InCourseSubjects from './src/scenes/in_course_subjects';
 import { darkModeColors, lightModeColors } from './src/styles/colorPalette';
 import { Appearance } from 'react-native';
+import { SessionManager } from './src/managers';
+import { ProfileOverview } from './src/components';
 
 const Drawer = createDrawerNavigator();
 
-const TAB_MENU_SHOWN_SCREENS = [
+const DRAWER_MENU_SHOWN_SCREENS = [
   "Home",
   "InCourseSubjects",
   "PendingSubjects",
@@ -24,18 +26,25 @@ const TAB_MENU_SHOWN_SCREENS = [
   "VerifyIdentity"
 ]
 
-function FilteredDrawerContent(props: any) {
+const FilteredDrawerContent = (props: DrawerContentComponentProps<DrawerContentOptions>) => {
   const { state, ...rest } = props;
   const newState = {
     ...state, routes: state.routes.filter((route: any) => {
-      // Only include the routes you want here
-      return TAB_MENU_SHOWN_SCREENS.includes(route.name);
+      return DRAWER_MENU_SHOWN_SCREENS.includes(route.name);
     })
   };
 
   return (
     <DrawerContentScrollView {...props}>
+      <ProfileOverview />
       <DrawerItemList {...rest} state={newState} />
+      <DrawerItem label="Cerrar Sesión" onPress={async () => {
+        await SessionManager.getInstance()?.clearCredentials();
+        props.navigation.reset({
+          index: 0,
+          routes: [{ name: 'Landing' }],
+        })
+      }} />
     </DrawerContentScrollView>
   );
 }
@@ -48,7 +57,7 @@ const App = () => {
         <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme}>
           <Drawer.Navigator
             initialRouteName="Landing"
-            screenOptions={{headerTintColor: colors.mainContrastColor}}
+            screenOptions={{ headerTintColor: colors.mainContrastColor }}
             drawerContent={props => <FilteredDrawerContent {...props} />}
           >
             <Drawer.Screen
