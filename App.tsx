@@ -1,155 +1,74 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
-import { DrawerItemList, DrawerContentScrollView, createDrawerNavigator, DrawerItem, DrawerContentComponentProps, DrawerContentOptions } from '@react-navigation/drawer';
+import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import { SplashScreen, LandingScreen, PreRegisterScreen, HomeScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen } from './src/scenes';
-import DeliverFinalExam from './src/scenes/home/subsections/HomeOptions/DeliverFinalExam';
-import VerifyIdentity from './src/scenes/home/subsections/HomeOptions/VerifyIdentity';
-import FilterNavBarButton from './src/scenes/home/filterNavBarButton';
+import { SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen, RootDrawer } from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
-import InCourseSubjects from './src/scenes/in_course_subjects';
-import { darkModeColors, lightModeColors } from './src/styles/colorPalette';
 import { Appearance } from 'react-native';
-import { SessionManager } from './src/managers';
-import { ProfileOverview } from './src/components';
 
-const Drawer = createDrawerNavigator();
+const Stack = createStackNavigator();
 
-const DRAWER_MENU_SHOWN_SCREENS = [
-  "Home",
-  "InCourseSubjects",
-  "PendingSubjects",
-  "ApprovedSubjects",
-  "DeliverFinalExam",
-  "VerifyIdentity"
-]
-
-const FilteredDrawerContent = (props: DrawerContentComponentProps<DrawerContentOptions>) => {
-  const { state, ...rest } = props;
-  const newState = {
-    ...state, routes: state.routes.filter((route: any) => {
-      return DRAWER_MENU_SHOWN_SCREENS.includes(route.name);
-    })
-  };
-
-  return (
-    <DrawerContentScrollView {...props}>
-      <ProfileOverview />
-      <DrawerItemList {...rest} state={newState} />
-      <DrawerItem label="Cerrar Sesión" onPress={async () => {
-        await SessionManager.getInstance()?.clearCredentials();
-        props.navigation.reset({
-          index: 0,
-          routes: [{ name: 'Landing' }],
-        })
-      }} />
-    </DrawerContentScrollView>
-  );
-}
 
 const App = () => {
-  const colors = isDarkTheme() ? darkModeColors : lightModeColors;
   return (
     <Provider store={store}>
       <ActionSheetProvider>
         <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme}>
-          <Drawer.Navigator
-            initialRouteName="Landing"
-            screenOptions={{ headerTintColor: colors.mainContrastColor }}
-            drawerContent={props => <FilteredDrawerContent {...props} />}
+          <Stack.Navigator
+            initialRouteName="Splash"
+            screenOptions={{ gestureEnabled: false }}
           >
-            <Drawer.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{ headerShown: true, title: 'Inicio' }}
+            <Stack.Screen
+              name="RootDrawer"
+              component={RootDrawer}
+              options={{ headerShown: false }}
             />
 
-            <Drawer.Screen
-              name="InCourseSubjects"
-              component={InCourseSubjects}
-              options={{
-                headerShown: true,
-                title: 'Materias en curso',
-              }}
-            />
-
-            <Drawer.Screen
-              name="ApprovedSubjects"
-              component={ApprovedSubjectsScreen}
-              options={{
-                headerShown: true,
-                title: 'Materias aprobadas',
-                headerRight: () => <FilterNavBarButton />,
-              }}
-            />
-
-            <Drawer.Screen
-              name="PendingSubjects"
-              component={PendingSubjectsScreen}
-              options={{
-                headerShown: true,
-                title: 'Materias pendientes',
-                headerRight: () => <FilterNavBarButton />,
-              }}
-            />
-
-            <Drawer.Screen
-              name="DeliverFinalExam"
-              component={DeliverFinalExam}
-              options={{ headerShown: true, title: 'Entregar examen final' }}
-            />
-
-            <Drawer.Screen
-              name="VerifyIdentity"
-              component={VerifyIdentity}
-              options={{ headerShown: true, title: 'Verificar identidad' }}
-            />
-
-            <Drawer.Screen
+            <Stack.Screen
               name="Splash"
               component={SplashScreen}
               options={{ headerShown: false }}
             />
 
-            <Drawer.Screen
+            <Stack.Screen
               name="Landing"
               component={LandingScreen}
               options={{ headerShown: false, title: 'Inicio' }}
             />
 
-            <Drawer.Screen
+            <Stack.Screen
               name="PreRegister"
               component={PreRegisterScreen}
               options={{ headerShown: true, title: 'Pre-registro' }}
             />
 
-            <Drawer.Screen
+            <Stack.Screen
               name="PreRegisterDone"
               component={PreRegisterLastInstructionsScreen}
               options={{ headerShown: false }}
             />
 
-            <Drawer.Screen
+            <Stack.Screen
               name="TakePicture"
               component={TakePictureStepScreen}
               options={({ route }) => ({ title: 'Tomar foto' })}
             />
 
-            <Drawer.Screen
+            <Stack.Screen
               name="ViewCommission"
               component={ViewCommissionScreen}
               options={{ headerShown: true, title: "Comisión" }}
             />
 
-            {/* <Drawer.Screen
+            {/* <Stack.Screen
               name="CameraTest"
               component={CameraTestScreen}
               options={({ route }) => ({ title: 'Prueba de cámara' })}
             /> */}
 
-            {/* <Drawer.Screen
+            {/* <Stack.Screen
               name="SubjectHistoryScreen"
               component={SubjectHistoryScreen}
               options={({ route }) => ({
@@ -157,7 +76,7 @@ const App = () => {
                 headerShown: true,
               })}
             /> */}
-          </Drawer.Navigator>
+          </Stack.Navigator>
         </NavigationContainer>
       </ActionSheetProvider>
     </Provider>

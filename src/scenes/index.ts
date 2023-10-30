@@ -14,3 +14,4 @@ export { default as PendingSubjectsScreen } from './pending_subjects';
 export { default as PreRegisterLastInstructionsScreen } from './preregister/done';
 export { default as ApprovedSubjectsScreen } from './approved_subjects';
 export { default as ViewCommissionScreen } from './view_commission';
+export { default as RootDrawer } from './root_drawer';

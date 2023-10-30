@@ -45,7 +45,7 @@ const Landing = ({ navigation }: Props) => {
         setLoginInProgress(false);
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Home' }],
+          routes: [{ name: 'RootDrawer' }],
         });
       }
         // navigation.reset({
