@@ -2,6 +2,7 @@ import {get, post} from './authenticatedRepository';
 import {getInfo} from './users';
 import {Subject, FinalExam, User} from '../models';
 import {StatusCodeError} from '../networking';
+import { NotASubject } from './utilTypes';
 
 const domainUrl = 'api/final_exams';
 
@@ -16,13 +17,6 @@ export class IdentityFail extends Error {
   constructor() {
     super('No eres quien dices ser.');
     this.name = 'IdentityValidationFail';
-  }
-}
-
-export class NotASubject extends Error {
-  constructor() {
-    super('No es un código de materia válido.');
-    this.name = 'NotAValidSubjectCode';
   }
 }
 

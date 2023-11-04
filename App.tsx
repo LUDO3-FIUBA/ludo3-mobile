@@ -3,7 +3,7 @@ import * as React from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import { SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen, RootDrawer } from './src/scenes';
+import { SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen, RootDrawer, CorrelativeSubjects } from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance } from 'react-native';
@@ -60,6 +60,12 @@ const App = () => {
               name="ViewCommission"
               component={ViewCommissionScreen}
               options={{ headerShown: true, title: "Comisión" }}
+            />
+
+            <Stack.Screen
+              name="CorrelativeSubjects"
+              component={CorrelativeSubjects}
+              options={{ headerShown: true, title: "Correlativas" }}
             />
 
             {/* <Stack.Screen

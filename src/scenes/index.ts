@@ -15,3 +15,4 @@ export { default as PreRegisterLastInstructionsScreen } from './preregister/done
 export { default as ApprovedSubjectsScreen } from './approved_subjects';
 export { default as ViewCommissionScreen } from './view_commission';
 export { default as RootDrawer } from './root_drawer';
+export { default as CorrelativeSubjects } from './correlative_subjects';

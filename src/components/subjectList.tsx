@@ -11,9 +11,10 @@ interface SubjectListProps {
   fetch: () => Promise<Subject[]>;
   emptyMessage: string;
   navigation: any; // You can replace 'any' with the actual navigation prop type if available
+  disableOnPress?: boolean
 }
 
-const SubjectList: FC<SubjectListProps> = ({ filter, fetch, emptyMessage, navigation }) => {
+const SubjectList: FC<SubjectListProps> = ({ filter, fetch, emptyMessage, navigation, disableOnPress = false }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -48,7 +49,7 @@ const SubjectList: FC<SubjectListProps> = ({ filter, fetch, emptyMessage, naviga
       Alert.alert(
         '¿Qué pasó?',
         'No sabemos pero no pudimos buscar tu información. ' +
-          'Volvé a intentar en unos minutos.'
+        'Volvé a intentar en unos minutos.'
       );
     }
   };
@@ -67,10 +68,11 @@ const SubjectList: FC<SubjectListProps> = ({ filter, fetch, emptyMessage, naviga
           data={subjects}
           onRefresh={() => fetchData(true)}
           refreshing={refreshing}
-          keyExtractor={finalExam => finalExam.id.toString()}
+          keyExtractor={subject => subject.id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
+                if (disableOnPress) return;
                 navigation.navigate('ViewCommission', {
                   subject: item.toObject(),
                 });

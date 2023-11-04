@@ -20,7 +20,7 @@ export default class Subject {
     };
   }
 
-  static fromObject(object) {
+  static fromObject(object: any) {
     return new Subject(object.id, object.code, object.name, object.professor);
   }
 }
