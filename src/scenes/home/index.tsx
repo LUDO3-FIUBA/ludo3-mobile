@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { home as style } from '../../styles';
-import { FinalExamOverviewList, RoundedButton, ScanQRIcon, SubjectOverviewList } from '../../components';
+import { FinalExamOverviewList, SubjectOverviewList, UpcomingEventsCard } from '../../components';
 import { useNavigation } from '@react-navigation/native';
 import { finalExamsRepository, subjectsRepository } from '../../repositories';
 
@@ -16,6 +16,11 @@ const Home: React.FC<any> = () => {
     <SafeAreaView style={style().view}>
       <ScrollView>
         <View style={style().mainView}>
+          <Text style={style().header1}>Eventos próximos</Text>
+          <UpcomingEventsCard />
+          <VerMasButton
+            onPress={() => navigation.navigate("Calendar")}
+          />
           <Text style={style().header1}>Materias en curso</Text>
           <SubjectOverviewList
             key="Materias en curso"

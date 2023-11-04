@@ -11,7 +11,7 @@ interface IBasicListItem {
     onPress: () => void
 }
 
-const BasicList: React.FC<any> = ({ items }: IProps) => {
+const BasicList: React.FC<IProps> = ({ items }: IProps) => {
     return (
         <View style={style().view}>
             {items.map((item) => (

@@ -3,7 +3,7 @@ import * as React from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import { SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen, RootDrawer, CorrelativeSubjects } from './src/scenes';
+import { SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen, ApprovedSubjectsScreen, PendingSubjectsScreen, ViewCommissionScreen, RootDrawer, CorrelativeSubjects, Calendar } from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance } from 'react-native';
@@ -66,6 +66,12 @@ const App = () => {
               name="CorrelativeSubjects"
               component={CorrelativeSubjects}
               options={{ headerShown: true, title: "Correlativas" }}
+            />
+
+            <Stack.Screen
+              name="Calendar"
+              component={Calendar}
+              options={{ headerShown: true, title: "Calendario" }}
             />
 
             {/* <Stack.Screen
