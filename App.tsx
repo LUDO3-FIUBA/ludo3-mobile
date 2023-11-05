@@ -68,12 +68,6 @@ const App = () => {
               options={{ headerShown: true, title: "Correlativas" }}
             />
 
-            <Stack.Screen
-              name="Calendar"
-              component={Calendar}
-              options={{ headerShown: true, title: "Calendario" }}
-            />
-
             {/* <Stack.Screen
               name="CameraTest"
               component={CameraTestScreen}

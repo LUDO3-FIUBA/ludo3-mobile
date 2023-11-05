@@ -25,7 +25,7 @@ const sharedStyle = StyleSheet.create({
   },
   subjectName: {
     ...basic().text,
-    fontSize: 20
+    fontSize: 18
   },
   date: {
     ...basic().text,
@@ -56,6 +56,10 @@ const lightMode = StyleSheet.create({
     ...sharedStyle.view,
     backgroundColor: lightModeColors.wellbeing,
   },
+  name: {
+    ...sharedStyle.name,
+    color: lightModeColors.black,
+  },
 });
 
 const darkMode = StyleSheet.create({
@@ -63,5 +67,9 @@ const darkMode = StyleSheet.create({
   view: {
     ...sharedStyle.view,
     backgroundColor: darkModeColors.wellbeing,
+  },
+  name: {
+    ...sharedStyle.name,
+    color: 'white',
   },
 });

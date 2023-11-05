@@ -17,3 +17,5 @@ export { default as basicList } from './basicList';
 export { default as profileOverview } from './profileOverview';
 export { default as upcomingEvents } from './upcomingEvents';
 export { default as eventCard } from './eventCard';
+export { default as calendar } from './calendar';
+export { default as calendarAgendaItem } from './calendar/agendaItem';
