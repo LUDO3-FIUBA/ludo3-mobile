@@ -36,7 +36,12 @@ const styles = StyleSheet.create({
     },
     itemButtonContainer: {
         flex: 1,
+        margin: 7,
         alignItems: 'flex-end'
+    },
+    itemButton: {
+        fontSize: 24,
+        color: 'black'
     },
     emptyItem: {
         paddingLeft: 20,

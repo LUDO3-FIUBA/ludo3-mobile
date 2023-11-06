@@ -5,12 +5,12 @@ import AgendaItem from './AgendaItem';
 import { EvaluationInstance } from '../../models';
 import { ChiefTeacher, Commission, Semester } from '../../models/EvaluationInstance';
 import { MarkedDates } from 'react-native-calendars/src/types';
+import { lightModeColors } from '../../styles/colorPalette';
 
-const ITEMS: { title: Date, data: EvaluationInstance[] }[] = getAgendaItems(getEventItems());
-const MARKS = getMarkedDates(ITEMS)
+const ITEMS: { title: string, data: EvaluationInstance[] }[] = getAgendaItems(getEventItems());
 
 const CalendarScreen = () => {
-  const marked = useRef(MARKS);
+  const marks: MarkedDates = getMarkedDates(ITEMS)
   const startingDate = new Date().toISOString();
 
   const renderItem = useCallback(({ item }: any) => {
@@ -21,10 +21,17 @@ const CalendarScreen = () => {
     <CalendarProvider
       date={startingDate}
       showTodayButton
+      theme={{todayButtonTextColor: lightModeColors.institutional}}
     >
       <ExpandableCalendar
         firstDay={1}
-        markedDates={marked.current}
+        markedDates={marks}
+        theme={{
+          dotColor: lightModeColors.institutional,
+          selectedDayBackgroundColor: lightModeColors.institutional,
+          arrowColor: lightModeColors.institutional,
+          todayTextColor: lightModeColors.institutional
+        }}
       />
       <AgendaList
         sections={ITEMS}
@@ -38,7 +45,7 @@ const CalendarScreen = () => {
 export default CalendarScreen;
 
 function getAgendaItems(evaluations: EvaluationInstance[]) {
-  return evaluations.map((item) => ({ title: item.date, data: [item] }))
+  return evaluations.map((item) => ({ title: item.date.toISOString().split('T')[0], data: [item] }))
 }
 
 
@@ -65,23 +72,31 @@ function getEventItems(): EvaluationInstance[] {
   );
 
   return [
-    new EvaluationInstance(1, 'Trabajo Practico', new Date("2023-09-06"), semester),
     new EvaluationInstance(1, 'Trabajo Practico', new Date("2023-11-06"), semester),
     new EvaluationInstance(2, 'Parcial', new Date("2023-11-26"), semester),
-    new EvaluationInstance(3, 'Final', new Date("2023-12-06"), semester)
+    new EvaluationInstance(3, 'Final', new Date("2023-12-06"), semester),
+    new EvaluationInstance(4, 'Final', new Date("2024-01-06"), semester),
+    new EvaluationInstance(5, 'Final', new Date("2024-02-06"), semester),
+    new EvaluationInstance(6, 'Final', new Date("2024-03-06"), semester),
+    new EvaluationInstance(7, 'Final', new Date("2024-04-06"), semester),
+    new EvaluationInstance(8, 'Final', new Date("2024-05-06"), semester),
+    new EvaluationInstance(9, 'Final', new Date("2024-06-06"), semester),
+    new EvaluationInstance(10, 'Final', new Date("2024-07-06"), semester),
+    new EvaluationInstance(11, 'Final', new Date("2024-08-06"), semester),
+    new EvaluationInstance(12, 'Final', new Date("2024-09-06"), semester),
+    new EvaluationInstance(13, 'Final', new Date("2024-11-06"), semester),
+    new EvaluationInstance(14, 'Final', new Date("2024-12-06"), semester),
+    new EvaluationInstance(15, 'Final', new Date("2024-12-06"), semester),
+    new EvaluationInstance(16, 'Final', new Date("2024-12-06"), semester),
   ]
 }
-function getMarkedDates(items: { title: Date; data: EvaluationInstance[]; }[]) {
+function getMarkedDates(items: { title: string; data: EvaluationInstance[]; }[]) {
   const marked: MarkedDates = {};
 
   items.forEach(item => {
-    // NOTE: only mark dates with data
-    if (item.data && item.data.length > 0) {
-      marked[item.title] = {marked: true, dotColor: 'red', selected: true};
-    } else {
-      marked[item.title] = {disabled: true};
-    }
+    marked[item.title] = { marked: true };
   });
+
   return marked;
 }
 
