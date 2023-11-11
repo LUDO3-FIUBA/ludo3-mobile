@@ -1,16 +1,17 @@
 import React from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { viewCommission as style } from '../../styles';
 import { BasicList } from '../../components';
-import { Subject } from '../../models';
+import { Semester, Subject } from '../../models';
 import { useNavigation } from '@react-navigation/native';
 
 Icon.loadFont();
 
-const ViewCommissionScreen: React.FC<any> = ({ route }) => {
+const ViewSemestercreen: React.FC<any> = ({ route }) => {
   const navigation = useNavigation()
-  const subject = route.params.subject as Subject;
+  const semester: Semester = route.params.semester;
+  const commission = semester.commission
 
   const listItems = [
     { name: "Ver Examenes", onPress: () => { } },
@@ -18,7 +19,7 @@ const ViewCommissionScreen: React.FC<any> = ({ route }) => {
     {
       name: "Ver Correlativas", onPress: () => {
         navigation.navigate('CorrelativeSubjects', {
-          id: subject.id,
+          id: semester.commission.subject_siu_id,
         });
       }
     },
@@ -29,8 +30,8 @@ const ViewCommissionScreen: React.FC<any> = ({ route }) => {
       <ScrollView>
         <View style={style().mainView}>
           <View style={{ margin: 25 }}>
-            <Text style={style().centeredHeader1}>{subject.code} {subject.name}</Text>
-            <Text style={style().centeredText}>{subject.professor}</Text>
+            <Text style={style().centeredHeader1}>{commission.subject_name}</Text>
+            <Text style={style().centeredText}>{commission.chief_teacher.first_name} {commission.chief_teacher.last_name}</Text>
           </View>
           <View style={{ marginTop: 25 }}>
             <BasicList items={listItems} />
@@ -42,4 +43,4 @@ const ViewCommissionScreen: React.FC<any> = ({ route }) => {
   );
 };
 
-export default ViewCommissionScreen;
+export default ViewSemestercreen;

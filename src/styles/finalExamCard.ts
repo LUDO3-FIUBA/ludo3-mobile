@@ -22,11 +22,13 @@ const sharedStyle = StyleSheet.create({
   subjectName: {
     ...basic().text,
     fontSize: 22,
+    color: 'white'
   },
   professor: {
     ...basic().text,
     fontSize: 15,
     paddingVertical: 5,
+    color: 'white'
   },
   grade: {
     ...basic().text,

@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { upcomingEvents as style } from '../styles';
 import BasicList from './basicList';
 import EventCard from './eventCard';
-import EvaluationInstance, { ChiefTeacher, Commission, Semester } from '../models/EvaluationInstance';
+import { ChiefTeacher, Commission, EvaluationInstance, Semester } from '../models';
 
 // interface UpcomingEventsCardProps {
 // }
@@ -18,25 +18,25 @@ const UpcomingEventsCard: FC = () => {
 
 function getEventItems(): EvaluationInstance[] {
 
-    const chiefTeacher = new ChiefTeacher(
-        "Juan Martin",
-        "Sirne",
-        "41318038",
-        "jsirne@fi.uba.ar",
-        "101049"
-    );
+    const chiefTeacher: ChiefTeacher = {
+        first_name: "Juan Martin",
+        last_name: "Sirne",
+        dni: "41318038",
+        email: "jsirne@fi.uba.ar",
+        legajo: "101049"
+    };
 
-    const commission = new Commission(
-        1,
-        "Física I - Cátedra 3", // Updated subject name
-        chiefTeacher
-    );
+    const commission: Commission = {
+        subject_siu_id: 1,
+        subject_name: "Física I - Cátedra 3", // Updated subject name
+        chief_teacher: chiefTeacher
+    };
 
-    const semester = new Semester(
-        "FS",
-        "2023-03-10T19:00:00-03:00",
+    const semester: Semester = {
+        year_moment: "FS",
+        start_date: new Date("2023-03-10T19:00:00-03:00"),
         commission
-    );
+    };
 
     return [
         new EvaluationInstance(1, 'Trabajo Practico', new Date("2023-11-06"), semester),

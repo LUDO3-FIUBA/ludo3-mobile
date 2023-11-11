@@ -1,11 +1,10 @@
 import React from "react";
 import { DrawerContentComponentProps, DrawerContentOptions, DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator } from "@react-navigation/drawer";
-import { ApprovedSubjectsScreen, CalendarScreen, HomeScreen, PendingSubjectsScreen } from "..";
+import { ApprovedSubjectsScreen, CalendarScreen, CommissionInscriptionsScreen, HomeScreen, PendingSubjectsScreen } from "..";
 import { ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
 import { Appearance } from "react-native";
-import InCourseSubjects from "../in_course_subjects";
 import FilterNavBarButton from "../home/filterNavBarButton";
 import DeliverFinalExam from "../home/subsections/HomeOptions/DeliverFinalExam";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
@@ -48,8 +47,8 @@ const RootDrawer = () => {
       />
 
       <Drawer.Screen
-        name="InCourseSubjects"
-        component={InCourseSubjects}
+        name="CurrentCommissionInscriptions"
+        component={CommissionInscriptionsScreen}
         options={{
           headerShown: true,
           title: 'Materias en curso',

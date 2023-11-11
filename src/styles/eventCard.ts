@@ -22,15 +22,18 @@ const sharedStyle = StyleSheet.create({
   name: {
     ...basic().text,
     fontSize: 20,
+    color: 'white',
   },
   subjectName: {
     ...basic().text,
-    fontSize: 18
+    fontSize: 18,
+    color: 'lightgray'
   },
   date: {
     ...basic().text,
     fontSize: 15,
     paddingVertical: 5,
+    color: 'lightgray'
   },
   grade: {
     ...basic().text,
@@ -58,7 +61,6 @@ const lightMode = StyleSheet.create({
   },
   name: {
     ...sharedStyle.name,
-    color: lightModeColors.black,
   },
 });
 
@@ -70,6 +72,5 @@ const darkMode = StyleSheet.create({
   },
   name: {
     ...sharedStyle.name,
-    color: 'white',
   },
 });

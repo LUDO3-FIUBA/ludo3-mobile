@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { View, Text } from 'react-native';
-import { EvaluationInstance, Subject } from '../models';
+import { EvaluationInstance } from '../models';
 import { eventCard as style } from '../styles';
 import moment from 'moment';
 
