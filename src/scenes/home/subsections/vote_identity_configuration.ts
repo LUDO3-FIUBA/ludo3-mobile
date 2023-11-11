@@ -8,8 +8,7 @@ class VerifyIdentityConfiguration extends TakePictureStepConfiguration {
   token: string;
 
   constructor(description: string, token: string) {
-    // super(description, 'front', false); // TODO: use front
-    super(description, 'back', false);
+    super(description, 'front', false);
     this.token = token;
   }
 

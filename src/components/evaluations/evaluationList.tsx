@@ -1,21 +1,20 @@
 import React, { useState, useEffect, FC } from 'react';
-import { View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import CommissionInscriptionCard from './commissionInscriptionCard';
+import EvaluationCard from './evaluationCard';
 import Loading from '../loading';
 import { finalExamList as style } from '../../styles';
-import { CommissionInscription } from '../../models';
+import { Evaluation } from '../../models';
 
-interface CommissionInscriptionListProps {
-  fetch: () => Promise<CommissionInscription[]>;
+interface EvaluationListProps {
+  fetch: () => Promise<Evaluation[]>;
   emptyMessage: string;
 }
 
-const CommissionInscriptionList: FC<CommissionInscriptionListProps> = ({ fetch, emptyMessage }) => {
+const EvaluationList: FC<EvaluationListProps> = ({ fetch, emptyMessage }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [commissionInscriptions, setCommissionInscriptions] = useState<CommissionInscription[]>([]);
-  const navigation = useNavigation()
+  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -26,17 +25,17 @@ const CommissionInscriptionList: FC<CommissionInscriptionListProps> = ({ fetch, 
       setRefreshing(true);
     } else {
       setLoading(true);
-      setCommissionInscriptions([]);
+      setEvaluations([]);
     }
 
     try {
-      const fetchedCommissionInscriptions = await fetch();
+      const fetchedEvaluations = await fetch();
       if (refreshing) {
         setRefreshing(false);
       } else {
         setLoading(false);
       }
-      setCommissionInscriptions(fetchedCommissionInscriptions);
+      setEvaluations(fetchedEvaluations);
     } catch (error) {
       if (refreshing) {
         setRefreshing(false);
@@ -55,7 +54,7 @@ const CommissionInscriptionList: FC<CommissionInscriptionListProps> = ({ fetch, 
   return (
     <View style={style().view}>
       {loading && <Loading />}
-      {!loading && !commissionInscriptions.length && (
+      {!loading && !evaluations.length && (
         <View style={style().textContainer}>
           <Text style={style().text}>{emptyMessage}</Text>
         </View>
@@ -63,20 +62,12 @@ const CommissionInscriptionList: FC<CommissionInscriptionListProps> = ({ fetch, 
       {!loading && (
         <FlatList
           contentContainerStyle={style().listView}
-          data={commissionInscriptions}
+          data={evaluations}
           onRefresh={() => fetchData(true)}
           refreshing={refreshing}
-          keyExtractor={commissionInscription => `${commissionInscription.semester.id}`}
+          keyExtractor={evaluation => `${evaluation.id}`}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('ViewSemester', {
-                  semester: item.semester,
-                });
-              }}
-            >
-              <CommissionInscriptionCard commissionInscription={item} />
-            </TouchableOpacity>
+            <EvaluationCard evaluation={item} />
           )}
         />
       )}
@@ -84,4 +75,4 @@ const CommissionInscriptionList: FC<CommissionInscriptionListProps> = ({ fetch, 
   );
 };
 
-export default CommissionInscriptionList;
+export default EvaluationList;

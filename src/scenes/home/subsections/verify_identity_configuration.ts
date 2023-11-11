@@ -7,8 +7,7 @@ import { makeRequest } from '../../authenticatedComponent';
 class VerifyIdentityConfiguration extends TakePictureStepConfiguration {
   
   constructor(description: string) {
-    // super(description, 'front', false); // TODO: use front
-    super(description, 'back', false);
+    super(description, 'front', false);
   }
 
   async onDataObtained(image: any, navigation: any, disableLoading: () => void) {

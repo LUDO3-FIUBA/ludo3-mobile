@@ -14,7 +14,13 @@ const ViewSemestercreen: React.FC<any> = ({ route }) => {
   const commission = semester.commission
 
   const listItems = [
-    { name: "Ver Examenes", onPress: () => { } },
+    {
+      name: "Ver Examenes", onPress: () => {
+        navigation.navigate('ViewEvaluations', {
+          semester_id: semester.id,
+        });
+      }
+    },
     { name: "Cuerpo Docente", onPress: () => { } },
     {
       name: "Ver Correlativas", onPress: () => {

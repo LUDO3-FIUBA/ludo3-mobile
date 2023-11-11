@@ -54,7 +54,7 @@ const CommissionInscriptionOverviewList: FC<CommissionInscriptionOverviewListPro
       )}
       {commissionInscriptions.map((item) =>
         <TouchableOpacity
-          key={`suboverview-${item.semester.commission.subject_siu_id}`} // TODO: use ID from backend
+          key={`suboverview-${item.semester.id}`}
           onPress={() => {
             navigation.navigate('ViewSemester', {
               semester: item.semester,

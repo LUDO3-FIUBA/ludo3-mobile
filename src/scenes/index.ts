@@ -18,3 +18,4 @@ export { default as RootDrawer } from './root_drawer';
 export { default as CorrelativeSubjects } from './correlative_subjects';
 export { default as CalendarScreen } from './calendar';
 export { default as CommissionInscriptionsScreen } from './commission_inscriptions';
+export { default as ViewEvaluationsScreen } from './view_evaluations';

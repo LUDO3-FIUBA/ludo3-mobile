@@ -8,8 +8,7 @@ class VerifyIdentityForExamConfiguration extends TakePictureStepConfiguration {
   finalId: string;
 
   constructor(description: string, finalId: string) {
-    // super(description, 'front', false); // TODO: use front
-    super(description, 'back', false);
+    super(description, 'front', false);
     this.finalId = finalId;
   }
 
