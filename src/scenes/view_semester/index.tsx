@@ -3,7 +3,7 @@ import { View, Text, SafeAreaView, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { viewCommission as style } from '../../styles';
 import { BasicList } from '../../components';
-import { Semester, Subject } from '../../models';
+import { Semester } from '../../models';
 import { useNavigation } from '@react-navigation/native';
 
 Icon.loadFont();
