@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, SafeAreaView, Text, Alert, AppStateStatus, AppState, Image } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, SafeAreaView, Text, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation, useRoute, RouteProp, useIsFocused } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { takePicture as style } from '../../styles';
 import TakePictureStepConfiguration from './takePictureStepConfiguration';
 import TakePictureStepConfigurationFactory from './takePictureStepConfigurationFactory';
-import { Camera, CameraDevice, CameraRuntimeError, Code, PhotoFile, useCameraDevice, useCameraDevices, useCodeScanner } from 'react-native-vision-camera';
-import { manipulateAsync, FlipType, SaveFormat, Action } from 'expo-image-manipulator';
-import { Loading, RoundedButton } from '../../components';
+import { Camera, Code, PhotoFile } from 'react-native-vision-camera';
+import { manipulateAsync, Action } from 'expo-image-manipulator';
+import { Loading } from '../../components';
+import CameraWithPermissions from './camera/CameraWithPermissions';
 
 Icon.loadFont();
 
 interface TakePictureStepProps {
-  id?: string;
   configuration?: TakePictureStepConfiguration;
 }
 
-const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: propConfiguration }) => {
+const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propConfiguration }) => {
   const [loading, setLoading] = useState(false);
   const [ignoreReadings, setIgnoreReadings] = useState(false);
   const [configuration, setConfiguration] = useState<TakePictureStepConfiguration | null>(null);
@@ -60,14 +60,6 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
     return undefined;
   }, [navigation, getConfiguration]);
 
-  useEffect(() => {
-    if (id) {
-      // fetchData();
-      // observeScreenChangesIfNecessary();
-    }
-  }, [id]);
-
-
   const onBarCodeRead = async (codes: Code[]) => {
     console.log(`QR CODE SCANNER: ${JSON.stringify(codes)}`)
     if (codes.length !== 0) {
@@ -104,7 +96,7 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ id, configuration: pr
       <SafeAreaView style={style().view}>
         <Text style={style().text}>{config.description}</Text>
         {loading && <Loading />}
-        <CameraViewOrPermissionMessage
+        <CameraWithPermissions
           takePicture={takePicture}
           onBarCodeRead={onBarCodeRead}
           cameraType={config.cameraType}
@@ -119,138 +111,7 @@ TakePictureStep.defaultProps = {
   configuration: new TakePictureStepConfiguration(),
 };
 
-const useCameraPermission = () => {
-  const [permissionGranted, setPermissionGranted] = useState(false);
-  useEffect(() => {
-    Camera.requestCameraPermission().then((res) => setPermissionGranted(res === 'granted'));
-  }, [])
-  return permissionGranted;
-}
-
 export default TakePictureStep;
-
-
-const useIsAppForeground = (): boolean => {
-  const [isForeground, setIsForeground] = useState(true);
-  const isFocused = useIsFocused();
-
-  useEffect(() => {
-    const onChange = (state: AppStateStatus): void => {
-      setIsForeground(state === 'active');
-    };
-    const listener = AppState.addEventListener('change', onChange);
-    return () => listener.remove();
-  }, [setIsForeground]);
-
-  return isForeground && isFocused;
-};
-
-interface CameraViewOrPermissionMessageProps {
-  takePicture: (camera: Camera) => Promise<void>;
-  cameraType: 'back' | 'front';
-  onBarCodeRead: (codes: Code[]) => void;
-  searchForQRCode: boolean;
-  ignoreReadings: boolean
-}
-
-const CameraViewOrPermissionMessage = ({ takePicture, cameraType, onBarCodeRead, searchForQRCode, ignoreReadings }: CameraViewOrPermissionMessageProps) => {
-  const device = useCameraDevice(cameraType);
-  const cameraPermissionGranted = useCameraPermission();
-
-  console.log(`cameraPermissionGranted: ${cameraPermissionGranted}`)
-
-  if (!cameraPermissionGranted) {
-    return (
-      <Text style={{flex: 1, flexGrow: 1}}>Se requieren los permisos de Cámara para continuar utilizando la aplicación</Text>
-    )
-  }
-
-  if (device && !searchForQRCode) {
-    return <PhotoCamera device={device} takePicture={takePicture} />
-  } else if (device && searchForQRCode) {
-    return <QRScannerCamera device={device} onBarCodeRead={onBarCodeRead} ignoreReadings={ignoreReadings} />
-  }
-
-  return <></>
-}
-
-interface PhotoCameraProps {
-  device: CameraDevice;
-  takePicture: (camera: Camera) => Promise<void>
-}
-
-const PhotoCamera = ({ device, takePicture }: PhotoCameraProps) => {
-  const camera = useRef<Camera>(null)
-
-  const onError = useCallback((error: CameraRuntimeError) => {
-    console.error(error)
-  }, [])
-
-
-  const isAppForeground = useIsAppForeground();
-  console.log(`PhotoCamera - isAppForeground: ${isAppForeground}`);
-
-  if (!isAppForeground) return <></>
-
-  return <>
-    <Camera
-      ref={camera}
-      onError={onError}
-      style={{ flex: 1 }}
-      device={device}
-      isActive={isAppForeground}
-      orientation='portrait'
-      photo={true} />
-    <RoundedButton
-      text='Tomar foto'
-      onPress={async () => {
-        if (camera.current === null) {
-          return;
-        }
-        takePicture(camera.current);
-      }}
-      style={{MainContainer: style().captureContainer, fontSize: 18, tintColor: 'white'}} // TODO: move this to the src/styles collection
-    />
-  </>;
-}
-
-interface QRScannerCameraProps {
-  device: CameraDevice;
-  onBarCodeRead: (codes: Code[]) => void;
-  ignoreReadings: boolean
-}
-
-const QRScannerCamera = ({ device, onBarCodeRead, ignoreReadings }: QRScannerCameraProps) => {
-  const camera = useRef<Camera>(null)
-
-  const onError = useCallback((error: CameraRuntimeError) => {
-    console.error(error)
-  }, [])
-
-  const codeScanner = useCodeScanner({
-    codeTypes: ['qr'],
-    onCodeScanned: (codes) => {
-      if (!ignoreReadings)
-        onBarCodeRead(codes)
-    }
-  }
-  )
-
-  const isAppForeground = useIsAppForeground();
-  console.log(`QRScannerCamera - isAppForeground: ${isAppForeground}`);
-
-  if (!isAppForeground) return <></>
-
-  return <Camera
-    ref={camera}
-    onError={onError}
-    style={{ flex: 1 }}
-    device={device}
-    isActive={isAppForeground}
-    codeScanner={codeScanner}
-    orientation='portrait'
-  />
-}
 
 /**
  * Adds a `rotate` action of +90 degrees for manipulateAsync in case it is needed.

@@ -12,13 +12,19 @@ const sharedStyle = StyleSheet.create({
   view: {
     ...basic().view,
     justifyContent: 'space-around',
-    padding: 5,
   },
   text: {
     ...basic().text,
-    flex: 0,
+    flex: 1,
+    position: 'absolute',
+    zIndex: 999,
     fontSize: 25,
-    marginBottom: 8
+    color: 'white',
+    padding: 10,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   preview: {
     flex: 1,
@@ -51,9 +57,12 @@ const sharedStyle = StyleSheet.create({
     borderRadius: 10,
   },
   captureContainer: {
-    padding: 15,
-    paddingHorizontal: 20,
     backgroundColor: darkModeColors.mainColor,
     borderRadius: 35,
+    position: 'absolute',
+    bottom: 8,
+    left: 0,
+    right: 0,
+    margin: 12
   },
 });
