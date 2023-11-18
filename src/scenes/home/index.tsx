@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { home as style } from '../../styles';
@@ -6,13 +6,18 @@ import { FinalExamOverviewList, UpcomingEventsCard } from '../../components';
 import { useNavigation } from '@react-navigation/native';
 import { commissionInscriptionsRepository, finalExamsRepository } from '../../repositories';
 import CommissionInscriptionOverviewList from '../../components/commission_inscriptions/commissionInscriptionOverviewList';
+import { NotificationManager } from '../../managers';
 
 Icon.loadFont();
 
 
 const Home: React.FC<any> = () => {
   const navigation = useNavigation()
-
+  
+  useEffect(() => {
+    NotificationManager.getInstance().registerCallbacks()
+  }, [])
+  
   return (
     <SafeAreaView style={style().view}>
       <ScrollView>

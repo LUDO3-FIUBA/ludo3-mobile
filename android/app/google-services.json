@@ -1,65 +1,26 @@
 {
   "project_info": {
-    "project_number": "1058100885410",
-    "project_id": "ludo-30690",
-    "storage_bucket": "ludo-30690.appspot.com"
+    "project_number": "711015440103",
+    "project_id": "ludo2-fiuba",
+    "storage_bucket": "ludo2-fiuba.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1058100885410:android:867152803d20b17549e4fb",
+        "mobilesdk_app_id": "1:711015440103:android:6b752ad4baca542b06cc42",
         "android_client_info": {
           "package_name": "org.erinc.ludo2"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1058100885410-q706v5kv9ngrqq6vdmfmo046cgcg704i.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA6IM7zv4hZqLjUdLSGzxliuqPmGFyJpRc"
+          "current_key": "AIzaSyDGavhwV0QhKN4Q8CzqkX8VcrIEWpjLnBM"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1058100885410-q706v5kv9ngrqq6vdmfmo046cgcg704i.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1058100885410:android:79e3270bf5c8557349e4fb",
-        "android_client_info": {
-          "package_name": "com.ludo"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "1058100885410-q706v5kv9ngrqq6vdmfmo046cgcg704i.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyA6IM7zv4hZqLjUdLSGzxliuqPmGFyJpRc"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1058100885410-q706v5kv9ngrqq6vdmfmo046cgcg704i.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
