@@ -1,4 +1,4 @@
-package com.reactnativeproject;
+package org.erinc.ludo2;
 import expo.modules.ReactActivityDelegateWrapper;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

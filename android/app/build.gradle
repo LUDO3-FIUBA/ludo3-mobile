@@ -74,9 +74,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.reactnativeproject"
+    namespace "org.erinc.ludo2"
     defaultConfig {
-        applicationId "com.reactnativeproject"
+        applicationId "org.erinc.ludo2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
