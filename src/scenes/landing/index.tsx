@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Alert } from 'react-native';
+import { View, Alert, Image } from 'react-native';
 import { authorize } from 'react-native-app-auth';
 import { RoundedButton } from '../../components';
 import { landing as style } from '../../styles';
 import { authenticationRepository, usersRepository } from '../../repositories';
 import SessionManager from '../../managers/sessionManager';
+const LudoIcon = require('../../assets/ludo_icon.png');
 
 interface Props {
   navigation: any;
@@ -38,7 +39,7 @@ const Landing = ({ navigation }: Props) => {
         sessionManager.saveCredentials(response);
         const user = await usersRepository.getInfo();
         console.log('alvaro user', user);
-        
+
         if (!user.isStudent()) {
           throw new authenticationRepository.NotAStudent();
         }
@@ -48,10 +49,10 @@ const Landing = ({ navigation }: Props) => {
           routes: [{ name: 'RootDrawer' }],
         });
       }
-        // navigation.reset({
-        //   index: 0,
-        //   routes: [{ name: 'Home' }],
-        // });
+      // navigation.reset({
+      //   index: 0,
+      //   routes: [{ name: 'Home' }],
+      // });
     } catch (error) {
       if (error instanceof authenticationRepository.NotAStudent) {
         showRoleError();
@@ -67,15 +68,14 @@ const Landing = ({ navigation }: Props) => {
 
   return (
     <View style={style().view}>
+      <Image source={LudoIcon} />
       <RoundedButton
-        text="PRE-REGISTRO"
-        style={style().button}
+        text="Pre-registro"
         enabled={!loginInProgress}
         onPress={() => navigation.navigate('PreRegister')}
       />
       <RoundedButton
-        text="LOGIN"
-        style={style().button}
+        text="Iniciar sesión"
         enabled={!loginInProgress}
         onPress={handleLogin}
       />
@@ -98,7 +98,7 @@ const showAccountNotApprovedError = () => {
   Alert.alert(
     'Error',
     'Tu cuenta no ha sido aprobada aún. Probablemente Admisión esté ' +
-      'verificando la imagen subida.'
+    'verificando la imagen subida.'
   );
 };
 
@@ -106,8 +106,8 @@ const showRoleError = () => {
   Alert.alert(
     'Error',
     '¿Te has registrado? ' +
-      'Te recordamos que esta app es para alumnos. Si lo sos, ' +
-      'chequeá que hayas ingresado correctamente tus datos.'
+    'Te recordamos que esta app es para alumnos. Si lo sos, ' +
+    'chequeá que hayas ingresado correctamente tus datos.'
   );
 };
 

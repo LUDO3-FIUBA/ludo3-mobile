@@ -81,7 +81,7 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
             />
           </View>
           <RoundedButton
-            text="LISTO"
+            text="Continuar"
             enabled={shouldEnableSignUp()}
             style={style().button}
             onPress={() => {

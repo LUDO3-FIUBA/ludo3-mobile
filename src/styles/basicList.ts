@@ -15,8 +15,8 @@ const sharedStyle = StyleSheet.create({
     ...basic().text,
     fontSize: 18
   },
-  touchableOpacity: { padding: 10 },
-  separator: {borderWidth: 0.25, opacity: 0.75}
+  touchableOpacity: { padding: 14, flexDirection: 'row', gap: 10, alignItems: 'center' },
+  separator: {borderWidth: 0.25, opacity: 0.5}
 });
 
 const lightMode = StyleSheet.create({

@@ -4,6 +4,7 @@ import { Camera, CameraDevice, CameraRuntimeError } from "react-native-vision-ca
 import { RoundedButton } from "../../../components";
 import { useIsAppForeground } from "./hooks";
 import { takePicture as style } from '../../../styles';
+import { View } from "react-native";
 
 interface PhotoCameraProps {
     device: CameraDevice;
@@ -33,16 +34,17 @@ const PhotoCamera = ({ device, takePicture }: PhotoCameraProps) => {
             orientation='portrait'
             resizeMode="cover"
             photo={true} />
-        <RoundedButton
-            text='Tomar foto'
-            onPress={async () => {
-                if (camera.current === null) {
-                    return;
-                }
-                takePicture(camera.current);
-            }}
-            style={{ MainContainer: style().captureContainer, fontSize: 18, tintColor: 'white' }} // TODO: move this to the src/styles collection
-        />
+        <View style={{ position: 'absolute', bottom: 8, width: '100%', alignItems: 'center', padding: 16 }}>
+            <RoundedButton
+                text='Tomar foto'
+                onPress={async () => {
+                    if (camera.current === null) {
+                        return;
+                    }
+                    takePicture(camera.current);
+                }}
+            />
+        </View>
     </>;
 }
 

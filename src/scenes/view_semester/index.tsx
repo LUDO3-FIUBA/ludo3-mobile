@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { viewCommission as style } from '../../styles';
-import { BasicList } from '../../components';
+import { BasicList, MaterialIcon } from '../../components';
 import { Semester } from '../../models';
 import { useNavigation } from '@react-navigation/native';
+import { lightModeColors } from '../../styles/colorPalette';
 
 Icon.loadFont();
 
@@ -15,38 +15,86 @@ const ViewSemestercreen: React.FC<any> = ({ route }) => {
 
   const listItems = [
     {
-      name: "Ver Examenes", onPress: () => {
+      name: "Ver Examenes",
+      onPress: () => {
         navigation.navigate('ViewEvaluations', {
           semester_id: semester.id,
         });
-      }
+      },
+      materialIcon: <MaterialIcon name="note-multiple" fontSize={24} />
     },
-    { name: "Cuerpo Docente", onPress: () => { } },
     {
-      name: "Ver Correlativas", onPress: () => {
+      name: "Cuerpo Docente",
+      onPress: () => { },
+      materialIcon: <MaterialIcon name="account-group" fontSize={24} />
+    },
+    {
+      name: "Ver Correlativas",
+      onPress: () => {
         navigation.navigate('CorrelativeSubjects', {
           id: semester.commission.subject_siu_id,
         });
-      }
+      },
+      materialIcon: <MaterialIcon name="graph-outline" fontSize={24} />
     },
   ]
 
   return (
-    <SafeAreaView style={style().view}>
-      <ScrollView>
-        <View style={style().mainView}>
-          <View style={{ margin: 25 }}>
-            <Text style={style().centeredHeader1}>{commission.subject_name}</Text>
-            <Text style={style().centeredText}>{commission.chief_teacher.first_name} {commission.chief_teacher.last_name}</Text>
-          </View>
-          <View style={{ marginTop: 25 }}>
-            <BasicList items={listItems} />
-          </View>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.header}>{commission.subject_name}</Text>
+      <Text style={styles.header2}>{commission.chief_teacher.first_name} {commission.chief_teacher.last_name}</Text>
+      <View style={styles.card}>
+        <View style={styles.cardItem}>
+          <BasicList items={listItems} />
         </View>
-      </ScrollView>
-      {/* <ScanQRIcon navigation={navigation} /> */}
-    </SafeAreaView>
+      </View>
+    </SafeAreaView >
   );
 };
 
 export default ViewSemestercreen;
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  header2: {
+    fontSize: 20,
+    marginBottom: 18,
+  },
+  card: {
+    flexDirection: 'column',
+    marginBottom: 20,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    elevation: 3,
+    gap: 18
+  },
+  cardItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 2,
+  },
+  cardText: {
+    color: 'gray',
+  },
+  passingGradeText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: lightModeColors.institutional,
+  },
+  passingGradeLabel: {
+    fontSize: 14,
+    color: 'gray',
+  },
+});

@@ -9,6 +9,7 @@ interface IProps {
 interface IBasicListItem {
     name: string
     onPress: () => void
+    materialIcon: React.ReactNode
 }
 
 const BasicList: React.FC<IProps> = ({ items }: IProps) => {
@@ -17,6 +18,7 @@ const BasicList: React.FC<IProps> = ({ items }: IProps) => {
             {items.map((item) => (
                 <View key={item.name}>
                     <TouchableOpacity onPress={item.onPress} style={style().touchableOpacity}>
+                        {item.materialIcon}
                         <Text style={style().itemText}>{item.name}</Text>
                     </TouchableOpacity >
                     <View style={style().separator} />

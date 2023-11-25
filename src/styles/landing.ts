@@ -12,6 +12,8 @@ const sharedStyle = StyleSheet.create({
     ...basic().view,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 18,
+    paddingHorizontal: 18
   },
   button: {
     ...basic().button,

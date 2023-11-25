@@ -31,15 +31,7 @@ const RoundedButton: FC<RoundedButtonProps> = ({
         onPress={onPress}
       >
         <Text
-          style={[
-            style.TextStyle,
-            {
-              color: customStyle?.tintColor,
-              fontSize: customStyle?.fontSize,
-              fontFamily: customStyle?.fontFamily,
-              fontWeight: customStyle?.fontWeight,
-            },
-          ]}
+          style={style.TextStyle}
         >
           {text}
         </Text>

@@ -22,8 +22,8 @@ const PreRegisterLastInstructions: FunctionComponent<PreRegisterLastInstructions
           </Text>
         </ScrollView>
         <RoundedButton
-          text="LISTO"
-          style={style().button}
+          text="Listo"
+          // style={style().button}
           onPress={() =>
             navigation.reset({
               index: 0,
