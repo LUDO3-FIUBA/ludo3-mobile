@@ -3,7 +3,10 @@ import * as React from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import { SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen, RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen } from './src/scenes';
+import {
+  SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen
+} from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance } from 'react-native';
@@ -72,6 +75,12 @@ const App = () => {
               name="ViewEvaluations"
               component={ViewEvaluationsScreen}
               options={{ headerShown: true, title: "Evaluaciones" }}
+            />
+
+            <Stack.Screen
+              name="ViewEvaluationDetails"
+              component={ViewEvaluationDetailsScreen}
+              options={{ headerShown: true, title: "Evaluacion" }}
             />
 
             {/* <Stack.Screen

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FC } from 'react';
-import { View, Text, FlatList, Alert } from 'react-native';
+import { View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import EvaluationCard from './evaluationCard';
 import Loading from '../loading';
@@ -15,6 +15,7 @@ const EvaluationList: FC<EvaluationListProps> = ({ fetch, emptyMessage }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchData();
@@ -67,7 +68,11 @@ const EvaluationList: FC<EvaluationListProps> = ({ fetch, emptyMessage }) => {
           refreshing={refreshing}
           keyExtractor={evaluation => `${evaluation.id}`}
           renderItem={({ item }) => (
-            <EvaluationCard evaluation={item} />
+            <TouchableOpacity onPress={() => {
+              navigation.navigate('ViewEvaluationDetails', { evaluation: item });
+            }}>
+              <EvaluationCard evaluation={item} />
+            </TouchableOpacity>
           )}
         />
       )}
