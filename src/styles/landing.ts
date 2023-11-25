@@ -13,7 +13,7 @@ const sharedStyle = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 18,
-    paddingHorizontal: 18
+    paddingHorizontal: 22
   },
   button: {
     ...basic().button,

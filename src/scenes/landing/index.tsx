@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Alert, Image } from 'react-native';
+import { View, Alert, Image, StyleSheet, Text } from 'react-native';
 import { authorize } from 'react-native-app-auth';
 import { RoundedButton } from '../../components';
 import { landing as style } from '../../styles';
 import { authenticationRepository, usersRepository } from '../../repositories';
 import SessionManager from '../../managers/sessionManager';
+import { lightModeColors } from '../../styles/colorPalette';
 const LudoIcon = require('../../assets/ludo_icon.png');
 
 interface Props {
@@ -68,7 +69,16 @@ const Landing = ({ navigation }: Props) => {
 
   return (
     <View style={style().view}>
-      <Image source={LudoIcon} />
+      <View style={styles.card}>
+        <View style={styles.cardItem}>
+          <Image source={LudoIcon} style={{ width: 120, height: 120 }} />
+          <View style={{flexDirection: 'column'}}>
+          <Text style={styles.cardTitle}>LUDO</Text>
+          <Text style={styles.cardLabel}>Libreta Universitaria</Text>
+          <Text style={styles.cardLabel}>Digital Oficial</Text>
+          </View>
+        </View>
+      </View>
       <RoundedButton
         text="Pre-registro"
         enabled={!loginInProgress}
@@ -112,3 +122,34 @@ const showRoleError = () => {
 };
 
 export default Landing;
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  card: {
+    flexDirection: 'column',
+    marginBottom: 28,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    elevation: 3,
+    gap: 18
+  },
+  cardItem: {
+    flexDirection: 'row',
+    margin: 18,
+    alignItems: 'center',
+    gap: 14
+  },
+  cardTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: lightModeColors.institutional,
+  },
+  cardLabel: {
+    fontSize: 18,
+    color: 'gray',
+  },
+});
