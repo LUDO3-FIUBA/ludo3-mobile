@@ -4,6 +4,7 @@ import { Evaluation } from "../../models";
 import moment from "moment";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { calendarAgendaItem as style } from "../../styles";
+import { useNavigation } from "@react-navigation/native";
 
 Icon.loadFont()
 
@@ -13,10 +14,11 @@ interface IProps {
 
 const AgendaItem = (props: IProps) => {
     const { item } = props;
-    const date = moment(item.end_date)
+    const date = moment(item.end_date);
+    const navigation = useNavigation();
 
     const buttonPressed = useCallback(() => {
-        Alert.alert('Show me more');
+        navigation.navigate('ViewEvaluationDetails', { evaluation: item });
     }, []);
 
     const itemPressed = useCallback(() => {
