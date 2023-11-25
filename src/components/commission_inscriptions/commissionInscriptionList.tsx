@@ -1,6 +1,5 @@
 import React, { useState, useEffect, FC } from 'react';
-import { View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, FlatList, Alert } from 'react-native';
 import CommissionInscriptionCard from './commissionInscriptionCard';
 import Loading from '../loading';
 import { finalExamList as style } from '../../styles';
@@ -15,7 +14,6 @@ const CommissionInscriptionList: FC<CommissionInscriptionListProps> = ({ fetch, 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [commissionInscriptions, setCommissionInscriptions] = useState<CommissionInscription[]>([]);
-  const navigation = useNavigation()
 
   useEffect(() => {
     fetchData();
@@ -68,15 +66,7 @@ const CommissionInscriptionList: FC<CommissionInscriptionListProps> = ({ fetch, 
           refreshing={refreshing}
           keyExtractor={commissionInscription => `${commissionInscription.semester.id}`}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('ViewSemester', {
-                  semester: item.semester,
-                });
-              }}
-            >
               <CommissionInscriptionCard commissionInscription={item} />
-            </TouchableOpacity>
           )}
         />
       )}

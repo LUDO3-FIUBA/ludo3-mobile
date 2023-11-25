@@ -25,7 +25,6 @@ const CameraWithPermissions = ({ takePicture, cameraType, onBarCodeRead, searchF
             <Text style={{ flex: 1, flexGrow: 1 }}>Se requieren los permisos de Cámara para continuar utilizando la aplicación</Text>
             <RoundedButton text="Habilitar cámara" onPress={requestPermission}
                 style={{ MainContainer: style().captureContainer, fontSize: 18, tintColor: 'white' }} // TODO: move this to the src/styles collection
-
             />
         </>
         )

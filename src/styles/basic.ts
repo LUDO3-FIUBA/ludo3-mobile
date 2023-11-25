@@ -67,7 +67,7 @@ const sharedStyle = StyleSheet.create({
 });
 
 const lightViewColors = {
-  backgroundColor: 'white',
+  // backgroundColor: 'gray',
   tintColor: lightModeColors.mainContrastColor,
   color: lightModeColors.mainColor,
 };

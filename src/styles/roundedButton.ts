@@ -12,6 +12,7 @@ export default StyleSheet.create({
   MainContainer: {
     justifyContent: 'center',
     marginTop: 20,
+    elevation: 3,
     marginBottom: 20,
   },
 

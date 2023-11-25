@@ -12,6 +12,7 @@ const sharedStyle = StyleSheet.create({
   view: {
     ...basic().view,
     alignItems: 'stretch',
+    elevation: 3,
     flex: 1,
     justifyContent: 'space-between',
     marginVertical: 4,
