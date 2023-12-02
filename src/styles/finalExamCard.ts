@@ -17,7 +17,6 @@ const sharedStyle = StyleSheet.create({
     justifyContent: 'space-between',
     marginVertical: 4,
     marginHorizontal: 10,
-    padding: 15,
     borderRadius: 12
   },
   subjectName: {

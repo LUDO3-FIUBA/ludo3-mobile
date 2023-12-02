@@ -20,6 +20,7 @@ const CommissionInscriptionCard: FC<CommissionInscriptionCardProps> = ({ commiss
             semester: semester,
           });
         }}
+        style={{ padding: 15 }}
       >
         <Text style={style().subjectName}>
           {commission.subject_name}

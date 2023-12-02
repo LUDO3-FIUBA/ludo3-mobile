@@ -16,9 +16,10 @@ const EvaluationCard: FC<EvaluationCardProps> = ({ evaluation }) => {
   const endDate = moment(evaluation.end_date);
   return (
     <View style={style().view}>
-      <TouchableOpacity style={{ elevation: 3 }} onPress={() => {
+      <TouchableOpacity style={{ elevation: 3, padding: 12 }} onPress={() => {
         navigation.navigate('ViewEvaluationDetails', { evaluation });
-      }}>
+      }}
+      >
         <Text style={style().subjectName}>
           {evaluation.evaluation_name}
         </Text>

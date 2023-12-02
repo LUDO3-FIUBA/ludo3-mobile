@@ -53,16 +53,10 @@ const CommissionInscriptionOverviewList: FC<CommissionInscriptionOverviewListPro
         </View>
       )}
       {commissionInscriptions.map((item) =>
-        <TouchableOpacity
+        <CommissionInscriptionCard
+          commissionInscription={item}
           key={`suboverview-${item.semester.id}`}
-          onPress={() => {
-            navigation.navigate('ViewSemester', {
-              semester: item.semester,
-            });
-          }}
-        >
-          <CommissionInscriptionCard commissionInscription={item} />
-        </TouchableOpacity>
+        />
       )}
     </View>
   );

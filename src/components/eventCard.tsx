@@ -1,27 +1,34 @@
 import React, { FC } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Evaluation } from '../models';
 import { eventCard as style } from '../styles';
 import moment from 'moment';
+import { useNavigation } from '@react-navigation/native';
 
 interface EventCardProps {
   event: Evaluation;
 }
 
 const EventCard: FC<EventCardProps> = ({ event }) => {
+  const navigation = useNavigation()
   return (
     <View style={style().view}>
-      <Text style={style().name}>
-        {event.evaluation_name}
-        <Text style={style().subjectName}>
-          {` `}- NombreDeMateria 
-        {/* TODO: re-add Semester info here */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate('ViewEvaluationDetails', { evaluation: event })}
+        style={{ padding: 12 }}
+      >
+        <Text style={style().name}>
+          {event.evaluation_name}
+          <Text style={style().subjectName}>
+            {` `}- NombreDeMateria
+            {/* TODO: re-add Semester info here */}
+          </Text>
         </Text>
-      </Text>
 
-      <Text style={style().date}>
-        {getRemainingTime(event.end_date)}
-      </Text>
+        <Text style={style().date}>
+          {getRemainingTime(event.end_date)}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };

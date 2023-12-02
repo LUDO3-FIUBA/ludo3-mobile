@@ -70,16 +70,7 @@ const SubjectList: FC<SubjectListProps> = ({ filter, fetch, emptyMessage, naviga
           refreshing={refreshing}
           keyExtractor={subject => subject.id.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => {
-                if (disableOnPress) return;
-                navigation.navigate('ViewCommission', {
-                  subject: item.toObject(),
-                });
-              }}
-            >
-              <SubjectCard subject={item} />
-            </TouchableOpacity>
+            <SubjectCard subject={item} />
           )}
         />
       )}
