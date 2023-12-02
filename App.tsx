@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen
 } from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -81,6 +81,12 @@ const App = () => {
               name="ViewEvaluationDetails"
               component={ViewEvaluationDetailsScreen}
               options={{ headerShown: true, title: "Evaluacion" }}
+            />
+
+            <Stack.Screen
+              name="Teachers"
+              component={TeachersScreen}
+              options={{ headerShown: true, title: "Cuerpo Docente" }}
             />
 
             {/* <Stack.Screen

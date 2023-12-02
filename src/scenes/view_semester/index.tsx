@@ -25,7 +25,11 @@ const ViewSemestercreen: React.FC<any> = ({ route }) => {
     },
     {
       name: "Cuerpo Docente",
-      onPress: () => { },
+      onPress: () => {
+        navigation.navigate('Teachers', {
+          teachers: { chiefTeacher: semester.commission.chief_teacher, staffTeachers: [] },
+        });
+      },
       materialIcon: <MaterialIcon name="account-group" fontSize={24} />
     },
     {

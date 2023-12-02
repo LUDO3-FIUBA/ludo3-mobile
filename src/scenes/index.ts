@@ -20,3 +20,4 @@ export { default as CalendarScreen } from './calendar';
 export { default as CommissionInscriptionsScreen } from './commission_inscriptions';
 export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
+export { default as TeachersScreen } from './teachers';
