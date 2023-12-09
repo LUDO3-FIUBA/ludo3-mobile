@@ -6,7 +6,7 @@ import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
 import { Appearance } from "react-native";
 import FilterNavBarButton from "../home/filterNavBarButton";
-import DeliverFinalExam from "../home/subsections/HomeOptions/DeliverFinalExam";
+import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
 
 const Drawer = createDrawerNavigator()
@@ -76,8 +76,8 @@ const RootDrawer = () => {
       />
 
       <Drawer.Screen
-        name="DeliverFinalExam"
-        component={DeliverFinalExam}
+        name="ScanQR"
+        component={ScanQR}
         options={{ headerShown: true, title: 'Entregar examen final' }}
       />
 

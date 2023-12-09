@@ -15,7 +15,7 @@ const ScanQRCodeIcon = ({ navigation }: ScanQRCodeIconProps) => {
         <View style={style().container}>
             <TouchableOpacity style={style().touchableOpacity}>
                 <Icon name='qrcode-scan' style={style().icon} 
-                onPress={() => navigation.navigate("DeliverFinalExam")}/>
+                onPress={() => navigation.navigate("ScanQR")}/>
             </TouchableOpacity>
         </View>
     );

@@ -6,10 +6,10 @@ interface Props {
   navigation: any
 }
 
-export function DeliverFinalExam({ navigation }: Props) {
-  const initialProps = { configuration: new QRScannerConfiguration('Escaneá el QR del final') }
+export function ScanQR({ navigation }: Props) {
+  const initialProps = { configuration: new QRScannerConfiguration('Escaneá el QR para entregar tu examen o marcar asistencia.') }
 
   return <TakePictureScreen key='FinalExam' {...initialProps} />;
 }
 
-export default DeliverFinalExam;
+export default ScanQR;
