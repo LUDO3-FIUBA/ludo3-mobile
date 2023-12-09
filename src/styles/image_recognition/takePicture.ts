@@ -18,7 +18,7 @@ const sharedStyle = StyleSheet.create({
     flex: 1,
     position: 'absolute',
     zIndex: 999,
-    fontSize: 25,
+    fontSize: 18,
     color: 'white',
     padding: 10,
     left: 0,
