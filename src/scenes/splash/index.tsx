@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text } from 'react-native';
 import SessionManager from '../../managers/sessionManager';
+import { Loading } from '../../components';
 
 interface Props {
   navigation: any;
@@ -9,7 +9,7 @@ interface Props {
 const Splash = ({ navigation }: Props) => {
   useEffect(() => {
     const init = async () => {
-      const sessionInstance: SessionManager = await SessionManager.getInstance()! 
+      const sessionInstance: SessionManager | null = SessionManager.getInstance()
       if (sessionInstance) {
         sessionInstance.getCredentials();
         const loggedIn = sessionInstance.isLoggedIn();
@@ -21,14 +21,7 @@ const Splash = ({ navigation }: Props) => {
   }, [navigation]);
 
   return (
-    <View>
-      <Text>LUDO</Text>
-      <Text>
-        Libreta Universitaria
-        {'\n'}
-        Digital Oficial
-      </Text>
-    </View>
+    <Loading />
   );
 };
 
