@@ -10,7 +10,7 @@ export function CommissionInscriptions() {
       <CommissionInscriptionList
         key="Materias en curso"
         fetch={() => commissionInscriptionsRepository.fetchCurrentInscriptions()}
-        emptyMessage={`No tenés materias en instancia de final.${'\n\n'}`} 
+        emptyMessage={`No estás inscripto en ninguna materia.${'\n\n'}`} 
         />
     </SafeAreaView>
   );
