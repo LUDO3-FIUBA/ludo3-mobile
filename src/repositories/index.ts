@@ -6,3 +6,4 @@ export { default as votingRepository } from './voting';
 export { default as subjectsRepository } from './subjects';
 export { default as commissionInscriptionsRepository } from './commissionInscriptions';
 export { default as evaluationsRepository } from './evaluations';
+export { default as commissionsRepository } from './commissions';

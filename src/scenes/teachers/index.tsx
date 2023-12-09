@@ -1,26 +1,10 @@
-import { useRoute } from '@react-navigation/native';
-import React from 'react';
-import { SafeAreaView, View, Text, FlatList, Image, StyleSheet } from 'react-native';
-import { ChiefTeacher } from '../../models';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, Alert } from 'react-native';
 import { lightModeColors } from '../../styles/colorPalette';
+import { Teacher, TeacherTuple, ChiefTeacher } from '../../models';
+import { commissionsRepository } from '../../repositories';
 const UserIcon = require('./img/usericon.jpg');
-
-// Mock data for the teachers
-const teachersData = [
-  // ... populate with your data
-  { id: '1', name: 'Juan Martinez', role: 'Jefe de cátedra', email: 'test@fi.uba.ar', image: UserIcon, isChief: true },
-  { id: '2', name: 'Franco Giordano', role: 'Jefe de trabajos prácticos', email: 'test@fi.uba.ar', image: UserIcon },
-  { id: '3', name: 'Luis Villagra', role: 'Ayudante', email: 'test@fi.uba.ar', image: UserIcon },
-  { id: '4', name: 'Sofia Gonzalez', role: 'Ayudante', email: 'test@fi.uba.ar', image: UserIcon },
-  // Add other teacher data
-];
-
-interface TeacherCardProps {
-  name: string;
-  role: string;
-  email: string;
-  image: any;
-}
 
 
 const ChiefCard = ({ first_name, last_name, email }: ChiefTeacher) => {
@@ -36,41 +20,79 @@ const ChiefCard = ({ first_name, last_name, email }: ChiefTeacher) => {
 };
 
 
-const TeacherCard = ({ name, role, email, image }: TeacherCardProps) => {
+const TeacherCard = ({ teacher, role}: { teacher: Teacher, role: string }) => {
   return (
     <View style={styles.cardContainer}>
-      <Image source={image} style={styles.image} />
+      <Image source={UserIcon} style={styles.image} />
       <View style={styles.infoContainer}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.role}>{role}</Text>
-        <Text style={styles.email}>{email}</Text>
+        <Text style={styles.name}>{teacher.first_name + ' ' + teacher.last_name} </Text>
+        <Text style={styles.role}>{role === 'T' ? 'Teacher' : 'Assistant'}</Text>
+        <Text style={styles.email}>{teacher.email}</Text>
       </View>
     </View>
   );
 };
 
-const TeachersScreen = () => {
-  const route = useRoute();
-  console.log("Route params");
-  console.log(route.params);
-  
-  const leader = (route.params as any).teachers.chiefTeacher;
+interface TeachersScreenProps {
+  route: any;
+}
 
-  // When unmocked, used this
-  // const teachersWithoutChief = (route.params as any).teachers.staffTeachers;
-  const teachersWithoutChief = teachersData.filter(teacher => !teacher.isChief);
+interface TeachersRouteParams {
+  commissionId: number;
+  chiefTeacher: ChiefTeacher;
+}
+
+
+const TeachersScreen = ({ route }: TeachersScreenProps) => {
+  const navigation = useNavigation();
+  // const route = useRoute();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const commissionId = (route.params as TeachersRouteParams).commissionId;
+  const chiefTeacher = (route.params as TeachersRouteParams).chiefTeacher;
+  const [staffTeachers, setStaffTeachers] = useState<TeacherTuple[]>([])
+
+  const fetchData = useCallback(async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const staffTeachers: TeacherTuple[] = await commissionsRepository.fetchTeachersOfCommission(commissionId);
+      console.log('Staff teachers', staffTeachers);
+      
+      setStaffTeachers(staffTeachers);
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching data", error);
+      Alert.alert(
+        '¿Qué pasó?',
+        'No sabemos pero no pudimos conseguir información acerca del semestre. ' +
+        'Volvé a intentar en unos minutos.',
+      );
+      setIsLoading(false);
+    }
+  }, [isLoading, commissionId]);
+
+  useEffect(() => {
+    const focusUnsubscribe = navigation.addListener('focus', () => {
+      fetchData();
+    });
+    return focusUnsubscribe;
+  }, [])
   
   return (
     <SafeAreaView style={styles.container}>
-      {leader && <ChiefCard {...leader} />}
+      {chiefTeacher && <ChiefCard {...chiefTeacher} />}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Cuerpo docente</Text>
       </View>
       <FlatList
-        data={teachersWithoutChief}
-        renderItem={({ item }) => <TeacherCard {...item} />}
-        keyExtractor={item => item.id}
+        data={staffTeachers}
+        renderItem={({ item }) => <TeacherCard teacher={item.teacher} role={item.role} />}
+        keyExtractor={item => item.teacher.dni}
         style={styles.list}
+        ListEmptyComponent={() => <Text style={styles.emptyStaffTeachersList}>No hay docentes auxiliares</Text>}
       />
     </SafeAreaView>
   );
@@ -96,6 +118,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: 'white',
     borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     elevation: 3,
   },
   image: {
@@ -165,6 +191,11 @@ const styles = StyleSheet.create({
     color: 'gray',
     fontSize: 18,
   },
+  emptyStaffTeachersList: { 
+    textAlign: 'center', 
+    marginTop: 20, 
+    fontSize: 18 
+  }
 });
 
 export default TeachersScreen;
