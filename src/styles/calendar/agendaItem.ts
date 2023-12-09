@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
         color: 'darkgray',
         marginLeft: 16,
         fontWeight: 'bold',
-        fontSize: 16
+        fontSize: 14
     },
     itemButtonContainer: {
         flex: 1,

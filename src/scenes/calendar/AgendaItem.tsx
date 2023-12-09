@@ -21,21 +21,17 @@ const AgendaItem = (props: IProps) => {
         navigation.navigate('ViewEvaluationDetails', { evaluation: item });
     }, []);
 
-    const itemPressed = useCallback(() => {
-        Alert.alert(item.evaluation_name);
-    }, []);
-
     return (
-        <View style={style().item}>
+        <TouchableOpacity style={style().item} onPress={buttonPressed}>
             <Text style={style().itemHourText}>{date.format('hh:mm a')}</Text>
             <View>
                 <Text style={style().itemTitleText}>{item.evaluation_name}</Text>
-                {/* <Text style={style().itemFooterText}>{item.semester.commission.subject_name}</Text>  TODO: Re-add semester info somehow */}
+                <Text style={style().itemFooterText}>{item.semester.commission.subject_name}</Text>
             </View>
-            <TouchableOpacity onPress={buttonPressed} style={style().itemButtonContainer}>
+            <View style={style().itemButtonContainer}>
                 <Icon style={style().itemButton} name='arrow-right' />
-            </TouchableOpacity>
-        </View>
+            </View>
+        </TouchableOpacity>
     );
 };
 

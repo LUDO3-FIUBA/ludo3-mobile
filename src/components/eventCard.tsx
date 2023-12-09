@@ -6,27 +6,26 @@ import moment from 'moment';
 import { useNavigation } from '@react-navigation/native';
 
 interface EventCardProps {
-  event: Evaluation;
+  evaluation: Evaluation;
 }
 
-const EventCard: FC<EventCardProps> = ({ event }) => {
+const EventCard: FC<EventCardProps> = ({ evaluation }) => {
   const navigation = useNavigation()
   return (
     <View style={style().view}>
       <TouchableOpacity
-        onPress={() => navigation.navigate('ViewEvaluationDetails', { evaluation: event })}
+        onPress={() => navigation.navigate('ViewEvaluationDetails', { evaluation })}
         style={{ padding: 12 }}
       >
         <Text style={style().name}>
-          {event.evaluation_name}
+          {evaluation.evaluation_name}
           <Text style={style().subjectName}>
-            {` `}- NombreDeMateria
-            {/* TODO: re-add Semester info here */}
+            {` `}- {evaluation.semester.commission.subject_name}
           </Text>
         </Text>
 
         <Text style={style().date}>
-          {getRemainingTime(event.end_date)}
+          {getRemainingTime(evaluation.end_date)}
         </Text>
       </TouchableOpacity>
     </View>
