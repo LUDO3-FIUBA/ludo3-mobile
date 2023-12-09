@@ -3,5 +3,4 @@ export enum HomeOptionsEnum {
   PendingSubjects = 'PendingSubjects',
   VerifyIdentity = 'VerifyIdentity',
   DeliverFinalExam = 'DeliverFinalExam',
-  Vote = 'Vote',
 }
