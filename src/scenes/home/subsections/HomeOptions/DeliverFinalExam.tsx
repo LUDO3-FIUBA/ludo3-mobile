@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import TakePictureScreen from '../../../image_recognition/takePictureStep';
-import QRScannerConfiguration from '../final_exam_configuration';
+import QRScannerConfiguration from '../scan_qr_configuration';
 
 interface Props {
   navigation: any

@@ -1,5 +1,5 @@
 import FacePictureConfiguration from '../preregister/face_recognition';
-import FinalExamQRConfiguration from '../home/subsections/final_exam_configuration';
+import QRScannerConfiguration from '../home/subsections/scan_qr_configuration';
 import FinalExamFacePictureConfiguration from '../home/subsections/final_exam_identity_configuration';
 import VerifyIdentityFacePictureConfiguration from '../home/subsections/verify_identity_configuration';
 import TakePictureStepConfiguration from './takePictureStepConfiguration';
@@ -15,11 +15,11 @@ interface TakePictureStepConfigurationObject {
 }
 
 export default class TakePictureStepConfigurationFactory {
-  static fromObject(object: TakePictureStepConfigurationObject): TakePictureStepConfiguration | FacePictureConfiguration | FinalExamQRConfiguration | FinalExamFacePictureConfiguration | VerifyIdentityFacePictureConfiguration {
+  static fromObject(object: TakePictureStepConfigurationObject): TakePictureStepConfiguration | FacePictureConfiguration | QRScannerConfiguration | FinalExamFacePictureConfiguration | VerifyIdentityFacePictureConfiguration {
     if (object.type === Type.RegisterFace) {
       return FacePictureConfiguration.fromObject(object);
-    } else if (object.type === Type.FinalExamQR) {
-      return FinalExamQRConfiguration.fromObject(object);
+    } else if (object.type === Type.ScanQR) {
+      return QRScannerConfiguration.fromObject(object);
     } else if (object.type === Type.FinalExamFace) {
       return FinalExamFacePictureConfiguration.fromObject(object);
     } else if (object.type === Type.VerifyIdentityFace) {
