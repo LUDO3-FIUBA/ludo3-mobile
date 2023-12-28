@@ -1,12 +1,19 @@
-export default interface QRCode {
+export interface QRCode {
     type: QRCodeType;
     parsedUuid: string;
 }
 
-export enum QRCodeType {
+enum QRCodeType {
     FinalExamUuid = 'FinalExamUuid',
     AssistanceUuid = 'AssistanceUuid',
     ExamUuid = 'ExamUuid',
+}
+
+class UnsupportedQRSchema extends Error {
+    constructor() {
+        super('QR no soportado');
+        this.name = 'UnsupportedQRSchema';
+    }
 }
 
 /**
@@ -24,7 +31,7 @@ export enum QRCodeType {
  * @param rawData raw string scanned by the camera
  * @returns parsed QRCode interface. Raises error if format is incorrect.
  */
-export function parseQrCodeData(rawData: string): QRCode {
+function parseQrCodeData(rawData: string): QRCode {
     const values = rawData.split(':')
 
     if (values.length === 1) {
@@ -43,9 +50,17 @@ export function parseQrCodeData(rawData: string): QRCode {
             case QRCodeType.ExamUuid:
                 return { type: QRCodeType.ExamUuid, parsedUuid }
             default:
-                throw new Error(`QR Code not supported. Scanned value was ${rawData}`)
+                console.error(`QR Code not supported. Scanned value was ${rawData}`)
+                throw new UnsupportedQRSchema()
         }
     } else {
-        throw new Error(`QR Code not supported. Scanned value was ${rawData}`)
+        console.error(`QR Code not supported. Scanned value was ${rawData}`)
+        throw new UnsupportedQRSchema()
     }
 }
+
+export const qrCodeUtils = {
+  QRCodeType,
+  parseQrCodeData,
+  UnsupportedQRSchema
+};

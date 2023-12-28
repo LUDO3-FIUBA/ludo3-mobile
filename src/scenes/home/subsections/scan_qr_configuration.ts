@@ -1,8 +1,8 @@
-import { InteractionManager } from 'react-native';
+import { Alert, InteractionManager } from 'react-native';
 import TakePictureStepConfiguration from '../../image_recognition/takePictureStepConfiguration';
 import VerifyIdentityConfiguration from './final_exam_identity_configuration';
 import Type from '../../image_recognition/takePictureStepConfigurationType';
-import { QRCode, QrCodeType, parseQrCodeData } from '../../../models';
+import { QRCode, qrCodeUtils } from '../../../models';
 
 class QRScannerConfiguration extends TakePictureStepConfiguration {
   constructor(description: string) {
@@ -11,23 +11,45 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
 
   async onDataObtained(qrCodeRawData: any, navigation: any, disableLoading: () => void) {
     try {
-      const qrCode = parseQrCodeData(qrCodeRawData);
+      const qrCode = qrCodeUtils.parseQrCodeData(qrCodeRawData);
+      console.log(`QRScannerConfiguration - Detected ${qrCode} code type`);
       switch (qrCode.type) {
-        case QrCodeType.FinalExamUuid:
+        case qrCodeUtils.QRCodeType.FinalExamUuid:
           await this.onScannedFinalExam(navigation, qrCode);
           break;
-        case QrCodeType.ExamUuid:
+        case qrCodeUtils.QRCodeType.ExamUuid:
           // TODO: SUBMIT EXAM VIA /api/evaluations/submissions/submit_evaluation/
+          showNonCancelablealert(
+            'Proximamente',
+            'TODO: completar para otros codigos',
+            disableLoading
+          );
           break;
-        default:
-          // TODO: SHOW MESSAGE FOR UNSUPPORTED TYPE
+        case qrCodeUtils.QRCodeType.AssistanceUuid:
+          showNonCancelablealert(
+            'Proximamente',
+            'TODO: completar para otros codigos',
+            disableLoading
+          );
           break;
       }
     } catch (error) {
-      // TODO: HANDLE ERROR ON PARSE OR SUBMIT
+      console.error(`QRScannerConfiguration - Error ${error}`);
+      if (error instanceof qrCodeUtils.UnsupportedQRSchema) {
+        showNonCancelablealert(
+          'QR no soportado',
+          'Este código no está soportado por LUDO. Asegurate de usar un código generado por un docente e intentá nuevamente.',
+          disableLoading
+        );
+      } else {
+        showNonCancelablealert(
+          'Error al escanear código',
+          'Por favor, intentá nuevamente.',
+          disableLoading
+        );
+      }
     }
 
-    InteractionManager.runAfterInteractions(disableLoading);
   }
 
   private async onScannedFinalExam(navigation: any, qrCode: QRCode) {
@@ -50,3 +72,22 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
 }
 
 export default QRScannerConfiguration;
+
+
+function showNonCancelablealert(alertTitle: string, alertDesc: string, disableLoading: () => void) {
+  Alert.alert(
+    alertTitle,
+    alertDesc,
+    [
+      {
+        text: 'OK',
+        onPress: () => {
+          InteractionManager.runAfterInteractions(disableLoading);
+        },
+      },
+    ],
+    {
+      cancelable: false,
+    }
+  );
+}

@@ -65,7 +65,7 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propCo
     if (codes.length !== 0) {
       setIgnoreReadings(true);
       setLoading(true);
-      const disableLoading = () => setLoading(false);
+      const disableLoading = () => { setLoading(false); setIgnoreReadings(false) };
       await getConfiguration()?.onDataObtained(codes[0].value, navigation, disableLoading);
     }
   };
