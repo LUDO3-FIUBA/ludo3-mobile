@@ -61,7 +61,7 @@ const VerMasButton = ({ onPress }: { onPress: onPressHandler }) => {
       onPress={onPress}
     >
       <Icon style={style().itemIcon} name='arrow-right' />
-      <Text style={style().text}>Ver mas</Text>
+      <Text style={style().text}>Ver más</Text>
     </TouchableOpacity>
   )
 }

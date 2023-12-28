@@ -1,10 +1,8 @@
 import React, { useState, useEffect, FC } from 'react';
-import { View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, Alert, TouchableOpacity } from 'react-native';
 import FinalExamCard from './finalExamCard';
-import Loading from './loading';
 import { finalExamList as style } from '../styles';
 import { FinalExam } from '../models';
-import { Filter } from '../scenes/approved_subjects/IFilter';
 
 interface FinalExamOverviewListProps {
   fetch: () => Promise<FinalExam[]>;
@@ -36,7 +34,7 @@ const FinalExamOverviewList: FC<FinalExamOverviewListProps> = ({ fetch, emptyMes
       } else {
         setLoading(false);
       }
-      const firstThreeFinalExams = fetchedFinalExams.slice(0 ,3);
+      const firstThreeFinalExams = fetchedFinalExams.slice(0, 3);
       setFinalExams(firstThreeFinalExams);
     } catch (error) {
       if (refreshing) {
@@ -52,6 +50,14 @@ const FinalExamOverviewList: FC<FinalExamOverviewListProps> = ({ fetch, emptyMes
       );
     }
   };
+
+  if (!loading && !finalExams.length) {
+    return (
+      <View style={style().view}>
+        <Text style={style().emptyMessageText}>{emptyMessage}</Text>
+      </View>
+    )
+  }
 
   return (
     <View style={style().view}>

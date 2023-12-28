@@ -57,7 +57,7 @@ const lightMode = StyleSheet.create({
   ...sharedStyle,
   view: {
     ...sharedStyle.view,
-    backgroundColor: lightModeColors.wellbeing,
+    backgroundColor: lightModeColors.institutional,
   },
   name: {
     ...sharedStyle.name,
@@ -68,7 +68,7 @@ const darkMode = StyleSheet.create({
   ...sharedStyle,
   view: {
     ...sharedStyle.view,
-    backgroundColor: darkModeColors.wellbeing,
+    backgroundColor: darkModeColors.institutional,
   },
   name: {
     ...sharedStyle.name,

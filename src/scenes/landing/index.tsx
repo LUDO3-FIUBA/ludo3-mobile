@@ -39,7 +39,6 @@ const Landing = ({ navigation }: Props) => {
       if (sessionManager) {
         sessionManager.saveCredentials(response);
         const user = await usersRepository.getInfo();
-        console.log('alvaro user', user);
 
         if (!user.isStudent()) {
           throw new authenticationRepository.NotAStudent();

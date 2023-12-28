@@ -14,4 +14,11 @@ const sharedStyle = StyleSheet.create({
     ...basic().text,
     fontSize: 20,
   },
+  emptyMessageText: {
+    ...basic().text,
+    fontSize: 15,
+    color: 'gray',
+    textAlign: 'center',
+    margin: 14
+  }
 });
