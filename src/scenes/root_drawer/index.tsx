@@ -1,7 +1,7 @@
 import React from "react";
 import { DrawerContentComponentProps, DrawerContentOptions, DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator } from "@react-navigation/drawer";
 import { ApprovedSubjectsScreen, CalendarScreen, CommissionInscriptionsScreen, HomeScreen, PendingSubjectsScreen } from "..";
-import { ProfileOverview } from "../../components";
+import { MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
 import { Appearance } from "react-native";
@@ -17,12 +17,14 @@ const CustomDrawerContent = (props: DrawerContentComponentProps<DrawerContentOpt
       <ProfileOverview />
       <DrawerItemList {...props} />
       <DrawerItem label="Cerrar Sesión" onPress={async () => {
-        await SessionManager.getInstance()?.clearCredentials();
-        props.navigation.reset({
-          index: 0,
-          routes: [{ name: 'Landing' }],
-        })
-      }} />
+          await SessionManager.getInstance()?.clearCredentials();
+          props.navigation.reset({
+            index: 0,
+            routes: [{ name: 'Landing' }],
+          })
+        }}
+        icon={makeDrawerIcon('logout-variant', 'logout-variant')}
+      />
     </DrawerContentScrollView>
   );
 }
@@ -37,13 +39,17 @@ const RootDrawer = () => {
       <Drawer.Screen
         name="Home"
         component={HomeScreen}
-        options={{ headerShown: true, title: 'Inicio' }}
+        options={{
+          headerShown: true,
+          title: 'Inicio',
+          drawerIcon: makeDrawerIcon('home', 'home-outline')
+        }}
       />
 
       <Drawer.Screen
         name="Calendar"
         component={CalendarScreen}
-        options={{ headerShown: true, title: 'Calendario' }}
+        options={{ headerShown: true, title: 'Calendario', drawerIcon: makeDrawerIcon('calendar', 'calendar-outline') }}
       />
 
       <Drawer.Screen
@@ -52,6 +58,7 @@ const RootDrawer = () => {
         options={{
           headerShown: true,
           title: 'Materias en curso',
+          drawerIcon: makeDrawerIcon('text-box-multiple', 'text-box-multiple-outline')
         }}
       />
 
@@ -62,6 +69,7 @@ const RootDrawer = () => {
           headerShown: true,
           title: 'Materias aprobadas',
           headerRight: () => <FilterNavBarButton />,
+          drawerIcon: makeDrawerIcon('text-box-check', 'text-box-check-outline')
         }}
       />
 
@@ -72,22 +80,27 @@ const RootDrawer = () => {
           headerShown: true,
           title: 'Materias pendientes',
           headerRight: () => <FilterNavBarButton />,
+          drawerIcon: makeDrawerIcon('file-clock', 'file-clock-outline')
         }}
       />
 
       <Drawer.Screen
         name="ScanQR"
         component={ScanQR}
-        options={{ headerShown: true, title: 'Entregar examen final' }}
+        options={{ headerShown: true, title: 'Escanear QR', drawerIcon: makeDrawerIcon('qrcode-scan', 'qrcode-scan') }}
       />
 
       <Drawer.Screen
         name="VerifyIdentity"
         component={VerifyIdentity}
-        options={{ headerShown: true, title: 'Verificar identidad' }}
+        options={{ headerShown: true, title: 'Verificar identidad', drawerIcon: makeDrawerIcon('face-recognition', 'face-recognition') }}
       />
     </Drawer.Navigator>
   )
+}
+
+function makeDrawerIcon(focusedIcon: string, unfocusedIcon: string): ((props: { color: string; size: number; focused: boolean; }) => React.ReactNode) | undefined {
+  return ({ focused, color, size }) => <MaterialIcon color={color} fontSize={size} name={focused ? focusedIcon : unfocusedIcon} style={{ marginRight: -8 }} />;
 }
 
 function isDarkTheme() {
