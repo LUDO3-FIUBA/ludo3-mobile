@@ -66,3 +66,8 @@ yarn-error.log
 /coverage
 
 .env
+
+# Android debug APK build artifacts
+android/app/src/main/res/**/node_modules*
+android/app/src/main/res/**/src_*
+index.android.bundle
