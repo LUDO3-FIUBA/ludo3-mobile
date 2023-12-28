@@ -1,9 +1,10 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, Alert } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, Alert, ToastAndroid } from 'react-native';
 import { lightModeColors } from '../../styles/colorPalette';
 import { Teacher, TeacherTuple, ChiefTeacher } from '../../models';
 import { commissionsRepository } from '../../repositories';
+import { CopyableEmailText } from '../../components';
 const UserIcon = require('./img/usericon.jpg');
 
 
@@ -14,6 +15,7 @@ const ChiefCard = ({ first_name, last_name, email }: ChiefTeacher) => {
       <View style={styles.leaderInfoContainer}>
         <Text style={styles.leaderName}>{first_name} {last_name}</Text>
         <Text style={styles.leaderRole}>{'Jefe de cátedra'}</Text>
+        <CopyableEmailText email={email} />
       </View>
     </View>
   );
@@ -26,8 +28,8 @@ const TeacherCard = ({ teacher, role}: { teacher: Teacher, role: string }) => {
       <Image source={UserIcon} style={styles.image} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{teacher.first_name + ' ' + teacher.last_name} </Text>
-        <Text style={styles.role}>{role === 'T' ? 'Teacher' : 'Assistant'}</Text>
-        <Text style={styles.email}>{teacher.email}</Text>
+        <Text style={styles.role}>{role === 'T' ? 'Docente' : 'Ayudante'}</Text>
+        <CopyableEmailText email={teacher.email} />
       </View>
     </View>
   );
@@ -142,12 +144,6 @@ const styles = StyleSheet.create({
   },
   role: {
     color: 'gray',
-    fontSize: 14,
-  },
-  email: {
-    color: 'gray',
-    fontWeight: 'bold',
-    fontStyle: 'italic',
     fontSize: 14,
   },
   headerContainer: {
