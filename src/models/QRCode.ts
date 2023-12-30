@@ -6,7 +6,7 @@ export interface QRCode {
 enum QRCodeType {
     FinalExamUuid = 'FinalExamUuid',
     AssistanceUuid = 'AssistanceUuid',
-    ExamUuid = 'ExamUuid',
+    EvaluationUuid = 'EvaluationUuid',
 }
 
 class UnsupportedQRSchema extends Error {
@@ -26,7 +26,7 @@ class UnsupportedQRSchema extends Error {
  *  `rawData = 'ludo:${type}:${parsedUuid}'`
  * 
  * Example:
- *  `rawData = 'ludo:ExamUuid:d118ff4e-57cc-43d1-8fc0-125188f45dd5'`
+ *  `rawData = 'ludo:EvaluationUuid:d118ff4e-57cc-43d1-8fc0-125188f45dd5'`
  * 
  * @param rawData raw string scanned by the camera
  * @returns parsed QRCode interface. Raises error if format is incorrect.
@@ -47,8 +47,8 @@ function parseQrCodeData(rawData: string): QRCode {
                 return { type: QRCodeType.FinalExamUuid, parsedUuid: rawData }
             case QRCodeType.AssistanceUuid:
                 return { type: QRCodeType.AssistanceUuid, parsedUuid }
-            case QRCodeType.ExamUuid:
-                return { type: QRCodeType.ExamUuid, parsedUuid }
+            case QRCodeType.EvaluationUuid:
+                return { type: QRCodeType.EvaluationUuid, parsedUuid }
             default:
                 console.error(`QR Code not supported. Scanned value was ${rawData}`)
                 throw new UnsupportedQRSchema()

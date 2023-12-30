@@ -21,7 +21,7 @@ export default class NotificationManager {
 
   onRegister(event: Registered) {
     console.log('NotificationManager:', event);
-    usersRepository.sendPushToken(event.deviceToken);
+    usersRepository.sendPushToken(event.deviceToken).catch(() => {});
 
     if (typeof this._onRegister === 'function') {
       this._onRegister(event);

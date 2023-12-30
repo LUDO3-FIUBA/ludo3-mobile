@@ -17,7 +17,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
         case qrCodeUtils.QRCodeType.FinalExamUuid:
           await this.onScannedFinalExam(navigation, qrCode);
           break;
-        case qrCodeUtils.QRCodeType.ExamUuid:
+        case qrCodeUtils.QRCodeType.EvaluationUuid:
           // TODO: SUBMIT EXAM VIA /api/evaluations/submissions/submit_evaluation/
           showNonCancelablealert(
             'Proximamente',
