@@ -1,6 +1,7 @@
 import { Alert, InteractionManager } from 'react-native';
 import TakePictureStepConfiguration from '../../image_recognition/takePictureStepConfiguration';
-import VerifyIdentityConfiguration from './final_exam_identity_configuration';
+import VerifyIdentityForExamConfiguration from './final_exam_identity_configuration';
+import VerifyIdentityForEvaluationConfiguration from './evaluation_identity_configuration';
 import Type from '../../image_recognition/takePictureStepConfigurationType';
 import { QRCode, qrCodeUtils } from '../../../models';
 
@@ -18,12 +19,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
           await this.onScannedFinalExam(navigation, qrCode);
           break;
         case qrCodeUtils.QRCodeType.EvaluationUuid:
-          // TODO: SUBMIT EXAM VIA /api/evaluations/submissions/submit_evaluation/
-          showNonCancelablealert(
-            'Proximamente',
-            'TODO: completar para otros codigos',
-            disableLoading
-          );
+          await this.onScannedEvaluation(navigation, qrCode);
           break;
         case qrCodeUtils.QRCodeType.AssistanceUuid:
           showNonCancelablealert(
@@ -54,11 +50,21 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
 
   private async onScannedFinalExam(navigation: any, qrCode: QRCode) {
     await navigation.navigate('TakePicture', {
-      configuration: new VerifyIdentityConfiguration(
+      configuration: new VerifyIdentityForExamConfiguration(
         'Verifiquemos tu identidad',
         qrCode.parsedUuid
       ).toObject(),
       title: 'Rendir final',
+    });
+  }
+
+  private async onScannedEvaluation(navigation: any, qrCode: QRCode) {
+    await navigation.navigate('TakePicture', {
+      configuration: new VerifyIdentityForEvaluationConfiguration(
+        'Verifiquemos tu identidad',
+        qrCode.parsedUuid
+      ).toObject(),
+      title: 'Rendir exámen',
     });
   }
 

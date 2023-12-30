@@ -1,6 +1,6 @@
-import {get, post} from './authenticatedRepository.ts';
+import {get, post} from './authenticatedRepository';
 import {StatusCodeError} from '../networking';
-import User from '../models/User.ts';
+import User from '../models/User';
 import {Platform} from 'react-native';
 
 const domainUrl = 'auth/users';
@@ -55,7 +55,7 @@ export function getInfo(): Promise<User> {
   );
 }
 
-export function sendPushToken(token): Promise<Void> {
+export function sendPushToken(token: string) {
   return post('api/device/gcm', {
     registration_id: token,
     cloud_message_type: Platform.OS == 'android' ? 'FCM' : 'APNS',

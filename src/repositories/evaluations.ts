@@ -1,5 +1,5 @@
-import { get } from './authenticatedRepository';
-import { Evaluation } from '../models';
+import { get, post } from './authenticatedRepository';
+import { Evaluation, EvaluationSubmission } from '../models';
 
 const domainUrl = 'api/evaluations';
 
@@ -25,6 +25,11 @@ async function fetchMisExamenes(): Promise<Evaluation[]> {
         .then(json => Promise.resolve(convertJsonToEvaluationsList(json)));
 }
 
+async function submitEvaluation(evaluationId: string): Promise<EvaluationSubmission> {
+    // TODO: error handling like in finalExamsRepository.submitExam
+    return await post(`${domainUrl}/submissions/submit_evaluation`, { evaluation: evaluationId }) as EvaluationSubmission
+}
+
 function convertJsonToEvaluationsList(json: any): Evaluation[] {
     console.log("EVALUATIONS", json);
     
@@ -35,5 +40,6 @@ function convertJsonToEvaluationsList(json: any): Evaluation[] {
 
 export default {
     fetchSemesterEvaluations,
-    fetchMisExamenes
+    fetchMisExamenes,
+    submitEvaluation
 };

@@ -9,4 +9,6 @@ export type { default as CommissionInscription } from './CommissionInscription';
 export type { default as Semester } from './Semester';
 export type { default as Commission } from './Commission';
 export type { default as ChiefTeacher } from './ChiefTeacher';
+export type { default as EvaluationSubmission } from './EvaluationSubmission';
+export type { default as Student } from './Student';
 export type { TeacherTuple, Teacher } from './Teachers';
