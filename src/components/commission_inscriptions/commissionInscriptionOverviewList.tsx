@@ -49,7 +49,7 @@ const CommissionInscriptionOverviewList: FC<CommissionInscriptionOverviewListPro
       {loading && <Loading />}
       {!loading && !commissionInscriptions.length && (
         <View style={style().textContainer}>
-          <Text style={style().text}>No tenés inscripciones actualmente.${'\n\n'}</Text>
+          <Text style={style().emptyMessageText}>No tenés inscripciones actualmente.</Text>
         </View>
       )}
       {commissionInscriptions.map((item) =>
