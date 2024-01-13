@@ -5,7 +5,7 @@ export interface QRCode {
 
 enum QRCodeType {
     FinalExamUuid = 'FinalExamUuid',
-    AssistanceUuid = 'AssistanceUuid',
+    AttendanceUuid = 'AttendanceUuid',
     EvaluationUuid = 'EvaluationUuid',
 }
 
@@ -45,8 +45,8 @@ function parseQrCodeData(rawData: string): QRCode {
         switch (typeString) {
             case QRCodeType.FinalExamUuid:
                 return { type: QRCodeType.FinalExamUuid, parsedUuid: rawData }
-            case QRCodeType.AssistanceUuid:
-                return { type: QRCodeType.AssistanceUuid, parsedUuid }
+            case QRCodeType.AttendanceUuid:
+                return { type: QRCodeType.AttendanceUuid, parsedUuid }
             case QRCodeType.EvaluationUuid:
                 return { type: QRCodeType.EvaluationUuid, parsedUuid }
             default:

@@ -3,7 +3,10 @@ import TakePictureStepConfiguration from '../../image_recognition/takePictureSte
 import VerifyIdentityForExamConfiguration from './final_exam_identity_configuration';
 import VerifyIdentityForEvaluationConfiguration from './evaluation_identity_configuration';
 import Type from '../../image_recognition/takePictureStepConfigurationType';
-import { QRCode, qrCodeUtils } from '../../../models';
+import { Attendance, QRCode, qrCodeUtils } from '../../../models';
+import { makeRequest } from '../../authenticatedComponent';
+import { attendanceRepository } from '../../../repositories';
+
 
 class QRScannerConfiguration extends TakePictureStepConfiguration {
   constructor(description: string) {
@@ -13,7 +16,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
   async onDataObtained(qrCodeRawData: any, navigation: any, disableLoading: () => void) {
     try {
       const qrCode = qrCodeUtils.parseQrCodeData(qrCodeRawData);
-      console.log(`QRScannerConfiguration - Detected ${qrCode} code type`);
+      console.log(`QRScannerConfiguration - Detected ${qrCode.type} code type`);
       switch (qrCode.type) {
         case qrCodeUtils.QRCodeType.FinalExamUuid:
           await this.onScannedFinalExam(navigation, qrCode);
@@ -21,12 +24,8 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
         case qrCodeUtils.QRCodeType.EvaluationUuid:
           await this.onScannedEvaluation(navigation, qrCode);
           break;
-        case qrCodeUtils.QRCodeType.AssistanceUuid:
-          showNonCancelablealert(
-            'Proximamente',
-            'TODO: completar para otros codigos',
-            disableLoading
-          );
+        case qrCodeUtils.QRCodeType.AttendanceUuid:
+          await this.onScannedAttendance(navigation, qrCode, disableLoading);
           break;
       }
     } catch (error) {
@@ -45,7 +44,6 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
         );
       }
     }
-
   }
 
   private async onScannedFinalExam(navigation: any, qrCode: QRCode) {
@@ -66,6 +64,28 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
       ).toObject(),
       title: 'Rendir exámen',
     });
+  }
+
+  private async onScannedAttendance(navigation: any, qrCode: QRCode, disableLoading: () => void) {
+    try {
+      const attendance: Attendance = await makeRequest(
+        () => attendanceRepository.submitAttendance(qrCode.parsedUuid),
+        navigation,
+      )
+      showNonCancelablealert(
+        'Éxito',
+        `Confirmaste asistencia en ${attendance.semester.commission.subject_name}.`,
+        disableLoading
+      );
+    } catch (error) {
+      console.log('Error', error);
+      // TODO: more verbose errors (i.e. QR ya escaneado, no estas inscripto en este semestre, etc.)
+      showNonCancelablealert(
+        'Error',
+        'Hubo un error, no pudimos confirmar tu asistencia. Por favor intentá nuevamente.',
+        disableLoading,
+      );
+    }
   }
 
   toObject() {
