@@ -1,20 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { lightModeColors } from '../../styles/colorPalette';
 import moment from 'moment';
 import { MaterialIcon } from '../../components';
-import { Evaluation } from '../../models';
+import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
+import { evaluationsRepository } from '../../repositories';
 
 
-const EvaluationDetailsScreen = ({ route }) => {
+const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const { evaluation }: { evaluation: Evaluation } = route.params;
-  const endDate = moment(evaluation.end_date).format('HH:mm D/MM/YY');
-  const startDate = moment(evaluation.start_date).format('HH:mm D/MM/YY');
+  const [evaluationSubmission, setEvaluationSubmission] = useState<EvaluationSubmission | undefined>(undefined)
+  const endDate = formatDate(evaluation.end_date);
+  const startDate = formatDate(evaluation.start_date);
+  const correctorName = getCorrectorName(evaluationSubmission?.corrector);
+  const grade: number =  evaluationSubmission?.grade || 0;
+  const createdAtDate = formatDate(evaluationSubmission?.created_at);
+  const updatedAtDate = formatDate(evaluationSubmission?.updated_at);
+
+  useEffect(() => {
+    if (!evaluation.id) return;
+    evaluationsRepository.fetchMySubmissions(evaluation.id)
+      .then(evaluationSubmissions => setEvaluationSubmission(evaluationSubmissions[0]))
+      .catch(err => console.error(`EvaluationDetails - ${err}`));
+  }, [evaluation]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>{evaluation.evaluation_name}</Text>
+      <Text style={styles.header2}>{evaluation.semester.commission.subject_name}</Text>
 
       <View style={styles.card}>
         <View style={styles.cardItem}>
@@ -35,15 +49,22 @@ const EvaluationDetailsScreen = ({ route }) => {
         <View style={styles.cardItem}>
           <MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
           <View>
-            <Text style={styles.passingGradeText}>Juan Manuel Sirne</Text>
+            <Text style={styles.passingGradeText}>{correctorName}</Text>
             <Text style={styles.passingGradeLabel}>Corrector</Text>
+          </View>
+        </View>
+        <View style={styles.cardItem}>
+          <MaterialIcon name="calendar-today" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
+          <View>
+            <Text style={styles.passingGradeText}>{evaluationSubmission?.created_at ? createdAtDate : `–`}</Text>
+            <Text style={styles.passingGradeLabel}>Fecha de entrega</Text>
           </View>
         </View>
         <View style={styles.cardItem}>
           <MaterialIcon name="calendar-edit" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
           <View>
-            <Text style={styles.passingGradeText}>12:34 – 13/11/23</Text>
-            <Text style={styles.passingGradeLabel}>Fecha de corrección</Text>
+            <Text style={styles.passingGradeText}>{evaluationSubmission?.updated_at ? updatedAtDate : `–`}</Text>
+            <Text style={styles.passingGradeLabel}>Última fecha de actualización</Text>
           </View>
         </View>
       </View>
@@ -51,8 +72,8 @@ const EvaluationDetailsScreen = ({ route }) => {
       <View style={styles.card}>
         <View style={{ alignItems: 'center', gap: 8 }}>
           <Progress.Circle
-            progress={0.6}
-            formatText={(a) => '6'}
+            progress={grade / 10}
+            formatText={(a) => grade || '–'}
             color={lightModeColors.institutional}
             unfilledColor='lightblue'
             strokeCap='round'
@@ -81,6 +102,9 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  header2: {
+    fontSize: 20,
     marginBottom: 18,
   },
   card: {
@@ -116,3 +140,11 @@ const styles = StyleSheet.create({
 });
 
 export default EvaluationDetailsScreen;
+
+function formatDate(date: string | null | undefined) {
+  return moment(date).format('HH:mm D/MM/YY');
+}
+
+function getCorrectorName(corrector: Teacher | undefined) {
+  return corrector ? `${corrector?.first_name} ${corrector?.last_name}` : '–';
+}
