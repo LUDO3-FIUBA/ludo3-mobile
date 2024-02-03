@@ -1,7 +1,5 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { SubjectList } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import { evaluationsRepository } from '../../repositories';
 import { Evaluation } from '../../models';
@@ -13,7 +11,6 @@ interface ViewEvaluationsProps {
 
 const ViewEvaluations: React.FC<ViewEvaluationsProps> = ({ route }) => {
   const semester_id = route.params?.semester_id;
-  const navigation = useNavigation();
 
   const fetchSemesterEvaluations = async (): Promise<Evaluation[]> => {
     try {

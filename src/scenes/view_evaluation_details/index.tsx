@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { lightModeColors } from '../../styles/colorPalette';
 import moment from 'moment';
@@ -8,25 +8,41 @@ import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 
 
+enum EvaluationStatus {
+  UNKNOWN = "–",
+  NOT_TAKEN = "No entregado",
+  TAKEN_NOT_GRADED = "Entregado, esperando corrección",
+  TAKEN_GRADED = "Corregido"
+}
+
 const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const { evaluation }: { evaluation: Evaluation } = route.params;
   const [evaluationSubmission, setEvaluationSubmission] = useState<EvaluationSubmission | undefined>(undefined)
+  const [evaluationStatus, setEvaluationStatus] = useState(EvaluationStatus.UNKNOWN)
   const endDate = formatDate(evaluation.end_date);
   const startDate = formatDate(evaluation.start_date);
   const correctorName = getCorrectorName(evaluationSubmission?.corrector);
-  const grade: number =  evaluationSubmission?.grade || 0;
+  const grade: number = evaluationSubmission?.grade || 0;
   const createdAtDate = formatDate(evaluationSubmission?.created_at);
   const updatedAtDate = formatDate(evaluationSubmission?.updated_at);
 
   useEffect(() => {
     if (!evaluation.id) return;
-    evaluationsRepository.fetchMySubmissions(evaluation.id)
-      .then(evaluationSubmissions => setEvaluationSubmission(evaluationSubmissions[0]))
-      .catch(err => console.error(`EvaluationDetails - ${err}`));
+
+    const fetch = async () => {
+      try {
+        const evaluationSubmissions = await evaluationsRepository.fetchMySubmissions(evaluation.id)
+        setEvaluationSubmission(evaluationSubmissions[0])
+        setEvaluationStatus(getEvaluationStatus(evaluationSubmissions[0]))
+      } catch (err) {
+        console.error(`EvaluationDetails - ${err}`)
+      }
+    }
+    fetch()
   }, [evaluation]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.header}>{evaluation.evaluation_name}</Text>
       <Text style={styles.header2}>{evaluation.semester.commission.subject_name}</Text>
 
@@ -47,10 +63,10 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
 
       <View style={styles.card}>
         <View style={styles.cardItem}>
-          <MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
+          <MaterialIcon name="information-outline" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
           <View>
-            <Text style={styles.passingGradeText}>{correctorName}</Text>
-            <Text style={styles.passingGradeLabel}>Corrector</Text>
+            <Text style={styles.passingGradeText}>{evaluationStatus}</Text>
+            <Text style={styles.passingGradeLabel}>Estado</Text>
           </View>
         </View>
         <View style={styles.cardItem}>
@@ -58,13 +74,6 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           <View>
             <Text style={styles.passingGradeText}>{evaluationSubmission?.created_at ? createdAtDate : `–`}</Text>
             <Text style={styles.passingGradeLabel}>Fecha de entrega</Text>
-          </View>
-        </View>
-        <View style={styles.cardItem}>
-          <MaterialIcon name="calendar-edit" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-          <View>
-            <Text style={styles.passingGradeText}>{evaluationSubmission?.updated_at ? updatedAtDate : `–`}</Text>
-            <Text style={styles.passingGradeLabel}>Última fecha de actualización</Text>
           </View>
         </View>
       </View>
@@ -90,9 +99,39 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           <Text style={styles.passingGradeLabel}>Nota mínima de aprobación: {evaluation.passing_grade}</Text>
         </View>
       </View>
-    </View>
+
+      {evaluationStatus !== EvaluationStatus.NOT_TAKEN &&
+        <View style={[styles.card, { marginBottom: 120 }]}>
+          <View style={styles.cardItem}>
+            <MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
+            <View>
+              <Text style={styles.passingGradeText}>{correctorName}</Text>
+              <Text style={styles.passingGradeLabel}>Corrector</Text>
+            </View>
+          </View>
+          <View style={styles.cardItem}>
+            <MaterialIcon name="calendar-edit" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
+            <View>
+              <Text style={styles.passingGradeText}>{evaluationSubmission?.updated_at ? updatedAtDate : `–`}</Text>
+              <Text style={styles.passingGradeLabel}>Última fecha de actualización</Text>
+            </View>
+          </View>
+        </View>}
+    </ScrollView>
   );
 };
+
+function getEvaluationStatus(evaluationSubmission: EvaluationSubmission | undefined): EvaluationStatus {
+  if (!evaluationSubmission) {
+    return EvaluationStatus.NOT_TAKEN
+  }
+
+  if (!evaluationSubmission.corrector && !evaluationSubmission.grade) {
+    return EvaluationStatus.TAKEN_NOT_GRADED
+  }
+
+  return EvaluationStatus.TAKEN_GRADED
+}
 
 const styles = StyleSheet.create({
   container: {
