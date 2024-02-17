@@ -25,6 +25,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const grade: number = evaluationSubmission?.grade || 0;
   const createdAtDate = formatDate(evaluationSubmission?.created_at);
   const updatedAtDate = formatDate(evaluationSubmission?.updated_at);
+  const failedExam = evaluationSubmission?.grade && grade < evaluation.passing_grade;
 
   useEffect(() => {
     if (!evaluation.id) return;
@@ -83,7 +84,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           <Progress.Circle
             progress={grade / 10}
             formatText={(a) => grade || '–'}
-            color={lightModeColors.institutional}
+            color={failedExam ? lightModeColors.menuOption : lightModeColors.institutional}
             unfilledColor='lightblue'
             strokeCap='round'
             size={135}
