@@ -126,7 +126,7 @@ function getEvaluationStatus(evaluationSubmission: EvaluationSubmission | undefi
     return EvaluationStatus.NOT_TAKEN
   }
 
-  if (!evaluationSubmission.corrector && !evaluationSubmission.grade) {
+  if (!evaluationSubmission.grade) {
     return EvaluationStatus.TAKEN_NOT_GRADED
   }
 
