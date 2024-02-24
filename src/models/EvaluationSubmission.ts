@@ -6,7 +6,7 @@ export default interface EvaluationSubmission {
     evaluation: Evaluation;
     student: Student;
     grade?: number;
-    corrector?: Teacher;
+    grader?: Teacher;
     created_at: string;
     updated_at: string;
 }

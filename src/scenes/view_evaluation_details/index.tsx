@@ -21,7 +21,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const [evaluationStatus, setEvaluationStatus] = useState(EvaluationStatus.UNKNOWN)
   const endDate = formatDate(evaluation.end_date);
   const startDate = formatDate(evaluation.start_date);
-  const correctorName = getCorrectorName(evaluationSubmission?.corrector);
+  const graderName = getGraderName(evaluationSubmission?.grader);
   const grade: number = evaluationSubmission?.grade || 0;
   const createdAtDate = formatDate(evaluationSubmission?.created_at);
   const updatedAtDate = formatDate(evaluationSubmission?.updated_at);
@@ -106,7 +106,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           <View style={styles.cardItem}>
             <MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
             <View>
-              <Text style={styles.passingGradeText}>{correctorName}</Text>
+              <Text style={styles.passingGradeText}>{graderName}</Text>
               <Text style={styles.passingGradeLabel}>Corrector</Text>
             </View>
           </View>
@@ -185,6 +185,6 @@ function formatDate(date: string | null | undefined) {
   return moment(date).format('HH:mm D/MM/YY');
 }
 
-function getCorrectorName(corrector: Teacher | undefined) {
-  return corrector ? `${corrector?.first_name} ${corrector?.last_name}` : '–';
+function getGraderName(grader: Teacher | undefined) {
+  return grader ? `${grader?.first_name} ${grader?.last_name}` : '–';
 }
