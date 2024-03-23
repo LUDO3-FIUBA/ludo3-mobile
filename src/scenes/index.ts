@@ -21,3 +21,4 @@ export { default as CommissionInscriptionsScreen } from './commission_inscriptio
 export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
 export { default as TeachersScreen } from './teachers';
+export { default as StatsScreen } from './stats';

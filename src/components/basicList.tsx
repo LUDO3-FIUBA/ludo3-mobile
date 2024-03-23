@@ -8,7 +8,7 @@ interface IProps {
 
 interface IBasicListItem {
     name: string
-    onPress: () => void
+    onPress?: () => void
     materialIcon: React.ReactNode
 }
 
