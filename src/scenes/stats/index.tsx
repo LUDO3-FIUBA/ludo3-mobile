@@ -49,7 +49,7 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
         strokeWidth: 2
       }
     ],
-    legend: ["Promedio (mes/año)"]
+    legend: ["Promedio (mes-año)"]
   };
 
   const listItems = Object.entries(studentStats?.topSubjects || {}).map(([subjectName, comparison]) => ({
