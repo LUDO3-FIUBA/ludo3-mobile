@@ -7,7 +7,7 @@ export async function fetchStudentStats(): Promise<StudentStats> {
   // return await get(`${domainUrl}/student`) as StudentStats;
   return {
     averageOverTime: {
-      "2020C2": 6.9, "2021C1": 6.8, "2021C2": 6.9, "2022C1": 7.0, "2022C2": 6.9, "2023C1": 7.0
+      "12-20": 6.9, "1-21": 6.8, "1-22": 6.9, "2-23": 7.0, "2-24": 6.9, "12-25": 7.0
     },
     averageComparison: {
       studentAverage: 7.1,
