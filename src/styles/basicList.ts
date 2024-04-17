@@ -1,6 +1,6 @@
 import { StyleSheet, Appearance } from 'react-native';
 import basic from './basic';
-import {lightModeColors, darkModeColors} from './colorPalette';
+import { lightModeColors, darkModeColors } from './colorPalette';
 
 export default function getStyleSheet() {
   return Appearance.getColorScheme() === 'dark' ? darkMode : lightMode;
@@ -16,7 +16,7 @@ const sharedStyle = StyleSheet.create({
     fontSize: 18
   },
   touchableOpacity: { padding: 14, flexDirection: 'row', gap: 10, alignItems: 'center' },
-  separator: {borderWidth: 0.25, opacity: 0.5}
+  separator: { borderWidth: 0.25, opacity: 0.5 }
 });
 
 const lightMode = StyleSheet.create({

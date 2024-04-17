@@ -8,3 +8,4 @@ export { default as commissionInscriptionsRepository } from './commissionInscrip
 export { default as evaluationsRepository } from './evaluations';
 export { default as commissionsRepository } from './commissions';
 export { default as attendanceRepository } from './attendance';
+export { default as statsRepository } from './stats';
