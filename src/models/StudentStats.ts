@@ -1,18 +1,22 @@
 export default interface StudentStats {
-    averageOverTime: AverageOverTime;
-    averageComparison: AverageComparison;
-    topSubjects: TopSubjects;
+    average_over_time: AverageOverTime[];
+    student_vs_global_average: StudentVsGlobalAverage;
+    best_subjects: BestSubject[];
 }
 
-export interface AverageComparison {
-    studentAverage: number;
-    globalAverage: number;
+export interface BestSubject {
+    subject: string;
+    grade: number;
+    subject_average: number;
+}
+
+interface StudentVsGlobalAverage {
+    student_average: number;
+    global_average: number;
 }
 
 interface AverageOverTime {
-    [semesterLabel: string]: number;
+    date: string;
+    average: number;
 }
 
-interface TopSubjects { // TODO: does this format make sense?
-    [subjectName: string]: AverageComparison;
-}

@@ -7,7 +7,7 @@ import { lightModeColors } from '../../styles/colorPalette';
 import { LineChart } from 'react-native-chart-kit';
 import { StudentStats } from '../../models';
 import { statsRepository } from '../../repositories';
-import { AverageComparison } from '../../models/StudentStats';
+import { BestSubject } from '../../models/StudentStats';
 
 interface StatsProps {
   route: any
@@ -41,10 +41,10 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
   };
 
   const data = {
-    labels: Object.keys(studentStats?.averageOverTime || {}),
+    labels: studentStats?.average_over_time.map(item => item.date) || [],
     datasets: [
       {
-        data: Object.values(studentStats?.averageOverTime || {}),
+        data: studentStats?.average_over_time.map(item => item.average) || [],
         color: (opacity = 1) => lightModeColors.institutional,
         strokeWidth: 2
       }
@@ -52,12 +52,12 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
     legend: ["Promedio (mes-año)"]
   };
 
-  const listItems = Object.entries(studentStats?.topSubjects || {}).map(([subjectName, comparison]) => ({
-    name: subjectName,
+  const listItems = studentStats?.best_subjects.map(item => ({
+    name: item.subject,
     materialIcon: <MaterialIcon name="trophy-award" fontSize={24} />,
-    rightItem: <Text style={[styles.percentText, styles.itemText]}>{percentToDisplayString(comparison)}</Text>,
-    onPress: buildTopSubjectOnPressAlert(subjectName, comparison)
-  }));
+    rightItem: <Text style={[styles.percentText, styles.itemText]}>{percentToDisplayString(item)}</Text>,
+    onPress: buildTopSubjectOnPressAlert(item)
+  })) || [];
 
   const screenWidth = Dimensions.get("window").width - 41;
 
@@ -93,8 +93,8 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, padding: 16 }}>
               <View style={{ alignItems: 'center', gap: 8 }}>
                 <Progress.Circle
-                  progress={studentStats.averageComparison.studentAverage / 10}
-                  formatText={(a) => studentStats.averageComparison.studentAverage}
+                  progress={studentStats.student_vs_global_average.student_average / 10}
+                  formatText={(a) => floatToFixedDecimal(studentStats.student_vs_global_average.student_average)}
                   color={lightModeColors.institutional}
                   unfilledColor='lightblue'
                   strokeCap='round'
@@ -108,8 +108,8 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
               </View>
               <View style={{ alignItems: 'center', gap: 8 }}>
                 <Progress.Circle
-                  progress={studentStats.averageComparison.globalAverage / 10}
-                  formatText={(a) => studentStats.averageComparison.globalAverage}
+                  progress={studentStats.student_vs_global_average.global_average / 10}
+                  formatText={(a) => floatToFixedDecimal(studentStats.student_vs_global_average.global_average)}
                   color={lightModeColors.institutional}
                   unfilledColor='lightblue'
                   strokeCap='round'
@@ -144,17 +144,21 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
 
 export default Stats;
 
-function buildTopSubjectOnPressAlert(subjectName: string, comparison: AverageComparison): () => void {
+function floatToFixedDecimal(averageFloat: number): string {
+  return averageFloat.toFixed(2);
+}
+
+function buildTopSubjectOnPressAlert(bestSubjectInfo: BestSubject): () => void {
   return () => Alert.alert(
-    subjectName,
-    `Tu promedio en esta materia fue de ${comparison.studentAverage} mientras que ` +
-    `el promedio global esta en ${comparison.globalAverage}.\n\n` +
-    `Significa que te fue un ${percentToDisplayString(comparison)} mejor que al resto!`
+    bestSubjectInfo.subject,
+    `Tu promedio en esta materia fue de ${bestSubjectInfo.grade} mientras que ` +
+    `el promedio global esta en ${bestSubjectInfo.subject_average}.\n\n` +
+    `Significa que te fue un ${percentToDisplayString(bestSubjectInfo)} mejor que al resto!`
   );
 }
 
-function percentToDisplayString(comparison: AverageComparison): string {
-  const percentIncrease = (comparison.studentAverage - comparison.globalAverage) / comparison.globalAverage;
+function percentToDisplayString(bestSubjectInfo: BestSubject): string {
+  const percentIncrease = (bestSubjectInfo.grade - bestSubjectInfo.subject_average) / bestSubjectInfo.subject_average;
   const roundedPercent = Math.round(percentIncrease * 100);
   return `+${roundedPercent}%`;
 }
@@ -203,7 +207,6 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
   separator: { borderWidth: 0.25, opacity: 0.5 },
-  // itemView: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   itemText: { fontSize: 18 },
   percentText: { color: 'green' },
 });
