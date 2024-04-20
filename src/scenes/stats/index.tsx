@@ -69,25 +69,27 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
       {loading && <Loading />}
       {!loading && studentStats && (
         <>
-          <LineChart
-            data={data}
-            width={screenWidth}
-            height={220}
-            chartConfig={{
-              backgroundGradientFrom: "#ffffff",
-              backgroundGradientTo: "#ffffff",
-              fillShadowGradientFrom: "#4D4D4D",
-              fillShadowGradientTo: "#FFFFFF",
-              decimalPlaces: 2,
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            }}
-            bezier
-            style={{
-              marginBottom: 18,
-              borderRadius: 16
-            }}
-          />
+          <View style={styles.card}>
+            <LineChart
+              data={data}
+              width={screenWidth}
+              height={220}
+              chartConfig={{
+                backgroundGradientFrom: "#ffffff",
+                backgroundGradientTo: "#ffffff",
+                fillShadowGradientFrom: "#4D4D4D",
+                fillShadowGradientTo: "#FFFFFF",
+                decimalPlaces: 2,
+                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              }}
+              bezier
+              style={{
+                marginBottom: 18,
+                borderRadius: 16
+              }}
+            />
+          </View>
 
           <View style={styles.card}>
             <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, padding: 16 }}>
