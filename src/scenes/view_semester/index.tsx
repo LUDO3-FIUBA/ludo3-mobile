@@ -5,6 +5,7 @@ import { BasicList, MaterialIcon } from '../../components';
 import { Semester } from '../../models';
 import { useNavigation } from '@react-navigation/native';
 import { lightModeColors } from '../../styles/colorPalette';
+import IsPassingCard from '../../components/isPassingCard';
 
 Icon.loadFont();
 
@@ -48,6 +49,7 @@ const ViewSemestercreen: React.FC<any> = ({ route }) => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>{commission.subject_name}</Text>
       <Text style={styles.header2}>{commission.chief_teacher.first_name} {commission.chief_teacher.last_name}</Text>
+      <IsPassingCard semesterId={semester.id} />
       <View style={styles.card}>
         <View style={styles.cardItem}>
           <BasicList items={listItems} />
