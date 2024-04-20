@@ -17,6 +17,7 @@ const sharedStyle = StyleSheet.create({
     ...basic().textInput,
     paddingHorizontal: 10,
     marginVertical: 15,
+    borderRadius: 8
   },
   button: {
     ...basic().button,
