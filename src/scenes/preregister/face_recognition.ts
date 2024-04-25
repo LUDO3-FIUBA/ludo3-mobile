@@ -18,7 +18,7 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
   images: any[];
 
   constructor(descriptions: string[], dni: string, mail: string, images: any[] = []) {
-    super(descriptions.shift() || '');
+    super(descriptions.shift() || '', 'front', false);
     this.descriptions = descriptions;
     this.dni = dni;
     this.mail = mail;
