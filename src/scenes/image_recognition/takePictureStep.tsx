@@ -121,7 +121,7 @@ export default TakePictureStep;
  * @param photoActions 
  */
 function addRotationIfWrongOrientation(photo: PhotoFile, photoActions: Action[]) {
-  if (photo.orientation === 'portrait' && photo.width > photo.height) {
+  if (photo.width > photo.height) {
     photoActions.push({ rotate: 90 })
   }
 }
