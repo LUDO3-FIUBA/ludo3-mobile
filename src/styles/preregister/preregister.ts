@@ -12,17 +12,29 @@ const sharedStyle = StyleSheet.create({
     ...basic().view,
     alignItems: 'stretch',
     flex: 1,
+    backgroundColor: 'white'
   },
   textInput: {
-    ...basic().textInput,
-    paddingHorizontal: 10,
-    marginVertical: 15,
-    borderRadius: 8
+    height: 40,
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    borderColor: 'grey',
   },
   button: {
     ...basic().button,
     marginVertical: 15,
   },
+  inputLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+    backgroundColor: 'transparent',
+    borderRadius: 5,
+    display: 'flex',
+    textAlign: 'center',
+  }
 });
 
 const lightMode = StyleSheet.create({

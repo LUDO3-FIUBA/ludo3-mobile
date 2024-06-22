@@ -1,5 +1,5 @@
 import React, { useState, useRef, FunctionComponent } from 'react';
-import { View, SafeAreaView } from 'react-native';
+import { View, SafeAreaView, Text } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { preregister as style } from '../../styles';
 import { RoundedButton, FormInput } from '../../components';
@@ -39,6 +39,11 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
           contentContainerStyle={style().scrollView}
         >
           <View>
+            <View style={style().inputLabels}>
+              <Text style={style().text}>
+                DNI
+              </Text>
+            </View>
             <FormInput
               ref={firstTextInput}
               style={style().textInput}
@@ -47,7 +52,7 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
               keyboardType="numeric"
               returnKeyType="next"
               nextField={() => secondTextInput.current}
-              placeholder="DNI"
+              placeholder="Por ejemplo: 12345678"
               blurOnSubmit={false}
               onTextChanged={(text, isValid) => onDniChange(text, isValid)}
               validation={{
@@ -61,13 +66,18 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
                 },
               }}
             />
+            <View style={style().inputLabels}>
+              <Text style={[style().text, { marginTop: 12 }]}>
+                Correo electrónico
+              </Text>
+            </View>
             <FormInput
               ref={secondTextInput}
               style={style().textInput}
               placeholderColor={style().textInputPlaceholder.color}
               errorStyle={style().errorInInput}
               keyboardType="email-address"
-              placeholder="Email"
+              placeholder="Por ejemplo: nombre@fi.uba.ar"
               onTextChanged={(text, isValid) => onEmailChange(text, isValid)}
               validation={{
                 presence: {
@@ -81,7 +91,7 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
             />
           </View>
           <RoundedButton
-            text="Continuar"
+            text="Siguiente"
             enabled={shouldEnableSignUp()}
             style={style().button}
             onPress={() => {

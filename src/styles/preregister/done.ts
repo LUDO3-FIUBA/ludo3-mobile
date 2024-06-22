@@ -1,6 +1,6 @@
-import { StyleSheet, Appearance } from 'react-native';
+import { Appearance, StyleSheet } from 'react-native';
 import basic from '../basic';
-import {lightModeColors, darkModeColors} from '../colorPalette';
+import { darkModeColors, lightModeColors } from '../colorPalette';
 
 export default function getStyleSheet() {
   return Appearance.getColorScheme() === 'dark' ? darkMode : lightMode;
@@ -18,7 +18,9 @@ const sharedStyle = StyleSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-    alignItems: 'stretch',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 30,
   },
   text: {
     ...basic().text,

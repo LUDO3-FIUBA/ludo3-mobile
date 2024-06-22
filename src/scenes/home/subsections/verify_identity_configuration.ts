@@ -13,17 +13,17 @@ class VerifyIdentityConfiguration extends TakePictureStepConfiguration {
   async onDataObtained(image: any, navigation: any, disableLoading: () => void) {
     await makeRequest(() => usersRepository.validate(image), navigation)
       .then((user: { fullName: () => any; id: () => any; }) => {
-        disableLoading();
         Alert.alert('Éxito', `Sos:\n${user.fullName()}\n(${user.id()})`);
+        disableLoading();
       })
       .catch((error: any) => {
-        disableLoading();
         if (error instanceof usersRepository.IdentityFail) {
           Alert.alert('Error', '¡No sos quien decís ser!');
         } else {
           console.log('Error', error);
           Alert.alert('Error', 'Hubo un error, no pudimos identificarte.');
         }
+        disableLoading();
       });
   }
 

@@ -35,18 +35,17 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
       await authenticationRepository
         .preregister(this.dni, this.mail, image)
         .then(() => {
-          disableLoading();
           navigation.navigate('PreRegisterDone');
+          disableLoading();
         })
         .catch((error) => {
-          disableLoading();
           if (error instanceof authenticationRepository.InvalidImage) {
             Alert.alert('Imagen inválida', 'Asegurate de que se vea bien tu cara.');
           } else if (error instanceof authenticationRepository.InvalidDNI) {
             Alert.alert(
               'DNI ya registrado',
               'Chequeá haberlo ingresado correctamente. De ser correcto, ' +
-                'contactate con Admisión para resetear la cuenta asociada a este DNI.',
+              'contactate con Admisión para resetear la cuenta asociada a este DNI.',
               [{ text: 'OK', onPress: () => navigation.navigate('PreRegister') }],
               {
                 cancelable: false,
@@ -63,6 +62,7 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
               }
             );
           }
+          disableLoading();
         });
     } else {
       navigation.push('TakePicture', {
