@@ -35,14 +35,17 @@ const sharedStyle = StyleSheet.create({
     ...basic().text,
     fontSize: 20,
     paddingVertical: 5,
+    color: 'white'
   },
   date: {
     ...basic().text,
     fontSize: 13,
+    color: 'white'
   },
   act: {
     ...basic().text,
     fontSize: 15,
+    color: 'white'
   },
   container: {
     ...basic().view,
