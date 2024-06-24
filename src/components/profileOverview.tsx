@@ -5,17 +5,20 @@ import { usersRepository } from '../repositories';
 import { User } from '../models';
 import { profileOverview as style } from '../styles';
 import { SessionManager } from '../managers';
+import { useNavigation } from '@react-navigation/native';
+import { makeRequest } from '../scenes/authenticatedComponent';
 
 Icon.loadFont()
 
 export default function ProfileOverview() {
     const [user, setUser] = useState<User | null>(null);
-    const isLoggedIn = SessionManager.getInstance()?.isLoggedIn()
+    const isLoggedIn = SessionManager.getInstance()?.isLoggedIn();
+    const navigation = useNavigation();
 
     useEffect(() => {
         async function getUser() {
             try {
-                const fetchedUser = await usersRepository.getInfo();
+                const fetchedUser = await makeRequest(usersRepository.getInfo, navigation);
                 setUser(fetchedUser);
             }
             catch (e) {
