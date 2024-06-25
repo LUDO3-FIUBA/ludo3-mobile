@@ -14,7 +14,7 @@ const ChiefCard = ({ first_name, last_name, email }: ChiefTeacher) => {
       <Image source={UserIcon} style={styles.leaderImage} />
       <View style={styles.leaderInfoContainer}>
         <Text style={styles.leaderName}>{first_name} {last_name}</Text>
-        <Text style={styles.leaderRole}>{'Jefe de cátedra'}</Text>
+        <Text style={styles.leaderRole}>Profesor Titular</Text>
         <CopyableEmailText email={email} />
       </View>
     </View>
@@ -28,7 +28,7 @@ const TeacherCard = ({ teacher, role}: { teacher: Teacher, role: string }) => {
       <Image source={UserIcon} style={styles.image} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{teacher.first_name + ' ' + teacher.last_name} </Text>
-        <Text style={styles.role}>{role === 'T' ? 'Docente' : 'Ayudante'}</Text>
+        <Text style={styles.role}>{role}</Text>
         <CopyableEmailText email={teacher.email} />
       </View>
     </View>

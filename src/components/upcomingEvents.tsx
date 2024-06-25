@@ -9,7 +9,7 @@ const UpcomingEventsCard: FC = () => {
 
     async function fetch() {
         const evals = await evaluationsRepository.fetchMisExamenes()
-        setEvaluations(evals)
+        setEvaluations(evals.slice(0, 3))
     }
 
     useEffect(() => {
