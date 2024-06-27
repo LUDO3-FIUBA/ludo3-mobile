@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "build-apk": "cd android && gradlew assembleRelease && copy app\\build\\outputs\\apk\\release\\app-release.apk ..\\"
   },
   "dependencies": {
     "@expo/react-native-action-sheet": "^3.9.0",
