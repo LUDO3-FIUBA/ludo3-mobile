@@ -44,7 +44,7 @@ function parseQrCodeData(rawData: string): QRCode {
 
         switch (typeString) {
             case QRCodeType.FinalExamUuid:
-                return { type: QRCodeType.FinalExamUuid, parsedUuid: rawData }
+                return { type: QRCodeType.FinalExamUuid, parsedUuid }
             case QRCodeType.AttendanceUuid:
                 return { type: QRCodeType.AttendanceUuid, parsedUuid }
             case QRCodeType.EvaluationUuid:
