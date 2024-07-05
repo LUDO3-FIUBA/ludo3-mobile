@@ -9,6 +9,7 @@ interface FinalExamCardProps {
 }
 
 const FinalExamCard: FC<FinalExamCardProps> = ({ finalExam }) => {
+  const fechaExamen = moment(finalExam.date).format('D [de] MMMM, YYYY');
   return (
     <View style={style().view}>
       <Text style={style().subjectName}>
@@ -31,7 +32,7 @@ const FinalExamCard: FC<FinalExamCardProps> = ({ finalExam }) => {
       )}
       {finalExam.date && (
         <Text style={style().date}>
-          {moment(finalExam.date).format('D [de] MMMM, YYYY')}
+          {fechaExamen}
         </Text>
       )}
     </View>

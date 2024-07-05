@@ -48,7 +48,7 @@ const FinalExamList: FC<FinalExamListProps> = ({ filter, fetch, emptyMessage, na
       Alert.alert(
         '¿Qué pasó?',
         'No sabemos pero no pudimos buscar tu información. ' +
-          'Volvé a intentar en unos minutos.'
+        'Volvé a intentar en unos minutos.'
       );
     }
   };
@@ -68,17 +68,7 @@ const FinalExamList: FC<FinalExamListProps> = ({ filter, fetch, emptyMessage, na
           onRefresh={() => fetchData(true)}
           refreshing={refreshing}
           keyExtractor={finalExam => finalExam.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('SubjectHistoryScreen', {
-                  subject: item.subject.toObject(),
-                });
-              }}
-            >
-              <FinalExamCard finalExam={item} />
-            </TouchableOpacity>
-          )}
+          renderItem={({ item }) => <FinalExamCard finalExam={item} />}
         />
       )}
     </View>

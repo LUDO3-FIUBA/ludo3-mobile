@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FC } from 'react';
-import { View, Text, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, Alert } from 'react-native';
 import FinalExamCard from './finalExamCard';
 import { finalExamList as style } from '../styles';
 import { FinalExam } from '../models';
@@ -62,16 +62,7 @@ const FinalExamOverviewList: FC<FinalExamOverviewListProps> = ({ fetch, emptyMes
   return (
     <View style={style().view}>
       {finalExams.map((item) =>
-        <TouchableOpacity
-          key={`finalexamsoverview-${item.id}`}
-          onPress={() => {
-            navigation.navigate('SubjectHistoryScreen', {
-              subject: item.subject.toObject(),
-            });
-          }}
-        >
-          <FinalExamCard finalExam={item} />
-        </TouchableOpacity>
+        <FinalExamCard key={`finalexamsoverview-${item.id}`} finalExam={item} />
       )}
     </View>
   );

@@ -94,20 +94,6 @@ const App = () => {
               component={StatsScreen}
               options={{ headerShown: true, title: "Estadisticas" }}
             />
-            {/* <Stack.Screen
-              name="CameraTest"
-              component={CameraTestScreen}
-              options={({ route }) => ({ title: 'Prueba de cámara' })}
-            /> */}
-
-            {/* <Stack.Screen
-              name="SubjectHistoryScreen"
-              component={SubjectHistoryScreen}
-              options={({ route }) => ({
-                title: route.params?.subject.name,
-                headerShown: true,
-              })}
-            /> */}
           </Stack.Navigator>
         </NavigationContainer>
       </ActionSheetProvider>

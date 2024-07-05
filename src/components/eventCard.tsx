@@ -25,22 +25,27 @@ const EventCard: FC<EventCardProps> = ({ evaluation }) => {
         </Text>
 
         <Text style={style().date}>
-          {getRemainingTime(evaluation.end_date)}
+          {getRemainingTime(evaluation.start_date, evaluation.end_date)}
         </Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-function getRemainingTime(targetDate: string): string {
+function getRemainingTime(startDateStr: string | null, endDateStr: string): string {
   const currentDate = moment();
-  const futureDate = moment(targetDate);
+  const startDate = moment(startDateStr || endDateStr);
+  const endDate = moment(endDateStr);
 
-  if (futureDate.isBefore(currentDate)) {
+  if (endDate.isBefore(currentDate)) {
     return "Este evento ya ocurrió";
   }
 
-  return futureDate.fromNow();
+  if (currentDate.isBetween(startDate, endDate)) {
+    return "Ahora";
+  }
+
+  return startDate.fromNow();
 }
 
 
