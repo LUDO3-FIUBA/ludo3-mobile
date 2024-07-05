@@ -38,47 +38,23 @@ class VerifyIdentityForEvaluationConfiguration extends TakePictureStepConfigurat
       })
       .catch((error: any) => {
         // TODO: check error handling below
-        disableLoading();
-        if (error instanceof finalExamsRepository.IdentityFail) {
-        //   Alert.alert(
-        //     '¡No sos quien decís ser!',
-        //     'O no hemos podido reconocerte. Intentá de nuevo.',
-        //   );
-        // } else if (error instanceof finalExamsRepository.NotAFinal) {
-        //   Alert.alert(
-        //     'QR inválido',
-        //     'No encontramos ningún final activo que corresponda a ese QR. ' +
-        //       'Cualquier cosa, intentá de nuevo.',
-        //     [
-        //       {
-        //         text: 'OK',
-        //         onPress: () => {
-        //           navigation.goBack();
-        //         },
-        //       },
-        //     ],
-        //     {
-        //       cancelable: false,
-        //     },
-        //   );
-        } else {
-          console.log('Error', error);
-          Alert.alert(
-            'Error',
-            'Hubo un error, no pudimos identificarte a vos o al exámen.',
-            [
-              {
-                text: 'OK',
-                onPress: () => {
-                  navigation.goBack();
-                },
-              },
-            ],
+        console.log('Error', error);
+        Alert.alert(
+          'Error',
+          'Hubo un error, no pudimos identificarte a vos o al exámen.',
+          [
             {
-              cancelable: false,
+              text: 'OK',
+              onPress: () => {
+                navigation.goBack();
+              },
             },
-          );
-        }
+          ],
+          {
+            cancelable: false,
+          },
+        );
+        disableLoading();
       });
   }
 
