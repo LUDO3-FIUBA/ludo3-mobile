@@ -1,5 +1,5 @@
 import React, { Dispatch, FC, SetStateAction } from 'react';
-import { TouchableHighlight, Alert } from 'react-native';
+import { TouchableOpacity, Alert } from 'react-native';
 import { connectActionSheet } from '@expo/react-native-action-sheet';
 import prompt from 'react-native-prompt-android';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -108,9 +108,9 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = () => {
   };
 
   return (
-    <TouchableHighlight style={style().filterButton} onPress={handlePress}>
+    <TouchableOpacity style={style().filterButton} onPress={handlePress}>
       <Icon style={style().filterButtonIcon} name="filter" />
-    </TouchableHighlight>
+    </TouchableOpacity>
   );
 };
 
