@@ -69,7 +69,7 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
       console.error("Error fetching data", error);
       Alert.alert(
         '¿Qué pasó?',
-        'No sabemos pero no pudimos conseguir información acerca del semestre. ' +
+        'No sabemos pero no pudimos conseguir información acerca del cuatrimestre. ' +
         'Volvé a intentar en unos minutos.',
       );
       setIsLoading(false);
