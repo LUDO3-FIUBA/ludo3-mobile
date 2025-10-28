@@ -52,10 +52,11 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
               }
             );
           } else {
-            console.log('Error', error);
+            console.error('[PreRegister] Error details:', JSON.stringify(error, null, 2));
+            const errorMsg = error?.message || error?.toString() || 'Error desconocido';
             Alert.alert(
               'Error',
-              'Hubo un error inesperado. Intenta nuevamente en unos minutos.',
+              `Hubo un error inesperado. Intenta nuevamente en unos minutos.\n\nDetalles: ${errorMsg}`,
               [{ text: 'OK', onPress: () => navigation.navigate('PreRegister') }],
               {
                 cancelable: false,

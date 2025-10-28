@@ -15,10 +15,22 @@ interface CameraWithPermissionsProps {
 }
 
 const CameraWithPermissions = ({ takePicture, cameraType, onBarCodeRead, searchForQRCode, ignoreReadings }: CameraWithPermissionsProps) => {
-    const device = useCameraDevice(cameraType);
+    const requestedDevice = useCameraDevice(cameraType);
+    const fallbackDevice = useCameraDevice(cameraType === 'front' ? 'back' : 'front');
     const { hasPermission, requestPermission } = useCameraPermission();
 
-    console.log(`cameraPermissionGranted: ${hasPermission}`)
+    // Use requested device if available, otherwise fallback to the other camera
+    const device = requestedDevice || fallbackDevice;
+
+    console.log(`[Camera] hasPermission: ${hasPermission}, requestedDevice: ${requestedDevice?.id || 'null'}, fallbackDevice: ${fallbackDevice?.id || 'null'}, cameraType: ${cameraType}`)
+
+    if (hasPermission === null) {
+        return (
+            <View style={{ position: 'absolute', bottom: 8, width: '100%', alignItems: 'center', gap: 24, padding: 16 }}>
+                <Text style={{ fontSize: 16 }}>Verificando permisos de cámara...</Text>
+            </View>
+        )
+    }
 
     if (!hasPermission) {
         return (
@@ -29,13 +41,19 @@ const CameraWithPermissions = ({ takePicture, cameraType, onBarCodeRead, searchF
         )
     }
 
-    if (device && !searchForQRCode) {
-        return <PhotoCamera device={device} takePicture={takePicture} />
-    } else if (device && searchForQRCode) {
-        return <QRScannerCamera device={device} onBarCodeRead={onBarCodeRead} ignoreReadings={ignoreReadings} />
+    if (!device) {
+        return (
+            <View style={{ position: 'absolute', bottom: 8, width: '100%', alignItems: 'center', gap: 24, padding: 16 }}>
+                <Text style={{ fontSize: 16 }}>No se encontró ninguna cámara en tu dispositivo. Verifica la configuración del emulador o dispositivo.</Text>
+            </View>
+        )
     }
 
-    return <></>
+    if (!searchForQRCode) {
+        return <PhotoCamera device={device} takePicture={takePicture} />
+    } else {
+        return <QRScannerCamera device={device} onBarCodeRead={onBarCodeRead} ignoreReadings={ignoreReadings} />
+    }
 }
 
 export default CameraWithPermissions;

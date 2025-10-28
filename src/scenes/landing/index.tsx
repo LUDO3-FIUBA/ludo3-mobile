@@ -29,8 +29,12 @@ const Landing = ({ navigation }: Props) => {
       additionalParameters: {},
     };
 
+    console.log('[Login] Starting OAuth flow with config:', JSON.stringify(config, null, 2));
+
     try {
+      console.log('[Login] Calling authorize...');
       const { authorizationCode } = await authorize(config);
+      console.log('[Login] Authorization code received');
       const response = await authenticationRepository.login(
         authorizationCode,
         redirectUrl
@@ -59,8 +63,8 @@ const Landing = ({ navigation }: Props) => {
       } else if (error instanceof authenticationRepository.AccountNotApproved) {
         showAccountNotApprovedError();
       } else if (!isCancellationError(error as { message: string })) {
-        console.log('Error', error);
-        showGenericError();
+        console.error('[Login] Error details:', JSON.stringify(error, null, 2));
+        showGenericError(error);
       }
       setLoginInProgress(false);
     }
@@ -99,8 +103,12 @@ const isCancellationError = (error: { message: string }) => {
   );
 };
 
-const showGenericError = () => {
-  Alert.alert('Error', 'Chequeá que hayas ingresado correctamente tus datos.');
+const showGenericError = (error?: any) => {
+  const errorMsg = error?.message || error?.toString() || 'Error desconocido';
+  Alert.alert(
+    'Error de autenticación', 
+    `No se pudo completar el inicio de sesión.\n\nDetalles: ${errorMsg}\n\nChequeá que hayas ingresado correctamente tus datos.`
+  );
 };
 
 const showAccountNotApprovedError = () => {
