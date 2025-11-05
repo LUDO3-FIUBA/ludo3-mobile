@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Alert, Image, StyleSheet, Text } from 'react-native';
+import { View, Alert, Image, StyleSheet, Text, Modal, TextInput, TouchableOpacity } from 'react-native';
 import { authorize } from 'react-native-app-auth';
 import { RoundedButton } from '../../components';
 import { landing as style } from '../../styles';
@@ -14,6 +14,8 @@ interface Props {
 
 const Landing = ({ navigation }: Props) => {
   const [loginInProgress, setLoginInProgress] = useState(false);
+  const [showDniModal, setShowDniModal] = useState(false);
+  const [dni, setDni] = useState('');
   const redirectUrl = 'org.erinc.ludo://oauth';
 
   const handleLogin = async () => {
@@ -70,6 +72,48 @@ const Landing = ({ navigation }: Props) => {
     }
   };
 
+  const handleClassicLogin = async () => {
+    if (!dni.trim()) {
+      Alert.alert('Error', 'Por favor ingresa tu DNI');
+      return;
+    }
+
+    setLoginInProgress(true);
+    setShowDniModal(false);
+    
+    try {
+      console.log('[Classic Login] Starting login with DNI:', dni);
+      const response = await authenticationRepository.classicLogin(dni.trim());
+      const sessionManager: SessionManager = await SessionManager.getInstance()!;
+      
+      if (sessionManager) {
+        sessionManager.saveCredentials(response);
+        const user = await usersRepository.getInfo();
+
+        if (!user.isStudent()) {
+          throw new authenticationRepository.NotAStudent();
+        }
+        setLoginInProgress(false);
+        setDni('');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'RootDrawer' }],
+        });
+      }
+    } catch (error) {
+      if (error instanceof authenticationRepository.NotAStudent) {
+        showRoleError();
+      } else if (error instanceof authenticationRepository.AccountNotApproved) {
+        showAccountNotApprovedError();
+      } else {
+        console.error('[Classic Login] Error details:', JSON.stringify(error, null, 2));
+        showGenericError(error);
+      }
+      setLoginInProgress(false);
+      setDni('');
+    }
+  };
+
   return (
     <View style={style().view}>
       <View style={styles.card}>
@@ -88,10 +132,54 @@ const Landing = ({ navigation }: Props) => {
         onPress={() => navigation.navigate('PreRegister')}
       />
       <RoundedButton
-        text="Iniciar sesión"
+        text="Login FIUBA"
         enabled={!loginInProgress}
         onPress={handleLogin}
       />
+      <RoundedButton
+        text="Ingreso clásico"
+        enabled={!loginInProgress}
+        onPress={() => setShowDniModal(true)}
+      />
+
+      <Modal
+        visible={showDniModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDniModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Ingreso clásico</Text>
+            <Text style={styles.modalLabel}>Ingresa tu DNI:</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="DNI"
+              keyboardType="numeric"
+              value={dni}
+              onChangeText={setDni}
+              autoFocus={true}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setShowDniModal(false);
+                  setDni('');
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={handleClassicLogin}
+              >
+                <Text style={styles.confirmButtonText}>Ingresar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -158,5 +246,71 @@ const styles = StyleSheet.create({
   cardLabel: {
     fontSize: 18,
     color: 'gray',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: lightModeColors.institutional,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalLabel: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 8,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 20,
+    backgroundColor: '#f9f9f9',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f0f0f0',
+  },
+  confirmButton: {
+    backgroundColor: lightModeColors.institutional,
+  },
+  cancelButtonText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  confirmButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
