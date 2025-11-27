@@ -16,61 +16,6 @@ const Landing = ({ navigation }: Props) => {
   const [loginInProgress, setLoginInProgress] = useState(false);
   const [showDniModal, setShowDniModal] = useState(false);
   const [dni, setDni] = useState('');
-  const redirectUrl = 'org.erinc.ludo://oauth';
-
-  const handleLogin = async () => {
-    setLoginInProgress(true);
-    const config = {
-      issuer: 'https://auth.fi.uba.ar/',
-      clientId: 'ed6fdc77-51b0-4828-be5d-37d23d1b6880',
-      redirectUrl,
-      scopes: ['openid', 'profile', 'email'],
-      response_type: 'code',
-      skipCodeExchange: true,
-      usePKCE: false,
-      additionalParameters: {},
-    };
-
-    console.log('[Login] Starting OAuth flow with config:', JSON.stringify(config, null, 2));
-
-    try {
-      console.log('[Login] Calling authorize...');
-      const { authorizationCode } = await authorize(config);
-      console.log('[Login] Authorization code received');
-      const response = await authenticationRepository.login(
-        authorizationCode,
-        redirectUrl
-      );
-      const sessionManager: SessionManager = await SessionManager.getInstance()!;
-      if (sessionManager) {
-        sessionManager.saveCredentials(response);
-        const user = await usersRepository.getInfo();
-
-        if (!user.isStudent()) {
-          throw new authenticationRepository.NotAStudent();
-        }
-        setLoginInProgress(false);
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'RootDrawer' }],
-        });
-      }
-      // navigation.reset({
-      //   index: 0,
-      //   routes: [{ name: 'Home' }],
-      // });
-    } catch (error) {
-      if (error instanceof authenticationRepository.NotAStudent) {
-        showRoleError();
-      } else if (error instanceof authenticationRepository.AccountNotApproved) {
-        showAccountNotApprovedError();
-      } else if (!isCancellationError(error as { message: string })) {
-        console.error('[Login] Error details:', JSON.stringify(error, null, 2));
-        showGenericError(error);
-      }
-      setLoginInProgress(false);
-    }
-  };
 
   const handleClassicLogin = async () => {
     if (!dni.trim()) {
