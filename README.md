@@ -47,8 +47,8 @@ brew install cocoapods
 
 cd ios && export LANG=en_US.UTF-8 && pod install
 
-# using npm
-npm run ios
+# using npx
+npx react-native run-ios --device "<device-name>"
 
 # OR using Yarn
 yarn ios
