@@ -132,12 +132,7 @@ const Landing = ({ navigation }: Props) => {
         onPress={() => navigation.navigate('PreRegister')}
       />
       <RoundedButton
-        text="Login FIUBA"
-        enabled={!loginInProgress}
-        onPress={handleLogin}
-      />
-      <RoundedButton
-        text="Ingreso clásico"
+        text="Login con DNI"
         enabled={!loginInProgress}
         onPress={() => setShowDniModal(true)}
       />
