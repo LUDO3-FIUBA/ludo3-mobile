@@ -30,15 +30,26 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
     navigation: NavigationType,
     disableLoading: () => void
   ): Promise<void> {
+    console.log('[FacePictureConfig] onDataObtained called');
+    console.log('[FacePictureConfig] descriptions.length:', this.descriptions.length);
+    console.log('[FacePictureConfig] images.length before push:', this.images.length);
+    
     this.images.push(image);
+    
     if (this.descriptions.length === 0) {
+      console.log('[FacePictureConfig] No more descriptions, calling preregister');
+      console.log('[FacePictureConfig] DNI:', this.dni, 'Email:', this.mail);
+      
       await authenticationRepository
         .preregister(this.dni, this.mail, image)
         .then(() => {
+          console.log('[FacePictureConfig] Preregister successful, navigating to PreRegisterDone');
           navigation.navigate('PreRegisterDone');
           disableLoading();
         })
         .catch((error) => {
+          console.log('[FacePictureConfig] Preregister failed:', error);
+          
           if (error instanceof authenticationRepository.InvalidImage) {
             Alert.alert('Imagen inválida', 'Asegurate de que se vea bien tu cara.');
           } else if (error instanceof authenticationRepository.InvalidDNI) {
@@ -66,6 +77,7 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
           disableLoading();
         });
     } else {
+      console.log('[FacePictureConfig] More descriptions remaining, navigating to next TakePicture');
       navigation.push('TakePicture', {
         configuration: new FacePictureConfiguration(
           this.descriptions,
