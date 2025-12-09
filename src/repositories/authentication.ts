@@ -42,7 +42,7 @@ export function preregister(
     dni,
     email,
     is_student: true,
-    image: `'${image}'`,
+    image: `${image}`,
   }).catch(error => {
     // Check for: No face detected error
     if (
@@ -83,9 +83,26 @@ export function refresh(token: string): Promise<Object> {
   return post(`${authUrl}/jwt/refresh`, {refresh: token});
 }
 
+export function classicLogin(dni: string): Promise<Object> {
+  return post(`${authUrl}/login`, {dni}).catch(
+    (error: StatusCodeError) => {
+      if (error instanceof StatusCodeError && error.code == 404) {
+        return Promise.reject(new NotAStudent());
+      } else if (
+        error instanceof StatusCodeError &&
+        error.isBecauseOf(accountNotApprovedErrorCode)
+      ) {
+        return Promise.reject(new AccountNotApproved());
+      }
+      return Promise.reject(error);
+    },
+  );
+}
+
 export default {
   preregister,
   login,
+  classicLogin,
   refresh,
   NotAStudent,
   AccountNotApproved,

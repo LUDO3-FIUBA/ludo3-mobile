@@ -74,6 +74,11 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
     namespace "org.erinc.ludo2"
     defaultConfig {
         applicationId "org.erinc.ludo2"
