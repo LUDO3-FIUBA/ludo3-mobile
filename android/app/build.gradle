@@ -74,15 +74,15 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "org.erinc.ludo2"
+    namespace "org.fiuba.ludo"
     defaultConfig {
-        applicationId "org.erinc.ludo2"
+        applicationId "org.fiuba.ludo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         manifestPlaceholders = [
-          appAuthRedirectScheme: 'org.erinc.ludo'
+          appAuthRedirectScheme: 'org.fiuba.ludo'
         ]
     }
     signingConfigs {

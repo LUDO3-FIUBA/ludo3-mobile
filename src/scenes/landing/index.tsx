@@ -14,7 +14,7 @@ interface Props {
 
 const Landing = ({ navigation }: Props) => {
   const [loginInProgress, setLoginInProgress] = useState(false);
-  const redirectUrl = 'org.erinc.ludo://oauth';
+  const redirectUrl = 'org.fiuba.ludo://oauth';
 
   const handleLogin = async () => {
     setLoginInProgress(true);

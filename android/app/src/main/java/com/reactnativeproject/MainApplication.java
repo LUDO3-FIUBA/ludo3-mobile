@@ -1,4 +1,4 @@
-package org.erinc.ludo2;
+package org.fiuba.ludo;
 import android.content.res.Configuration;
 import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
