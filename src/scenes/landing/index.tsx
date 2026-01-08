@@ -7,6 +7,7 @@ import { authenticationRepository, usersRepository } from '../../repositories';
 import SessionManager from '../../managers/sessionManager';
 import { lightModeColors } from '../../styles/colorPalette';
 const LudoIcon = require('../../assets/ludo_icon.png');
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 interface Props {
   navigation: any;
@@ -66,6 +67,36 @@ const Landing = ({ navigation }: Props) => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    setLoginInProgress(true);
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      
+      // Log the user info to see what's available
+      console.log('Google Sign-In Success!');
+      console.log('Full Response:', JSON.stringify(userInfo, null, 2));
+      console.log('User ID:', userInfo.data?.user.id);
+      console.log('Email:', userInfo.data?.user.email);
+      console.log('Full Name:', userInfo.data?.user.name);
+      console.log('Given Name:', userInfo.data?.user.givenName);
+      console.log('Family Name:', userInfo.data?.user.familyName);
+      console.log('Photo URL:', userInfo.data?.user.photo);
+      
+      // Show success alert with user info
+      Alert.alert(
+        'Google Sign-In Success',
+        `Name: ${userInfo.data?.user.name}\nEmail: ${userInfo.data?.user.email}`
+      );
+      
+    } catch (error: any) {
+      console.error('Google Sign-In Error:', error);
+      Alert.alert('Error', `Google Sign-In failed: ${error.message}`);
+    } finally {
+      setLoginInProgress(false);
+    }
+  };
+
   return (
     <View style={style().view}>
       <View style={styles.card}>
@@ -87,6 +118,11 @@ const Landing = ({ navigation }: Props) => {
         text="Iniciar sesión"
         enabled={!loginInProgress}
         onPress={handleLogin}
+      />
+      <RoundedButton
+        text="Iniciar sesión con Google"
+        enabled={!loginInProgress}
+        onPress={signInWithGoogle}
       />
     </View>
   );

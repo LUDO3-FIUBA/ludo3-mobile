@@ -10,11 +10,17 @@ import {
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance } from 'react-native';
+import { useEffect } from 'react';
+import { configureGoogle } from './src/auth/google_signin';
 
 const Stack = createStackNavigator();
 
 
 const App = () => {
+  useEffect(() => {
+    configureGoogle();
+  }, []);
+
   return (
     <Provider store={store}>
       <ActionSheetProvider>
