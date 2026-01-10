@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, Alert, Image, StyleSheet, Text, Modal, TextInput, TouchableOpacity } from 'react-native';
-import { authorize } from 'react-native-app-auth';
+import { View, Alert, Image, StyleSheet, Text, TextInput } from 'react-native';
 import { RoundedButton } from '../../components';
 import { landing as style } from '../../styles';
 import { authenticationRepository, usersRepository } from '../../repositories';
@@ -14,7 +13,6 @@ interface Props {
 
 const Landing = ({ navigation }: Props) => {
   const [loginInProgress, setLoginInProgress] = useState(false);
-  const [showDniModal, setShowDniModal] = useState(false);
   const [dni, setDni] = useState('');
 
   const handleClassicLogin = async () => {
@@ -24,7 +22,6 @@ const Landing = ({ navigation }: Props) => {
     }
 
     setLoginInProgress(true);
-    setShowDniModal(false);
     
     try {
       console.log('[Classic Login] Starting login with DNI:', dni);
@@ -71,63 +68,36 @@ const Landing = ({ navigation }: Props) => {
           </View>
         </View>
       </View>
-      <RoundedButton
-        text="Pre-registro"
-        enabled={!loginInProgress}
-        onPress={() => navigation.navigate('PreRegister')}
-      />
-      <RoundedButton
-        text="Login con DNI"
-        enabled={!loginInProgress}
-        onPress={() => setShowDniModal(true)}
-      />
 
-      <Modal
-        visible={showDniModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowDniModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Ingreso clásico</Text>
-            <Text style={styles.modalLabel}>Ingresa tu DNI:</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="DNI"
-              keyboardType="numeric"
-              value={dni}
-              onChangeText={setDni}
-              autoFocus={true}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setShowDniModal(false);
-                  setDni('');
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.confirmButton]}
-                onPress={handleClassicLogin}
-              >
-                <Text style={styles.confirmButtonText}>Ingresar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <View style={styles.loginSection}>
+        <Text style={styles.dniLabel}>Ingresá tu DNI:</Text>
+        <TextInput
+          style={styles.dniInput}
+          placeholder="DNI"
+          keyboardType="numeric"
+          value={dni}
+          onChangeText={setDni}
+          editable={!loginInProgress}
+        />
+        <RoundedButton
+          text="Ingresar"
+          enabled={!loginInProgress && dni.trim().length > 0}
+          onPress={handleClassicLogin}
+        />
+      </View>
+
+      <View style={styles.preregisterSection}>
+        <Text style={styles.preregisterText}>
+          ¿Es tu primera vez?{' '}
+          <Text
+            style={styles.preregisterLink}
+            onPress={() => navigation.navigate('PreRegister')}
+          >
+            Realizá el pre-registro
+          </Text>
+        </Text>
+      </View>
     </View>
-  );
-};
-
-const isCancellationError = (error: { message: string }) => {
-  return (
-    error.message === 'User cancelled flow' ||
-    error.message === 'The operation couldn’t be completed. (org.openid.appauth.general error -3.)'
   );
 };
 
@@ -187,70 +157,36 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'gray',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  loginSection: {
+    width: '100%',
+    marginBottom: 24,
   },
-  modalContent: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 24,
-    width: '85%',
-    maxWidth: 400,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: lightModeColors.institutional,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  modalLabel: {
+  dniLabel: {
     fontSize: 16,
     color: '#333',
     marginBottom: 8,
+    fontWeight: '500',
   },
-  modalInput: {
+  dniInput: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  modalButton: {
-    flex: 1,
     padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
+    fontSize: 16,
+    marginBottom: 16,
+    backgroundColor: 'white',
   },
-  cancelButton: {
-    backgroundColor: '#f0f0f0',
+  preregisterSection: {
+    marginTop: 24,
   },
-  confirmButton: {
-    backgroundColor: lightModeColors.institutional,
-  },
-  cancelButtonText: {
+  preregisterText: {
+    fontSize: 14,
     color: '#666',
-    fontSize: 16,
-    fontWeight: '600',
+    textAlign: 'center',
   },
-  confirmButtonText: {
-    color: 'white',
-    fontSize: 16,
+  preregisterLink: {
+    color: lightModeColors.institutional,
     fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
