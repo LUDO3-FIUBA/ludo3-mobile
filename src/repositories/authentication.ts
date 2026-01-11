@@ -72,8 +72,8 @@ export function refresh(token: string): Promise<Object> {
   return post(`${authUrl}/jwt/refresh`, {refresh: token});
 }
 
-export function login(dni: string): Promise<Object> {
-  return post(`${authUrl}/login`, {dni}).catch(
+export function login(dni: string, password: string): Promise<Object> {
+  return post(`${authUrl}/login`, {dni, password}).catch(
     (error: StatusCodeError) => {
       if (error instanceof StatusCodeError && error.code == 404) {
         return Promise.reject(new NotAStudent());
