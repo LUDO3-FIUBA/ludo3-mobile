@@ -4,7 +4,7 @@ import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
-  SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
+  SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
   RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen, StatsScreen
 } from './src/scenes';
 import { Provider } from 'react-redux';
@@ -44,6 +44,12 @@ const App = () => {
             <Stack.Screen
               name="PreRegister"
               component={PreRegisterScreen}
+              options={{ headerShown: true, title: 'Pre-registro' }}
+            />
+
+            <Stack.Screen
+              name="PreRegisterPassword"
+              component={PreRegisterPasswordScreen}
               options={{ headerShown: true, title: 'Pre-registro' }}
             />
 

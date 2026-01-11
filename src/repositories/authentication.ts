@@ -36,14 +36,22 @@ export class InvalidDNI extends Error {
 export function preregister(
   dni: string,
   email: string,
-  image: string,
+  padron: string,
+  password: string,
+  image?: string,  // Comentado: imagen ahora es opcional (antes era requerida para captura facial)
 ): Promise<Object> {
-  return post(`${authUrl}/users`, {
+  const body: any = {
     dni,
     email,
+    padron,
+    password,
     is_student: true,
-    image: `${image}`,
-  }).catch(error => {
+  };
+  // Comentado: campo de imagen para captura facial
+  // if (image) {
+  //   body.image = image;
+  // }
+  return post(`${authUrl}/users`, body).catch(error => {
     // Check for: No face detected error
     if (
       error instanceof StatusCodeError &&

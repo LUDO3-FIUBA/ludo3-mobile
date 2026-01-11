@@ -15,13 +15,24 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
   descriptions: string[];
   dni: string;
   mail: string;
+  padron: string;
+  password: string;
   images: any[];
 
-  constructor(descriptions: string[], dni: string, mail: string, images: any[] = []) {
+  constructor(
+    descriptions: string[],
+    dni: string,
+    mail: string,
+    padron: string = '',
+    password: string = '',
+    images: any[] = []
+  ) {
     super(descriptions.shift() || '', 'front', false);
     this.descriptions = descriptions;
     this.dni = dni;
     this.mail = mail;
+    this.padron = padron;
+    this.password = password;
     this.images = images;
   }
 
@@ -38,10 +49,10 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
     
     if (this.descriptions.length === 0) {
       console.log('[FacePictureConfig] No more descriptions, calling preregister');
-      console.log('[FacePictureConfig] DNI:', this.dni, 'Email:', this.mail);
+      console.log('[FacePictureConfig] DNI:', this.dni, 'Email:', this.mail, 'Padron:', this.padron);
       
       await authenticationRepository
-        .preregister(this.dni, this.mail, image)
+        .preregister(this.dni, this.mail, this.padron, this.password, image)
         .then(() => {
           console.log('[FacePictureConfig] Preregister successful, navigating to PreRegisterDone');
           navigation.navigate('PreRegisterDone');
@@ -83,6 +94,8 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
           this.descriptions,
           this.dni,
           this.mail,
+          this.padron,
+          this.password,
           this.images
         ).toObject(),
         title: 'Pre-registro'
@@ -96,6 +109,8 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
       descriptions: JSON.stringify(this.descriptions),
       dni: this.dni,
       mail: this.mail,
+      padron: this.padron,
+      password: this.password,
       images: this.images
     });
   }
@@ -107,6 +122,8 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
       descriptions,
       object.dni,
       object.mail,
+      object.padron,
+      object.password,
       object.images
     );
   }
