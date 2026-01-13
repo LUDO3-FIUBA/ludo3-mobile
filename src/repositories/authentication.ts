@@ -10,6 +10,16 @@ export class NotAStudent extends Error {
   }
 }
 
+export class NeedsRegistration extends Error {
+  public googleData: any;
+  
+  constructor(googleData: any) {
+    super('Usuario necesita completar registro');
+    this.name = 'NeedsRegistration';
+    this.googleData = googleData;
+  }
+}
+
 export class AccountNotApproved extends Error {
   constructor() {
     super(
@@ -99,13 +109,54 @@ export function classicLogin(dni: string): Promise<Object> {
   );
 }
 
+export function googleSignIn(idToken: string): Promise<Object> {
+  return post(`${authUrl}/google`, {id_token: idToken}).catch(
+    (error: StatusCodeError) => {
+      if (error instanceof StatusCodeError && error.code == 409) {
+        return Promise.reject(new NeedsRegistration(error.info));
+      }
+      return Promise.reject(error);
+    },
+  );
+}
+
+export function googleRegistration(
+  sub: string,
+  email: string,
+  dni: string,
+  padron: string,
+  firstName: string,
+  lastName: string,
+  isStudent: boolean = true,
+  isTeacher: boolean = false,
+): Promise<Object> {
+  return post(`${authUrl}/google/registration`, {
+    sub,
+    email,
+    dni,
+    padron,
+    first_name: firstName,
+    last_name: lastName,
+    is_student: isStudent,
+    is_teacher: isTeacher,
+  }).catch(error => {
+    if (error instanceof StatusCodeError && error.fieldErrorIsBecauseOf('dni', 'unique')) {
+      return Promise.reject(new InvalidDNI());
+    }
+    return Promise.reject(error);
+  });
+}
+
 export default {
   preregister,
   login,
   classicLogin,
   refresh,
+  googleSignIn,
+  googleRegistration,
   NotAStudent,
   AccountNotApproved,
   InvalidImage,
   InvalidDNI,
+  NeedsRegistration,
 };

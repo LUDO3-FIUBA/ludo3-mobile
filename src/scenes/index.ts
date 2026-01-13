@@ -22,3 +22,4 @@ export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
+export { default as GoogleRegisterScreen } from './google_register';

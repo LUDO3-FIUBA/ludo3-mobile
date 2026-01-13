@@ -68,64 +68,52 @@ const Landing = ({ navigation }: Props) => {
   };
 
   const signInWithGoogle = async () => {
-    setLoginInProgress(true);
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      
-      // Log the user info to see what's available
-      console.log('Google Sign-In Success!');
-      console.log('Full Response:', JSON.stringify(userInfo, null, 2));
-      console.log('User ID:', userInfo.data?.user.id);
-      console.log('Email:', userInfo.data?.user.email);
-      console.log('Full Name:', userInfo.data?.user.name);
-      console.log('Given Name:', userInfo.data?.user.givenName);
-      console.log('Family Name:', userInfo.data?.user.familyName);
-      console.log('Photo URL:', userInfo.data?.user.photo);
-      
-      // Show success alert with user info
-      Alert.alert(
-        'Google Sign-In Success',
-        `Name: ${userInfo.data?.user.name}\nEmail: ${userInfo.data?.user.email}`
-      );
-      
-    } catch (error: any) {
-      console.error('Google Sign-In Error:', error);
-      Alert.alert('Error', `Google Sign-In failed: ${error.message}`);
-    } finally {
-      setLoginInProgress(false);
+  setLoginInProgress(true);
+  try {
+    await GoogleSignin.hasPlayServices();
+    const userInfo = await GoogleSignin.signIn();
+    
+    const idToken = userInfo.data?.idToken;
+    if (!idToken) {
+      throw new Error('No se pudo obtener el token de Google');
     }
-  };
+    const response = await authenticationRepository.googleSignIn(idToken);
+    
+    // Logueó exitosamente
+    const sessionManager: SessionManager = await SessionManager.getInstance()!;
+    if (sessionManager) {
+      await sessionManager.saveCredentials(response);
+      const user = await usersRepository.getInfo();
 
-  const signInWithGoogle = async () => {
-    setLoginInProgress(true);
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
+      if (!user.isStudent()) {
+        throw new authenticationRepository.NotAStudent();
+      }
       
-      // Log the user info to see what's available
-      console.log('Google Sign-In Success!');
-      console.log('Full Response:', JSON.stringify(userInfo, null, 2));
-      console.log('User ID:', userInfo.data?.user.id);
-      console.log('Email:', userInfo.data?.user.email);
-      console.log('Full Name:', userInfo.data?.user.name);
-      console.log('Given Name:', userInfo.data?.user.givenName);
-      console.log('Family Name:', userInfo.data?.user.familyName);
-      console.log('Photo URL:', userInfo.data?.user.photo);
-      
-      // Show success alert with user info
-      Alert.alert(
-        'Google Sign-In Success',
-        `Name: ${userInfo.data?.user.name}\nEmail: ${userInfo.data?.user.email}`
-      );
-      
-    } catch (error: any) {
-      console.error('Google Sign-In Error:', error);
-      Alert.alert('Error', `Google Sign-In failed: ${error.message}`);
-    } finally {
+      setLoginInProgress(false);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'RootDrawer' }],
+      });
+    }
+  } catch (error: any) {
+    if (error instanceof authenticationRepository.NeedsRegistration) {
+      // Completar registro
+      setLoginInProgress(false);
+      navigation.navigate('GoogleRegister', {
+        googleData: error.googleData,
+      });
+    } else if (error instanceof authenticationRepository.NotAStudent) {
+      showRoleError();
+      setLoginInProgress(false);
+    } else if (error instanceof authenticationRepository.AccountNotApproved) {
+      showAccountNotApprovedError();
+      setLoginInProgress(false);
+    } else {
+      Alert.alert('Error', `No se pudo iniciar sesión con Google: ${error.message}`);
       setLoginInProgress(false);
     }
-  };
+  }
+};
 
   return (
     <View style={style().view}>
@@ -162,12 +150,17 @@ const Landing = ({ navigation }: Props) => {
           <View style={styles.dividerLine} />
         </View>
 
-        <TouchableOpacity style={styles.googleButton} activeOpacity={0.7}>
-          <View style={styles.googleIcon}>
-            <GoogleLogo size={20} />
-          </View>
-          <Text style={styles.googleButtonText}>Continua con Google</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.googleButton, loginInProgress && { opacity: 0.6 }]}
+            activeOpacity={0.7}
+            onPress={signInWithGoogle}
+            disabled={loginInProgress}
+          >
+            <View style={styles.googleIcon}>
+              <GoogleLogo size={20} />
+            </View>
+            <Text style={styles.googleButtonText}>Continua con Google</Text>
+          </TouchableOpacity>
       </View>
 
       <View style={styles.preregisterSection}>

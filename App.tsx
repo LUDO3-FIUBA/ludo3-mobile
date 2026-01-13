@@ -5,7 +5,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen, StatsScreen
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen, StatsScreen,
+  GoogleRegisterScreen
 } from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -99,6 +100,12 @@ const App = () => {
               name="Stats"
               component={StatsScreen}
               options={{ headerShown: true, title: "Estadisticas" }}
+            />
+            
+            <Stack.Screen
+              name="GoogleRegister"
+              component={GoogleRegisterScreen}
+              options={{ headerShown: true, title: 'Completar registro' }}
             />
           </Stack.Navigator>
         </NavigationContainer>
