@@ -43,6 +43,13 @@ export class InvalidDNI extends Error {
   }
 }
 
+export class InvalidEmailDomain extends Error {
+  constructor() {
+    super('Solo se aceptan correos fi.uba.ar');
+    this.name = 'InvalidEmailDomain';
+  }
+}
+
 export function preregister(
   dni: string,
   email: string,
@@ -159,4 +166,5 @@ export default {
   InvalidImage,
   InvalidDNI,
   NeedsRegistration,
+  InvalidEmailDomain,
 };

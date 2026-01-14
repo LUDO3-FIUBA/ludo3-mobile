@@ -74,9 +74,16 @@ const Landing = ({ navigation }: Props) => {
     const userInfo = await GoogleSignin.signIn();
     
     const idToken = userInfo.data?.idToken;
+    const email = userInfo.data?.user?.email;
+
     if (!idToken) {
       throw new Error('No se pudo obtener el token de Google');
     }
+
+    if (!email || !email.endsWith('@fi.uba.ar')) {
+      throw new authenticationRepository.InvalidEmailDomain();
+    }
+
     const response = await authenticationRepository.googleSignIn(idToken);
     
     // Logueó exitosamente
@@ -108,10 +115,14 @@ const Landing = ({ navigation }: Props) => {
     } else if (error instanceof authenticationRepository.AccountNotApproved) {
       showAccountNotApprovedError();
       setLoginInProgress(false);
+    } else if (error instanceof authenticationRepository.InvalidEmailDomain) {
+      showInvalidDomain();
+      setLoginInProgress(false);
     } else {
       Alert.alert('Error', `No se pudo iniciar sesión con Google: ${error.message}`);
       setLoginInProgress(false);
     }
+    await GoogleSignin.signOut();
   }
 };
 
@@ -183,6 +194,13 @@ const showGenericError = (error?: any) => {
   Alert.alert(
     'Error de autenticación', 
     `No se pudo completar el inicio de sesión.\n\nDetalles: ${errorMsg}\n\nChequeá que hayas ingresado correctamente tus datos.`
+  );
+};
+
+const showInvalidDomain = () => {
+  Alert.alert(
+    'Error',
+    'Dominio de correo inválido. \nUtilizar correo FIUBA.'
   );
 };
 

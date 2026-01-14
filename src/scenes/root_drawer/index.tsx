@@ -8,6 +8,7 @@ import { Appearance } from "react-native";
 import FilterNavBarButton from "../home/filterNavBarButton";
 import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const Drawer = createDrawerNavigator()
 
@@ -17,6 +18,7 @@ const CustomDrawerContent = (props: DrawerContentComponentProps<DrawerContentOpt
       <ProfileOverview />
       <DrawerItemList {...props} />
       <DrawerItem label="Cerrar Sesión" onPress={async () => {
+        await GoogleSignin.signOut();
         await SessionManager.getInstance()?.clearCredentials();
         props.navigation.reset({
           index: 0,
