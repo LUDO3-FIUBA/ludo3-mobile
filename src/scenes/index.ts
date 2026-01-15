@@ -12,6 +12,7 @@ export { default as TakePictureStepScreen } from './image_recognition/takePictur
 export { default as CameraTestScreen } from './camera_test'
 export { default as PendingSubjectsScreen } from './pending_subjects';
 export { default as PreRegisterLastInstructionsScreen } from './preregister/done';
+export { default as PreRegisterPasswordScreen } from './preregister/password';
 export { default as ApprovedSubjectsScreen } from './approved_subjects';
 export { default as ViewSemesterScreen } from './view_semester';
 export { default as RootDrawer } from './root_drawer';

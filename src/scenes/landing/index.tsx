@@ -25,18 +25,23 @@ interface Props {
 const Landing = ({ navigation }: Props) => {
   const [loginInProgress, setLoginInProgress] = useState(false);
   const [dni, setDni] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleClassicLogin = async () => {
+  const handleLogin = async () => {
     if (!dni.trim()) {
       Alert.alert('Error', 'Por favor ingresa tu DNI');
       return;
     }
+    if (!password.trim()) {
+      Alert.alert('Error', 'Por favor ingresa tu contraseña');
+      return;
+    }
 
     setLoginInProgress(true);
-    
+
     try {
-      console.log('[Classic Login] Starting login with DNI:', dni);
-      const response = await authenticationRepository.classicLogin(dni.trim());
+      console.log('[Login] Starting login with DNI:', dni);
+      const response = await authenticationRepository.login(dni.trim(), password);
       const sessionManager: SessionManager = await SessionManager.getInstance()!;
       
       if (sessionManager) {
@@ -48,6 +53,7 @@ const Landing = ({ navigation }: Props) => {
         }
         setLoginInProgress(false);
         setDni('');
+        setPassword('');
         navigation.reset({
           index: 0,
           routes: [{ name: 'RootDrawer' }],
@@ -59,11 +65,12 @@ const Landing = ({ navigation }: Props) => {
       } else if (error instanceof authenticationRepository.AccountNotApproved) {
         showAccountNotApprovedError();
       } else {
-        console.error('[Classic Login] Error details:', JSON.stringify(error, null, 2));
+        console.error('[Login] Error details:', JSON.stringify(error, null, 2));
         showGenericError(error);
       }
       setLoginInProgress(false);
       setDni('');
+      setPassword('');
     }
   };
 
@@ -140,7 +147,7 @@ const Landing = ({ navigation }: Props) => {
       </View>
 
       <View style={styles.loginSection}>
-        <Text style={styles.dniLabel}>Ingresá tu DNI:</Text>
+        <Text style={styles.dniLabel}>Ingresá tus datos:</Text>
         <TextInput
           style={styles.dniInput}
           placeholder="DNI"
@@ -149,10 +156,18 @@ const Landing = ({ navigation }: Props) => {
           onChangeText={setDni}
           editable={!loginInProgress}
         />
+        <TextInput
+          style={styles.dniInput}
+          placeholder="Contraseña"
+          secureTextEntry={true}
+          value={password}
+          onChangeText={setPassword}
+          editable={!loginInProgress}
+        />
         <RoundedButton
           text="Ingresar"
-          enabled={!loginInProgress && dni.trim().length > 0}
-          onPress={handleClassicLogin}
+          enabled={!loginInProgress && dni.trim().length > 0 && password.trim().length > 0}
+          onPress={handleLogin}
         />
 
         <View style={styles.dividerContainer}>

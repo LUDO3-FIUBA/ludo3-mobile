@@ -53,14 +53,22 @@ export class InvalidEmailDomain extends Error {
 export function preregister(
   dni: string,
   email: string,
-  image: string,
+  padron: string,
+  password: string,
+  image?: string,  // Comentado: imagen ahora es opcional (antes era requerida para captura facial)
 ): Promise<Object> {
-  return post(`${authUrl}/users`, {
+  const body: any = {
     dni,
     email,
+    padron,
+    password,
     is_student: true,
-    image: `${image}`,
-  }).catch(error => {
+  };
+  // Comentado: campo de imagen para captura facial
+  // if (image) {
+  //   body.image = image;
+  // }
+  return post(`${authUrl}/users`, body).catch(error => {
     // Check for: No face detected error
     if (
       error instanceof StatusCodeError &&
@@ -77,31 +85,12 @@ export function preregister(
   });
 }
 
-/// 404: si el usuario no tiene el rol del SIU correspondiente al especificado
-/// al registrarse en nuestras apps (ya sea porque no se registró o porque no
-/// está en el SIU)
-export function login(code: string, redirectUrl: string): Promise<Object> {
-  return post(`${authUrl}/oauth`, {code, redirect_uri: redirectUrl}).catch(
-    (error: StatusCodeError) => {
-      if (error instanceof StatusCodeError && error.code == 404) {
-        return Promise.reject(new NotAStudent());
-      } else if (
-        error instanceof StatusCodeError &&
-        error.isBecauseOf(accountNotApprovedErrorCode)
-      ) {
-        return Promise.reject(new AccountNotApproved());
-      }
-      return Promise.reject(error);
-    },
-  );
-}
-
 export function refresh(token: string): Promise<Object> {
   return post(`${authUrl}/jwt/refresh`, {refresh: token});
 }
 
-export function classicLogin(dni: string): Promise<Object> {
-  return post(`${authUrl}/login`, {dni}).catch(
+export function login(dni: string, password: string): Promise<Object> {
+  return post(`${authUrl}/login`, {dni, password}).catch(
     (error: StatusCodeError) => {
       if (error instanceof StatusCodeError && error.code == 404) {
         return Promise.reject(new NotAStudent());
@@ -157,7 +146,6 @@ export function googleRegistration(
 export default {
   preregister,
   login,
-  classicLogin,
   refresh,
   googleSignIn,
   googleRegistration,
