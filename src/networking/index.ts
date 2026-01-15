@@ -7,6 +7,7 @@ const logRequests = true;
 export class StatusCodeError extends Error {
   code: number;
   info: any;
+  json: any;
   constructor(statusCode: number, info = '<not available>') {
     super(`Invalid response with status code ${statusCode}.
       More information: ${JSON.stringify(info)}`);

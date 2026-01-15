@@ -7,6 +7,7 @@ import SessionManager from '../../managers/sessionManager';
 import { lightModeColors } from '../../styles/colorPalette';
 import Svg, { Path } from 'react-native-svg';
 const LudoIcon = require('../../assets/ludo_icon.png');
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const GoogleLogo = ({ size = 20 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 48 48">
@@ -73,6 +74,65 @@ const Landing = ({ navigation }: Props) => {
     }
   };
 
+  const signInWithGoogle = async () => {
+  setLoginInProgress(true);
+  try {
+    await GoogleSignin.hasPlayServices();
+    const userInfo = await GoogleSignin.signIn();
+    
+    const idToken = userInfo.data?.idToken;
+    const email = userInfo.data?.user?.email;
+
+    if (!idToken) {
+      throw new Error('No se pudo obtener el token de Google');
+    }
+
+    if (!email || !email.endsWith('@fi.uba.ar')) {
+      throw new authenticationRepository.InvalidEmailDomain();
+    }
+
+    const response = await authenticationRepository.googleSignIn(idToken);
+    
+    // Logueó exitosamente
+    const sessionManager: SessionManager = await SessionManager.getInstance()!;
+    if (sessionManager) {
+      await sessionManager.saveCredentials(response);
+      const user = await usersRepository.getInfo();
+
+      if (!user.isStudent()) {
+        throw new authenticationRepository.NotAStudent();
+      }
+      
+      setLoginInProgress(false);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'RootDrawer' }],
+      });
+    }
+  } catch (error: any) {
+    if (error instanceof authenticationRepository.NeedsRegistration) {
+      // Completar registro
+      setLoginInProgress(false);
+      navigation.navigate('GoogleRegister', {
+        googleData: error.googleData,
+      });
+    } else if (error instanceof authenticationRepository.NotAStudent) {
+      showRoleError();
+      setLoginInProgress(false);
+    } else if (error instanceof authenticationRepository.AccountNotApproved) {
+      showAccountNotApprovedError();
+      setLoginInProgress(false);
+    } else if (error instanceof authenticationRepository.InvalidEmailDomain) {
+      showInvalidDomain();
+      setLoginInProgress(false);
+    } else {
+      Alert.alert('Error', `No se pudo iniciar sesión con Google: ${error.message}`);
+      setLoginInProgress(false);
+    }
+    await GoogleSignin.signOut();
+  }
+};
+
   return (
     <View style={style().view}>
       <View style={styles.card}>
@@ -116,12 +176,17 @@ const Landing = ({ navigation }: Props) => {
           <View style={styles.dividerLine} />
         </View>
 
-        <TouchableOpacity style={styles.googleButton} activeOpacity={0.7}>
-          <View style={styles.googleIcon}>
-            <GoogleLogo size={20} />
-          </View>
-          <Text style={styles.googleButtonText}>Continua con Google</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.googleButton, loginInProgress && { opacity: 0.6 }]}
+            activeOpacity={0.7}
+            onPress={signInWithGoogle}
+            disabled={loginInProgress}
+          >
+            <View style={styles.googleIcon}>
+              <GoogleLogo size={20} />
+            </View>
+            <Text style={styles.googleButtonText}>Continua con Google</Text>
+          </TouchableOpacity>
       </View>
 
       <View style={styles.preregisterSection}>
@@ -144,6 +209,13 @@ const showGenericError = (error?: any) => {
   Alert.alert(
     'Error de autenticación', 
     `No se pudo completar el inicio de sesión.\n\nDetalles: ${errorMsg}\n\nChequeá que hayas ingresado correctamente tus datos.`
+  );
+};
+
+const showInvalidDomain = () => {
+  Alert.alert(
+    'Error',
+    'Dominio de correo inválido. \nUtilizar correo FIUBA.'
   );
 };
 
