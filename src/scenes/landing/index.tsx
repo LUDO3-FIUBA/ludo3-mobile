@@ -76,9 +76,11 @@ const Landing = ({ navigation }: Props) => {
 
   const signInWithGoogle = async () => {
   setLoginInProgress(true);
+  console.log('[Google Sign-In] Starting Google Sign-In process');
   try {
     await GoogleSignin.hasPlayServices();
     const userInfo = await GoogleSignin.signIn();
+    console.log('[Google Sign-In] userInfo:', userInfo);
     
     const idToken = userInfo.data?.idToken;
     const email = userInfo.data?.user?.email;
