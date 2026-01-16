@@ -27,6 +27,50 @@ const Landing = ({ navigation }: Props) => {
   const [dni, setDni] = useState('');
   const [password, setPassword] = useState('');
 
+  const finalizeLogin = async (authResponse: any) => {
+    const sessionManager: SessionManager = await SessionManager.getInstance()!;
+    if (!sessionManager) {
+      throw new Error('No se pudo inicializar la sesión');
+    }
+    await sessionManager.saveCredentials(authResponse);
+    const user = await usersRepository.getInfo();
+
+    if (!user.isStudent()) {
+      throw new authenticationRepository.NotAStudent();
+    }
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'RootDrawer' }],
+    });
+  };
+
+  const handleCommonAuthErrors = (error: any) => {
+    if (error instanceof authenticationRepository.NotAStudent) {
+      showRoleError();
+      return true;
+    }
+    if (error instanceof authenticationRepository.AccountNotApproved) {
+      showAccountNotApprovedError();
+      return true;
+    }
+    return false;
+  };
+
+  const handleGoogleAuthError = (error: any) => {
+    if (error instanceof authenticationRepository.NeedsRegistration) {
+      navigation.navigate('GoogleRegister', {
+        googleData: error.googleData,
+      });
+      return true;
+    }
+    if (error instanceof authenticationRepository.InvalidEmailDomain) {
+      showInvalidDomain();
+      return true;
+    }
+    return handleCommonAuthErrors(error);
+  };
+
   const handleLogin = async () => {
     if (!dni.trim()) {
       Alert.alert('Error', 'Por favor ingresa tu DNI');
@@ -42,32 +86,14 @@ const Landing = ({ navigation }: Props) => {
     try {
       console.log('[Login] Starting login with DNI:', dni);
       const response = await authenticationRepository.login(dni.trim(), password);
-      const sessionManager: SessionManager = await SessionManager.getInstance()!;
-      
-      if (sessionManager) {
-        sessionManager.saveCredentials(response);
-        const user = await usersRepository.getInfo();
+      await finalizeLogin(response);
 
-        if (!user.isStudent()) {
-          throw new authenticationRepository.NotAStudent();
-        }
-        setLoginInProgress(false);
-        setDni('');
-        setPassword('');
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'RootDrawer' }],
-        });
-      }
     } catch (error) {
-      if (error instanceof authenticationRepository.NotAStudent) {
-        showRoleError();
-      } else if (error instanceof authenticationRepository.AccountNotApproved) {
-        showAccountNotApprovedError();
-      } else {
-        console.error('[Login] Error details:', JSON.stringify(error, null, 2));
+      if (!handleCommonAuthErrors(error)) {
+        console.error('[Login] Error details:', error);
         showGenericError(error);
       }
+    } finally {
       setLoginInProgress(false);
       setDni('');
       setPassword('');
@@ -76,64 +102,34 @@ const Landing = ({ navigation }: Props) => {
 
   const signInWithGoogle = async () => {
   setLoginInProgress(true);
-  console.log('[Google Sign-In] Starting Google Sign-In process');
-  try {
-    await GoogleSignin.hasPlayServices();
-    const userInfo = await GoogleSignin.signIn();
-    console.log('[Google Sign-In] userInfo:', userInfo);
-    
-    const idToken = userInfo.data?.idToken;
-    const email = userInfo.data?.user?.email;
+    console.log('[Google Sign-In] Starting Google Sign-In process');
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      console.log('[Google Sign-In] userInfo:', userInfo);
 
-    if (!idToken) {
-      throw new Error('No se pudo obtener el token de Google');
-    }
+      const idToken = userInfo.data?.idToken;
+      const email = userInfo.data?.user?.email;
 
-    if (!email || !email.endsWith('@fi.uba.ar')) {
-      throw new authenticationRepository.InvalidEmailDomain();
-    }
-
-    const response = await authenticationRepository.googleSignIn(idToken);
-    
-    // Logueó exitosamente
-    const sessionManager: SessionManager = await SessionManager.getInstance()!;
-    if (sessionManager) {
-      await sessionManager.saveCredentials(response);
-      const user = await usersRepository.getInfo();
-
-      if (!user.isStudent()) {
-        throw new authenticationRepository.NotAStudent();
+      if (!idToken) {
+        throw new Error('No se pudo obtener el token de Google');
       }
-      
-      setLoginInProgress(false);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'RootDrawer' }],
-      });
-    }
-  } catch (error: any) {
-    if (error instanceof authenticationRepository.NeedsRegistration) {
-      // Completar registro
-      setLoginInProgress(false);
-      navigation.navigate('GoogleRegister', {
-        googleData: error.googleData,
-      });
-    } else if (error instanceof authenticationRepository.NotAStudent) {
-      showRoleError();
-      setLoginInProgress(false);
-    } else if (error instanceof authenticationRepository.AccountNotApproved) {
-      showAccountNotApprovedError();
-      setLoginInProgress(false);
-    } else if (error instanceof authenticationRepository.InvalidEmailDomain) {
-      showInvalidDomain();
-      setLoginInProgress(false);
-    } else {
-      Alert.alert('Error', `No se pudo iniciar sesión con Google: ${error.message}`);
+
+      if (!email || !email.endsWith('@fi.uba.ar')) {
+        throw new authenticationRepository.InvalidEmailDomain();
+      }
+
+      const response = await authenticationRepository.googleSignIn(idToken);
+      await finalizeLogin(response);
+    } catch (error: any) {
+      if (!handleGoogleAuthError(error)) {
+        Alert.alert('Error', `No se pudo iniciar sesión con Google: ${error.message}`);
+      }
+      await GoogleSignin.signOut();
+    } finally {
       setLoginInProgress(false);
     }
-    await GoogleSignin.signOut();
-  }
-};
+  };
 
   return (
     <View style={style().view}>
