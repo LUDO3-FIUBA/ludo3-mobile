@@ -1,7 +1,7 @@
 .PHONY: up-android up-ios
 
 up-android:
-	npm install
+	npm install --legacy-peer-deps
 	npm run android
 
 up-ios:
