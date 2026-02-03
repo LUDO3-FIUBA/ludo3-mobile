@@ -3,33 +3,39 @@ import { View, SafeAreaView, Text } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { preregister as style } from '../../styles';
 import { RoundedButton, FormInput } from '../../components';
-import FacePictureConfiguration from './face_recognition';
 
 interface Props {
-  navigation: any; // You can specify the exact type based on your navigation setup
+  navigation: any;
 }
 
 const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
-  const [dni, setDni] = useState("")
-  const [email, setEmail] = useState("")
-  const [firstValid, setFirstValid] = useState<boolean>(false);
-  const [secondValid, setSecondValid] = useState<boolean>(false);
+  const [dni, setDni] = useState("");
+  const [email, setEmail] = useState("");
+  const [padron, setPadron] = useState("");
+  const [dniValid, setDniValid] = useState<boolean>(false);
+  const [emailValid, setEmailValid] = useState<boolean>(false);
+  const [padronValid, setPadronValid] = useState<boolean>(false);
 
-  let firstTextInput = useRef<any>(null); // Specify the exact type based on FormInput implementation
-  let secondTextInput = useRef<any>(null); // Specify the exact type based on FormInput implementation
+  let dniInput = useRef<any>(null);
+  let emailInput = useRef<any>(null);
+  let padronInput = useRef<any>(null);
 
-  const shouldEnableSignUp = () => firstValid && secondValid;
+  const shouldEnableNext = () => dniValid && emailValid && padronValid;
 
   const onDniChange = (text: string, isValid: boolean) => {
-    setDni(text)
-    setFirstValid(isValid)
-  } 
+    setDni(text);
+    setDniValid(isValid);
+  };
 
   const onEmailChange = (text: string, isValid: boolean) => {
-    setEmail(text)
-    setSecondValid(isValid)
-  }
-  
+    setEmail(text);
+    setEmailValid(isValid);
+  };
+
+  const onPadronChange = (text: string, isValid: boolean) => {
+    setPadron(text);
+    setPadronValid(isValid);
+  };
 
   return (
     <View style={style().view}>
@@ -45,13 +51,13 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
               </Text>
             </View>
             <FormInput
-              ref={firstTextInput}
+              ref={dniInput}
               style={style().textInput}
               placeholderColor={style().textInputPlaceholder.color}
               errorStyle={style().errorInInput}
               keyboardType="numeric"
               returnKeyType="next"
-              nextField={() => secondTextInput.current}
+              nextField={() => emailInput.current}
               placeholder="Por ejemplo: 12345678"
               blurOnSubmit={false}
               onTextChanged={(text, isValid) => onDniChange(text, isValid)}
@@ -62,7 +68,7 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
                 },
                 length: {
                   is: 8,
-                  message: 'DNI inválido',
+                  message: 'DNI inválido (debe tener 8 dígitos)',
                 },
               }}
             />
@@ -72,36 +78,67 @@ const PreRegisterScreen: FunctionComponent<Props> = ({ navigation }) => {
               </Text>
             </View>
             <FormInput
-              ref={secondTextInput}
+              ref={emailInput}
               style={style().textInput}
               placeholderColor={style().textInputPlaceholder.color}
               errorStyle={style().errorInInput}
               keyboardType="email-address"
+              returnKeyType="next"
+              nextField={() => padronInput.current}
               placeholder="Por ejemplo: nombre@fi.uba.ar"
+              blurOnSubmit={false}
               onTextChanged={(text, isValid) => onEmailChange(text, isValid)}
               validation={{
                 presence: {
                   allowEmpty: false,
                   message: 'Email necesario.',
                 },
-                email: {
-                  message: 'Email inválido.',
+                format: {
+                  pattern: "^[a-zA-Z0-9._%+-]+@fi\\.uba\\.ar$",
+                  flags: "i",
+                  message: 'El email debe ser @fi.uba.ar',
+                },
+              }}
+            />
+            <View style={style().inputLabels}>
+              <Text style={[style().text, { marginTop: 12 }]}>
+                Padrón
+              </Text>
+            </View>
+            <FormInput
+              ref={padronInput}
+              style={style().textInput}
+              placeholderColor={style().textInputPlaceholder.color}
+              errorStyle={style().errorInInput}
+              keyboardType="numeric"
+              returnKeyType="done"
+              placeholder="Por ejemplo: 123456"
+              onTextChanged={(text, isValid) => onPadronChange(text, isValid)}
+              validation={{
+                presence: {
+                  allowEmpty: false,
+                  message: 'Padrón necesario.',
+                },
+                length: {
+                  maximum: 7,
+                  tooLong: 'Padrón inválido (máximo 7 dígitos)',
+                },
+                format: {
+                  pattern: /^\d+$/,
+                  message: 'El padrón debe ser numérico',
                 },
               }}
             />
           </View>
           <RoundedButton
             text="Siguiente"
-            enabled={shouldEnableSignUp()}
+            enabled={shouldEnableNext()}
             style={style().button}
             onPress={() => {
-              navigation.navigate('TakePicture', {
-                configuration: new FacePictureConfiguration(
-                  ['Tomate una foto de frente'],
-                  dni,
-                  email
-                ).toObject(),
-                title: 'Pre-registro',
+              navigation.navigate('PreRegisterPassword', {
+                dni,
+                email,
+                padron,
               });
             }}
           />

@@ -12,6 +12,7 @@ export { default as TakePictureStepScreen } from './image_recognition/takePictur
 export { default as CameraTestScreen } from './camera_test'
 export { default as PendingSubjectsScreen } from './pending_subjects';
 export { default as PreRegisterLastInstructionsScreen } from './preregister/done';
+export { default as PreRegisterPasswordScreen } from './preregister/password';
 export { default as ApprovedSubjectsScreen } from './approved_subjects';
 export { default as ViewSemesterScreen } from './view_semester';
 export { default as RootDrawer } from './root_drawer';
@@ -22,3 +23,4 @@ export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
+export { default as GoogleRegisterScreen } from './google_register';

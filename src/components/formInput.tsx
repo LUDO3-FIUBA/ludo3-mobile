@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import { View, TextInput, Text } from 'react-native';
 import validate from 'validate.js';
 
@@ -19,6 +19,7 @@ interface FormInputProps {
   blurOnSubmit?: boolean;
   errorMessageOnEditFinish?: boolean;
   validation?: object;
+  editable?: boolean;
 }
 
 const FormInput = forwardRef<TextInput, FormInputProps>(({
@@ -35,20 +36,24 @@ const FormInput = forwardRef<TextInput, FormInputProps>(({
   blurOnSubmit = true,
   errorMessageOnEditFinish = true,
   validation,
+  editable = true,
 }, ref) => {
   const [value, setValue] = useState(initialValue);
   const validateValue = (val: string): string | null => {
     const formValues = { campo: val };
     const formFields = { campo: validation };
     const result = validate(formValues, formFields);
-    let err = null;
-    if (result && result.campo) {
-      err = result.campo[0];
-    }
-    return err;
+    return result && result.campo ? result.campo[0] : null;
   };
 
-  const [error, setError] = useState<string | null>(initialValue ? validateValue(initialValue) : null);
+  const [error, setError] = useState<string | null>(
+    initialValue ? validateValue(initialValue) : null
+  );
+
+  useEffect(() => {
+    setValue(initialValue);
+    setError(initialValue ? validateValue(initialValue) : null);
+  }, [initialValue]);
 
   const handleValueChanged = (newValue: string) => {
     setValue(newValue);
@@ -86,6 +91,7 @@ const FormInput = forwardRef<TextInput, FormInputProps>(({
         blurOnSubmit={blurOnSubmit}
         placeholder={placeholder}
         placeholderTextColor={placeholderColor}
+        editable={editable}
       />
       {error ? <Text style={errorStyle}>{error}</Text> : null}
     </View>

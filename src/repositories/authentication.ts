@@ -10,6 +10,16 @@ export class NotAStudent extends Error {
   }
 }
 
+export class NeedsRegistration extends Error {
+  public googleData: any;
+  
+  constructor(googleData: any) {
+    super('Usuario necesita completar registro');
+    this.name = 'NeedsRegistration';
+    this.googleData = googleData;
+  }
+}
+
 export class AccountNotApproved extends Error {
   constructor() {
     super(
@@ -33,17 +43,32 @@ export class InvalidDNI extends Error {
   }
 }
 
+export class InvalidEmailDomain extends Error {
+  constructor() {
+    super('Solo se aceptan correos fi.uba.ar');
+    this.name = 'InvalidEmailDomain';
+  }
+}
+
 export function preregister(
   dni: string,
   email: string,
-  image: string,
+  padron: string,
+  password: string,
+  image?: string,  // Comentado: imagen ahora es opcional (antes era requerida para captura facial)
 ): Promise<Object> {
-  return post(`${authUrl}/users`, {
+  const body: any = {
     dni,
     email,
+    padron,
+    password,
     is_student: true,
-    image: `${image}`,
-  }).catch(error => {
+  };
+  // Comentado: campo de imagen para captura facial
+  // if (image) {
+  //   body.image = image;
+  // }
+  return post(`${authUrl}/users`, body).catch(error => {
     // Check for: No face detected error
     if (
       error instanceof StatusCodeError &&
@@ -60,31 +85,12 @@ export function preregister(
   });
 }
 
-/// 404: si el usuario no tiene el rol del SIU correspondiente al especificado
-/// al registrarse en nuestras apps (ya sea porque no se registró o porque no
-/// está en el SIU)
-export function login(code: string, redirectUrl: string): Promise<Object> {
-  return post(`${authUrl}/oauth`, {code, redirect_uri: redirectUrl}).catch(
-    (error: StatusCodeError) => {
-      if (error instanceof StatusCodeError && error.code == 404) {
-        return Promise.reject(new NotAStudent());
-      } else if (
-        error instanceof StatusCodeError &&
-        error.isBecauseOf(accountNotApprovedErrorCode)
-      ) {
-        return Promise.reject(new AccountNotApproved());
-      }
-      return Promise.reject(error);
-    },
-  );
-}
-
 export function refresh(token: string): Promise<Object> {
   return post(`${authUrl}/jwt/refresh`, {refresh: token});
 }
 
-export function classicLogin(dni: string): Promise<Object> {
-  return post(`${authUrl}/login`, {dni}).catch(
+export function login(dni: string, password: string): Promise<Object> {
+  return post(`${authUrl}/login`, {dni, password}).catch(
     (error: StatusCodeError) => {
       if (error instanceof StatusCodeError && error.code == 404) {
         return Promise.reject(new NotAStudent());
@@ -97,15 +103,56 @@ export function classicLogin(dni: string): Promise<Object> {
       return Promise.reject(error);
     },
   );
+}
+
+export function googleSignIn(idToken: string): Promise<Object> {
+  return post(`${authUrl}/google`, {id_token: idToken}).catch(
+    (error: StatusCodeError) => {
+      if (error instanceof StatusCodeError && error.code == 409) {
+        return Promise.reject(new NeedsRegistration(error.info));
+      }
+      return Promise.reject(error);
+    },
+  );
+}
+
+export function googleRegistration(
+  sub: string,
+  email: string,
+  dni: string,
+  padron: string,
+  firstName: string,
+  lastName: string,
+  isStudent: boolean = true,
+  isTeacher: boolean = false,
+): Promise<Object> {
+  return post(`${authUrl}/google/registration`, {
+    sub,
+    email,
+    dni,
+    padron,
+    first_name: firstName,
+    last_name: lastName,
+    is_student: isStudent,
+    is_teacher: isTeacher,
+  }).catch(error => {
+    if (error instanceof StatusCodeError && error.fieldErrorIsBecauseOf('dni', 'unique')) {
+      return Promise.reject(new InvalidDNI());
+    }
+    return Promise.reject(error);
+  });
 }
 
 export default {
   preregister,
   login,
-  classicLogin,
   refresh,
+  googleSignIn,
+  googleRegistration,
   NotAStudent,
   AccountNotApproved,
   InvalidImage,
   InvalidDNI,
+  NeedsRegistration,
+  InvalidEmailDomain,
 };

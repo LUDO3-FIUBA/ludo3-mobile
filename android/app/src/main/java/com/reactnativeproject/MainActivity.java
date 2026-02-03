@@ -1,4 +1,4 @@
-package org.erinc.ludo2;
+package org.fiuba.ludo;
 import expo.modules.ReactActivityDelegateWrapper;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

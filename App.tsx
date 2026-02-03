@@ -4,17 +4,24 @@ import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
-  SplashScreen, LandingScreen, PreRegisterScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen, StatsScreen
+  SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen, StatsScreen,
+  GoogleRegisterScreen
 } from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance } from 'react-native';
+import { useEffect } from 'react';
+import { configureGoogle } from './src/auth/google_signin';
 
 const Stack = createStackNavigator();
 
 
 const App = () => {
+  useEffect(() => {
+    configureGoogle();
+  }, []);
+
   return (
     <Provider store={store}>
       <ActionSheetProvider>
@@ -44,6 +51,12 @@ const App = () => {
             <Stack.Screen
               name="PreRegister"
               component={PreRegisterScreen}
+              options={{ headerShown: true, title: 'Pre-registro' }}
+            />
+
+            <Stack.Screen
+              name="PreRegisterPassword"
+              component={PreRegisterPasswordScreen}
               options={{ headerShown: true, title: 'Pre-registro' }}
             />
 
@@ -93,6 +106,12 @@ const App = () => {
               name="Stats"
               component={StatsScreen}
               options={{ headerShown: true, title: "Estadisticas" }}
+            />
+            
+            <Stack.Screen
+              name="GoogleRegister"
+              component={GoogleRegisterScreen}
+              options={{ headerShown: true, title: 'Completar registro' }}
             />
           </Stack.Navigator>
         </NavigationContainer>
