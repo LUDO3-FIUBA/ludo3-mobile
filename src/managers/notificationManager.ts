@@ -1,6 +1,6 @@
-import { NotificationBackgroundFetchResult, Notifications, Registered } from 'react-native-notifications';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { usersRepository } from '../repositories';
-import { PermissionsAndroid } from 'react-native';
 
 export default class NotificationManager {
   static myInstance = new NotificationManager();
@@ -11,7 +11,7 @@ export default class NotificationManager {
     return this.myInstance;
   }
 
-  onNotification(notification) {
+  onNotification(notification: Notifications.Notification) {
     console.log('NotificationManager:', notification);
 
     if (typeof this._onNotification === 'function') {
@@ -19,43 +19,47 @@ export default class NotificationManager {
     }
   }
 
-  onRegister(event: Registered) {
-    console.log('NotificationManager:', event);
-    usersRepository.sendPushToken(event.deviceToken).catch(() => {});
-
-    if (typeof this._onRegister === 'function') {
-      this._onRegister(event);
+  async registerCallbacks() {
+    if (Platform.OS === 'web') {
+      console.log('NotificationManager (Web): Skipping notification registration');
+      return;
     }
-  }
 
-  registerCallbacks() {
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
 
-    Notifications.registerRemoteNotifications();
-    Notifications.events().registerRemoteNotificationsRegistered(manager.onRegister.bind(manager))
-    Notifications.events().registerRemoteNotificationsRegistrationFailed(manager.onRegistrationError.bind(manager))
-    Notifications.events().registerRemoteNotificationsRegistrationDenied(manager.onRegistrationDenied.bind(manager))
-    Notifications.events().registerNotificationReceivedBackground((notif, completion) => { console.log("Background Notif:", notif); completion(NotificationBackgroundFetchResult.NO_DATA) })
-    Notifications.events().registerNotificationReceivedForeground((notif, completion) => {
-      console.log("Foreground Notif:", notif);
-      Notifications.postLocalNotification({
-        body: notif.payload["gcm.notification.body"],
-        title: notif.payload["gcm.notification.title"],
-      });
-      completion({ badge: false, alert: false, sound: false })
-    })
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
 
-    console.log('NotificationManager: Registered notification permissions')
-  }
+    if (finalStatus !== 'granted') {
+      console.log('NotificationManager: Permission not granted');
+      return;
+    }
 
-  // (optional) Called when the user fails to register for remote notifications.
-  // Typically occurs when APNS is having issues, or the device is a simulator. (iOS)
-  onRegistrationError(err) {
-    console.log(err);
-  }
+    try {
+      const tokenData = await Notifications.getDevicePushTokenAsync();
+      console.log('NotificationManager: Token received', tokenData.data);
+      usersRepository.sendPushToken(tokenData.data).catch(() => {});
 
-  onRegistrationDenied() {
-    console.log("NotificationManager: Registration Denied");
+      if (typeof this._onRegister === 'function') {
+        this._onRegister(tokenData);
+      }
+    } catch (err) {
+      console.log('NotificationManager: Registration error', err);
+    }
+
+    Notifications.addNotificationReceivedListener((notification) => {
+      console.log('Foreground Notif:', notification);
+      this.onNotification(notification);
+    });
+
+    Notifications.addNotificationResponseReceivedListener((response) => {
+      console.log('Notification Response:', response);
+    });
+
+    console.log('NotificationManager: Registered notification permissions');
   }
 }
 

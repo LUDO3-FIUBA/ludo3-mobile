@@ -9,7 +9,6 @@ import CommissionInscriptionOverviewList from '../../components/commission_inscr
 import { NotificationManager } from '../../managers';
 import { CommissionInscription, Evaluation, FinalExam } from '../../models';
 
-Icon.loadFont();
 
 
 const Home: React.FC<any> = () => {

@@ -1,10 +1,16 @@
 import React from "react";
-import { DrawerContentComponentProps, DrawerContentOptions, DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator } from "@react-navigation/drawer";
-import { ApprovedSubjectsScreen, CalendarScreen, CommissionInscriptionsScreen, HomeScreen, PendingSubjectsScreen, StatsScreen } from "..";
+import { DrawerContentComponentProps, DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator } from "@react-navigation/drawer";
+import HomeScreen from "../home";
+import CalendarScreen from "../calendar";
+import CommissionInscriptionsScreen from "../commission_inscriptions";
+import ApprovedSubjectsScreen from "../approved_subjects";
+import PendingSubjectsScreen from "../pending_subjects";
+import StatsScreen from "../stats";
 import { MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
-import { Appearance } from "react-native";
+import { Appearance, TouchableOpacity } from "react-native";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
 import FilterNavBarButton from "../home/filterNavBarButton";
 import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
@@ -12,7 +18,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const Drawer = createDrawerNavigator()
 
-const CustomDrawerContent = (props: DrawerContentComponentProps<DrawerContentOptions>) => {
+const CustomDrawerContent = (props: DrawerContentComponentProps) => {
   return (
     <DrawerContentScrollView {...props}>
       <ProfileOverview />
@@ -31,11 +37,27 @@ const CustomDrawerContent = (props: DrawerContentComponentProps<DrawerContentOpt
   );
 }
 
+const DrawerMenuButton = ({ color }: { color: string }) => {
+  const navigation = useNavigation();
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+      style={{ marginLeft: 16 }}
+      accessibilityLabel="Show navigation menu"
+    >
+      <MaterialIcon name="menu" fontSize={24} color={color} />
+    </TouchableOpacity>
+  );
+};
+
 const RootDrawer = () => {
   const colors = isDarkTheme() ? darkModeColors : lightModeColors;
   return (
     <Drawer.Navigator
-      screenOptions={{ headerTintColor: colors.mainContrastColor }}
+      screenOptions={{
+        headerTintColor: colors.mainContrastColor,
+        headerLeft: () => <DrawerMenuButton color={colors.mainContrastColor} />,
+      }}
       drawerContent={props => <CustomDrawerContent {...props} />}
     >
       <Drawer.Screen

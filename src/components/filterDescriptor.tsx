@@ -3,7 +3,6 @@ import { View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { filterDescriptor as style } from '../styles';
 
-Icon.loadFont();
 
 interface FilterDescriptorProps {
   filter: {
@@ -13,7 +12,7 @@ interface FilterDescriptorProps {
   onClose: () => void;
 }
 
-const FilterDescriptor: FC<FilterDescriptorProps> = ({ filter, onClose }) => {
+const FilterDescriptor: FC<FilterDescriptorProps> = ({ filter, onClose = () => {} }) => {
   return (
     <View style={style().view}>
       <View style={style().textContainer}>
@@ -27,10 +26,6 @@ const FilterDescriptor: FC<FilterDescriptorProps> = ({ filter, onClose }) => {
       />
     </View>
   );
-};
-
-FilterDescriptor.defaultProps = {
-  onClose: () => {}, // Default empty function if onClose is not provided
 };
 
 export default FilterDescriptor;
