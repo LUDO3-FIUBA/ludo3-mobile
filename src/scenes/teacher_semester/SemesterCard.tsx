@@ -93,10 +93,7 @@ export function SemesterCard({ route }: Props) {
 
   useEffect(() => {
     if (error) {
-      Alert.alert(
-        'Error',
-        'No se pudo cargar la información del cuatrimestre. Intente nuevamente más tarde.'
-      );
+      console.log('SemesterCard error:', error);
     }
   }, [error]);
 
@@ -115,7 +112,17 @@ export function SemesterCard({ route }: Props) {
   }
 
   if (!semesterData) {
-    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>No hay datos disponibles</Text></View>;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <MaterialIcon name="calendar-remove" fontSize={48} color="gray" />
+        <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 12, textAlign: 'center' }}>
+          No hay cuatrimestre activo
+        </Text>
+        <Text style={{ fontSize: 14, color: 'gray', marginTop: 8, textAlign: 'center' }}>
+          Esta comisión no tiene un cuatrimestre vigente. Podés crear uno desde "Crear Cuatrimestre".
+        </Text>
+      </View>
+    );
   }
 
   return (

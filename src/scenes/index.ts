@@ -46,3 +46,4 @@ export { default as TeacherFinalExamQRScreen } from './teacher_qr/FinalExamQR';
 export { default as TeacherStatsScreen } from './teacher_stats';
 export { default as TeacherFinalExamSubmissionsScreen } from './teacher_finals/FinalExamSubmissions';
 export { default as TeacherAddClassToSemesterScreen } from './teacher_attendances/AddClassToSemester';
+export { default as TeacherSemesterCardScreen } from './teacher_semester/SemesterCard';

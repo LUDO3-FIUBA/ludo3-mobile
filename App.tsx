@@ -15,6 +15,7 @@ import {
   TeacherSemesterAttendancesScreen, TeacherAttendanceDetailsScreen,
   TeacherSemesterAttendanceQRScreen, TeacherEvaluationQRScreen, TeacherFinalExamQRScreen,
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
+  TeacherSemesterCardScreen,
 } from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -212,6 +213,11 @@ const App = () => {
               name="AddClassToSemester"
               component={TeacherAddClassToSemesterScreen}
               options={{ headerShown: true, title: 'Agregar clase' }}
+            />
+            <Stack.Screen
+              name="SemesterCard"
+              component={TeacherSemesterCardScreen}
+              options={{ headerShown: true, title: 'Cuatrimestre' }}
             />
           </Stack.Navigator>
         </NavigationContainer>

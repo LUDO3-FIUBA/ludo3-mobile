@@ -38,7 +38,7 @@ export const fetchTeachers = createAsyncThunk(
       const staffTeachers: TeacherTuple[] = await teacherStaffRepository.fetchTeachersOfCommission(commissionId);
       return { allTeachers, staffTeachers };
     } catch (error: any) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.message || 'Failed to fetch teachers');
     }
   }
 );
