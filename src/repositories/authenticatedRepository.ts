@@ -2,6 +2,7 @@ import {
   get as basicGet,
   post as basicPost,
   put as basicPut,
+  deleteMethod as basicDelete,
   StatusCodeError,
 } from '../networking';
 import { refresh } from './authentication';
@@ -109,4 +110,28 @@ function reLogInIfNecessary(error: unknown): Promise<string> {
   return Promise.reject(error);
 }
 
-export default {post, get, MustLoginAgain};
+export function deleteMethod(
+  url: string,
+  body: any,
+  queryParams = [],
+  headers = {},
+): Promise<Object> {
+  const sessionManager: SessionManager | null = SessionManager.getInstance()
+  const token = sessionManager?.getAuthToken();
+  if (!token) {
+    return Promise.reject(new MustLoginAgain());
+  }
+  return basicDelete(url, body, queryParams, {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  }).catch(error => {
+    return reLogInIfNecessary(error).then(newToken => {
+      return basicDelete(url, body, queryParams, {
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      });
+    });
+  });
+}
+
+export default {post, get, put, deleteMethod, MustLoginAgain};

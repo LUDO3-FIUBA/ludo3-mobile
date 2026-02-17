@@ -35,7 +35,7 @@ const Landing = ({ navigation }: Props) => {
     await sessionManager.saveCredentials(authResponse);
     const user = await usersRepository.getInfo();
 
-    if (!user.isStudent()) {
+    if (!user.isStudent() && !user.isTeacher()) {
       throw new authenticationRepository.NotAStudent();
     }
 
@@ -229,8 +229,7 @@ const showRoleError = () => {
   Alert.alert(
     'Error',
     '¿Te has registrado? ' +
-    'Te recordamos que esta app es para alumnos. Si lo sos, ' +
-    'chequeá que hayas ingresado correctamente tus datos.'
+    'Chequeá que hayas ingresado correctamente tus datos.'
   );
 };
 

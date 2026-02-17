@@ -24,3 +24,25 @@ export { default as ViewEvaluationDetailsScreen } from './view_evaluation_detail
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
 export { default as GoogleRegisterScreen } from './google_register';
+
+// Teacher scenes
+export { default as TeacherHomeScreen } from './teacher_home';
+export { default as TeacherCreateSemesterScreen } from './teacher_semester/CreateSemester';
+export { default as TeacherSemesterStudentsScreen } from './teacher_semester/SemesterStudents';
+export { default as TeacherSemesterEditScreen } from './teacher_semester/SemesterEditScreen';
+export { default as TeacherEvaluationsListScreen } from './teacher_evaluations/EvaluationsList';
+export { default as TeacherAddEvaluationScreen } from './teacher_evaluations/AddEvaluation';
+export { default as TeacherSubmissionsListScreen } from './teacher_evaluations/SubmissionsList';
+export { default as TeacherFinalsListScreen } from './teacher_finals/FinalsList';
+export { default as TeacherAddFinalScreen } from './teacher_finals/AddFinal';
+export { default as TeacherStaffScreen } from './teacher_staff/Teachers';
+export { default as TeacherStaffConfigurationScreen } from './teacher_staff/TeachersConfiguration';
+export { default as TeacherAddStaffScreen } from './teacher_staff/AddTeachersConfigurationList';
+export { default as TeacherSemesterAttendancesScreen } from './teacher_attendances/SemesterAttendances';
+export { default as TeacherAttendanceDetailsScreen } from './teacher_attendances/AttendanceDetails';
+export { default as TeacherSemesterAttendanceQRScreen } from './teacher_qr/SemesterAttendanceQR';
+export { default as TeacherEvaluationQRScreen } from './teacher_qr/EvaluationQR';
+export { default as TeacherFinalExamQRScreen } from './teacher_qr/FinalExamQR';
+export { default as TeacherStatsScreen } from './teacher_stats';
+export { default as TeacherFinalExamSubmissionsScreen } from './teacher_finals/FinalExamSubmissions';
+export { default as TeacherAddClassToSemesterScreen } from './teacher_attendances/AddClassToSemester';

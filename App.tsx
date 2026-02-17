@@ -6,7 +6,15 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
   RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen, StatsScreen,
-  GoogleRegisterScreen
+  GoogleRegisterScreen,
+  // Teacher screens
+  TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
+  TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen,
+  TeacherFinalsListScreen, TeacherAddFinalScreen,
+  TeacherStaffScreen, TeacherStaffConfigurationScreen, TeacherAddStaffScreen,
+  TeacherSemesterAttendancesScreen, TeacherAttendanceDetailsScreen,
+  TeacherSemesterAttendanceQRScreen, TeacherEvaluationQRScreen, TeacherFinalExamQRScreen,
+  TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
 } from './src/scenes';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -112,6 +120,98 @@ const App = () => {
               name="GoogleRegister"
               component={GoogleRegisterScreen}
               options={{ headerShown: true, title: 'Completar registro' }}
+            />
+
+            {/* Teacher Stack screens */}
+            <Stack.Screen
+              name="SemesterStudents"
+              component={TeacherSemesterStudentsScreen}
+              options={{ headerShown: true, title: 'Alumnos del cuatrimestre' }}
+            />
+            <Stack.Screen
+              name="SemesterEditScreen"
+              component={TeacherSemesterEditScreen}
+              options={{ headerShown: true, title: 'Editar cuatrimestre' }}
+            />
+            <Stack.Screen
+              name="EvaluationsList"
+              component={TeacherEvaluationsListScreen}
+              options={{ headerShown: true, title: 'Evaluaciones' }}
+            />
+            <Stack.Screen
+              name="AddEvaluation"
+              component={TeacherAddEvaluationScreen}
+              options={{ headerShown: true, title: 'Agregar evaluación' }}
+            />
+            <Stack.Screen
+              name="SubmissionsList"
+              component={TeacherSubmissionsListScreen}
+              options={{ headerShown: true, title: 'Entregas' }}
+            />
+            <Stack.Screen
+              name="FinalsList"
+              component={TeacherFinalsListScreen}
+              options={{ headerShown: true, title: 'Finales' }}
+            />
+            <Stack.Screen
+              name="AddFinal"
+              component={TeacherAddFinalScreen}
+              options={{ headerShown: true, title: 'Agregar final' }}
+            />
+            <Stack.Screen
+              name="TeacherStaff"
+              component={TeacherStaffScreen}
+              options={{ headerShown: true, title: 'Cuerpo Docente' }}
+            />
+            <Stack.Screen
+              name="TeachersConfiguration"
+              component={TeacherStaffConfigurationScreen}
+              options={{ headerShown: true, title: 'Configurar docentes' }}
+            />
+            <Stack.Screen
+              name="AddTeachersConfigurationList"
+              component={TeacherAddStaffScreen}
+              options={{ headerShown: true, title: 'Agregar docente' }}
+            />
+            <Stack.Screen
+              name="SemesterAttendances"
+              component={TeacherSemesterAttendancesScreen}
+              options={{ headerShown: true, title: 'Asistencias' }}
+            />
+            <Stack.Screen
+              name="AttendanceDetails"
+              component={TeacherAttendanceDetailsScreen}
+              options={{ headerShown: true, title: 'Detalles de asistencia' }}
+            />
+            <Stack.Screen
+              name="SemesterAttendanceQR"
+              component={TeacherSemesterAttendanceQRScreen}
+              options={{ headerShown: true, title: 'QR de Asistencia' }}
+            />
+            <Stack.Screen
+              name="EvaluationQR"
+              component={TeacherEvaluationQRScreen}
+              options={{ headerShown: true, title: 'QR de Evaluación' }}
+            />
+            <Stack.Screen
+              name="FinalExamQR"
+              component={TeacherFinalExamQRScreen}
+              options={{ headerShown: true, title: 'QR de Final' }}
+            />
+            <Stack.Screen
+              name="TeacherStats"
+              component={TeacherStatsScreen}
+              options={{ headerShown: true, title: 'Estadísticas' }}
+            />
+            <Stack.Screen
+              name="FinalExamSubmissions"
+              component={TeacherFinalExamSubmissionsScreen}
+              options={{ headerShown: true, title: 'Inscriptos al final' }}
+            />
+            <Stack.Screen
+              name="AddClassToSemester"
+              component={TeacherAddClassToSemesterScreen}
+              options={{ headerShown: true, title: 'Agregar clase' }}
             />
           </Stack.Navigator>
         </NavigationContainer>

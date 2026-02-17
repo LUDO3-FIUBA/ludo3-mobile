@@ -50,6 +50,7 @@ export function getInfo(): Promise<User> {
         json.last_name,
         json.email,
         json.is_student ? json.file : null,
+        json.is_teacher || false,
       ),
     ),
   );
