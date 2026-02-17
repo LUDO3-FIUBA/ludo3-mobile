@@ -78,7 +78,7 @@ const CreateSemester = () => {
         const response = await teacherSemestersRepository.createSemester(chosenCommission, yearMoment, combinedStartDateAndTime, numberClasses, mininumAttendance)
         console.log("Response", response);
 
-        navigation.navigate('Home');
+        navigation.navigate('TeacherHome');
       } else {
         Alert.alert(
           'Error',
@@ -96,6 +96,7 @@ const CreateSemester = () => {
       <View style={{ marginBottom: 100 }}>
         <Text style={{ ...styles.label, marginTop: -5 }}>Comisión</Text>
         <DropDownPicker
+          listMode="SCROLLVIEW"
           open={openCommissionPicker}
           style={{ borderColor: 'gray' }}
           value={chosenCommission}
@@ -108,6 +109,7 @@ const CreateSemester = () => {
 
         <Text style={{ ...styles.label, marginTop: 20 }}>Momento del año</Text>
         <DropDownPicker
+          listMode="SCROLLVIEW"
           open={openYearMomentPicker}
           style={{ borderColor: 'gray', zIndex: openYearMomentPicker ? 1 : 0 }}
           value={yearMoment}

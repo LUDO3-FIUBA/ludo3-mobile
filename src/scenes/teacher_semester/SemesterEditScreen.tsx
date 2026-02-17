@@ -12,7 +12,7 @@ import { RoundedButton } from '../../components';
 const SemesterEditScreen: React.FC = () => {
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
-    const semesterData = useAppSelector(state => state.semester.data)!;
+    const semesterData = useAppSelector(state => state.teacherSemester.data)!;
 
     const [totalClasses, setTotalClasses] = useState<string>(semesterData.classesAmount.toString());
     const [minAttendance, setMinAttendance] = useState<string>(semesterData.minimumAttendance.toString());

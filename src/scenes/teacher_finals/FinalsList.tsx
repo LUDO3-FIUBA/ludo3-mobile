@@ -36,18 +36,17 @@ const FinalsList: React.FC = () => {
 
   const navigation = useNavigation();
 
-  const setNavOptions = useCallback(() => {
+  useEffect(() => {
     navigation.setOptions({
       title: 'Finales',
       headerRight: () => isActualUserChiefTeacher ? <FinalsListHeaderRight subjectId={subjectId} subjectName={subjectName} /> : null,
     });
-  }, [navigation]);
+  }, [navigation, isActualUserChiefTeacher, subjectId, subjectName]);
 
   useFocusEffect(
     React.useCallback(() => {
-      setNavOptions();
       fetchData(hasDoneFirstLoad);
-      return () => { }; // Return a cleanup function if necessary
+      return () => { };
     }, [])
   );
 

@@ -7,7 +7,7 @@ import { SemesterStudentsHeaderRight } from './SemesterStudentsHeaderRight';
 const UserIcon = require('./img/usericon.jpg');
 
 const SemesterStudents: React.FC = () => {
-  const students = useAppSelector((state) => state.semester.data?.students as TeacherStudent[]);
+  const students = useAppSelector((state) => state.teacherSemester.data?.students as TeacherStudent[]);
 
   const navigation = useNavigation()
 

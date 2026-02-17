@@ -52,7 +52,7 @@ export function SemesterCard({ route }: Props) {
     },
     {
       name: "Cuerpo Docente", onPress: () => {
-        navigation.navigate('Teachers', {
+        navigation.navigate('TeacherStaff', {
           commissionId: commission.id,
           chiefTeacher: semesterData?.commission.chiefTeacher,
         });
@@ -78,7 +78,7 @@ export function SemesterCard({ route }: Props) {
     },
     {
       name: "Estadísticas", onPress: () => {
-        navigation.navigate('Stats', {
+        navigation.navigate('TeacherStats', {
           semester: semesterData,
         });
       },
@@ -99,9 +99,9 @@ export function SemesterCard({ route }: Props) {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => <SemesterHeaderRight />, // TODO: disable when user is not chiefteacher
+      headerRight: () => semesterData ? <SemesterHeaderRight /> : null,
     });
-  }, [navigation]);
+  }, [navigation, semesterData]);
 
   if (isLoading) {
     return (

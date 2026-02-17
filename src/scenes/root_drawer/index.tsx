@@ -19,6 +19,8 @@ import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { usersRepository } from "../../repositories";
 import User from "../../models/User";
+import { useAppDispatch } from "../../redux/hooks";
+import { fetchUserDataAsync } from "../../redux/reducers/teacherUserDataSlice";
 
 const Drawer = createDrawerNavigator()
 
@@ -79,6 +81,7 @@ const DrawerMenuButton = ({ color }: { color: string }) => {
 
 const RootDrawer = () => {
   const colors = isDarkTheme() ? darkModeColors : lightModeColors;
+  const dispatch = useAppDispatch();
   const [user, setUser] = useState<User | null>(null);
   const [roleView, setRoleView] = useState<RoleView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,6 +93,7 @@ const RootDrawer = () => {
         const initialRole: RoleView = (!fetchedUser.isStudent() && fetchedUser.isTeacher()) ? 'teacher' : 'student';
         setUser(fetchedUser);
         setRoleView(initialRole);
+        dispatch(fetchUserDataAsync(fetchedUser));
       } catch (e) {
         console.log('RootDrawer: Failed to fetch user', e);
         setRoleView('student');
