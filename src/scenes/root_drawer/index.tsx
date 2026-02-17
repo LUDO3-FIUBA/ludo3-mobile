@@ -120,11 +120,6 @@ const RootDrawer = () => {
           roleView={roleView}
           onSwitchRole={(role) => {
             setRoleView(role);
-            if (role === 'student') {
-              props.navigation.navigate('Home');
-            } else {
-              props.navigation.navigate('TeacherHome');
-            }
           }}
         />
       )}
