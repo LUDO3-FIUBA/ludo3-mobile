@@ -7,7 +7,6 @@ import { useNavigation } from '@react-navigation/native';
 import { lightModeColors } from '../../styles/colorPalette';
 import IsPassingCard from '../../components/isPassingCard';
 
-Icon.loadFont();
 
 const ViewSemestercreen: React.FC<any> = ({ route }) => {
   const navigation = useNavigation()

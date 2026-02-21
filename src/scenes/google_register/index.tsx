@@ -29,21 +29,24 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
 
   const [dni, setDni] = useState('');
   const [padron, setPadron] = useState('');
+  const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState(first_name || '');
   const [lastName, setLastName] = useState(last_name || '');
   const [dniValid, setDniValid] = useState(false);
   const [padronValid, setPadronValid] = useState(false);
+  const [passwordValid, setPasswordValid] = useState(false);
   const [firstNameValid, setFirstNameValid] = useState(!!first_name);
   const [lastNameValid, setLastNameValid] = useState(!!last_name);
   const [registering, setRegistering] = useState(false);
 
   let dniTextInput = useRef<any>(null);
   let padronTextInput = useRef<any>(null);
+  let passwordTextInput = useRef<any>(null);
   let firstNameTextInput = useRef<any>(null);
   let lastNameTextInput = useRef<any>(null);
 
-  const shouldEnableRegister = () => 
-    dniValid && padronValid && firstNameValid && lastNameValid && !registering;
+  const shouldEnableRegister = () =>
+    dniValid && padronValid && passwordValid && firstNameValid && lastNameValid && !registering;
 
   const handleRegister = async () => {
     setRegistering(true);
@@ -53,6 +56,7 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
         email,
         dni.trim(),
         padron.trim(),
+        password,
         firstName.trim(),
         lastName.trim(),
         true, // is_student
@@ -63,10 +67,6 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
       if (sessionManager) {
         await sessionManager.saveCredentials(response);
         const user = await usersRepository.getInfo();
-
-        if (!user.isStudent()) {
-          throw new authenticationRepository.NotAStudent();
-        }
 
         navigation.reset({
           index: 0,
@@ -197,7 +197,10 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
               placeholderColor={style().textInputPlaceholder.color}
               errorStyle={style().errorInInput}
               keyboardType="numeric"
+              returnKeyType="next"
+              nextField={() => passwordTextInput.current}
               placeholder="Por ejemplo: 123456"
+              blurOnSubmit={false}
               onTextChanged={(text, isValid) => {
                 setPadron(text);
                 setPadronValid(isValid);
@@ -209,6 +212,32 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
                 },
                 numericality: {
                   message: 'Padrón inválido',
+                },
+              }}
+            />
+
+            <View style={style().inputLabels}>
+              <Text style={[style().text, { marginTop: 12 }]}>Contraseña</Text>
+            </View>
+            <FormInput
+              ref={passwordTextInput}
+              style={style().textInput}
+              placeholderColor={style().textInputPlaceholder.color}
+              errorStyle={style().errorInInput}
+              secureTextEntry={true}
+              placeholder="Ingresá una contraseña"
+              onTextChanged={(text, isValid) => {
+                setPassword(text);
+                setPasswordValid(isValid);
+              }}
+              validation={{
+                presence: {
+                  allowEmpty: false,
+                  message: 'Contraseña necesaria.',
+                },
+                length: {
+                  minimum: 6,
+                  message: 'La contraseña debe tener al menos 6 caracteres',
                 },
               }}
             />

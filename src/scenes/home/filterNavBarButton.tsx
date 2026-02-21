@@ -15,7 +15,6 @@ if (Platform.OS === 'android') {
   promptAndroid = require('react-native-prompt-android').default;
 }
 
-Icon.loadFont();
 
 interface FilterNavBarButtonProps {
 }

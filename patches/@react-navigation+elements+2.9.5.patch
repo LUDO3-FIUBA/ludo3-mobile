@@ -1,0 +1,56 @@
+diff --git a/node_modules/@react-navigation/elements/lib/module/Header/Header.js b/node_modules/@react-navigation/elements/lib/module/Header/Header.js
+index db27170..668d988 100644
+--- a/node_modules/@react-navigation/elements/lib/module/Header/Header.js
++++ b/node_modules/@react-navigation/elements/lib/module/Header/Header.js
+@@ -282,7 +282,7 @@ export function Header(props) {
+           pointerEvents: "box-none",
+           style: [styles.title, {
+             // Avoid the title from going offscreen or overlapping buttons
+-            maxWidth: headerTitleAlign === 'center' ? layout.width - ((leftButton ? headerBackButtonDisplayMode !== 'minimal' ? 80 : 32 : 16) + (rightButton || headerSearchBarOptions ? 16 : 0) + Math.max(insets.left, insets.right)) * 2 : layout.width - ((leftButton ? 52 : 16) + (rightButton || headerSearchBarOptions ? 52 : 16) + insets.left - insets.right)
++            maxWidth: layout.width > 0 ? (headerTitleAlign === 'center' ? layout.width - ((leftButton ? headerBackButtonDisplayMode !== 'minimal' ? 80 : 32 : 16) + (rightButton || headerSearchBarOptions ? 16 : 0) + Math.max(insets.left, insets.right)) * 2 : layout.width - ((leftButton ? 52 : 16) + (rightButton || headerSearchBarOptions ? 52 : 16) + insets.left - insets.right)) : undefined
+           }, headerTitleAlign === 'left' && leftButton ? {
+             marginStart: 4
+           } : {
+diff --git a/node_modules/@react-navigation/elements/src/Header/Header.tsx b/node_modules/@react-navigation/elements/src/Header/Header.tsx
+index ff00094..3000dbb 100644
+--- a/node_modules/@react-navigation/elements/src/Header/Header.tsx
++++ b/node_modules/@react-navigation/elements/src/Header/Header.tsx
+@@ -362,21 +362,23 @@ export function Header(props: Props) {
+                 {
+                   // Avoid the title from going offscreen or overlapping buttons
+                   maxWidth:
+-                    headerTitleAlign === 'center'
+-                      ? layout.width -
+-                        ((leftButton
+-                          ? headerBackButtonDisplayMode !== 'minimal'
+-                            ? 80
+-                            : 32
+-                          : 16) +
+-                          (rightButton || headerSearchBarOptions ? 16 : 0) +
+-                          Math.max(insets.left, insets.right)) *
+-                          2
+-                      : layout.width -
+-                        ((leftButton ? 52 : 16) +
+-                          (rightButton || headerSearchBarOptions ? 52 : 16) +
+-                          insets.left -
+-                          insets.right),
++                    layout.width > 0
++                      ? headerTitleAlign === 'center'
++                        ? layout.width -
++                          ((leftButton
++                            ? headerBackButtonDisplayMode !== 'minimal'
++                              ? 80
++                              : 32
++                            : 16) +
++                            (rightButton || headerSearchBarOptions ? 16 : 0) +
++                            Math.max(insets.left, insets.right)) *
++                            2
++                        : layout.width -
++                          ((leftButton ? 52 : 16) +
++                            (rightButton || headerSearchBarOptions ? 52 : 16) +
++                            insets.left -
++                            insets.right)
++                      : undefined,
+                 },
+                 headerTitleAlign === 'left' && leftButton
+                   ? { marginStart: 4 }

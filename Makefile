@@ -1,9 +1,13 @@
-.PHONY: up-android up-ios
+.PHONY: up-android up-ios prebuild start
 
 up-android:
-	npm install --legacy-peer-deps
-	npm run android
+	npx expo run:android
 
 up-ios:
-	cd ios && export LANG=en_US.UTF-8 && pod install
-	npx react-native run-ios
+	npx expo run:ios
+
+prebuild:
+	npx expo prebuild --clean
+
+start:
+	npx expo start --dev-client --clear

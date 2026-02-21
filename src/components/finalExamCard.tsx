@@ -39,13 +39,4 @@ const FinalExamCard: FC<FinalExamCardProps> = ({ finalExam }) => {
   );
 };
 
-FinalExamCard.defaultProps = {
-  finalExam: new FinalExam(
-    10,
-    1,
-    new Subject(1, '00.00', 'Materia', 'Profesor'),
-    new Date(),
-  ),
-};
-
 export default FinalExamCard;

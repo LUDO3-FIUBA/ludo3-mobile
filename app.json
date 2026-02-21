@@ -1,4 +1,47 @@
 {
-  "name": "ReactNativeProject",
-  "displayName": "ReactNativeProject"
+  "expo": {
+    "name": "LUDO",
+    "slug": "ludo3-mobile",
+    "version": "2.0.0",
+    "icon": "./src/assets/ludo_icon.png",
+    "scheme": "ludo",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "ios": {
+      "bundleIdentifier": "org.fiuba.ludo",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "org.fiuba.ludo",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/ludo_icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "LUDO necesita acceso a la cámara para tomar fotos"
+        }
+      ],
+      "@react-native-google-signin/google-signin",
+      "expo-notifications",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "1.9.25"
+          }
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ]
+  }
 }

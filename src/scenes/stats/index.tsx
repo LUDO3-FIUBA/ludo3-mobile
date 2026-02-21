@@ -69,62 +69,67 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
       {loading && <Loading />}
       {!loading && studentStats && (
         <>
-          <View style={styles.card}>
-            <LineChart
-              data={data}
-              width={screenWidth}
-              height={220}
-              chartConfig={{
-                backgroundGradientFrom: "#ffffff",
-                backgroundGradientTo: "#ffffff",
-                fillShadowGradientFrom: "#4D4D4D",
-                fillShadowGradientTo: "#FFFFFF",
-                decimalPlaces: 2,
-                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-              }}
-              bezier
-              style={{
-                marginBottom: 18,
-                borderRadius: 16
-              }}
-            />
-          </View>
+          {data.datasets[0].data.length > 0 && (
+            <View style={styles.card}>
+              <LineChart
+                data={data}
+                width={screenWidth}
+                height={220}
+                chartConfig={{
+                  backgroundGradientFrom: "#ffffff",
+                  backgroundGradientTo: "#ffffff",
+                  fillShadowGradientFrom: "#4D4D4D",
+                  fillShadowGradientTo: "#FFFFFF",
+                  decimalPlaces: 2,
+                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                }}
+                bezier
+                style={{
+                  marginBottom: 18,
+                  borderRadius: 16
+                }}
+              />
+            </View>
+          )}
 
-          <View style={styles.card}>
-            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, padding: 16 }}>
-              <View style={{ alignItems: 'center', gap: 8 }}>
-                <Progress.Circle
-                  progress={studentStats.student_vs_global_average.student_average / 10}
-                  formatText={(a) => floatToFixedDecimal(studentStats.student_vs_global_average.student_average)}
-                  color={lightModeColors.institutional}
-                  unfilledColor='lightblue'
-                  strokeCap='round'
-                  size={120}
-                  thickness={10}
-                  showsText={true}
-                  borderWidth={0}
-                  textStyle={{ fontWeight: 'bold' }}
-                />
-                <Text style={styles.passingGradeLabel}>Tu Promedio</Text>
-              </View>
-              <View style={{ alignItems: 'center', gap: 8 }}>
-                <Progress.Circle
-                  progress={studentStats.student_vs_global_average.global_average / 10}
-                  formatText={(a) => floatToFixedDecimal(studentStats.student_vs_global_average.global_average)}
-                  color={lightModeColors.institutional}
-                  unfilledColor='lightblue'
-                  strokeCap='round'
-                  size={120}
-                  thickness={10}
-                  showsText={true}
-                  borderWidth={0}
-                  textStyle={{ fontWeight: 'bold' }}
-                />
-                <Text style={styles.passingGradeLabel}>Promedio Global</Text>
+          {(studentStats.student_vs_global_average.student_average != null ||
+            studentStats.student_vs_global_average.global_average != null) && (
+            <View style={styles.card}>
+              <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, padding: 16 }}>
+                <View style={{ alignItems: 'center', gap: 8 }}>
+                  <Progress.Circle
+                    progress={(studentStats.student_vs_global_average.student_average ?? 0) / 10}
+                    formatText={() => floatToFixedDecimal(studentStats.student_vs_global_average.student_average)}
+                    color={lightModeColors.institutional}
+                    unfilledColor='lightblue'
+                    strokeCap='round'
+                    size={120}
+                    thickness={10}
+                    showsText={true}
+                    borderWidth={0}
+                    textStyle={{ fontWeight: 'bold' }}
+                  />
+                  <Text style={styles.passingGradeLabel}>Tu Promedio</Text>
+                </View>
+                <View style={{ alignItems: 'center', gap: 8 }}>
+                  <Progress.Circle
+                    progress={(studentStats.student_vs_global_average.global_average ?? 0) / 10}
+                    formatText={() => floatToFixedDecimal(studentStats.student_vs_global_average.global_average)}
+                    color={lightModeColors.institutional}
+                    unfilledColor='lightblue'
+                    strokeCap='round'
+                    size={120}
+                    thickness={10}
+                    showsText={true}
+                    borderWidth={0}
+                    textStyle={{ fontWeight: 'bold' }}
+                  />
+                  <Text style={styles.passingGradeLabel}>Promedio Global</Text>
+                </View>
               </View>
             </View>
-          </View>
+          )}
 
           <View style={[styles.card, { marginBottom: 120 }]}>
             <View style={styles.cardItem}>
@@ -146,7 +151,8 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
 
 export default Stats;
 
-function floatToFixedDecimal(averageFloat: number): string {
+function floatToFixedDecimal(averageFloat: number | null | undefined): string {
+  if (averageFloat == null) return '—';
   return averageFloat.toFixed(2);
 }
 
