@@ -3,6 +3,7 @@
     "name": "LUDO",
     "slug": "ludo3-mobile",
     "version": "2.0.0",
+    "icon": "./src/assets/ludo_icon.png",
     "scheme": "ludo",
     "platforms": [
       "ios",
