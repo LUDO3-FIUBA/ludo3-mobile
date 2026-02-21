@@ -19,3 +19,4 @@ export { default as teacherStaffRepository } from './teacherStaff';
 export { default as teacherQrAttendanceRepository } from './teacherQrAttendance';
 export { default as teacherStatsRepository } from './teacherStats';
 export { default as teacherStudentsRepository } from './teacherStudents';
+export { default as teacherProfileRepository } from './teacherProfile';

@@ -8,6 +8,7 @@ import PendingSubjectsScreen from "../pending_subjects";
 import StatsScreen from "../stats";
 import TeacherHomeScreen from "../teacher_home";
 import CreateSemester from "../teacher_semester/CreateSemester";
+import TeacherProfileScreen from "../teacher_profile";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -219,6 +220,16 @@ const RootDrawer = () => {
               headerShown: true,
               title: 'Crear Cuatrimestre',
               drawerIcon: makeDrawerIcon('plus-circle', 'plus-circle-outline')
+            }}
+          />
+
+          <Drawer.Screen
+            name="TeacherProfile"
+            component={TeacherProfileScreen}
+            options={{
+              headerShown: true,
+              title: 'Mi Perfil Profesional',
+              drawerIcon: makeDrawerIcon('account-details', 'account-details-outline')
             }}
           />
         </>
