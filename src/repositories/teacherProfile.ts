@@ -17,6 +17,7 @@ function toSnakeCase(profile: TeacherProfile): object {
     current_position: profile.currentPosition,
     years_of_experience: profile.yearsOfExperience != null ? toInt(profile.yearsOfExperience) : null,
     certifications: profile.certifications ?? '',
+    linkedin_url: profile.linkedinUrl ?? '',
     work_experience: profile.workExperience.map(item => ({
       company: item.company,
       position: item.position,

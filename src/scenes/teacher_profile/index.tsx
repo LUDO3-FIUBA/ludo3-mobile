@@ -30,6 +30,7 @@ const EMPTY_PROFILE: TeacherProfile = {
   currentPosition: '',
   yearsOfExperience: undefined,
   certifications: '',
+  linkedinUrl: '',
   workExperience: [],
 };
 
@@ -44,6 +45,7 @@ const profileSchema = Yup.object().shape({
     .nullable()
     .transform((value, originalValue) => (originalValue === '' ? null : value)),
   certifications: Yup.string(),
+  linkedinUrl: Yup.string().url('Debe ser una URL válida (ej: https://linkedin.com/in/...)'),
   workExperience: Yup.array().of(
     Yup.object().shape({
       company: Yup.string().required('La empresa es requerida'),
@@ -139,6 +141,12 @@ const TeacherProfileScreen: React.FC = () => {
           </Section>
         ) : null}
 
+        {profile.linkedinUrl ? (
+          <Section title="LinkedIn">
+            <Text style={styles.linkText}>{profile.linkedinUrl}</Text>
+          </Section>
+        ) : null}
+
         {profile.workExperience.length > 0 && (
           <Section title="Experiencia laboral">
             {profile.workExperience.map((exp, idx) => (
@@ -226,6 +234,17 @@ const TeacherProfileScreen: React.FC = () => {
             multiline
             numberOfLines={3}
             style={styles.multilineInput}
+          />
+
+          <FormField
+            label="LinkedIn"
+            value={values.linkedinUrl ?? ''}
+            onChangeText={handleChange('linkedinUrl')}
+            onBlur={handleBlur('linkedinUrl')}
+            placeholder="https://linkedin.com/in/tu-perfil"
+            keyboardType="url"
+            autoCapitalize="none"
+            error={touched.linkedinUrl ? errors.linkedinUrl : undefined}
           />
 
           <Text style={styles.sectionTitle}>Experiencia laboral</Text>
@@ -375,6 +394,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#333',
     lineHeight: 22,
+  },
+  linkText: {
+    fontSize: 15,
+    color: '#0077B5',
   },
   workItem: {
     backgroundColor: '#fff',
