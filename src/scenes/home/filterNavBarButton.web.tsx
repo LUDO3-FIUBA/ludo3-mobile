@@ -9,6 +9,7 @@ import { FiltersEnum } from '../approved_subjects/FiltersEnum';
 import { useAppDispatch } from '../../redux/hooks';
 import { setFilter, setFilterToCorrelative, setFilterToName, setFilterToYear } from '../../redux/reducers/filterSlice';
 
+Icon.loadFont();
 
 interface FilterNavBarButtonProps {
 }
