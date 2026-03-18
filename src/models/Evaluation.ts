@@ -6,5 +6,7 @@ export default interface Evaluation {
     passing_grade: number;
     start_date: string | null;
     end_date: string;
+    requires_qr: boolean;
+    requires_identity: boolean;
     semester: Semester;
 }

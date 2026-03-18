@@ -7,14 +7,24 @@ import { fetchPresentSemesterFromCommissionId } from './teacherSemesters';
 
 const domainUrl = 'api/teacher/evaluations';
 
-async function create(semester: TeacherSemester, evaluationName: string, startDate: Date, finishDate: Date, minimumPassingGrade: string): Promise<CreatedEvaluation> {
+async function create(
+  semester: TeacherSemester,
+  evaluationName: string,
+  startDate: Date,
+  finishDate: Date,
+  minimumPassingGrade: string,
+  requiresIdentity: boolean,
+  requiresQr: boolean,
+): Promise<CreatedEvaluation> {
   const evaluationToBeCreated: CreatedEvaluationSnakeCase = {
     semester_id: semester.id,
     evaluation_name: evaluationName,
     is_graded: true,
     passing_grade: +minimumPassingGrade,
     start_date: startDate,
-    end_date: finishDate
+    end_date: finishDate,
+    requires_identity: requiresIdentity,
+    requires_qr: requiresQr
   }
 
   const response = await post(`${domainUrl}/add_evaluation`, evaluationToBeCreated)

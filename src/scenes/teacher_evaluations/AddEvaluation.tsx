@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Switch,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Loading, RoundedButton } from '../../components';
@@ -36,6 +37,9 @@ const AddEvaluation: React.FC<Props> = () => {
 
   const [minimumPassingGrade, setMinimumPassingGrade] = useState<string>('')
   const [creating, setCreating] = useState(false);
+
+  const [requireIdentityVerification, setRequireIdentityVerification] = useState(false);
+  const [requireQrScan, setRequireQrScan] = useState(false);
 
   const navigation = useNavigation();
   const semester: TeacherSemester = useAppSelector(selectSemesterData)!
@@ -261,6 +265,28 @@ const AddEvaluation: React.FC<Props> = () => {
         </TouchableOpacity>
         <Text style={{ color: 'grey', fontSize: 12, marginTop: 3, marginBottom: 25 }}> Los horarios están restringidos a intervalos de 30 minutos</Text>
 
+        <View style={{ marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <Text style={{ ...style().text, color: 'black' }}>
+              Requerir verificación de identidad
+            </Text>
+            <Switch
+              value={requireIdentityVerification}
+              onValueChange={setRequireIdentityVerification}
+            />
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={{ ...style().text, color: 'black' }}>
+              Requerir escaneo de QR
+            </Text>
+            <Switch
+              value={requireQrScan}
+              onValueChange={setRequireQrScan}
+            />
+          </View>
+        </View>
+
         <RoundedButton
           text="Agregar evaluación"
           style={{ ...style().button }}
@@ -273,7 +299,15 @@ const AddEvaluation: React.FC<Props> = () => {
                 const startFullDate = combineDateAndTime(startDate, startTime);
                 const finishFullDate = combineDateAndTime(finishDate, finishTime);
 
-                teacherEvaluationsRepository.create(semester, evaluationName, startFullDate, finishFullDate, minimumPassingGrade)
+                teacherEvaluationsRepository.create(
+                  semester,
+                  evaluationName,
+                  startFullDate,
+                  finishFullDate,
+                  minimumPassingGrade,
+                  requireIdentityVerification,
+                  requireQrScan,
+                )
                   .then(() => {
                     setCreating(false);
                     navigation.goBack();
