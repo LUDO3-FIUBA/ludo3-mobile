@@ -13,8 +13,8 @@ async function create(
   startDate: Date,
   finishDate: Date,
   minimumPassingGrade: string,
-  requiresIdentity: boolean,
   requiresQr: boolean,
+  requiresIdentity: boolean,
 ): Promise<CreatedEvaluation> {
   const evaluationToBeCreated: CreatedEvaluationSnakeCase = {
     semester_id: semester.id,
@@ -23,8 +23,8 @@ async function create(
     passing_grade: +minimumPassingGrade,
     start_date: startDate,
     end_date: finishDate,
-    requires_identity: requiresIdentity,
-    requires_qr: requiresQr
+    requires_qr: requiresQr,
+    requires_identity: requiresIdentity
   }
 
   const response = await post(`${domainUrl}/add_evaluation`, evaluationToBeCreated)
