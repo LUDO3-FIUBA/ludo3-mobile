@@ -67,41 +67,32 @@ const Home: React.FC<any> = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Two-column layout for web */}
-        <View style={styles.grid}>
-          {/* Left column */}
-          <View style={styles.colLeft}>
-            {/* Eventos próximos */}
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
-              <MaterialIcon name="calendar-clock" fontSize={24} color={colors.black} />
-              <Text style={[styles.header1, { color: colors.black }]}>Eventos próximos</Text>
-            </View>
-            <UpcomingEventsCard evaluations={evaluations} />
-            <VerMasButton onPress={() => navigation.navigate('Calendar')} colors={colors} />
-
-            {/* Materias en curso */}
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
-              <MaterialIcon name="text-box-multiple" fontSize={24} color={colors.black} />
-              <Text style={[styles.header1, { color: colors.black }]}>Materias en curso</Text>
-            </View>
-            <CommissionInscriptionOverviewList commissionInscriptions={commissionInscriptions} />
-            <VerMasButton onPress={() => navigation.navigate('CurrentCommissionInscriptions')} colors={colors} />
-          </View>
-
-          {/* Right column */}
-          <View style={styles.colRight}>
-            {/* Materias aprobadas */}
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
-              <MaterialIcon name="text-box-check" fontSize={24} color={colors.black} />
-              <Text style={[styles.header1, { color: colors.black }]}>Materias aprobadas</Text>
-            </View>
-            <FinalExamOverviewList
-              finalExams={finalExams}
-              emptyMessage={`No tenés materias aprobadas aún.\nNo te olvides de rendir los finales.`}
-            />
-            <VerMasButton onPress={() => navigation.navigate('ApprovedSubjects')} colors={colors} />
-          </View>
+        {/* Eventos próximos */}
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
+          <MaterialIcon name="calendar-clock" fontSize={24} color={colors.black} />
+          <Text style={[styles.header1, { color: colors.black }]}>Eventos próximos</Text>
         </View>
+        <UpcomingEventsCard evaluations={evaluations} />
+        <VerMasButton onPress={() => navigation.navigate('Calendar')} colors={colors} />
+
+        {/* Materias en curso */}
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
+          <MaterialIcon name="text-box-multiple" fontSize={24} color={colors.black} />
+          <Text style={[styles.header1, { color: colors.black }]}>Materias en curso</Text>
+        </View>
+        <CommissionInscriptionOverviewList commissionInscriptions={commissionInscriptions} />
+        <VerMasButton onPress={() => navigation.navigate('CurrentCommissionInscriptions')} colors={colors} />
+
+        {/* Materias aprobadas */}
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
+          <MaterialIcon name="text-box-check" fontSize={24} color={colors.black} />
+          <Text style={[styles.header1, { color: colors.black }]}>Materias aprobadas</Text>
+        </View>
+        <FinalExamOverviewList
+          finalExams={finalExams}
+          emptyMessage={`No tenés materias aprobadas aún.\nNo te olvides de rendir los finales.`}
+        />
+        <VerMasButton onPress={() => navigation.navigate('ApprovedSubjects')} colors={colors} />
       </ScrollView>
     </SafeAreaView>
   );
