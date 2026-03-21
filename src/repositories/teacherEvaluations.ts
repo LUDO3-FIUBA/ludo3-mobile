@@ -76,4 +76,4 @@ async function notifyStudents(evaluationId: number): Promise<void> {
   return;
 }
 
-export default { create, addSubmissionToEvaluation, fetchPresentSemesterEvaluations, notifyStudents }
+export default { create, update, addSubmissionToEvaluation, fetchPresentSemesterEvaluations, notifyStudents }

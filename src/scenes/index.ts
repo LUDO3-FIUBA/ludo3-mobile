@@ -47,3 +47,4 @@ export { default as TeacherStatsScreen } from './teacher_stats';
 export { default as TeacherFinalExamSubmissionsScreen } from './teacher_finals/FinalExamSubmissions';
 export { default as TeacherAddClassToSemesterScreen } from './teacher_attendances/AddClassToSemester';
 export { default as TeacherSemesterCardScreen } from './teacher_semester/SemesterCard';
+export { default as TeacherEditEvaluationScreen } from './teacher_evaluations/EditEvaluation';

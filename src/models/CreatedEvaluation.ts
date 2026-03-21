@@ -5,8 +5,8 @@ export interface CreatedEvaluation {
   passingGrade: number;
   startDate:    Date;
   endDate:      Date;
-  requiresIdentity: boolean;
   requiresQr: boolean;
+  requiresIdentity: boolean;
 }
 
 export interface CreatedEvaluationSnakeCase {
@@ -16,6 +16,6 @@ export interface CreatedEvaluationSnakeCase {
   passing_grade:   number;
   start_date:      Date;
   end_date:        Date;
-  requires_identity: boolean;
   requires_qr: boolean;
+  requires_identity: boolean;
 }
