@@ -2,7 +2,7 @@ import { CreatedEvaluation, CreatedEvaluationSnakeCase } from '../models/Created
 import { TeacherEvaluation } from '../models/TeacherEvaluation';
 import { TeacherSemester } from '../models/TeacherSemester';
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
-import { post } from './authenticatedRepository';
+import { post, put } from './authenticatedRepository';
 import { fetchPresentSemesterFromCommissionId } from './teacherSemesters';
 
 const domainUrl = 'api/teacher/evaluations';
@@ -29,6 +29,30 @@ async function create(
 
   const response = await post(`${domainUrl}/add_evaluation`, evaluationToBeCreated)
   return convertSnakeToCamelCase(response) as CreatedEvaluation
+}
+
+async function update(
+  evaluationId: number,
+  evaluationName: string,
+  startDate: Date,
+  finishDate: Date,
+  minimumPassingGrade: string,
+  requiresQr: boolean,
+  requiresIdentity: boolean,
+): Promise<CreatedEvaluation> {
+  const body = {
+    evaluation_id: evaluationId,
+    evaluation_name: evaluationName,
+    is_graded: true,
+    passing_grade: +minimumPassingGrade,
+    start_date: startDate,
+    end_date: finishDate,
+    requires_qr: requiresQr,
+    requires_identity: requiresIdentity,
+  };
+
+  const response = await put(`${domainUrl}/update_evaluation`, body);
+  return convertSnakeToCamelCase(response) as CreatedEvaluation;
 }
 
 export async function fetchPresentSemesterEvaluations(commissionId: number): Promise<TeacherEvaluation[]> {
