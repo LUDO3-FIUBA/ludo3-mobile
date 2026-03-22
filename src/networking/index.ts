@@ -1,6 +1,7 @@
 import { API_URL } from "@env";
+import { Platform } from "react-native";
 
-export const baseUrl = API_URL || 'http://example.com:8007';
+export const baseUrl = Platform.OS === 'web' ? 'http://localhost:8007' : (API_URL || 'http://example.com:8007');
 
 const logRequests = true;
 
