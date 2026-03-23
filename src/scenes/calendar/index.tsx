@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View } from 'react-native';
-import { AgendaList, Calendar, CalendarProvider } from 'react-native-calendars';
+import { ListRenderItem, View } from 'react-native';
 import { DateData, MarkedDates } from 'react-native-calendars/src/types';
 import { CommissionInscription, Evaluation, FinalExam } from '../../models';
 import { SemesterSchedule } from '../../models/Semester';
@@ -8,6 +7,11 @@ import { calendar as style } from '../../styles';
 import { lightModeColors } from '../../styles/colorPalette';
 import AgendaItem from './AgendaItem';
 import { commissionInscriptionsRepository, evaluationsRepository, finalExamsRepository } from '../../repositories';
+import ViewModeToggle from './ViewModeToggle';
+import MonthView from './MonthView';
+import WeekView from './WeekView';
+import DayView from './DayView';
+import { useNavigation } from '@react-navigation/native';
 
 export type ClassOccurrence = {
   date: Date;
@@ -23,10 +27,12 @@ export type CalendarEvent =
   | { type: 'final'; data: FinalExam }
   | { type: 'class'; data: ClassOccurrence };
 
-interface AgendaSection {
+export interface AgendaSection {
   title: string;
   data: CalendarEvent[];
 }
+
+export type ViewMode = 'month' | 'week' | 'day';
 
 const EVAL_COLOR  = lightModeColors.careers;  // naranja
 const FINAL_COLOR = '#e53935';                // rojo
@@ -37,10 +43,15 @@ const FINAL_DOT = { key: 'final',      color: FINAL_COLOR, selectedDotColor: 'wh
 const CLASS_DOT = { key: 'class',      color: CLASS_COLOR, selectedDotColor: 'white' };
 
 const CalendarScreen = () => {
-  const [evaluations, setEvaluations]     = useState<Evaluation[]>([]);
-  const [finals, setFinals]               = useState<FinalExam[]>([]);
-  const [inscriptions, setInscriptions]   = useState<CommissionInscription[]>([]);
-  const [selectedDate, setSelectedDate]   = useState<string | null>(null);
+  const navigation = useNavigation();
+
+  const [evaluations, setEvaluations]   = useState<Evaluation[]>([]);
+  const [finals, setFinals]             = useState<FinalExam[]>([]);
+  const [inscriptions, setInscriptions] = useState<CommissionInscription[]>([]);
+  const [viewMode, setViewMode]         = useState<ViewMode>('month');
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split('T')[0],
+  );
 
   useEffect(() => {
     evaluationsRepository.fetchMisExamenes().then(setEvaluations).catch(() => {});
@@ -53,14 +64,8 @@ const CalendarScreen = () => {
     [evaluations, finals, inscriptions],
   );
 
-  const filteredItems = useMemo(() => {
-    if (!selectedDate) return calendarItems;
-    return calendarItems.filter(s => s.title === selectedDate);
-  }, [calendarItems, selectedDate]);
-
   const marks: MarkedDates = useMemo(() => {
     const base = getMarkedDates(calendarItems);
-    if (!selectedDate) return base;
     return {
       ...base,
       [selectedDate]: {
@@ -71,41 +76,68 @@ const CalendarScreen = () => {
     };
   }, [calendarItems, selectedDate]);
 
-  const startingDate = new Date().toISOString().split('T')[0];
-
   const onDayPress = useCallback((day: DateData) => {
-    setSelectedDate(prev => prev === day.dateString ? null : day.dateString);
+    setSelectedDate(day.dateString);
   }, []);
 
+  const onDayPressStr = useCallback((dateStr: string) => {
+    setSelectedDate(dateStr);
+  }, []);
 
-  const renderItem = useCallback(({ item }: { item: CalendarEvent }) => {
-    return <AgendaItem item={item} evalColor={EVAL_COLOR} finalColor={FINAL_COLOR} classColor={CLASS_COLOR} />;
+  const onEventPress = useCallback((event: CalendarEvent) => {
+    if (event.type === 'evaluation') {
+      navigation.navigate('ViewEvaluationDetails', { evaluation: event.data });
+    } else if (event.type === 'final') {
+      navigation.navigate('ViewFinalDetails', { finalExam: event.data });
+    } else {
+      navigation.navigate('ViewClassDetails', { classOccurrence: event.data });
+    }
+  }, [navigation]);
+
+  const renderItem: ListRenderItem<CalendarEvent> = useCallback(({ item }) => {
+    return (
+      <AgendaItem
+        item={item}
+        evalColor={EVAL_COLOR}
+        finalColor={FINAL_COLOR}
+        classColor={CLASS_COLOR}
+      />
+    );
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
-      <CalendarProvider date={startingDate}>
-        <Calendar
-          firstDay={1}
-          markedDates={marks}
-          markingType="multi-dot"
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
+      <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+
+      {viewMode === 'month' && (
+        <MonthView
+          calendarItems={calendarItems}
+          marks={marks}
+          selectedDate={selectedDate}
           onDayPress={onDayPress}
-          theme={{
-            selectedDayBackgroundColor: lightModeColors.institutional,
-            arrowColor: lightModeColors.institutional,
-            todayTextColor: lightModeColors.institutional,
-            monthTextColor: lightModeColors.darkGray,
-            textMonthFontWeight: 'bold',
-            textDayFontSize: 14,
-            textMonthFontSize: 16,
-          }}
-        />
-        <AgendaList
-          sections={filteredItems}
           renderItem={renderItem}
           sectionStyle={style().section}
         />
-      </CalendarProvider>
+      )}
+
+      {viewMode === 'week' && (
+        <WeekView
+          calendarItems={calendarItems}
+          marks={marks}
+          selectedDate={selectedDate}
+          onDayPress={onDayPressStr}
+          renderItem={renderItem}
+        />
+      )}
+
+      {viewMode === 'day' && (
+        <DayView
+          calendarItems={calendarItems}
+          selectedDate={selectedDate}
+          onDateChange={onDayPressStr}
+          onEventPress={onEventPress}
+        />
+      )}
     </View>
   );
 };
@@ -115,7 +147,7 @@ export default CalendarScreen;
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-function getEventDate(event: CalendarEvent): string {
+export function getEventDate(event: CalendarEvent): string {
   if (event.type === 'evaluation') return event.data.end_date.split('T')[0];
   if (event.type === 'final') {
     const d = event.data.date;
