@@ -1,86 +1,152 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { AgendaList, CalendarProvider, ExpandableCalendar } from 'react-native-calendars';
-import { MarkedDates } from 'react-native-calendars/src/types';
-import { Evaluation } from '../../models';
+import { View } from 'react-native';
+import { AgendaList, Calendar, CalendarProvider } from 'react-native-calendars';
+import { DateData, MarkedDates } from 'react-native-calendars/src/types';
+import { Evaluation, FinalExam } from '../../models';
 import { calendar as style } from '../../styles';
 import { lightModeColors } from '../../styles/colorPalette';
 import AgendaItem from './AgendaItem';
-import { evaluationsRepository } from '../../repositories';
+import { evaluationsRepository, finalExamsRepository } from '../../repositories';
 
-interface CalendarItem {
+export type CalendarEvent =
+  | { type: 'evaluation'; data: Evaluation }
+  | { type: 'final'; data: FinalExam };
+
+interface AgendaSection {
   title: string;
-  data: Evaluation[];
+  data: CalendarEvent[];
 }
 
-const CalendarScreen = () => {
-  const [evaluations, setEvaluations] = useState<Evaluation[]>([])
+const EVAL_COLOR = lightModeColors.careers;   // naranja
+const FINAL_COLOR = '#e53935';                // rojo
 
-  async function fetch() {
-    const evals = await evaluationsRepository.fetchMisExamenes()
-    setEvaluations(evals)
-  }
+const EVAL_DOT = { key: 'evaluation', color: EVAL_COLOR, selectedDotColor: 'white' };
+const FINAL_DOT = { key: 'final', color: FINAL_COLOR, selectedDotColor: 'white' };
+
+const CalendarScreen = () => {
+  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [finals, setFinals] = useState<FinalExam[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch()
-  }, [])
+    evaluationsRepository.fetchMisExamenes().then(setEvaluations).catch(() => {});
+    finalExamsRepository.fetchPending().then(setFinals).catch(() => {});
+  }, []);
 
-  const calendarItems: CalendarItem[] = useMemo(() => getAgendaItems(evaluations), [evaluations]);
-  const marks: MarkedDates = useMemo(() => getMarkedDates(calendarItems), [evaluations]);
-  const startingDate = new Date().toISOString();
+  const calendarItems: AgendaSection[] = useMemo(
+    () => getAgendaItems(evaluations, finals),
+    [evaluations, finals],
+  );
 
-  const renderItem = useCallback(({ item }: any) => {
-    return <AgendaItem item={item} />;
+  const filteredItems = useMemo(() => {
+    if (!selectedDate) return calendarItems;
+    return calendarItems.filter(s => s.title === selectedDate);
+  }, [calendarItems, selectedDate]);
+
+  const marks: MarkedDates = useMemo(() => {
+    const base = getMarkedDates(calendarItems);
+    if (!selectedDate) return base;
+    return {
+      ...base,
+      [selectedDate]: {
+        ...(base[selectedDate] || {}),
+        selected: true,
+        selectedColor: lightModeColors.institutional,
+      },
+    };
+  }, [calendarItems, selectedDate]);
+
+  const startingDate = new Date().toISOString().split('T')[0];
+
+  const onDayPress = useCallback((day: DateData) => {
+    setSelectedDate(prev => prev === day.dateString ? null : day.dateString);
+  }, []);
+
+  const renderItem = useCallback(({ item }: { item: CalendarEvent }) => {
+    return <AgendaItem item={item} evalColor={EVAL_COLOR} finalColor={FINAL_COLOR} />;
   }, []);
 
   return (
-    <CalendarProvider
-      date={startingDate}
-      showTodayButton
-      theme={{ todayButtonTextColor: lightModeColors.institutional }}
-    >
-      <ExpandableCalendar
-        firstDay={1}
-        markedDates={marks}
-        theme={{
-          dotColor: lightModeColors.institutional,
-          selectedDayBackgroundColor: lightModeColors.institutional,
-          arrowColor: lightModeColors.institutional,
-          todayTextColor: lightModeColors.institutional
-        }}
-      />
-      <AgendaList
-        sections={calendarItems}
-        renderItem={renderItem}
-        sectionStyle={style().section}
-      />
-    </CalendarProvider>
+    <View style={{ flex: 1 }}>
+      <CalendarProvider
+        date={startingDate}
+        showTodayButton
+        theme={{ todayButtonTextColor: lightModeColors.institutional }}
+      >
+        <Calendar
+          firstDay={1}
+          markedDates={marks}
+          markingType="multi-dot"
+          onDayPress={onDayPress}
+          theme={{
+            selectedDayBackgroundColor: lightModeColors.institutional,
+            arrowColor: lightModeColors.institutional,
+            todayTextColor: lightModeColors.institutional,
+            monthTextColor: lightModeColors.darkGray,
+            textMonthFontWeight: 'bold',
+            textDayFontSize: 14,
+            textMonthFontSize: 16,
+          }}
+        />
+        <AgendaList
+          sections={filteredItems}
+          renderItem={renderItem}
+          sectionStyle={style().section}
+        />
+      </CalendarProvider>
+    </View>
   );
 };
 
 export default CalendarScreen;
 
 
-function getAgendaItems(evaluations: Evaluation[]) {
-  return evaluations.reduce<CalendarItem[]>((acc, item) => {
-    const date = item.end_date.split('T')[0];
-    const existingGroup = acc.find(group => group.title === date);
+function getEventDate(event: CalendarEvent): string {
+  if (event.type === 'evaluation') {
+    return event.data.end_date.split('T')[0];
+  }
+  return (typeof event.data.date === 'string' ? event.data.date : event.data.date.toISOString()).split('T')[0];
+}
 
-    if (existingGroup) {
-      existingGroup.data.push(item);
+function getAgendaItems(evaluations: Evaluation[], finals: FinalExam[]): AgendaSection[] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const events: CalendarEvent[] = [
+    ...evaluations.map<CalendarEvent>(data => ({ type: 'evaluation', data })),
+    ...finals
+      .filter(f => new Date(f.date) >= today)
+      .map<CalendarEvent>(data => ({ type: 'final', data })),
+  ];
+
+  events.sort((a, b) => {
+    const dateA = new Date(getEventDate(a));
+    const dateB = new Date(getEventDate(b));
+    return dateA.getTime() - dateB.getTime();
+  });
+
+  return events.reduce<AgendaSection[]>((acc, event) => {
+    const date = getEventDate(event);
+    const existing = acc.find(s => s.title === date);
+    if (existing) {
+      existing.data.push(event);
     } else {
-      acc.push({ title: date, data: [item] });
+      acc.push({ title: date, data: [event] });
     }
-
     return acc;
   }, []);
 }
 
-function getMarkedDates(items: CalendarItem[]) {
+function getMarkedDates(sections: AgendaSection[]): MarkedDates {
   const marked: MarkedDates = {};
-
-  items.forEach(item => {
-    marked[item.title] = { marked: true };
+  sections.forEach(s => {
+    const hasEval = s.data.some(e => e.type === 'evaluation');
+    const hasFinal = s.data.some(e => e.type === 'final');
+    const dots = [
+      ...(hasEval ? [EVAL_DOT] : []),
+      ...(hasFinal ? [FINAL_DOT] : []),
+    ];
+    marked[s.title] = { dots };
   });
-
   return marked;
 }
