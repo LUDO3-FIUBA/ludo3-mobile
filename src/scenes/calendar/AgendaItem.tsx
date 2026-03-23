@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import moment from "moment";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { calendarAgendaItem as style } from "../../styles";
@@ -21,11 +21,7 @@ const AgendaItem = (props: IProps) => {
         if (item.type === 'evaluation') {
             navigation.navigate('ViewEvaluationDetails', { evaluation: item.data });
         } else {
-            const date = moment(item.data.date);
-            Alert.alert(
-                item.data.subject.name,
-                `Fecha: ${date.format('DD/MM/YYYY [a las] HH:mm')}\nDocente: ${item.data.subject.teacher_name}`,
-            );
+            navigation.navigate('ViewFinalDetails', { finalExam: item.data });
         }
     }, [item]);
 
