@@ -6,6 +6,7 @@ import { ViewMode } from './index';
 interface Props {
   mode: ViewMode;
   onChange: (m: ViewMode) => void;
+  onTodayPress: () => void;
 }
 
 const MODES: { key: ViewMode; label: string }[] = [
@@ -14,7 +15,7 @@ const MODES: { key: ViewMode; label: string }[] = [
   { key: 'day',   label: 'Día' },
 ];
 
-const ViewModeToggle = ({ mode, onChange }: Props) => {
+const ViewModeToggle = ({ mode, onChange, onTodayPress }: Props) => {
   return (
     <View style={styles.container}>
       <View style={styles.pill}>
@@ -34,6 +35,10 @@ const ViewModeToggle = ({ mode, onChange }: Props) => {
           );
         })}
       </View>
+
+      <TouchableOpacity onPress={onTodayPress} style={styles.todayBtn} activeOpacity={0.7}>
+        <Text style={styles.todayLabel}>Hoy</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -42,11 +47,15 @@ export default ViewModeToggle;
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 10,
     backgroundColor: 'white',
+    gap: 10,
   },
   pill: {
+    flex: 1,
     flexDirection: 'row',
     backgroundColor: '#f0f0f0',
     borderRadius: 10,
@@ -73,6 +82,18 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   labelSelected: {
+    color: lightModeColors.institutional,
+    fontWeight: '600',
+  },
+  todayBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: lightModeColors.institutional,
+  },
+  todayLabel: {
+    fontSize: 13,
     color: lightModeColors.institutional,
     fontWeight: '600',
   },

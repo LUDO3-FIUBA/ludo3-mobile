@@ -112,7 +112,11 @@ const CalendarScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: 'white' }}>
-      <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+      <ViewModeToggle
+        mode={viewMode}
+        onChange={setViewMode}
+        onTodayPress={() => setSelectedDate(new Date().toISOString().split('T')[0])}
+      />
 
       {viewMode === 'month' && (
         <MonthView

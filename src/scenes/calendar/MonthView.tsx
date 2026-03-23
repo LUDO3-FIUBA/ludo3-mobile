@@ -28,9 +28,10 @@ const MonthView = ({
   );
 
   return (
-    <CalendarProvider date={selectedDate} style={{ flex: 1 }}>
+    <CalendarProvider key={selectedDate.substring(0, 7)} date={selectedDate} style={{ flex: 1 }}>
       <Calendar
         firstDay={1}
+        current={selectedDate}
         markedDates={marks}
         markingType="multi-dot"
         onDayPress={onDayPress}
