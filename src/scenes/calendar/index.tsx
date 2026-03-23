@@ -43,7 +43,7 @@ const FINAL_DOT = { key: 'final',      color: FINAL_COLOR, selectedDotColor: 'wh
 const CLASS_DOT = { key: 'class',      color: CLASS_COLOR, selectedDotColor: 'white' };
 
 const CalendarScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const [evaluations, setEvaluations]   = useState<Evaluation[]>([]);
   const [finals, setFinals]             = useState<FinalExam[]>([]);
@@ -88,9 +88,14 @@ const CalendarScreen = () => {
     if (event.type === 'evaluation') {
       navigation.navigate('ViewEvaluationDetails', { evaluation: event.data });
     } else if (event.type === 'final') {
-      navigation.navigate('ViewFinalDetails', { finalExam: event.data });
+      const d = event.data.date;
+      navigation.navigate('ViewFinalDetails', {
+        finalExam: { ...event.data, date: d instanceof Date ? d.toISOString() : d },
+      });
     } else {
-      navigation.navigate('ViewClassDetails', { classOccurrence: event.data });
+      navigation.navigate('ViewClassDetails', {
+        classOccurrence: { ...event.data, date: event.data.date.toISOString() },
+      });
     }
   }, [navigation]);
 

@@ -16,17 +16,22 @@ interface IProps {
 
 const AgendaItem = (props: IProps) => {
     const { item, evalColor, finalColor, classColor } = props;
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
 
     const onPress = useCallback(() => {
         if (item.type === 'evaluation') {
             navigation.navigate('ViewEvaluationDetails', { evaluation: item.data });
         } else if (item.type === 'final') {
-            navigation.navigate('ViewFinalDetails', { finalExam: item.data });
+            const d = item.data.date;
+            navigation.navigate('ViewFinalDetails', {
+                finalExam: { ...item.data, date: d instanceof Date ? d.toISOString() : d },
+            });
         } else {
-            navigation.navigate('ViewClassDetails', { classOccurrence: item.data });
+            navigation.navigate('ViewClassDetails', {
+                classOccurrence: { ...item.data, date: item.data.date.toISOString() },
+            });
         }
-    }, [item]);
+    }, [item, navigation]);
 
     if (item.type === 'evaluation') {
         const date = moment(item.data.end_date);
