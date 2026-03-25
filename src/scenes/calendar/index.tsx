@@ -11,6 +11,7 @@ import ViewModeToggle from './ViewModeToggle';
 import MonthView from './MonthView';
 import WeekView from './WeekView';
 import DayView from './DayView';
+import ExportToGoogleButton from './ExportToGoogleButton';
 import { useNavigation } from '@react-navigation/native';
 
 export type ClassOccurrence = {
@@ -117,6 +118,7 @@ const CalendarScreen = () => {
         onChange={setViewMode}
         onTodayPress={() => setSelectedDate(new Date().toISOString().split('T')[0])}
       />
+      <ExportToGoogleButton evaluations={evaluations} finals={finals} inscriptions={inscriptions} />
 
       {viewMode === 'month' && (
         <MonthView
