@@ -21,8 +21,8 @@ export default function AddEvaluation() {
         new Date(values.startDate!.getFullYear(), values.startDate!.getMonth(), values.startDate!.getDate(), values.startTime!.getHours(), values.startTime!.getMinutes()),
         new Date(values.finishDate!.getFullYear(), values.finishDate!.getMonth(), values.finishDate!.getDate(), values.finishTime!.getHours(), values.finishTime!.getMinutes()),
         values.minimumPassingGrade,
-        values.requireIdentityVerification,
         values.requireQrScan,
+        values.requireIdentityVerification,
         values.isGradeable,
       );
       navigation.goBack();

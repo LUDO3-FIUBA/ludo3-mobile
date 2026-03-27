@@ -26,6 +26,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
   const [submissionText, setSubmissionText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const requiresIdentity = evaluation.requires_identity === true;
 
   const submitWithoutIdentity = async () => {
     setSubmitting(true);
@@ -61,7 +62,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
       return;
     }
 
-    if (evaluation.requires_identity) {
+    if (requiresIdentity) {
       navigation.navigate('TakePicture', {
         configuration: new VerifyIdentityForEvaluationConfiguration(
           'Verifiquemos tu identidad',
