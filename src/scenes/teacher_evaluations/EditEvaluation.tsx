@@ -28,6 +28,7 @@ export default function EditEvaluation() {
         values.minimumPassingGrade,
         values.requireQrScan,
         values.requireIdentityVerification,
+        values.isGradeable,
       );
       navigation.goBack();
     } catch {
@@ -50,6 +51,7 @@ export default function EditEvaluation() {
         finishTime: end,
         requireIdentityVerification: (evaluation as any).requiresIdentity ?? false,
         requireQrScan: (evaluation as any).requiresQr ?? false,
+        isGradeable: (evaluation as any).isGradeable ?? true,
       }}
       onSubmit={onSubmit}
     />

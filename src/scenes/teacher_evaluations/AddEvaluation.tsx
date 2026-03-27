@@ -23,6 +23,7 @@ export default function AddEvaluation() {
         values.minimumPassingGrade,
         values.requireIdentityVerification,
         values.requireQrScan,
+        values.isGradeable,
       );
       navigation.goBack();
     } catch {
@@ -45,6 +46,7 @@ export default function AddEvaluation() {
         finishTime: null,
         requireIdentityVerification: false,
         requireQrScan: false,
+        isGradeable: true,
       }}
       onSubmit={onSubmit}
     />

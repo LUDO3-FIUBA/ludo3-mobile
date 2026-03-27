@@ -12,19 +12,21 @@ async function create(
   evaluationName: string,
   startDate: Date,
   finishDate: Date,
-  minimumPassingGrade: string,
+  minimumPassingGrade: string | null,
   requiresQr: boolean,
   requiresIdentity: boolean,
+  isGradeable: boolean,
 ): Promise<CreatedEvaluation> {
   const evaluationToBeCreated: CreatedEvaluationSnakeCase = {
     semester_id: semester.id,
     evaluation_name: evaluationName,
     is_graded: true,
-    passing_grade: +minimumPassingGrade,
+    passing_grade: minimumPassingGrade === null ? null : +minimumPassingGrade,
     start_date: startDate,
     end_date: finishDate,
     requires_qr: requiresQr,
-    requires_identity: requiresIdentity
+    requires_identity: requiresIdentity,
+    is_gradeable: isGradeable,
   }
 
   const response = await post(`${domainUrl}/add_evaluation`, evaluationToBeCreated)
@@ -36,19 +38,21 @@ async function update(
   evaluationName: string,
   startDate: Date,
   finishDate: Date,
-  minimumPassingGrade: string,
+  minimumPassingGrade: string | null,
   requiresQr: boolean,
   requiresIdentity: boolean,
+  isGradeable: boolean,
 ): Promise<CreatedEvaluation> {
   const body = {
     evaluation_id: evaluationId,
     evaluation_name: evaluationName,
     is_graded: true,
-    passing_grade: +minimumPassingGrade,
+    passing_grade: minimumPassingGrade === null ? null : +minimumPassingGrade,
     start_date: startDate,
     end_date: finishDate,
     requires_qr: requiresQr,
     requires_identity: requiresIdentity,
+    is_gradeable: isGradeable,
   };
 
   const response = await put(`${domainUrl}/update_evaluation`, body);

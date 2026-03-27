@@ -5,16 +5,18 @@ import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/dat
 import moment from 'moment';
 import { Loading, RoundedButton } from '../../components';
 import { getStyleSheet as style } from '../../styles';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 export type EvaluationFormValues = {
   evaluationName: string;
-  minimumPassingGrade: string;
+  minimumPassingGrade: string | null;
   startDate: Date | null;
   startTime: Date | null;
   finishDate: Date | null;
   finishTime: Date | null;
   requireIdentityVerification: boolean;
   requireQrScan: boolean;
+  isGradeable: boolean;
 };
 
 type Props = {
@@ -58,11 +60,16 @@ export default function EvaluationForm({
     initialValues.requireIdentityVerification,
   );
   const [requireQrScan, setRequireQrScan] = useState(initialValues.requireQrScan);
-
+  const [isGradeable, setIsGradeable] = useState(initialValues.isGradeable);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showStartTimePicker, setShowStartTimePicker] = useState(false);
   const [showFinishDatePicker, setShowFinishDatePicker] = useState(false);
   const [showFinishTimePicker, setShowFinishTimePicker] = useState(false);
+  const [openGradeTypePicker, setOpenGradeTypePicker] = useState(false);
+  const [gradeTypeItems, setGradeTypeItems] = useState([
+    { label: 'Nota numérica', value: true },
+    { label: 'Aprobado/Desaprobado', value: false },
+  ]);
 
   const onStartDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setShowStartDatePicker(false);
@@ -109,7 +116,7 @@ export default function EvaluationForm({
 
   const enabled =
     !!evaluationName &&
-    !!minimumPassingGrade &&
+    (!isGradeable || !!minimumPassingGrade) &&
     !!startDate &&
     !!startTime &&
     !!finishDate &&
@@ -136,6 +143,7 @@ export default function EvaluationForm({
       finishTime,
       requireIdentityVerification,
       requireQrScan,
+      isGradeable,
     });
   };
 
@@ -161,22 +169,47 @@ export default function EvaluationForm({
           placeholder="Por ejemplo: Primer Parcial"
         />
 
-        <View style={style().dateButtonInputs}>
-          <Text style={{ ...style().text, color: 'black' }}>Nota mínima de aprobación</Text>
+        <View style={{ marginTop: 12, zIndex: openGradeTypePicker ? 1000 : 0 }}>
+          <Text style={{ ...style().text, color: 'black', marginBottom: 8 }}>
+            Tipo de calificación
+          </Text>
+          <DropDownPicker
+            listMode="SCROLLVIEW"
+            open={openGradeTypePicker}
+            value={isGradeable}
+            items={gradeTypeItems}
+            setOpen={setOpenGradeTypePicker}
+            setValue={(callback) => {
+              const next = callback(isGradeable);
+              setIsGradeable(next);
+              if (!next) setMinimumPassingGrade(null);
+            }}
+            setItems={setGradeTypeItems}
+            style={{ borderColor: 'grey' }}
+            placeholder="Seleccione un tipo"
+          />
         </View>
-        <TextInput
-          style={{
-            height: 40,
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 5,
-            borderColor: 'grey',
-          }}
-          onChangeText={setMinimumPassingGrade}
-          value={minimumPassingGrade}
-          placeholder="Por ejemplo: 4"
-          keyboardType="numeric"
-        />
+
+        {isGradeable && (
+          <>
+            <View style={style().dateButtonInputs}>
+              <Text style={{ ...style().text, color: 'black' }}>Nota mínima de aprobación</Text>
+            </View>
+            <TextInput
+              style={{
+                height: 40,
+                borderWidth: 1,
+                padding: 10,
+                borderRadius: 5,
+                borderColor: 'grey',
+              }}
+              onChangeText={setMinimumPassingGrade}
+              value={minimumPassingGrade}
+              placeholder="Por ejemplo: 4"
+              keyboardType="numeric"
+            />
+          </>
+        )}
 
         <View style={style().dateButtonInputs}>
           <Text style={{ ...style().text, color: 'black', marginTop: 10 }}>Fecha de Inicio</Text>
