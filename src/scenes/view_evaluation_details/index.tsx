@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import * as Progress from 'react-native-progress';
 import { lightModeColors } from '../../styles/colorPalette';
 import moment from 'moment';
 import { MaterialIcon } from '../../components';
 import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
+import { useNavigation } from '@react-navigation/native';
 
 
 enum EvaluationStatus {
@@ -17,6 +18,7 @@ enum EvaluationStatus {
 
 const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const { evaluation }: { evaluation: Evaluation } = route.params;
+  const navigation = useNavigation<any>();
   const [evaluationSubmission, setEvaluationSubmission] = useState<EvaluationSubmission | undefined>(undefined)
   const [evaluationStatus, setEvaluationStatus] = useState(EvaluationStatus.UNKNOWN)
   const endDate = formatDate(evaluation.end_date);
@@ -27,20 +29,29 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const updatedAtDate = formatDate(evaluationSubmission?.updated_at);
   const failedExam = evaluationSubmission?.grade && grade < evaluation.passing_grade;
 
+  const fetchSubmission = async () => {
+    if (!evaluation.id) return;
+
+    try {
+      const evaluationSubmissions = await evaluationsRepository.fetchMySubmissions(evaluation.id)
+      setEvaluationSubmission(evaluationSubmissions[0])
+      setEvaluationStatus(getEvaluationStatus(evaluationSubmissions[0]))
+    } catch (err) {
+      console.error(`EvaluationDetails - ${err}`)
+    }
+  };
+
   useEffect(() => {
     if (!evaluation.id) return;
 
-    const fetch = async () => {
-      try {
-        const evaluationSubmissions = await evaluationsRepository.fetchMySubmissions(evaluation.id)
-        setEvaluationSubmission(evaluationSubmissions[0])
-        setEvaluationStatus(getEvaluationStatus(evaluationSubmissions[0]))
-      } catch (err) {
-        console.error(`EvaluationDetails - ${err}`)
-      }
-    }
-    fetch()
+    fetchSubmission()
   }, [evaluation]);
+
+  const onAddSubmissionPress = () => {
+    navigation.navigate('AddEvaluationSubmission', {
+      evaluation,
+    });
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -118,6 +129,23 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
             </View>
           </View>
         </View>}
+
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && !evaluation.requires_qr &&
+        <View style={[styles.card, { marginBottom: 120 }]}>
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={onAddSubmissionPress}
+          >
+            <Text style={styles.submitButtonText}>
+              Añadir entrega
+            </Text>
+          </TouchableOpacity>
+          <Text style={styles.submitHintText}>
+            {evaluation.requires_identity
+              ? 'Esta evaluación no requiere QR, pero sí verificación de identidad.'
+              : 'Esta evaluación no requiere QR ni verificación de identidad.'}
+          </Text>
+        </View>}
     </ScrollView>
   );
 };
@@ -175,6 +203,21 @@ const styles = StyleSheet.create({
   },
   passingGradeLabel: {
     fontSize: 14,
+    color: 'gray',
+  },
+  submitButton: {
+    backgroundColor: lightModeColors.institutional,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  submitHintText: {
+    fontSize: 13,
     color: 'gray',
   },
 });

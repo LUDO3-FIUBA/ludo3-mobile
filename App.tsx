@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
@@ -103,6 +103,12 @@ const App = () => {
               name="ViewEvaluationDetails"
               component={ViewEvaluationDetailsScreen}
               options={{ headerShown: true, title: "Evaluacion" }}
+            />
+
+            <Stack.Screen
+              name="AddEvaluationSubmission"
+              component={AddEvaluationSubmissionScreen}
+              options={{ headerShown: true, title: 'Agregar entrega' }}
             />
 
             <Stack.Screen
