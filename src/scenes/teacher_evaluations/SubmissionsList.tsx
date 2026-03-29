@@ -16,6 +16,7 @@ import { selectStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
 import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
 import EditableText from '../../components/EditableText';
 import { MaterialIcon } from '../../components';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 interface Props {
   route: any;
@@ -35,6 +36,7 @@ export default function SubmissionsList({ route }: Props) {
   const [semesterTeachers, setSemesterTeachers] = useState<TeacherModel[]>([]);
   const [showTeacherSelectionModal, setShowTeacherSelectionModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<TeacherStudent | null>(null);
+  const [openStatusPickerStudentId, setOpenStatusPickerStudentId] = useState<number | null>(null);
 
   const { evaluation } = route.params as RouteParams;
 
@@ -42,6 +44,7 @@ export default function SubmissionsList({ route }: Props) {
   const userData = useAppSelector(selectUserData);
 
   const isActualUserChiefTeacher = semester?.commission.chiefTeacher.id === userData?.id;
+  const isGradeable = (evaluation as any).isGradeable ?? true;
 
   const fetchData = useCallback(async () => {
     if (isLoading) return;
@@ -110,15 +113,48 @@ export default function SubmissionsList({ route }: Props) {
   };
 
   const updateSubmissionGrade = async (student: TeacherStudent, newGrade: string) => {
-    const res = await teacherSubmissionsRepository.gradeSubmission(student.id, evaluation.id, +newGrade);
-    ToastAndroid.show(`La calificación de ${student.firstName} ${student.lastName} ha sido guardada exitosamente`, ToastAndroid.LONG);
-    setSubmissions(prevSubmissions =>
-      prevSubmissions.map(submission =>
-        submission.student.id === student.id
-          ? { ...submission, grade: newGrade, grader: res.grader }
-          : submission
-      )
-    );
+    try {
+      const res = await teacherSubmissionsRepository.gradeSubmission(student.id, evaluation.id, +newGrade);
+      ToastAndroid.show(`La calificación de ${student.firstName} ${student.lastName} ha sido guardada exitosamente`, ToastAndroid.LONG);
+      setSubmissions(prevSubmissions =>
+        prevSubmissions.map(submission =>
+          submission.student.id === student.id
+            ? { ...submission, grade: String(newGrade), grader: res.grader }
+            : submission
+        )
+      );
+    } catch (error) {
+      Alert.alert('Error', 'No pudimos guardar la calificación. Intenta nuevamente.');
+      console.error('Error grading submission', error);
+    }
+  };
+
+  const updateSubmissionStatus = async (student: TeacherStudent, status: 'aprobado' | 'desaprobado') => {
+    const backendStatus = status === 'aprobado' ? 'APROBADO' : 'DESAPROBADO';
+
+    try {
+      const res = await teacherSubmissionsRepository.setSubmissionStatus(
+        student.id,
+        evaluation.id,
+        backendStatus,
+      );
+
+      ToastAndroid.show(
+        `El estado de ${student.firstName} ${student.lastName} ha sido guardado exitosamente`,
+        ToastAndroid.LONG,
+      );
+
+      setSubmissions(prevSubmissions =>
+        prevSubmissions.map(submission =>
+          submission.student.id === student.id
+            ? { ...submission, submissionStatus: backendStatus, grader: res.grader }
+            : submission
+        )
+      );
+    } catch (error) {
+      Alert.alert('Error', 'No pudimos guardar el estado. Intenta nuevamente.');
+      console.error('Error updating submission status', error);
+    }
   };
 
   useEffect(() => {
@@ -179,11 +215,51 @@ export default function SubmissionsList({ route }: Props) {
                   <Text style={styles.text}>{submission.grader?.lastName}</Text>
                 </TouchableOpacity>
                 <View style={styles.divider} />
-                <EditableText
-                  value={submission.grade || ''}
-                  onChange={text => updateSubmissionGrade(submission.student, text)}
-                  editable={isEditable}
-                />
+                {isGradeable ? (
+                  <EditableText
+                    value={submission.grade || ''}
+                    onChange={text => updateSubmissionGrade(submission.student, text)}
+                    editable={isEditable}
+                  />
+                ) : (
+                  <View style={styles.statusPickerWrapper}>
+                    <DropDownPicker
+                      listMode="MODAL"
+                      open={openStatusPickerStudentId === submission.student.id}
+                      value={
+                        submission.submissionStatus === 'APROBADO'
+                          ? 'aprobado'
+                          : submission.submissionStatus === 'DESAPROBADO'
+                            ? 'desaprobado'
+                            : null
+                      }
+                      items={[
+                        { label: 'Aprobado', value: 'aprobado' },
+                        { label: 'Desaprobado', value: 'desaprobado' },
+                      ]}
+                      setOpen={() => {}}
+                      onOpen={() => setOpenStatusPickerStudentId(submission.student.id)}
+                      onClose={() => setOpenStatusPickerStudentId(null)}
+                      setValue={(callback) => {
+                        const currentValue =
+                          submission.submissionStatus === 'APROBADO'
+                            ? 'aprobado'
+                            : submission.submissionStatus === 'DESAPROBADO'
+                              ? 'desaprobado'
+                              : null;
+                        const nextValue = callback(currentValue);
+
+                        if (nextValue && nextValue !== currentValue) {
+                          updateSubmissionStatus(submission.student, nextValue);
+                        }
+                      }}
+                      disabled={!isEditable}
+                      placeholder="Sin calificar"
+                      style={styles.statusPicker}
+                      dropDownContainerStyle={styles.statusPickerDropdown}
+                    />
+                  </View>
+                )}
               </View>
             );
           }}
@@ -276,6 +352,17 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     textAlign: 'center',
     backgroundColor: '#fff', // Make the input visible
+  },
+  statusPickerWrapper: {
+    flex: 1,
+    zIndex: 10,
+  },
+  statusPicker: {
+    minHeight: 34,
+    borderColor: '#ccc',
+  },
+  statusPickerDropdown: {
+    borderColor: '#ccc',
   },
   emptyContainer: {
     flex: 1,
