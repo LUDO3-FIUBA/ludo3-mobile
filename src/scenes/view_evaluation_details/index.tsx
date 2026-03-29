@@ -21,13 +21,40 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const navigation = useNavigation<any>();
   const [evaluationSubmission, setEvaluationSubmission] = useState<EvaluationSubmission | undefined>(undefined)
   const [evaluationStatus, setEvaluationStatus] = useState(EvaluationStatus.UNKNOWN)
-  const endDate = formatDate(evaluation.end_date);
-  const startDate = formatDate(evaluation.start_date);
+  const detailedEvaluation = evaluationSubmission?.evaluation || evaluation;
+  const endDate = formatDate(detailedEvaluation.end_date);
+  const startDate = formatDate(detailedEvaluation.start_date);
   const graderName = getGraderName(evaluationSubmission?.grader);
   const grade: number = evaluationSubmission?.grade || 0;
   const createdAtDate = formatDate(evaluationSubmission?.created_at);
   const updatedAtDate = formatDate(evaluationSubmission?.updated_at);
-  const failedExam = evaluationSubmission?.grade && grade < evaluation.passing_grade;
+  const isNumericEvaluation = getIsNumericEvaluation(detailedEvaluation);
+  const normalizedSubmissionStatus = (evaluationSubmission?.submission_status || '').toUpperCase();
+  const isApprovedSubmission = normalizedSubmissionStatus === 'APROBADO';
+  const isFailedSubmission = normalizedSubmissionStatus === 'DESAPROBADO';
+  
+  const failedExam = isNumericEvaluation
+    ? evaluationSubmission?.grade !== null && evaluationSubmission?.grade !== undefined && grade < (detailedEvaluation.passing_grade || 0)
+    : isFailedSubmission;
+  
+  const circleProgress = isNumericEvaluation
+    ? grade / 10
+    : (isApprovedSubmission || isFailedSubmission)
+      ? 1
+      : 0;
+  
+    const circleText = isNumericEvaluation
+    ? (evaluationSubmission?.grade ?? '–')
+    : isApprovedSubmission
+      ? 'Aprobado'
+      : isFailedSubmission
+        ? 'Desaprobado'
+        : '–';
+  
+    const circleTextStyle =
+    circleText === 'Aprobado' || circleText === 'Desaprobado'
+      ? styles.progressTextSmall
+      : styles.progressText;
 
   const fetchSubmission = async () => {
     if (!evaluation.id) return;
@@ -55,15 +82,15 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>{evaluation.evaluation_name}</Text>
-      <Text style={styles.header2}>{evaluation.semester.commission.subject_name}</Text>
+      <Text style={styles.header}>{detailedEvaluation.evaluation_name}</Text>
+      <Text style={styles.header2}>{detailedEvaluation.semester?.commission?.subject_name}</Text>
 
       <View style={styles.card}>
         <View style={styles.cardItem}>
           <MaterialIcon name="calendar-clock" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
           <View style={{ flexGrow: 1 }}>
             <Text style={styles.cardTitle}>Inicio</Text>
-            <Text style={styles.cardText}>{evaluation.start_date ? startDate : `–`}</Text>
+            <Text style={styles.cardText}>{detailedEvaluation.start_date ? startDate : `–`}</Text>
           </View>
           <MaterialIcon name="chevron-right" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
           <View style={{ flexGrow: .5 }}>
@@ -93,23 +120,27 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
       <View style={styles.card}>
         <View style={{ alignItems: 'center', gap: 8 }}>
           <Progress.Circle
-            progress={grade / 10}
-            formatText={(a) => grade || '–'}
-            color={failedExam ? lightModeColors.menuOption : lightModeColors.institutional}
-            unfilledColor='lightblue'
+            progress={circleProgress}
+            formatText={() => circleText}
+            color={failedExam ? lightModeColors.failed : lightModeColors.passed}
+            unfilledColor={failedExam ? lightModeColors.failed_background : lightModeColors.passed_background}
             strokeCap='round'
             size={135}
             thickness={12}
             showsText={true}
             borderWidth={0}
-            textStyle={{ fontWeight: 'bold' }}
+            textStyle={circleTextStyle}
           />
-          <Text style={styles.passingGradeLabel}>Nota obtenida</Text>
+          <Text style={styles.passingGradeLabel}>
+            {isNumericEvaluation ? 'Nota obtenida' : 'Estado de entrega'}
+          </Text>
         </View>
 
-        <View>
-          <Text style={styles.passingGradeLabel}>Nota mínima de aprobación: {evaluation.passing_grade}</Text>
-        </View>
+        {isNumericEvaluation && (
+          <View>
+            <Text style={styles.passingGradeLabel}>Nota mínima de aprobación: {detailedEvaluation.passing_grade}</Text>
+          </View>
+        )}
       </View>
 
       {evaluationStatus !== EvaluationStatus.NOT_TAKEN &&
@@ -130,7 +161,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           </View>
         </View>}
 
-      {evaluationStatus === EvaluationStatus.NOT_TAKEN && !evaluation.requires_qr &&
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && !detailedEvaluation.requires_qr &&
         <View style={[styles.card, { marginBottom: 120 }]}>
           <TouchableOpacity
             style={styles.submitButton}
@@ -141,7 +172,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
             </Text>
           </TouchableOpacity>
           <Text style={styles.submitHintText}>
-            {evaluation.requires_identity
+            {detailedEvaluation.requires_identity
               ? 'Esta evaluación no requiere QR, pero sí verificación de identidad.'
               : 'Esta evaluación no requiere QR ni verificación de identidad.'}
           </Text>
@@ -155,7 +186,11 @@ function getEvaluationStatus(evaluationSubmission: EvaluationSubmission | undefi
     return EvaluationStatus.NOT_TAKEN
   }
 
-  if (!evaluationSubmission.grade) {
+  const hasNumericGrade = evaluationSubmission.grade !== null && evaluationSubmission.grade !== undefined;
+  const normalizedStatus = (evaluationSubmission.submission_status || '').toUpperCase();
+  const hasFinalStatus = normalizedStatus === 'APROBADO' || normalizedStatus === 'DESAPROBADO';
+
+  if (!hasNumericGrade && !hasFinalStatus) {
     return EvaluationStatus.TAKEN_NOT_GRADED
   }
 
@@ -220,9 +255,21 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'gray',
   },
+  progressText: {
+    fontWeight: 'bold',
+    fontSize: 22,
+  },
+  progressTextSmall: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
 
 export default EvaluationDetailsScreen;
+
+function getIsNumericEvaluation(evaluation: Evaluation | any): boolean {
+  return evaluation?.is_gradeable;
+}
 
 function formatDate(date: string | null | undefined) {
   return moment(date).format('HH:mm D/MM/YY');

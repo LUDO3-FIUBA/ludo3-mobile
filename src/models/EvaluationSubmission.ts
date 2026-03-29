@@ -6,7 +6,7 @@ export default interface EvaluationSubmission {
     evaluation: Evaluation;
     student: Student;
     grade?: number;
-    status?: string;
+    submission_status?: string;
     grader?: Teacher;
     submission_text?: string;
     created_at: string;

@@ -7,6 +7,10 @@ const facultyColors = {
   investigation: '#800000',
   wellbeing: '#6640ff',
   black: '#000000',
+  passed: '#0088cc',
+  failed: '#cf0000',
+  passed_background: 'lightblue',
+  failed_background: '#ffb3b3',
 };
 
 const sharedColors = {
