@@ -48,6 +48,9 @@ export default function EvaluationForm({
   submitting,
   onSubmit,
 }: Props) {
+  const placeholderColor = '#808080';
+  const pickerPlaceholderTextStyle = { color: placeholderColor };
+
   const [evaluationName, setEvaluationName] = useState(initialValues.evaluationName);
   const [minimumPassingGrade, setMinimumPassingGrade] = useState(initialValues.minimumPassingGrade);
 
@@ -167,6 +170,7 @@ export default function EvaluationForm({
           onChangeText={setEvaluationName}
           value={evaluationName}
           placeholder="Por ejemplo: Primer Parcial"
+          placeholderTextColor={placeholderColor}
         />
 
         <View style={{ marginTop: 12, zIndex: openGradeTypePicker ? 1000 : 0 }}>
@@ -185,7 +189,6 @@ export default function EvaluationForm({
               if (!next) setMinimumPassingGrade(null);
             }}
             setItems={setGradeTypeItems}
-            style={{ borderColor: 'grey' }}
             placeholder="Seleccione un tipo"
           />
         </View>
@@ -206,6 +209,7 @@ export default function EvaluationForm({
               onChangeText={setMinimumPassingGrade}
               value={minimumPassingGrade}
               placeholder="Por ejemplo: 4"
+              placeholderTextColor={placeholderColor}
               keyboardType="numeric"
             />
           </>
@@ -234,12 +238,12 @@ export default function EvaluationForm({
           {startDate ? (
             <Text>{moment(startDate).format('dddd D MMMM YYYY')}</Text>
           ) : (
-            <Text>Por ejemplo: lunes 01 enero 2024</Text>
+            <Text style={pickerPlaceholderTextStyle}>Por ejemplo: lunes 01 enero 2024</Text>
           )}
         </TouchableOpacity>
 
         <View style={{ ...style().dateButtonInputs }}>
-          <Text style={{ ...style().text, marginTop: 10 }}>Horario de inicio</Text>
+          <Text style={{ ...style().text, color: 'black', marginTop: 10 }}>Horario de inicio</Text>
         </View>
         {showStartTimePicker && (
           <DateTimePicker
@@ -264,7 +268,7 @@ export default function EvaluationForm({
               {moment(startTime).format('hh:mm A') + ' (' + moment(startTime).format('HH:mm') + ')'}
             </Text>
           ) : (
-            <Text>Por ejemplo: 7:00 PM (19:00)</Text>
+            <Text style={pickerPlaceholderTextStyle}>Por ejemplo: 7:00 PM (19:00)</Text>
           )}
         </TouchableOpacity>
         <Text style={{ color: 'grey', fontSize: 12, marginTop: 3 }}>
@@ -297,12 +301,12 @@ export default function EvaluationForm({
           {finishDate ? (
             <Text>{moment(finishDate).format('dddd D MMMM YYYY')}</Text>
           ) : (
-            <Text>Por ejemplo: lunes 01 enero 2024</Text>
+            <Text style={pickerPlaceholderTextStyle}>Por ejemplo: lunes 01 enero 2024</Text>
           )}
         </TouchableOpacity>
 
         <View style={{ ...style().dateButtonInputs }}>
-          <Text style={{ ...style().text, marginTop: 10 }}>Horario de finalización</Text>
+          <Text style={{ ...style().text, color: 'black', marginTop: 10 }}>Horario de finalización</Text>
         </View>
         {showFinishTimePicker && (
           <DateTimePicker
@@ -327,7 +331,7 @@ export default function EvaluationForm({
               {moment(finishTime).format('hh:mm A') + ' (' + moment(finishTime).format('HH:mm') + ')'}
             </Text>
           ) : (
-            <Text>Por ejemplo: 10 PM (22:00)</Text>
+            <Text style={pickerPlaceholderTextStyle}>Por ejemplo: 10 PM (22:00)</Text>
           )}
         </TouchableOpacity>
         <Text style={{ color: 'grey', fontSize: 12, marginTop: 3, marginBottom: 25 }}>
@@ -350,6 +354,8 @@ export default function EvaluationForm({
             <Switch
               value={requireIdentityVerification}
               onValueChange={setRequireIdentityVerification}
+              trackColor={{ false: '#d3d3d3', true: '#4CAF50' }}
+              thumbColor={requireIdentityVerification ? '#ffffff' : '#f4f3f4'}
             />
           </View>
 
@@ -361,7 +367,12 @@ export default function EvaluationForm({
             }}
           >
             <Text style={{ ...style().text, color: 'black' }}>Requerir escaneo de QR</Text>
-            <Switch value={requireQrScan} onValueChange={setRequireQrScan} />
+            <Switch
+              value={requireQrScan}
+              onValueChange={setRequireQrScan}
+              trackColor={{ false: '#d3d3d3', true: '#4CAF50' }}
+              thumbColor={requireQrScan ? '#ffffff' : '#f4f3f4'}
+            />
           </View>
         </View>
 
