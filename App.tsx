@@ -17,6 +17,7 @@ import {
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
   TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
 } from './src/scenes';
+import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance } from 'react-native';
@@ -103,6 +104,12 @@ const App = () => {
               name="ViewEvaluationDetails"
               component={ViewEvaluationDetailsScreen}
               options={{ headerShown: true, title: "Evaluacion" }}
+            />
+
+            <Stack.Screen
+              name="ScanQRScreen"
+              component={ScanQR}
+              options={{ headerShown: true, title: 'Escanear QR' }}
             />
 
             <Stack.Screen

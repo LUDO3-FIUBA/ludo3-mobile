@@ -7,6 +7,7 @@ import { MaterialIcon } from '../../components';
 import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 import { useNavigation } from '@react-navigation/native';
+import ScanQR from '../home/subsections/HomeOptions/ScanQR';
 
 
 enum EvaluationStatus {
@@ -78,6 +79,10 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
     navigation.navigate('AddEvaluationSubmission', {
       evaluation,
     });
+  };
+
+  const onScanQRPress = () => {
+    navigation.push('ScanQRScreen', { evaluation });
   };
 
   return (
@@ -177,6 +182,19 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
               : 'Esta evaluación no requiere QR ni verificación de identidad.'}
           </Text>
         </View>}
+
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && detailedEvaluation.requires_qr &&
+        <View style={[styles.card, { marginBottom: 120, alignItems: 'center' }]}>
+          <TouchableOpacity
+            style={styles.qrButton}
+            onPress={onScanQRPress}
+          >
+            <MaterialIcon name="qrcode-scan" fontSize={48} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.submitHintText}>
+            Escanea el código QR para realizar la entrega.
+          </Text>
+        </View>}
     </ScrollView>
   );
 };
@@ -245,6 +263,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  qrButton: {
+    backgroundColor: lightModeColors.institutional,
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
   submitButtonText: {
     color: 'white',
