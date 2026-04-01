@@ -1,5 +1,5 @@
 // src/scenes/teacher_evaluations/EvaluationForm.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, Text, View, TouchableOpacity, TextInput, ScrollView, Switch } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import moment from 'moment';
@@ -132,6 +132,12 @@ export default function EvaluationForm({
       setFinishTime(new Date(selectedTime));
     }
   };
+
+  useEffect(() => {
+    if (initialValues.isMakeUp) {
+      fetchEvaluations();
+    }
+  }, []);
 
   const fetchEvaluations = async () => {
     try {

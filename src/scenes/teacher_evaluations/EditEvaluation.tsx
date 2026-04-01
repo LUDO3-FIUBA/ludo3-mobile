@@ -17,6 +17,10 @@ export default function EditEvaluation() {
   const { evaluation } = route.params as Params;
   const [saving, setSaving] = useState(false);
 
+  const parentEvaluationId = evaluation.parentEvaluation ?? null;
+  const initialParentEvaluation =
+    semester.evaluations.find((semesterEvaluation) => semesterEvaluation.id === parentEvaluationId) || null;
+
   const start = new Date(evaluation.startDate);
   const end = new Date(evaluation.endDate);
 
@@ -53,11 +57,11 @@ export default function EditEvaluation() {
         startTime: start,
         finishDate: end,
         finishTime: end,
-        requireIdentityVerification: (evaluation as any).requiresIdentity ?? false,
-        requireQrScan: (evaluation as any).requiresQr ?? false,
-        isGradeable: (evaluation as any).isGradeable ?? true,
-        isMakeUp: false,
-        parentEvaluation: null,
+        requireIdentityVerification: evaluation.requiresIdentity ?? false,
+        requireQrScan: evaluation.requiresQr ?? false,
+        isGradeable: evaluation.isGradeable ?? true,
+        isMakeUp: !!parentEvaluationId,
+        parentEvaluation: initialParentEvaluation,
       }}
       onSubmit={onSubmit}
       semester={semester}
