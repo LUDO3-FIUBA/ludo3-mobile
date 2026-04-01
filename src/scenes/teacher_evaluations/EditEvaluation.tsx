@@ -32,6 +32,7 @@ export default function EditEvaluation() {
         values.requireQrScan,
         values.requireIdentityVerification,
         values.isGradeable,
+        values.parentEvaluation ? values.parentEvaluation.id : null,
       );
       navigation.goBack();
     } catch {

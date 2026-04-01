@@ -10,4 +10,5 @@ export default interface Evaluation {
     requires_qr: boolean;
     requires_identity: boolean;
     semester: Semester;
+    parent_evaluation: Evaluation | null;
 }

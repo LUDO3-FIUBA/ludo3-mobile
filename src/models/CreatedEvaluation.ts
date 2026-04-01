@@ -8,6 +8,7 @@ export interface CreatedEvaluation {
   requiresQr: boolean;
   requiresIdentity: boolean;
   isGradeable: boolean;
+  parentEvaluationId: number | null;
 }
 
 export interface CreatedEvaluationSnakeCase {
@@ -20,4 +21,5 @@ export interface CreatedEvaluationSnakeCase {
   requires_qr: boolean;
   requires_identity: boolean;
   is_gradeable: boolean;
+  parent_evaluation: number | null;
 }

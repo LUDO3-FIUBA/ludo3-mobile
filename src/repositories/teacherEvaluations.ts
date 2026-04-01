@@ -16,6 +16,7 @@ async function create(
   requiresQr: boolean,
   requiresIdentity: boolean,
   isGradeable: boolean,
+  parentEvaluation: number | null,
 ): Promise<CreatedEvaluation> {
   const evaluationToBeCreated: CreatedEvaluationSnakeCase = {
     semester_id: semester.id,
@@ -27,6 +28,7 @@ async function create(
     requires_qr: requiresQr,
     requires_identity: requiresIdentity,
     is_gradeable: isGradeable,
+    parent_evaluation: parentEvaluation,
   }
 
   const response = await post(`${domainUrl}/add_evaluation`, evaluationToBeCreated)
@@ -42,6 +44,7 @@ async function update(
   requiresQr: boolean,
   requiresIdentity: boolean,
   isGradeable: boolean,
+  parentEvaluation: number | null,
 ): Promise<CreatedEvaluation> {
   const body = {
     evaluation_id: evaluationId,
@@ -53,6 +56,7 @@ async function update(
     requires_qr: requiresQr,
     requires_identity: requiresIdentity,
     is_gradeable: isGradeable,
+    parent_evaluation_id: parentEvaluation,
   };
 
   const response = await put(`${domainUrl}/update_evaluation`, body);
@@ -80,11 +84,11 @@ async function notifyStudents(evaluationId: number): Promise<void> {
   return;
 }
 
-async function getEvaluationsBySemester(semesterId: number): Promise<Array<{ id: string | number; evaluation_name: string }>> {
+async function getEvaluationsBySemester(semesterId: number): Promise<TeacherEvaluation[]> {
   const response = await get(`${domainUrl}/get_evaluations`, [
     { key: 'semester', value: semesterId },
   ]);
-  return response as Array<{ id: string | number; evaluation_name: string }>;
+  return convertSnakeToCamelCase(response) as TeacherEvaluation[];
 }
 
 export default { create, update, addSubmissionToEvaluation, fetchPresentSemesterEvaluations, notifyStudents, getEvaluationsBySemester }

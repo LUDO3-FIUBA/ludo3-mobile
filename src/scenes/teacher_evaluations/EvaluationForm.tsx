@@ -7,6 +7,7 @@ import { Loading, RoundedButton } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { TeacherSemester } from '../../models/TeacherSemester';
+import { TeacherEvaluation } from '../../models/TeacherEvaluation';
 import { teacherEvaluationsRepository } from '../../repositories';
 
 export type EvaluationFormValues = {
@@ -20,7 +21,7 @@ export type EvaluationFormValues = {
   requireQrScan: boolean;
   isGradeable: boolean;
   isMakeUp: boolean;
-  parentEvaluation: string | null;
+  parentEvaluation: TeacherEvaluation | null;
 };
 
 type Props = {
@@ -80,9 +81,11 @@ export default function EvaluationForm({
     { label: 'Aprobado/Desaprobado', value: false },
   ]);
   const [isMakeUp, setIsMakeUp] = useState(initialValues.isMakeUp);
-  const [parentEvaluation, setParentEvaluation] = useState<string | null>(
-    initialValues.parentEvaluation,
+  const [parentEvaluation, setParentEvaluation] = useState<TeacherEvaluation | null>(initialValues.parentEvaluation);
+  const [selectedParentEvaluationId, setSelectedParentEvaluationId] = useState<string | null>(
+    initialValues.parentEvaluation ? String(initialValues.parentEvaluation.id) : null,
   );
+  const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>([]);
   const [evaluationsItems, setEvaluationsItems] = useState<Array<{ label: string; value: string }>>([]);
   const [openEvaluationsDropdown, setOpenEvaluationsDropdown] = useState(false);
   const [loadingEvaluations, setLoadingEvaluations] = useState(false);
@@ -134,8 +137,10 @@ export default function EvaluationForm({
     try {
       setLoadingEvaluations(true);
       const evaluations = await teacherEvaluationsRepository.getEvaluationsBySemester(semester.id);
+      setEvaluations(evaluations);
+      console.log('Fetched evaluations for makeup:', evaluations);
       const items = evaluations.map((evaluation) => ({
-        label: evaluation.evaluation_name,
+        label: evaluation.evaluationName,
         value: String(evaluation.id),
       }));
       setEvaluationsItems(items);
@@ -155,8 +160,16 @@ export default function EvaluationForm({
       fetchEvaluations();
     } else {
       setParentEvaluation(null);
+      setSelectedParentEvaluationId(null);
+      setEvaluations([]);
       setEvaluationsItems([]);
     }
+  };
+
+  const handleParentEvaluationChange = (value: string | null) => {
+    setSelectedParentEvaluationId(value);
+    const selectedEvaluation = evaluations.find((evaluation) => String(evaluation.id) === value) || null;
+    setParentEvaluation(selectedEvaluation);
   };
 
   const enabled =
@@ -247,10 +260,13 @@ export default function EvaluationForm({
               <DropDownPicker
                 listMode="SCROLLVIEW"
                 open={openEvaluationsDropdown}
-                value={parentEvaluation}
+                value={selectedParentEvaluationId}
                 items={evaluationsItems}
                 setOpen={setOpenEvaluationsDropdown}
-                setValue={setParentEvaluation}
+                setValue={(callback) => {
+                  const nextValue = callback(selectedParentEvaluationId);
+                  handleParentEvaluationChange(nextValue);
+                }}
                 setItems={setEvaluationsItems}
                 placeholder="Seleccione una evaluación"
               />
@@ -292,7 +308,7 @@ export default function EvaluationForm({
                 borderColor: 'grey',
               }}
               onChangeText={setMinimumPassingGrade}
-              value={minimumPassingGrade}
+              value={minimumPassingGrade ?? ''}
               placeholder="Por ejemplo: 4"
               placeholderTextColor={placeholderColor}
               keyboardType="numeric"
