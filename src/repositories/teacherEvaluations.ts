@@ -2,7 +2,7 @@ import { CreatedEvaluation, CreatedEvaluationSnakeCase } from '../models/Created
 import { TeacherEvaluation } from '../models/TeacherEvaluation';
 import { TeacherSemester } from '../models/TeacherSemester';
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
-import { post, put } from './authenticatedRepository';
+import { get, post, put } from './authenticatedRepository';
 import { fetchPresentSemesterFromCommissionId } from './teacherSemesters';
 
 const domainUrl = 'api/teacher/evaluations';
@@ -80,4 +80,11 @@ async function notifyStudents(evaluationId: number): Promise<void> {
   return;
 }
 
-export default { create, update, addSubmissionToEvaluation, fetchPresentSemesterEvaluations, notifyStudents }
+async function getEvaluationsBySemester(semesterId: number): Promise<Array<{ id: string | number; evaluation_name: string }>> {
+  const response = await get(`${domainUrl}/get_evaluations`, [
+    { key: 'semester', value: semesterId },
+  ]);
+  return response as Array<{ id: string | number; evaluation_name: string }>;
+}
+
+export default { create, update, addSubmissionToEvaluation, fetchPresentSemesterEvaluations, notifyStudents, getEvaluationsBySemester }

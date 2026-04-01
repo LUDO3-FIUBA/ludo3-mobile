@@ -47,8 +47,11 @@ export default function AddEvaluation() {
         requireIdentityVerification: false,
         requireQrScan: false,
         isGradeable: true,
+        isMakeUp: false,
+        parentEvaluation: null,
       }}
       onSubmit={onSubmit}
+      semester={semester}
     />
   );
 }

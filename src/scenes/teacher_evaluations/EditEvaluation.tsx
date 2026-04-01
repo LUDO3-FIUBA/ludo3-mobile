@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useAppSelector } from '../../redux/hooks';
+import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { teacherEvaluationsRepository } from '../../repositories';
 import EvaluationForm, { EvaluationFormValues } from './EvaluationForm';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
@@ -11,6 +13,7 @@ type Params = { evaluation: TeacherEvaluation };
 export default function EditEvaluation() {
   const navigation = useNavigation();
   const route = useRoute();
+  const semester = useAppSelector(selectSemesterData)!;
   const { evaluation } = route.params as Params;
   const [saving, setSaving] = useState(false);
 
@@ -52,8 +55,11 @@ export default function EditEvaluation() {
         requireIdentityVerification: (evaluation as any).requiresIdentity ?? false,
         requireQrScan: (evaluation as any).requiresQr ?? false,
         isGradeable: (evaluation as any).isGradeable ?? true,
+        isMakeUp: false,
+        parentEvaluation: null,
       }}
       onSubmit={onSubmit}
+      semester={semester}
     />
   );
 }

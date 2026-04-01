@@ -6,6 +6,8 @@ import moment from 'moment';
 import { Loading, RoundedButton } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import DropDownPicker from 'react-native-dropdown-picker';
+import { TeacherSemester } from '../../models/TeacherSemester';
+import { teacherEvaluationsRepository } from '../../repositories';
 
 export type EvaluationFormValues = {
   evaluationName: string;
@@ -17,6 +19,8 @@ export type EvaluationFormValues = {
   requireIdentityVerification: boolean;
   requireQrScan: boolean;
   isGradeable: boolean;
+  isMakeUp: boolean;
+  parentEvaluation: string | null;
 };
 
 type Props = {
@@ -24,6 +28,7 @@ type Props = {
   initialValues: EvaluationFormValues;
   submitting: boolean;
   onSubmit: (values: EvaluationFormValues) => Promise<void>;
+  semester: TeacherSemester;
 };
 
 const combineDateAndTime = (date: Date, time: Date) =>
@@ -47,6 +52,7 @@ export default function EvaluationForm({
   initialValues,
   submitting,
   onSubmit,
+  semester,
 }: Props) {
   const placeholderColor = '#808080';
   const pickerPlaceholderTextStyle = { color: placeholderColor };
@@ -73,6 +79,13 @@ export default function EvaluationForm({
     { label: 'Nota numérica', value: true },
     { label: 'Aprobado/Desaprobado', value: false },
   ]);
+  const [isMakeUp, setIsMakeUp] = useState(initialValues.isMakeUp);
+  const [parentEvaluation, setParentEvaluation] = useState<string | null>(
+    initialValues.parentEvaluation,
+  );
+  const [evaluationsItems, setEvaluationsItems] = useState<Array<{ label: string; value: string }>>([]);
+  const [openEvaluationsDropdown, setOpenEvaluationsDropdown] = useState(false);
+  const [loadingEvaluations, setLoadingEvaluations] = useState(false);
 
   const onStartDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setShowStartDatePicker(false);
@@ -117,6 +130,35 @@ export default function EvaluationForm({
     }
   };
 
+  const fetchEvaluations = async () => {
+    try {
+      setLoadingEvaluations(true);
+      const evaluations = await teacherEvaluationsRepository.getEvaluationsBySemester(semester.id);
+      const items = evaluations.map((evaluation) => ({
+        label: evaluation.evaluation_name,
+        value: String(evaluation.id),
+      }));
+      setEvaluationsItems(items);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'No pudimos cargar las evaluaciones. Volvé a intentar en unos minutos.',
+      );
+    } finally {
+      setLoadingEvaluations(false);
+    }
+  };
+
+  const handleIsMakeUpChange = (value: boolean) => {
+    setIsMakeUp(value);
+    if (value) {
+      fetchEvaluations();
+    } else {
+      setParentEvaluation(null);
+      setEvaluationsItems([]);
+    }
+  };
+
   const enabled =
     !!evaluationName &&
     (!isGradeable || !!minimumPassingGrade) &&
@@ -124,6 +166,7 @@ export default function EvaluationForm({
     !!startTime &&
     !!finishDate &&
     !!finishTime &&
+    (!isMakeUp || !!parentEvaluation) &&
     !submitting;
 
   const submit = async () => {
@@ -147,6 +190,8 @@ export default function EvaluationForm({
       requireIdentityVerification,
       requireQrScan,
       isGradeable,
+      isMakeUp,
+      parentEvaluation: parentEvaluation,
     });
   };
 
@@ -172,6 +217,46 @@ export default function EvaluationForm({
           placeholder="Por ejemplo: Primer Parcial"
           placeholderTextColor={placeholderColor}
         />
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 12,
+            marginTop: 12,
+          }}
+        >
+          <Text style={{ ...style().text, color: 'black' }}>Es recuperatorio</Text>
+          <Switch
+            value={isMakeUp}
+            onValueChange={handleIsMakeUpChange}
+            trackColor={{ false: '#d3d3d3', true: '#4CAF50' }}
+            thumbColor={isMakeUp ? '#ffffff' : '#f4f3f4'}
+          />
+        </View>
+
+        {isMakeUp && (
+          <View style={{ marginTop: 12, zIndex: openEvaluationsDropdown ? 1000 : 0, marginBottom: 12 }}>
+            <Text style={{ ...style().text, color: 'black', marginBottom: 8 }}>
+              Evaluación a recuperar
+            </Text>
+            {loadingEvaluations ? (
+              <Text style={{ ...style().text, color: 'grey' }}>Cargando evaluaciones...</Text>
+            ) : (
+              <DropDownPicker
+                listMode="SCROLLVIEW"
+                open={openEvaluationsDropdown}
+                value={parentEvaluation}
+                items={evaluationsItems}
+                setOpen={setOpenEvaluationsDropdown}
+                setValue={setParentEvaluation}
+                setItems={setEvaluationsItems}
+                placeholder="Seleccione una evaluación"
+              />
+            )}
+          </View>
+        )}
 
         <View style={{ marginTop: 12, zIndex: openGradeTypePicker ? 1000 : 0 }}>
           <Text style={{ ...style().text, color: 'black', marginBottom: 8 }}>
