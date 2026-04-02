@@ -35,7 +35,7 @@ const Landing = ({ navigation }: Props) => {
     await sessionManager.saveCredentials(authResponse);
     const user = await usersRepository.getInfo();
 
-    if (!user.isStudent() && !user.isTeacher()) {
+    if (!user.isStudent() && !user.isTeacher() && !user.isAdmin()) {
       throw new authenticationRepository.NotAStudent();
     }
 

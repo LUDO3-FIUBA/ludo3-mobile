@@ -15,3 +15,4 @@ export type { default as Attendance } from './Attendance';
 export type { TeacherTuple, Teacher } from './Teachers';
 export type { default as StudentStats } from './StudentStats';
 export type { default as IsPassing } from './IsPassing';
+export type { default as Department } from './Department';

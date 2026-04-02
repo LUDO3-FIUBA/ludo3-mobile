@@ -9,6 +9,9 @@ import StatsScreen from "../stats";
 import TeacherHomeScreen from "../teacher_home";
 import CreateSemester from "../teacher_semester/CreateSemester";
 import TeacherProfileScreen from "../teacher_profile";
+import DepartmentList from "../admin_departments/DepartmentList";
+import DepartmentDetail from "../admin_departments/DepartmentDetail";
+import DepartmentForm from "../admin_departments/DepartmentForm";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -25,11 +28,11 @@ import { fetchUserDataAsync } from "../../redux/reducers/teacherUserDataSlice";
 
 const Drawer = createDrawerNavigator()
 
-type RoleView = 'student' | 'teacher';
+type RoleView = 'student' | 'teacher' | 'admin';
 
 const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User | null, roleView: RoleView, onSwitchRole: (role: RoleView) => void }) => {
   const { user, roleView, onSwitchRole, ...drawerProps } = props;
-  const hasBothRoles = user?.isStudent() && user?.isTeacher();
+  const hasBothRoles = user?.isStudent() && user?.isTeacher() && !user?.isAdmin();
 
   return (
     <DrawerContentScrollView {...drawerProps}>
@@ -91,7 +94,14 @@ const RootDrawer = () => {
     async function fetchUser() {
       try {
         const fetchedUser = await usersRepository.getInfo();
-        const initialRole: RoleView = (!fetchedUser.isStudent() && fetchedUser.isTeacher()) ? 'teacher' : 'student';
+        let initialRole: RoleView;
+        if (fetchedUser.isAdmin()) {
+          initialRole = 'admin';
+        } else if (!fetchedUser.isStudent() && fetchedUser.isTeacher()) {
+          initialRole = 'teacher';
+        } else {
+          initialRole = 'student';
+        }
         setUser(fetchedUser);
         setRoleView(initialRole);
         dispatch(fetchUserDataAsync(fetchedUser));
@@ -111,6 +121,10 @@ const RootDrawer = () => {
 
   const showStudentScreens = roleView === 'student' && (user?.isStudent() ?? true);
   const showTeacherScreens = roleView === 'teacher' && (user?.isTeacher() ?? false);
+  const showAdminScreens = roleView === 'admin' && (user?.isAdmin() ?? false);
+
+  const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+  const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
 
   return (
     <Drawer.Navigator
@@ -197,6 +211,18 @@ const RootDrawer = () => {
             component={StatsScreen}
             options={{ headerShown: true, title: 'Estadisticas', drawerIcon: makeDrawerIcon('chart-box', 'chart-box-outline') }}
           />
+
+          <Drawer.Screen
+            name="StudentDepartmentList"
+            component={StudentDepartmentListScreen}
+            options={{ headerShown: true, title: 'Departamentos', drawerIcon: makeDrawerIcon('office-building', 'office-building-outline') }}
+          />
+
+          <Drawer.Screen
+            name="AdminDepartmentDetail"
+            component={DepartmentDetail}
+            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null }}
+          />
         </>
       )}
 
@@ -231,6 +257,51 @@ const RootDrawer = () => {
               title: 'Mi Perfil Profesional',
               drawerIcon: makeDrawerIcon('account-details', 'account-details-outline')
             }}
+          />
+
+          <Drawer.Screen
+            name="TeacherDepartmentList"
+            component={StudentDepartmentListScreen}
+            options={{ headerShown: true, title: 'Departamentos', drawerIcon: makeDrawerIcon('office-building', 'office-building-outline') }}
+          />
+
+          <Drawer.Screen
+            name="AdminDepartmentDetail"
+            component={DepartmentDetail}
+            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null }}
+          />
+        </>
+      )}
+
+      {/* Admin screens */}
+      {showAdminScreens && (
+        <>
+          <Drawer.Screen
+            name="AdminDepartmentList"
+            component={AdminDepartmentListScreen}
+            options={{
+              headerShown: true,
+              title: 'Departamentos',
+              drawerIcon: makeDrawerIcon('office-building', 'office-building-outline')
+            }}
+          />
+
+          <Drawer.Screen
+            name="AdminDepartmentCreate"
+            component={DepartmentForm}
+            options={{ headerShown: true, title: 'Nuevo Departamento', drawerLabel: () => null }}
+          />
+
+          <Drawer.Screen
+            name="AdminDepartmentDetail"
+            component={DepartmentDetail}
+            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null }}
+          />
+
+          <Drawer.Screen
+            name="AdminDepartmentEdit"
+            component={DepartmentForm}
+            options={{ headerShown: true, title: 'Editar Departamento', drawerLabel: () => null }}
           />
         </>
       )}
