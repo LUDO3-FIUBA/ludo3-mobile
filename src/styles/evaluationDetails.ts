@@ -71,6 +71,26 @@ export const evaluationDetailsSharedStyles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
+  submissionText: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 22,
+  },
+  linkText: {
+    color: lightModeColors.institutional,
+    textDecorationLine: 'underline',
+    fontWeight: '600',
+  },
+  emptyText: {
+    fontSize: 15,
+    color: 'gray',
+    fontStyle: 'italic',
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#333',
+  },
 });
 
 export const evaluationResultCardStyles = StyleSheet.create({

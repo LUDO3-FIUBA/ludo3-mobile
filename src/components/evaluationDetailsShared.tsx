@@ -1,4 +1,5 @@
 import React from 'react';
+import { Linking } from 'react-native';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { lightModeColors } from '../styles/colorPalette';
 import MaterialIcon from './materialIcon';
@@ -42,6 +43,71 @@ export function SubmissionDateRow({ dateText, isLate, lateByText }: { dateText: 
         {isLate && <Text style={styles.lateWarning}>Entregado fuera de término</Text>}
         {isLate && lateByText && <Text style={styles.lateByText}>Se entregó con {lateByText} de retraso</Text>}
       </View>
+    </View>
+  );
+}
+
+export function SubmissionTextCard({ submissionText }: { submissionText?: string | null }) {
+  const normalizedText = (submissionText || '').trim();
+  const linkRegex = /((https?:\/\/|www\.)[^\s]+|[a-z0-9.-]+\.[a-z]{2,}(\/[^\s]*)?)/gi;
+
+  const openLink = async (linkToOpen?: string) => {
+    if (!linkToOpen) return;
+    try {
+      await Linking.openURL(linkToOpen);
+    } catch (error) {
+      console.error('No se pudo abrir el enlace.', error);
+    }
+  };
+
+  const renderTextWithLinks = () => {
+    const parts: Array<{ text: string; isLink: boolean; url?: string }> = [];
+    let lastIndex = 0;
+    let match = linkRegex.exec(normalizedText);
+
+    while (match) {
+      const start = match.index;
+      const end = start + match[0].length;
+
+      if (start > lastIndex) {
+        parts.push({ text: normalizedText.slice(lastIndex, start), isLink: false });
+      }
+
+      const rawUrl = match[0];
+      const normalizedUrl = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+      parts.push({ text: rawUrl, isLink: true, url: normalizedUrl });
+
+      lastIndex = end;
+      match = linkRegex.exec(normalizedText);
+    }
+
+    if (lastIndex < normalizedText.length) {
+      parts.push({ text: normalizedText.slice(lastIndex), isLink: false });
+    }
+
+    return (
+      <Text style={styles.submissionText}>
+        {parts.map((part, index) => (
+          <Text
+            key={`${part.text}-${index}`}
+            style={part.isLink ? styles.linkText : styles.submissionText}
+            onPress={part.isLink ? () => openLink(part.url) : undefined}
+          >
+            {part.text}
+          </Text>
+        ))}
+      </Text>
+    );
+  };
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.sectionTitle}>Comentarios</Text>
+      {!normalizedText ? (
+        <Text style={styles.emptyText}>Esta entrega no incluye texto adicional.</Text>
+      ) : (
+        renderTextWithLinks()
+      )}
     </View>
   );
 }

@@ -9,6 +9,7 @@ import {
   GraderUpdatedCard,
   MaterialIcon,
   SubmissionDateRow,
+  SubmissionTextCard,
 } from '../../components';
 import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
@@ -106,6 +107,8 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
         </View>
         <SubmissionDateRow dateText={evaluationSubmission?.created_at ? createdAtDate : '–'} isLate={isLate} lateByText={lateByText} />
       </View>
+
+      <SubmissionTextCard submissionText={evaluationSubmission?.submission_text} />
 
       <EvaluationResultCard
         progress={circleProgress}

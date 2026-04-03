@@ -8,6 +8,7 @@ import {
 	GraderUpdatedCard,
 	MaterialIcon,
 	SubmissionDateRow,
+	SubmissionTextCard,
 } from '../../components';
 import { Submission } from '../../models/Submission';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
@@ -59,6 +60,7 @@ export default function SubmissionDetails({ route }: any) {
 	const endDateRaw = (evaluation as any).endDate || (evaluation as any).end_date;
 	const submissionCreatedAtRaw = (submission as any).createdAt || (submission as any).created_at;
 	const submissionUpdatedAtRaw = (submission as any).updatedAt || (submission as any).updated_at;
+	const submissionTextRaw = (submission as any).submissionText || (submission as any).submission_text;
 	const [currentGrader, setCurrentGrader] = useState(submission.grader);
 	const [currentUpdatedAt, setCurrentUpdatedAt] = useState(submissionUpdatedAtRaw);
 
@@ -212,6 +214,8 @@ export default function SubmissionDetails({ route }: any) {
 
 				<SubmissionDateRow dateText={formatDate(submissionCreatedAtRaw)} isLate={isLate} lateByText={lateByText} />
 			</View>
+
+			<SubmissionTextCard submissionText={submissionTextRaw} />
 
 			<EvaluationResultCard
 				progress={circleProgress}
