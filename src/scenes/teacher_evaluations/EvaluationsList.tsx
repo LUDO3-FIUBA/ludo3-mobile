@@ -45,7 +45,10 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const fetchData = async () => {
     try {
       const evaluationsData: TeacherEvaluation[] = await makeRequest(() => teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id), navigation);
-      setEvaluations(evaluationsData);
+      const sortedEvaluations = [...evaluationsData].sort((a, b) => 
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+      );
+      setEvaluations(sortedEvaluations);
       setLoading(false);
     } catch (error) {
       setLoading(false);
