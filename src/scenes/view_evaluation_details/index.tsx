@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import * as Progress from 'react-native-progress';
-import { lightModeColors } from '../../styles/colorPalette';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import moment from 'moment';
-import { MaterialIcon } from '../../components';
+import { lightModeColors } from '../../styles/colorPalette';
+import {
+  EvaluationDateRangeCard,
+  EvaluationDetailsHeader,
+  EvaluationResultCard,
+  GraderUpdatedCard,
+  MaterialIcon,
+  SubmissionDateRow,
+} from '../../components';
 import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 import { useNavigation } from '@react-navigation/native';
 import { getLateSubmissionInfo } from '../../utils/lateSubmission';
+import { evaluationDetailsScreenStyles as styles, evaluationDetailsTextStyles } from '../../styles/evaluationDetails';
 
 
 enum EvaluationStatus {
@@ -56,11 +63,6 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
         ? 'Desaprobado'
         : '–';
   
-    const circleTextStyle =
-    circleText === 'Aprobado' || circleText === 'Desaprobado'
-      ? styles.progressTextSmall
-      : styles.progressText;
-
   const fetchSubmission = async () => {
     if (!evaluation.id) return;
 
@@ -91,86 +93,33 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>{detailedEvaluation.evaluation_name}</Text>
-      <Text style={styles.header2}>{subjectName}</Text>
-
-      <View style={styles.card}>
-        <View style={styles.cardItem}>
-          <MaterialIcon name="calendar-clock" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-          <View style={{ flexGrow: 1 }}>
-            <Text style={styles.cardTitle}>Inicio</Text>
-            <Text style={styles.cardText}>{detailedEvaluation.start_date ? startDate : `–`}</Text>
-          </View>
-          <MaterialIcon name="chevron-right" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-          <View style={{ flexGrow: .5 }}>
-            <Text style={styles.cardTitle}>Fin</Text>
-            <Text style={styles.cardText}>{endDate}</Text>
-          </View>
-        </View>
-      </View>
+      <EvaluationDetailsHeader title={detailedEvaluation.evaluation_name} subtitle={subjectName} />
+      <EvaluationDateRangeCard startDate={detailedEvaluation.start_date ? startDate : '–'} endDate={endDate} />
 
       <View style={styles.card}>
         <View style={styles.cardItem}>
           <MaterialIcon name="information-outline" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
           <View>
-            <Text style={styles.passingGradeText}>{evaluationStatus}</Text>
-            <Text style={styles.passingGradeLabel}>Estado</Text>
+            <Text style={evaluationDetailsTextStyles.passingGradeText}>{evaluationStatus}</Text>
+            <Text style={evaluationDetailsTextStyles.passingGradeLabel}>Estado</Text>
           </View>
         </View>
-        <View style={styles.cardItem}>
-          <MaterialIcon name="calendar-today" fontSize={24} color={isLate ? '#E67E22' : lightModeColors.institutional} style={{ marginRight: 10 }} />
-          <View>
-            <Text style={[styles.passingGradeText, isLate && styles.lateText]}>{evaluationSubmission?.created_at ? createdAtDate : `–`}</Text>
-            <Text style={styles.passingGradeLabel}>Fecha de entrega</Text>
-            {isLate && <Text style={styles.lateWarning}>Entregado fuera de término</Text>}
-            {isLate && lateByText && <Text style={styles.lateByText}>Se entregó con {lateByText} de retraso</Text>}
-          </View>
-        </View>
+        <SubmissionDateRow dateText={evaluationSubmission?.created_at ? createdAtDate : '–'} isLate={isLate} lateByText={lateByText} />
       </View>
 
-      <View style={styles.card}>
-        <View style={{ alignItems: 'center', gap: 8 }}>
-          <Progress.Circle
-            progress={circleProgress}
-            formatText={() => circleText}
-            color={failedExam ? lightModeColors.failed : lightModeColors.passed}
-            unfilledColor={failedExam ? lightModeColors.failed_background : lightModeColors.passed_background}
-            strokeCap='round'
-            size={135}
-            thickness={12}
-            showsText={true}
-            borderWidth={0}
-            textStyle={circleTextStyle}
-          />
-          <Text style={styles.passingGradeLabel}>
-            {isNumericEvaluation ? 'Nota obtenida' : 'Estado de entrega'}
-          </Text>
-        </View>
-
-        {isNumericEvaluation && (
-          <View>
-            <Text style={styles.passingGradeLabel}>Nota mínima de aprobación: {detailedEvaluation.passing_grade}</Text>
-          </View>
-        )}
-      </View>
+      <EvaluationResultCard
+        progress={circleProgress}
+        circleText={String(circleText)}
+        failed={failedExam}
+        isNumericEvaluation={isNumericEvaluation}
+        passingGrade={detailedEvaluation.passing_grade}
+      />
 
       {evaluationStatus !== EvaluationStatus.NOT_TAKEN &&
-        <View style={[styles.card, { marginBottom: 120 }]}>
-          <View style={styles.cardItem}>
-            <MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-            <View>
-              <Text style={styles.passingGradeText}>{graderName}</Text>
-              <Text style={styles.passingGradeLabel}>Corrector</Text>
-            </View>
-          </View>
-          <View style={styles.cardItem}>
-            <MaterialIcon name="calendar-edit" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-            <View>
-              <Text style={styles.passingGradeText}>{evaluationSubmission?.updated_at ? updatedAtDate : `–`}</Text>
-              <Text style={styles.passingGradeLabel}>Última fecha de actualización</Text>
-            </View>
-          </View>
-        </View>}
+        <GraderUpdatedCard
+          graderName={graderName}
+          updatedAt={evaluationSubmission?.updated_at ? updatedAtDate : '–'}
+        />}
 
       {evaluationStatus === EvaluationStatus.NOT_TAKEN && !detailedEvaluation.requires_qr &&
         <View style={[styles.card, { marginBottom: 120 }]}>
@@ -220,97 +169,6 @@ function getEvaluationStatus(evaluationSubmission: EvaluationSubmission | undefi
 
   return EvaluationStatus.TAKEN_GRADED
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  header2: {
-    fontSize: 20,
-    marginBottom: 18,
-  },
-  card: {
-    flexDirection: 'column',
-    marginBottom: 20,
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 8,
-    elevation: 3,
-    gap: 18
-  },
-  cardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cardTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  cardText: {
-    color: 'gray',
-  },
-  passingGradeText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: lightModeColors.institutional,
-  },
-  passingGradeLabel: {
-    fontSize: 14,
-    color: 'gray',
-  },
-  submitButton: {
-    backgroundColor: lightModeColors.institutional,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  qrButton: {
-    backgroundColor: lightModeColors.institutional,
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  submitButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  submitHintText: {
-    fontSize: 13,
-    color: 'gray',
-  },
-  progressText: {
-    fontWeight: 'bold',
-    fontSize: 22,
-  },
-  progressTextSmall: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  lateText: {
-    color: '#E67E22',
-  },
-  lateWarning: {
-    color: '#E67E22',
-    fontSize: 13,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  lateByText: {
-    color: '#E67E22',
-    fontSize: 12,
-    marginTop: 2,
-  },
-});
 
 export default EvaluationDetailsScreen;
 

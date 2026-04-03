@@ -1,8 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import * as Progress from 'react-native-progress';
+import { Alert, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import moment from 'moment';
-import { MaterialIcon } from '../../components';
+import {
+	EvaluationDateRangeCard,
+	EvaluationDetailsHeader,
+	EvaluationResultCard,
+	GraderUpdatedCard,
+	MaterialIcon,
+	SubmissionDateRow,
+} from '../../components';
 import { Submission } from '../../models/Submission';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
 import { TeacherModel } from '../../models/TeacherModel';
@@ -15,6 +21,7 @@ import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { selectStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
 import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
 import { getLateSubmissionInfo } from '../../utils/lateSubmission';
+import { evaluationDetailsScreenStyles as styles, evaluationDetailsTextStyles } from '../../styles/evaluationDetails';
 
 type RouteParams = {
 	evaluation: TeacherEvaluation;
@@ -183,72 +190,38 @@ export default function SubmissionDetails({ route }: any) {
 
 	const content = (
 		<>
-			<Text style={styles.header}>{evaluationName}</Text>
-			<Text style={styles.header2}>{subjectName}</Text>
-
-			<View style={styles.card}>
-				<View style={styles.cardItem}>
-					<MaterialIcon name="calendar-clock" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
-					<View style={{ flexGrow: 1 }}>
-						<Text style={styles.cardTitle}>Inicio</Text>
-						<Text style={styles.cardText}>{formatDate(startDateRaw)}</Text>
-					</View>
-					<MaterialIcon name="chevron-right" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
-					<View style={{ flexGrow: 0.5 }}>
-						<Text style={styles.cardTitle}>Fin</Text>
-						<Text style={styles.cardText}>{formatDate(endDateRaw)}</Text>
-					</View>
-				</View>
-			</View>
+			<EvaluationDetailsHeader title={evaluationName} subtitle={subjectName} />
+			<EvaluationDateRangeCard startDate={formatDate(startDateRaw)} endDate={formatDate(endDateRaw)} />
 
 			<View style={styles.card}>
 				<View style={styles.cardItem}>
 					<MaterialIcon name="account" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
 					<View>
-						<Text style={styles.passingGradeText}>{submission.student.firstName} {submission.student.lastName}</Text>
-						<Text style={styles.passingGradeLabel}>Estudiante</Text>
+						<Text style={evaluationDetailsTextStyles.passingGradeText}>{submission.student.firstName} {submission.student.lastName}</Text>
+						<Text style={evaluationDetailsTextStyles.passingGradeLabel}>Estudiante</Text>
 					</View>
 				</View>
 
 				<View style={styles.cardItem}>
 					<MaterialIcon name="information-outline" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
 					<View>
-						<Text style={styles.passingGradeText}>{statusLabel}</Text>
-						<Text style={styles.passingGradeLabel}>Estado</Text>
+						<Text style={evaluationDetailsTextStyles.passingGradeText}>{statusLabel}</Text>
+						<Text style={evaluationDetailsTextStyles.passingGradeLabel}>Estado</Text>
 					</View>
 				</View>
 
-				<View style={styles.cardItem}>
-					<MaterialIcon name="calendar-today" fontSize={24} color={isLate ? '#E67E22' : lightModeColors.institutional} style={styles.iconMargin} />
-					<View>
-						<Text style={[styles.passingGradeText, isLate && styles.lateText]}>{formatDate(submissionCreatedAtRaw)}</Text>
-						<Text style={styles.passingGradeLabel}>Fecha de entrega</Text>
-						{isLate && <Text style={styles.lateWarning}>Entregado fuera de término</Text>}
-						{isLate && lateByText && <Text style={styles.lateByText}>Se entregó con {lateByText} de retraso</Text>}
-					</View>
-				</View>
+				<SubmissionDateRow dateText={formatDate(submissionCreatedAtRaw)} isLate={isLate} lateByText={lateByText} />
 			</View>
 
-			<View style={styles.card}>
-				<View style={{ alignItems: 'center', gap: 8 }}>
-					<TouchableOpacity activeOpacity={0.8} onPress={onCirclePress}>
-						<Progress.Circle
-							progress={circleProgress}
-							formatText={() => String(circleText)}
-							color={failedExam ? lightModeColors.failed : lightModeColors.passed}
-							unfilledColor={failedExam ? lightModeColors.failed_background : lightModeColors.passed_background}
-							strokeCap="round"
-							size={135}
-							thickness={12}
-							showsText
-							borderWidth={0}
-							textStyle={typeof circleText === 'string' && (circleText === 'Aprobado' || circleText === 'Desaprobado') ? styles.progressTextSmall : styles.progressText}
-						/>
-					</TouchableOpacity>
-					<Text style={styles.passingGradeLabel}>{isGradeable ? 'Nota obtenida' : 'Estado de entrega'}</Text>
-					<Text style={styles.editHint}>Presionar para editar</Text>
-				</View>
-
+			<EvaluationResultCard
+				progress={circleProgress}
+				circleText={String(circleText)}
+				failed={failedExam}
+				isNumericEvaluation={isGradeable}
+				passingGrade={passingGrade}
+				onPressCircle={onCirclePress}
+				showEditHint
+			>
 				{editing && (
 					<View style={styles.editorCard}>
 						{isGradeable ? (
@@ -284,30 +257,14 @@ export default function SubmissionDetails({ route }: any) {
 						</TouchableOpacity>
 					</View>
 				)}
+			</EvaluationResultCard>
 
-				{isGradeable && (
-					<View>
-						<Text style={styles.passingGradeLabel}>Nota mínima de aprobación: {passingGrade ?? '–'}</Text>
-					</View>
-				)}
-			</View>
-
-			<View style={[styles.card, { marginBottom: 120 }]}>
-				<View style={styles.cardItem}>
-					<MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
-					<TouchableOpacity onPress={updateCorrectorToSubmission} disabled={!isActualUserChiefTeacher}>
-						<Text style={[styles.passingGradeText, isActualUserChiefTeacher && styles.clickableLabel]}>{getGraderName(currentGrader)}</Text>
-						<Text style={styles.passingGradeLabel}>Corrector</Text>
-					</TouchableOpacity>
-				</View>
-				<View style={styles.cardItem}>
-					<MaterialIcon name="calendar-edit" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
-					<View>
-						<Text style={styles.passingGradeText}>{formatDate(currentUpdatedAt)}</Text>
-						<Text style={styles.passingGradeLabel}>Última fecha de actualización</Text>
-					</View>
-				</View>
-			</View>
+			<GraderUpdatedCard
+				graderName={getGraderName(currentGrader)}
+				updatedAt={formatDate(currentUpdatedAt)}
+				onPressGrader={updateCorrectorToSubmission}
+				canEditGrader={isActualUserChiefTeacher}
+			/>
 		</>
 	);
 
@@ -330,111 +287,6 @@ export default function SubmissionDetails({ route }: any) {
 		</>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		padding: 20,
-	},
-	header: {
-		fontSize: 24,
-		fontWeight: 'bold',
-	},
-	header2: {
-		fontSize: 20,
-		marginBottom: 18,
-	},
-	card: {
-		flexDirection: 'column',
-		marginBottom: 20,
-		backgroundColor: 'white',
-		padding: 15,
-		borderRadius: 8,
-		elevation: 3,
-		gap: 18,
-	},
-	cardItem: {
-		flexDirection: 'row',
-		alignItems: 'center',
-	},
-	cardTitle: {
-		fontWeight: 'bold',
-		fontSize: 16,
-		marginBottom: 2,
-	},
-	cardText: {
-		color: 'gray',
-	},
-	passingGradeText: {
-		fontSize: 18,
-		fontWeight: 'bold',
-		color: lightModeColors.institutional,
-	},
-	passingGradeLabel: {
-		fontSize: 14,
-		color: 'gray',
-	},
-	clickableLabel: {
-		textDecorationLine: 'underline',
-	},
-	iconMargin: {
-		marginRight: 10,
-	},
-	progressText: {
-		fontWeight: 'bold',
-		fontSize: 22,
-	},
-	progressTextSmall: {
-		fontWeight: 'bold',
-		fontSize: 16,
-	},
-	lateText: {
-		color: '#E67E22',
-	},
-	lateWarning: {
-		color: '#E67E22',
-		fontSize: 13,
-		fontWeight: '600',
-		marginTop: 2,
-	},
-	lateByText: {
-		color: '#E67E22',
-		fontSize: 12,
-		marginTop: 2,
-	},
-	editHint: {
-		fontSize: 12,
-		color: 'gray',
-	},
-	editorCard: {
-		gap: 10,
-		paddingTop: 8,
-	},
-	editorLabel: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#333',
-	},
-	editorInput: {
-		height: 42,
-		borderWidth: 1,
-		borderColor: '#ccc',
-		borderRadius: 8,
-		paddingHorizontal: 12,
-		backgroundColor: 'white',
-	},
-	saveButton: {
-		backgroundColor: lightModeColors.institutional,
-		paddingVertical: 12,
-		borderRadius: 8,
-		alignItems: 'center',
-		marginTop: 4,
-	},
-	saveButtonText: {
-		color: 'white',
-		fontWeight: 'bold',
-	},
-});
 
 function formatDate(date: string | Date | null | undefined): string {
 	if (!date) return '–';
