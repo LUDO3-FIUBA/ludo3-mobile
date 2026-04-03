@@ -45,6 +45,9 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const lateInfo = getLateSubmissionInfo(evaluationSubmission?.created_at, detailedEvaluation.end_date);
   const isLate = lateInfo.isLate;
   const lateByText = lateInfo.lateByText;
+  const hasEvaluationStarted = detailedEvaluation.start_date
+    ? moment().isSameOrAfter(moment(detailedEvaluation.start_date))
+    : true;
   
   const failedExam = isNumericEvaluation
     ? evaluationSubmission?.grade !== null && evaluationSubmission?.grade !== undefined && grade < (detailedEvaluation.passing_grade || 0)
@@ -124,7 +127,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           updatedAt={evaluationSubmission?.updated_at ? updatedAtDate : '–'}
         />}
 
-      {evaluationStatus === EvaluationStatus.NOT_TAKEN && !detailedEvaluation.requires_qr &&
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && hasEvaluationStarted && !detailedEvaluation.requires_qr &&
         <View style={[styles.card, { marginBottom: 120 }]}>
           <TouchableOpacity
             style={styles.submitButton}
@@ -141,7 +144,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           </Text>
         </View>}
 
-      {evaluationStatus === EvaluationStatus.NOT_TAKEN && detailedEvaluation.requires_qr &&
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && hasEvaluationStarted && detailedEvaluation.requires_qr &&
         <View style={[styles.card, { marginBottom: 120, alignItems: 'center' }]}>
           <TouchableOpacity
             style={styles.qrButton}
