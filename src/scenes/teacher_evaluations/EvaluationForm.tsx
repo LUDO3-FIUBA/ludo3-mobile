@@ -34,6 +34,7 @@ type Props = {
   onDelete?: () => void;
   deleting?: boolean;
   deleteButtonText?: string;
+  currentEvaluationId?: number;
 };
 
 const combineDateAndTime = (date: Date, time: Date) =>
@@ -62,6 +63,7 @@ export default function EvaluationForm({
   onDelete,
   deleting = false,
   deleteButtonText = 'Eliminar evaluación',
+  currentEvaluationId,
 }: Props) {
   const placeholderColor = '#808080';
   const pickerPlaceholderTextStyle = { color: placeholderColor };
@@ -153,7 +155,8 @@ export default function EvaluationForm({
       const evaluations = await teacherEvaluationsRepository.getEvaluationsBySemester(semester.id);
       setEvaluations(evaluations);
       console.log('Fetched evaluations for makeup:', evaluations);
-      const items = evaluations.map((evaluation) => ({
+      const filteredEvaluations = evaluations.filter((e) => e.id !== currentEvaluationId);
+      const items = filteredEvaluations.map((evaluation) => ({
         label: evaluation.evaluationName,
         value: String(evaluation.id),
       }));

@@ -103,6 +103,7 @@ export default function EditEvaluation() {
       onDelete={confirmDelete}
       deleting={deleting}
       deleteButtonText="Eliminar evaluación"
+      currentEvaluationId={evaluation.id}
     />
   );
 }
