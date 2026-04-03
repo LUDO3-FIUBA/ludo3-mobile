@@ -5,9 +5,15 @@ import moment from 'moment';
 import { MaterialIcon } from '../../components';
 import { Submission } from '../../models/Submission';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
+import { TeacherModel } from '../../models/TeacherModel';
 import { lightModeColors } from '../../styles/colorPalette';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { teacherSubmissionsRepository } from '../../repositories';
+import EntitySelectionModal from './EntitySelectionModal';
+import { useAppSelector } from '../../redux/hooks';
+import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
+import { selectStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
+import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
 
 type RouteParams = {
 	evaluation: TeacherEvaluation;
@@ -16,6 +22,10 @@ type RouteParams = {
 
 export default function SubmissionDetails({ route }: any) {
 	const { evaluation, submission } = route.params as RouteParams;
+	const semester = useAppSelector(selectSemesterData);
+	const teachersTuples = useAppSelector(selectStaffTeachers);
+	const userData = useAppSelector(selectUserData);
+	const isActualUserChiefTeacher = semester?.commission.chiefTeacher.id === userData?.id;
 	const isGradeable = (evaluation as any).isGradeable ?? (evaluation as any).is_gradeable ?? true;
 	const initialGrade = submission.grade ? String(submission.grade) : '';
 	const initialStatus = (submission.submissionStatus || '').toUpperCase();
@@ -30,6 +40,8 @@ export default function SubmissionDetails({ route }: any) {
 	);
 	const [saving, setSaving] = useState(false);
 	const [statusOpen, setStatusOpen] = useState(false);
+	const [showTeacherSelectionModal, setShowTeacherSelectionModal] = useState(false);
+	const [semesterTeachers, setSemesterTeachers] = useState<TeacherModel[]>([]);
 
 	const evaluationName = (evaluation as any).evaluationName || (evaluation as any).evaluation_name || 'Evaluacion';
 	const subjectName = (evaluation as any).semester?.commission?.subjectName || (evaluation as any).semester?.commission?.subject_name || '–';
@@ -38,6 +50,8 @@ export default function SubmissionDetails({ route }: any) {
 	const endDateRaw = (evaluation as any).endDate || (evaluation as any).end_date;
 	const submissionCreatedAtRaw = (submission as any).createdAt || (submission as any).created_at;
 	const submissionUpdatedAtRaw = (submission as any).updatedAt || (submission as any).updated_at;
+	const [currentGrader, setCurrentGrader] = useState(submission.grader);
+	const [currentUpdatedAt, setCurrentUpdatedAt] = useState(submissionUpdatedAtRaw);
 
 	const passingGrade = (evaluation as any).passingGrade ?? (evaluation as any).passing_grade;
 	const gradeNumber = grade ? Number(grade) : null;
@@ -140,12 +154,45 @@ export default function SubmissionDetails({ route }: any) {
 					status === 'aprobado' ? 'APROBADO' : 'DESAPROBADO',
 				);
 			}
+			setCurrentUpdatedAt(moment().toISOString());
 			setEditing(false);
 		} catch (error) {
 			Alert.alert('Error', 'No pudimos guardar los cambios. Intenta nuevamente.');
 			console.error('Error updating submission from details', error);
 		} finally {
 			setSaving(false);
+		}
+	};
+
+	const updateCorrectorToSubmission = () => {
+		if (grade.trim() !== '') {
+			Alert.alert('Error', 'No se puede cambiar el corrector de una entrega ya calificada.');
+			return;
+		}
+
+		if (isActualUserChiefTeacher) {
+			if (semester) {
+				const commissionTeachers = teachersTuples.map(actual => actual.teacher);
+				commissionTeachers.push(semester.commission.chiefTeacher);
+				setSemesterTeachers(commissionTeachers);
+			}
+			setShowTeacherSelectionModal(true);
+			return;
+		}
+
+		Alert.alert('Error', 'No tiene permisos para cambiar el corrector de esta entrega.');
+	};
+
+	const assignCorrectorToStudent = async (newCorrector: TeacherModel) => {
+		setShowTeacherSelectionModal(false);
+
+		try {
+			await teacherSubmissionsRepository.assignGraderToSubmission(submission.student.id, evaluation.id, newCorrector.id);
+			setCurrentGrader(newCorrector);
+			setCurrentUpdatedAt(moment().toISOString());
+		} catch (error) {
+			Alert.alert('Error', 'Hubo un error al agregar el corrector');
+			console.error('Error assigning grader from details', error);
 		}
 	};
 
@@ -212,81 +259,90 @@ export default function SubmissionDetails({ route }: any) {
 							borderWidth={0}
 							textStyle={typeof circleText === 'string' && (circleText === 'Aprobado' || circleText === 'Desaprobado') ? styles.progressTextSmall : styles.progressText}
 						/>
+					</TouchableOpacity>
+					<Text style={styles.passingGradeLabel}>{isGradeable ? 'Nota obtenida' : 'Estado de entrega'}</Text>
+					<Text style={styles.editHint}>Presionar para editar</Text>
+				</View>
+
+				{editing && (
+					<View style={styles.editorCard}>
+						{isGradeable ? (
+							<>
+								<Text style={styles.editorLabel}>Editar nota</Text>
+								<TextInput
+									style={styles.editorInput}
+									keyboardType="numeric"
+									maxLength={2}
+									value={grade}
+									onChangeText={onGradeChange}
+									placeholder="Ingresá una nota"
+								/>
+							</>
+						) : (
+							<>
+								<Text style={styles.editorLabel}>Editar estado</Text>
+								<DropDownPicker
+									open={statusOpen}
+									value={status}
+									items={[
+										{ label: 'Aprobado', value: 'aprobado' },
+										{ label: 'Desaprobado', value: 'desaprobado' },
+									]}
+									setOpen={setStatusOpen}
+									setValue={(callback) => setStatus(callback(status))}
+									placeholder="Seleccioná un estado"
+								/>
+							</>
+						)}
+						<TouchableOpacity style={styles.saveButton} onPress={saveChanges} disabled={saving}>
+							<Text style={styles.saveButtonText}>{saving ? 'Guardando...' : 'Guardar cambios'}</Text>
 						</TouchableOpacity>
-						<Text style={styles.passingGradeLabel}>{isGradeable ? 'Nota obtenida' : 'Estado de entrega'}</Text>
-						<Text style={styles.editHint}>Presionar para editar</Text>
 					</View>
+				)}
 
-					{editing && (
-						<View style={styles.editorCard}>
-							{isGradeable ? (
-								<>
-									<Text style={styles.editorLabel}>Editar nota</Text>
-									<TextInput
-										style={styles.editorInput}
-										keyboardType="numeric"
-										maxLength={2}
-										value={grade}
-										onChangeText={onGradeChange}
-										placeholder="Ingresá una nota"
-									/>
-								</>
-							) : (
-								<>
-									<Text style={styles.editorLabel}>Editar estado</Text>
-									<DropDownPicker
-										open={statusOpen}
-										value={status}
-										items={[
-											{ label: 'Aprobado', value: 'aprobado' },
-											{ label: 'Desaprobado', value: 'desaprobado' },
-										]}
-										setOpen={setStatusOpen}
-										setValue={(callback) => setStatus(callback(status))}
-										placeholder="Seleccioná un estado"
-									/>
-								</>
-							)}
-							<TouchableOpacity style={styles.saveButton} onPress={saveChanges} disabled={saving}>
-								<Text style={styles.saveButtonText}>{saving ? 'Guardando...' : 'Guardar cambios'}</Text>
-							</TouchableOpacity>
-						</View>
-					)}
+				{isGradeable && (
+					<View>
+						<Text style={styles.passingGradeLabel}>Nota mínima de aprobación: {passingGrade ?? '–'}</Text>
+					</View>
+				)}
+			</View>
 
-					{isGradeable && (
-						<View>
-							<Text style={styles.passingGradeLabel}>Nota mínima de aprobación: {passingGrade ?? '–'}</Text>
-						</View>
-					)}
+			<View style={[styles.card, { marginBottom: 120 }]}>
+				<View style={styles.cardItem}>
+					<MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
+					<TouchableOpacity onPress={updateCorrectorToSubmission} disabled={!isActualUserChiefTeacher}>
+						<Text style={[styles.passingGradeText, isActualUserChiefTeacher && styles.clickableLabel]}>{getGraderName(currentGrader)}</Text>
+						<Text style={styles.passingGradeLabel}>Corrector</Text>
+					</TouchableOpacity>
 				</View>
-
-				<View style={[styles.card, { marginBottom: 120 }]}> 
-					<View style={styles.cardItem}>
-						<MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
-						<View>
-							<Text style={styles.passingGradeText}>{getGraderName(submission.grader)}</Text>
-							<Text style={styles.passingGradeLabel}>Corrector</Text>
-						</View>
-					</View>
-					<View style={styles.cardItem}>
-						<MaterialIcon name="calendar-edit" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
-						<View>
-							<Text style={styles.passingGradeText}>{formatDate(submissionUpdatedAtRaw)}</Text>
-							<Text style={styles.passingGradeLabel}>Ultima fecha de actualización</Text>
-						</View>
+				<View style={styles.cardItem}>
+					<MaterialIcon name="calendar-edit" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
+					<View>
+						<Text style={styles.passingGradeText}>{formatDate(currentUpdatedAt)}</Text>
+						<Text style={styles.passingGradeLabel}>Última fecha de actualización</Text>
 					</View>
 				</View>
+			</View>
 		</>
 	);
 
 	return (
-		<FlatList
-			style={styles.container}
-			data={[{ key: 'content' }]}
-			renderItem={() => null}
-			ListHeaderComponent={content}
-			keyExtractor={(item) => item.key}
-		/>
+		<>
+			<FlatList
+				style={styles.container}
+				data={[{ key: 'content' }]}
+				renderItem={() => null}
+				ListHeaderComponent={content}
+				keyExtractor={(item) => item.key}
+			/>
+			<EntitySelectionModal
+				visible={showTeacherSelectionModal}
+				entities={semesterTeachers}
+				onSelect={(selectedTeacher) => assignCorrectorToStudent(selectedTeacher as TeacherModel)}
+				onClose={() => setShowTeacherSelectionModal(false)}
+				title="Asignar corrector"
+			/>
+		</>
 	);
 }
 
@@ -332,6 +388,9 @@ const styles = StyleSheet.create({
 	passingGradeLabel: {
 		fontSize: 14,
 		color: 'gray',
+	},
+	clickableLabel: {
+		textDecorationLine: 'underline',
 	},
 	iconMargin: {
 		marginRight: 10,

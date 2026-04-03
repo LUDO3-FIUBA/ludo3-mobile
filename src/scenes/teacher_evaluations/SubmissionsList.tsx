@@ -14,9 +14,7 @@ import { TeacherTuple } from '../../models/TeacherTuple';
 import EntitySelectionModal from './EntitySelectionModal';
 import { selectStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
 import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
-import EditableText from '../../components/EditableText';
 import { MaterialIcon } from '../../components';
-import DropDownPicker from 'react-native-dropdown-picker';
 
 interface Props {
   route: any;
@@ -109,51 +107,6 @@ export default function SubmissionsList({ route }: Props) {
       fetchData();
     } catch (error) {
       Alert.alert("Error", "Hubo un error al agregar el corrector");
-    }
-  };
-
-  const updateSubmissionGrade = async (student: TeacherStudent, newGrade: string) => {
-    try {
-      const res = await teacherSubmissionsRepository.gradeSubmission(student.id, evaluation.id, +newGrade);
-      ToastAndroid.show(`La calificación de ${student.firstName} ${student.lastName} ha sido guardada exitosamente`, ToastAndroid.LONG);
-      setSubmissions(prevSubmissions =>
-        prevSubmissions.map(submission =>
-          submission.student.id === student.id
-            ? { ...submission, grade: String(newGrade), grader: res.grader }
-            : submission
-        )
-      );
-    } catch (error) {
-      Alert.alert('Error', 'No pudimos guardar la calificación. Intenta nuevamente.');
-      console.error('Error grading submission', error);
-    }
-  };
-
-  const updateSubmissionStatus = async (student: TeacherStudent, status: 'aprobado' | 'desaprobado') => {
-    const backendStatus = status === 'aprobado' ? 'APROBADO' : 'DESAPROBADO';
-
-    try {
-      const res = await teacherSubmissionsRepository.setSubmissionStatus(
-        student.id,
-        evaluation.id,
-        backendStatus,
-      );
-
-      ToastAndroid.show(
-        `El estado de ${student.firstName} ${student.lastName} ha sido guardado exitosamente`,
-        ToastAndroid.LONG,
-      );
-
-      setSubmissions(prevSubmissions =>
-        prevSubmissions.map(submission =>
-          submission.student.id === student.id
-            ? { ...submission, submissionStatus: backendStatus, grader: res.grader }
-            : submission
-        )
-      );
-    } catch (error) {
-      Alert.alert('Error', 'No pudimos guardar el estado. Intenta nuevamente.');
-      console.error('Error updating submission status', error);
     }
   };
 
