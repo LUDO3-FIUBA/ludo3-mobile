@@ -9,7 +9,7 @@ import {
   GoogleRegisterScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
-  TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen,
+  TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
   TeacherFinalsListScreen, TeacherAddFinalScreen,
   TeacherStaffScreen, TeacherStaffConfigurationScreen, TeacherAddStaffScreen,
   TeacherSemesterAttendancesScreen, TeacherAttendanceDetailsScreen,
@@ -161,6 +161,11 @@ const App = () => {
               name="SubmissionsList"
               component={TeacherSubmissionsListScreen}
               options={{ headerShown: true, title: 'Entregas' }}
+            />
+            <Stack.Screen
+              name="TeacherSubmissionDetails"
+              component={TeacherSubmissionDetailsScreen}
+              options={{ headerShown: true, title: 'Detalle de entrega' }}
             />
             <Stack.Screen
               name="FinalsList"

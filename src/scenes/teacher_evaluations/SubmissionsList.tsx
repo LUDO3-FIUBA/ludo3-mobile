@@ -28,7 +28,7 @@ interface RouteParams {
 
 
 export default function SubmissionsList({ route }: Props) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const semester = useAppSelector(selectSemesterData);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -171,8 +171,11 @@ export default function SubmissionsList({ route }: Props) {
   const renderHeader = () => (
     <View style={styles.header}>
       <Text style={styles.headerText}>Estudiante</Text>
+      <View style={styles.headerDivider} />
       <Text style={styles.headerText}>Corrector</Text>
+      <View style={styles.headerDivider} />
       <Text style={styles.headerText}>Nota</Text>
+      <View style={styles.headerArrowSpacer} />
     </View>
   );
 
@@ -202,64 +205,35 @@ export default function SubmissionsList({ route }: Props) {
           keyExtractor={submission => submission.student.dni}
           ListHeaderComponent={renderHeader}
           renderItem={({ item: submission }) => {
-            const isEditable = editingCondition(submission);
             return (
-              <View style={[styles.row, !isEditable && styles.nonEditableRow]}>
-                <Text style={styles.cell}>{`${submission.student.firstName} ${submission.student.lastName}`}</Text>
+              <View style={styles.row}>
+                <View style={styles.cell}>
+                  <Text style={styles.text}>{`${submission.student.firstName} ${submission.student.lastName}`}</Text>
+                </View>
                 <View style={styles.divider} />
+                <View style={styles.cell}>
+                  <Text style={styles.text}>{submission.grader?.lastName || '–'}</Text>
+                </View>
+                <View style={styles.divider} />
+                <View style={styles.cell}>
+                  {isGradeable ? (
+                    <Text style={styles.text}>{submission.grade || '–'}</Text>
+                  ) : (
+                    <Text style={styles.text}>
+                      {submission.submissionStatus === 'APROBADO'
+                        ? 'A'
+                        : submission.submissionStatus === 'DESAPROBADO'
+                          ? 'D'
+                          : '–'}
+                    </Text>
+                  )}
+                </View>
                 <TouchableOpacity
-                  style={styles.cell}
-                  disabled={!isActualUserChiefTeacher}
-                  onPress={() => updateCorrectorToSubmission(submission)}
+                  style={styles.arrowButton}
+                  onPress={() => navigation.navigate('TeacherSubmissionDetails', { evaluation, submission })}
                 >
-                  <Text style={styles.text}>{submission.grader?.lastName}</Text>
+                  <MaterialIcon name="chevron-right" fontSize={28} color="#666" />
                 </TouchableOpacity>
-                <View style={styles.divider} />
-                {isGradeable ? (
-                  <EditableText
-                    value={submission.grade || ''}
-                    onChange={text => updateSubmissionGrade(submission.student, text)}
-                    editable={isEditable}
-                  />
-                ) : (
-                  <View style={styles.statusPickerWrapper}>
-                    <DropDownPicker
-                      listMode="MODAL"
-                      open={openStatusPickerStudentId === submission.student.id}
-                      value={
-                        submission.submissionStatus === 'APROBADO'
-                          ? 'aprobado'
-                          : submission.submissionStatus === 'DESAPROBADO'
-                            ? 'desaprobado'
-                            : null
-                      }
-                      items={[
-                        { label: 'Aprobado', value: 'aprobado' },
-                        { label: 'Desaprobado', value: 'desaprobado' },
-                      ]}
-                      setOpen={() => {}}
-                      onOpen={() => setOpenStatusPickerStudentId(submission.student.id)}
-                      onClose={() => setOpenStatusPickerStudentId(null)}
-                      setValue={(callback) => {
-                        const currentValue =
-                          submission.submissionStatus === 'APROBADO'
-                            ? 'aprobado'
-                            : submission.submissionStatus === 'DESAPROBADO'
-                              ? 'desaprobado'
-                              : null;
-                        const nextValue = callback(currentValue);
-
-                        if (nextValue && nextValue !== currentValue) {
-                          updateSubmissionStatus(submission.student, nextValue);
-                        }
-                      }}
-                      disabled={!isEditable}
-                      placeholder="Sin calificar"
-                      style={styles.statusPicker}
-                      dropDownContainerStyle={styles.statusPickerDropdown}
-                    />
-                  </View>
-                )}
               </View>
             );
           }}
@@ -305,13 +279,22 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     marginHorizontal: 10,
     borderRadius: 8,
-    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   headerText: {
     flex: 1,
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginHorizontal: 5,
+  },
+  headerDivider: {
+    height: '100%',
+    width: 1,
+    backgroundColor: '#ccc',
+  },
+  headerArrowSpacer: {
+    width: 36,
   },
   row: {
     flexDirection: 'row',
@@ -338,6 +321,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginHorizontal: 5,
     textAlign: 'center',
+  },
+  arrowButton: {
+    width: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   divider: {
     height: '100%',

@@ -34,6 +34,7 @@ export { default as TeacherSemesterEditScreen } from './teacher_semester/Semeste
 export { default as TeacherEvaluationsListScreen } from './teacher_evaluations/EvaluationsList';
 export { default as TeacherAddEvaluationScreen } from './teacher_evaluations/AddEvaluation';
 export { default as TeacherSubmissionsListScreen } from './teacher_evaluations/SubmissionsList';
+export { default as TeacherSubmissionDetailsScreen } from './teacher_evaluations/SubmissionDetails';
 export { default as TeacherFinalsListScreen } from './teacher_finals/FinalsList';
 export { default as TeacherAddFinalScreen } from './teacher_finals/AddFinal';
 export { default as TeacherStaffScreen } from './teacher_staff/Teachers';
