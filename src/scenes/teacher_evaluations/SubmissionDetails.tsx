@@ -14,14 +14,16 @@ import { useAppSelector } from '../../redux/hooks';
 import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { selectStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
 import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
+import { getLateSubmissionInfo } from '../../utils/lateSubmission';
 
 type RouteParams = {
 	evaluation: TeacherEvaluation;
 	submission: Submission;
+	subjectName?: string;
 };
 
 export default function SubmissionDetails({ route }: any) {
-	const { evaluation, submission } = route.params as RouteParams;
+	const { evaluation, submission, subjectName: routeSubjectName } = route.params as RouteParams;
 	const semester = useAppSelector(selectSemesterData);
 	const teachersTuples = useAppSelector(selectStaffTeachers);
 	const userData = useAppSelector(selectUserData);
@@ -43,8 +45,8 @@ export default function SubmissionDetails({ route }: any) {
 	const [showTeacherSelectionModal, setShowTeacherSelectionModal] = useState(false);
 	const [semesterTeachers, setSemesterTeachers] = useState<TeacherModel[]>([]);
 
-	const evaluationName = (evaluation as any).evaluationName || (evaluation as any).evaluation_name || 'Evaluacion';
-	const subjectName = (evaluation as any).semester?.commission?.subjectName || (evaluation as any).semester?.commission?.subject_name || '–';
+	const evaluationName = (evaluation as any).evaluationName || (evaluation as any).evaluation_name || 'Evaluación';
+	const subjectName = routeSubjectName || (evaluation as any).semester?.commission?.subjectName || (evaluation as any).semester?.commission?.subject_name || '–';
 
 	const startDateRaw = (evaluation as any).startDate || (evaluation as any).start_date;
 	const endDateRaw = (evaluation as any).endDate || (evaluation as any).end_date;
@@ -89,26 +91,9 @@ export default function SubmissionDetails({ route }: any) {
 				? 'Desaprobado'
 				: '–';
 
-	const isLate = useMemo(() => {
-		if (!submissionCreatedAtRaw || !endDateRaw) return false;
-		return moment(submissionCreatedAtRaw).isAfter(moment(endDateRaw));
-	}, [submissionCreatedAtRaw, endDateRaw]);
-
-	const lateByText = useMemo(() => {
-		if (!isLate || !submissionCreatedAtRaw || !endDateRaw) return null;
-
-		const ms = moment(submissionCreatedAtRaw).diff(moment(endDateRaw));
-		const minutes = Math.floor(ms / (1000 * 60));
-		const days = Math.floor(minutes / (60 * 24));
-		const hours = Math.floor((minutes % (60 * 24)) / 60);
-		const mins = minutes % 60;
-
-		if (days > 0) {
-			return `${days} dia${days > 1 ? 's' : ''} ${hours} hora${hours !== 1 ? 's' : ''}`;
-		}
-
-		return `${hours} hora${hours !== 1 ? 's' : ''} ${mins} minuto${mins !== 1 ? 's' : ''}`;
-	}, [isLate, submissionCreatedAtRaw, endDateRaw]);
+	const lateInfo = useMemo(() => getLateSubmissionInfo(submissionCreatedAtRaw, endDateRaw), [submissionCreatedAtRaw, endDateRaw]);
+	const isLate = lateInfo.isLate;
+	const lateByText = lateInfo.lateByText;
 
 	const onCirclePress = () => {
 		setEditing(true);

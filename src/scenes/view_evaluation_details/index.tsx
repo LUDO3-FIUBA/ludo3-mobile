@@ -7,7 +7,7 @@ import { MaterialIcon } from '../../components';
 import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 import { useNavigation } from '@react-navigation/native';
-import ScanQR from '../home/subsections/HomeOptions/ScanQR';
+import { getLateSubmissionInfo } from '../../utils/lateSubmission';
 
 
 enum EvaluationStatus {
@@ -23,6 +23,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const [evaluationSubmission, setEvaluationSubmission] = useState<EvaluationSubmission | undefined>(undefined)
   const [evaluationStatus, setEvaluationStatus] = useState(EvaluationStatus.UNKNOWN)
   const detailedEvaluation = evaluationSubmission?.evaluation || evaluation;
+  const subjectName = (evaluation as any).semester?.commission?.subject_name || '–';
   const endDate = formatDate(detailedEvaluation.end_date);
   const startDate = formatDate(detailedEvaluation.start_date);
   const graderName = getGraderName(evaluationSubmission?.grader);
@@ -33,6 +34,9 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const normalizedSubmissionStatus = (evaluationSubmission?.submission_status || '').toUpperCase();
   const isApprovedSubmission = normalizedSubmissionStatus === 'APROBADO';
   const isFailedSubmission = normalizedSubmissionStatus === 'DESAPROBADO';
+  const lateInfo = getLateSubmissionInfo(evaluationSubmission?.created_at, detailedEvaluation.end_date);
+  const isLate = lateInfo.isLate;
+  const lateByText = lateInfo.lateByText;
   
   const failedExam = isNumericEvaluation
     ? evaluationSubmission?.grade !== null && evaluationSubmission?.grade !== undefined && grade < (detailedEvaluation.passing_grade || 0)
@@ -88,7 +92,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>{detailedEvaluation.evaluation_name}</Text>
-      <Text style={styles.header2}>{detailedEvaluation.semester?.commission?.subject_name}</Text>
+      <Text style={styles.header2}>{subjectName}</Text>
 
       <View style={styles.card}>
         <View style={styles.cardItem}>
@@ -114,10 +118,12 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           </View>
         </View>
         <View style={styles.cardItem}>
-          <MaterialIcon name="calendar-today" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
+          <MaterialIcon name="calendar-today" fontSize={24} color={isLate ? '#E67E22' : lightModeColors.institutional} style={{ marginRight: 10 }} />
           <View>
-            <Text style={styles.passingGradeText}>{evaluationSubmission?.created_at ? createdAtDate : `–`}</Text>
+            <Text style={[styles.passingGradeText, isLate && styles.lateText]}>{evaluationSubmission?.created_at ? createdAtDate : `–`}</Text>
             <Text style={styles.passingGradeLabel}>Fecha de entrega</Text>
+            {isLate && <Text style={styles.lateWarning}>Entregado fuera de término</Text>}
+            {isLate && lateByText && <Text style={styles.lateByText}>Se entregó con {lateByText} de retraso</Text>}
           </View>
         </View>
       </View>
@@ -289,6 +295,20 @@ const styles = StyleSheet.create({
   progressTextSmall: {
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  lateText: {
+    color: '#E67E22',
+  },
+  lateWarning: {
+    color: '#E67E22',
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  lateByText: {
+    color: '#E67E22',
+    fontSize: 12,
+    marginTop: 2,
   },
 });
 

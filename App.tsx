@@ -103,7 +103,7 @@ const App = () => {
             <Stack.Screen
               name="ViewEvaluationDetails"
               component={ViewEvaluationDetailsScreen}
-              options={{ headerShown: true, title: "Evaluacion" }}
+              options={{ headerShown: true, title: "Evaluación" }}
             />
 
             <Stack.Screen

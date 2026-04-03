@@ -24,7 +24,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const route = useRoute();
   const semester: TeacherSemester = (route.params as EvaluationsRouteParams).semester;
   const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>([]);
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const [loading, setLoading] = useState(true);
 
@@ -88,6 +88,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
               onPress={() => {
                 navigation.navigate('SubmissionsList', {
                   evaluation: item,
+                  semester,
                 });
               }}
             >

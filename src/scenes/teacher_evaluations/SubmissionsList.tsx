@@ -4,6 +4,7 @@ import { Submission } from '../../models/Submission';
 import { teacherSubmissionsRepository } from '../../repositories';
 import { useNavigation } from '@react-navigation/native';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
+import { TeacherSemester } from '../../models/TeacherSemester';
 import { SubmissionsHeaderRight } from './SubmissionsHeaderRight';
 import { Loading } from '../../components';
 import { TeacherStudent } from '../../models/TeacherStudent';
@@ -22,6 +23,7 @@ interface Props {
 
 interface RouteParams {
   evaluation: TeacherEvaluation;
+  semester?: TeacherSemester;
 }
 
 
@@ -36,7 +38,13 @@ export default function SubmissionsList({ route }: Props) {
   const [selectedStudent, setSelectedStudent] = useState<TeacherStudent | null>(null);
   const [openStatusPickerStudentId, setOpenStatusPickerStudentId] = useState<number | null>(null);
 
-  const { evaluation } = route.params as RouteParams;
+  const { evaluation, semester: semesterFromParams } = route.params as RouteParams;
+  const subjectName =
+    semesterFromParams?.commission.subjectName ||
+    (semesterFromParams?.commission as any)?.subject_name ||
+    (evaluation as any).subjectName ||
+    (evaluation as any).subject_name ||
+    '–';
 
   const teachersTuples: TeacherTuple[] = useAppSelector(selectStaffTeachers);
   const userData = useAppSelector(selectUserData);
@@ -71,6 +79,7 @@ export default function SubmissionsList({ route }: Props) {
   }, [evaluation.id, isLoading]);
 
   const setNavOptions = useCallback(() => {
+
     navigation.setOptions({
       title: 'Entregas', // Set the screen title
       headerRight: () => (
@@ -183,7 +192,7 @@ export default function SubmissionsList({ route }: Props) {
                 </View>
                 <TouchableOpacity
                   style={styles.arrowButton}
-                  onPress={() => navigation.navigate('TeacherSubmissionDetails', { evaluation, submission })}
+                  onPress={() => navigation.navigate('TeacherSubmissionDetails', { evaluation, submission, subjectName })}
                 >
                   <MaterialIcon name="chevron-right" fontSize={28} color="#666" />
                 </TouchableOpacity>
