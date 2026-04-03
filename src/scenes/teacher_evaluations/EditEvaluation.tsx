@@ -11,11 +11,12 @@ import { TeacherEvaluation } from '../../models/TeacherEvaluation';
 type Params = { evaluation: TeacherEvaluation };
 
 export default function EditEvaluation() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const route = useRoute();
   const semester = useAppSelector(selectSemesterData)!;
   const { evaluation } = route.params as Params;
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const parentEvaluationId = evaluation.parentEvaluation ?? null;
   const initialParentEvaluation =
@@ -46,10 +47,44 @@ export default function EditEvaluation() {
     }
   };
 
+  const onDeleteEvaluation = async () => {
+    try {
+      setDeleting(true);
+      await teacherEvaluationsRepository.deleteEvaluation(evaluation.id);
+      navigation.navigate('EvaluationsList', {
+        semester,
+        evaluations: semester.evaluations,
+      });
+    } catch {
+      Alert.alert('Te fallamos', 'No pudimos eliminar esta evaluación. Volvé a intentar en unos minutos.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const confirmDelete = () => {
+    Alert.alert(
+      '¿Estás seguro de que querés eliminar la evaluación?',
+      'Esta decisión es irreversible.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: onDeleteEvaluation,
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
   return (
     <EvaluationForm
       titleButton="Guardar cambios"
-      submitting={saving}
+      submitting={saving || deleting}
       initialValues={{
         evaluationName: evaluation.evaluationName,
         minimumPassingGrade: String(evaluation.passingGrade),
@@ -65,6 +100,9 @@ export default function EditEvaluation() {
       }}
       onSubmit={onSubmit}
       semester={semester}
+      onDelete={confirmDelete}
+      deleting={deleting}
+      deleteButtonText="Eliminar evaluación"
     />
   );
 }

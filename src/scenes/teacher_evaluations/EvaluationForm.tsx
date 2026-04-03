@@ -30,6 +30,10 @@ type Props = {
   submitting: boolean;
   onSubmit: (values: EvaluationFormValues) => Promise<void>;
   semester: TeacherSemester;
+  extraBottomContent?: React.ReactNode;
+  onDelete?: () => void;
+  deleting?: boolean;
+  deleteButtonText?: string;
 };
 
 const combineDateAndTime = (date: Date, time: Date) =>
@@ -54,6 +58,10 @@ export default function EvaluationForm({
   submitting,
   onSubmit,
   semester,
+  extraBottomContent,
+  onDelete,
+  deleting = false,
+  deleteButtonText = 'Eliminar evaluación',
 }: Props) {
   const placeholderColor = '#808080';
   const pickerPlaceholderTextStyle = { color: placeholderColor };
@@ -484,6 +492,20 @@ export default function EvaluationForm({
         </View>
 
         <RoundedButton text={titleButton} style={style().button} enabled={enabled} onPress={submit} />
+        {onDelete && (
+          <RoundedButton
+            text={deleting ? 'Eliminando...' : deleteButtonText}
+            style={{
+              MainContainer: {
+                marginTop: 12,
+                backgroundColor: '#D32F2F',
+              },
+            }}
+            enabled={!submitting}
+            onPress={onDelete}
+          />
+        )}
+        {extraBottomContent}
         {submitting && <Loading />}
       </View>
     </ScrollView>

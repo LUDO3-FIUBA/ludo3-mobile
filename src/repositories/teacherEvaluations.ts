@@ -2,7 +2,7 @@ import { CreatedEvaluation, CreatedEvaluationSnakeCase } from '../models/Created
 import { TeacherEvaluation } from '../models/TeacherEvaluation';
 import { TeacherSemester } from '../models/TeacherSemester';
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
-import { get, post, put } from './authenticatedRepository';
+import { deleteMethod, get, post, put } from './authenticatedRepository';
 import { fetchPresentSemesterFromCommissionId } from './teacherSemesters';
 
 const domainUrl = 'api/teacher/evaluations';
@@ -63,6 +63,14 @@ async function update(
   return convertSnakeToCamelCase(response) as CreatedEvaluation;
 }
 
+async function deleteEvaluation(evaluationId: number): Promise<void> {
+  const payload = {
+    evaluation_id: evaluationId,
+  };
+
+  await deleteMethod(`${domainUrl}/delete_evaluation`, payload);
+}
+
 export async function fetchPresentSemesterEvaluations(commissionId: number): Promise<TeacherEvaluation[]> {
   const presentSemester: TeacherSemester = await fetchPresentSemesterFromCommissionId(commissionId) as TeacherSemester;
   return presentSemester.evaluations
@@ -91,4 +99,12 @@ async function getEvaluationsBySemester(semesterId: number): Promise<TeacherEval
   return convertSnakeToCamelCase(response) as TeacherEvaluation[];
 }
 
-export default { create, update, addSubmissionToEvaluation, fetchPresentSemesterEvaluations, notifyStudents, getEvaluationsBySemester }
+export default {
+  create,
+  update,
+  deleteEvaluation,
+  addSubmissionToEvaluation,
+  fetchPresentSemesterEvaluations,
+  notifyStudents,
+  getEvaluationsBySemester,
+}
