@@ -161,8 +161,10 @@ export default function SubmissionDetails({ route }: any) {
 		}
 	};
 
+	const submissionAlreadyGraded = grade.trim() !== '' || Boolean(status);
+
 	const updateCorrectorToSubmission = () => {
-		if (grade.trim() !== '') {
+		if (submissionAlreadyGraded) {
 			Alert.alert('Error', 'No se puede cambiar el corrector de una entrega ya calificada.');
 			return;
 		}

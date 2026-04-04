@@ -56,9 +56,9 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
   }
 
   private async onScannedEvaluation(navigation: any, qrCode: QRCode) {
-    const parsedEvaluationId = Number(qrCode.parsedUuid);
+    const parsedEvaluationId = qrCode.parsedUuid?.trim();
 
-    if (!Number.isNaN(parsedEvaluationId)) {
+    if (parsedEvaluationId) {
       try {
         const evaluations = await makeRequest(
           () => evaluationsRepository.fetchMisExamenes(),
@@ -66,7 +66,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
         ) as Evaluation[];
 
         const scannedEvaluation = evaluations.find(
-          (evaluation) => evaluation.id === parsedEvaluationId,
+          (evaluation) => String(evaluation.id) === parsedEvaluationId,
         );
 
         if (scannedEvaluation) {
@@ -77,8 +77,8 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
         }
 
         showNonCancelablealert(
-          'Evaluacion no encontrada',
-          'No pudimos encontrar esta evaluacion para cargar la entrega. Intenta nuevamente en unos minutos.',
+          'Evaluación no encontrada',
+          'No pudimos encontrar esta evaluación para cargar la entrega. Intenta nuevamente en unos minutos.',
           () => navigation.popToTop(),
         );
         return;
@@ -86,7 +86,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
         console.log('Error al verificar requisitos del examen', error);
         showNonCancelablealert(
           'Error',
-          'No pudimos cargar la evaluacion escaneada. Intenta nuevamente en unos minutos.',
+          'No pudimos cargar la evaluación escaneada. Intenta nuevamente en unos minutos.',
           () => navigation.popToTop(),
         );
         return;
@@ -94,8 +94,8 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
     }
 
     showNonCancelablealert(
-      'QR invalido',
-      'El codigo QR de evaluacion no es valido.',
+      'QR inválido',
+      'El código QR de evaluación no es válido.',
       () => navigation.popToTop(),
     );
   }
