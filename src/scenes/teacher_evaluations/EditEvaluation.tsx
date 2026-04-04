@@ -69,7 +69,7 @@ export default function EditEvaluation() {
   const confirmDelete = () => {
     Alert.alert(
       '¿Estás seguro de que querés eliminar la evaluación?',
-      'Esta decisión es irreversible.',
+      'Sus recuperatorios asociados también se eliminarán. \nEsta decisión es irreversible.',
       [
         {
           text: 'Cancelar',
