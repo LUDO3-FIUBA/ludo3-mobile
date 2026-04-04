@@ -243,7 +243,7 @@ export default function EvaluationForm({
   };
 
   return (
-    <ScrollView style={style().containerView}>
+    <ScrollView style={style().containerView} nestedScrollEnabled>
       <View style={{ marginBottom: 100 }}>
         <View style={style().dateButtonInputs}>
           <Text style={{ ...style().text, color: 'black' }}>
@@ -292,7 +292,7 @@ export default function EvaluationForm({
               <Text style={{ ...style().text, color: 'grey' }}>Cargando evaluaciones...</Text>
             ) : (
               <DropDownPicker
-                listMode="SCROLLVIEW"
+                listMode="MODAL"
                 open={openEvaluationsDropdown}
                 value={selectedParentEvaluationId}
                 items={evaluationsItems}
