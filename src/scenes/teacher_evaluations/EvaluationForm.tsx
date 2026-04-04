@@ -100,6 +100,23 @@ export default function EvaluationForm({
   const [openEvaluationsDropdown, setOpenEvaluationsDropdown] = useState(false);
   const [loadingEvaluations, setLoadingEvaluations] = useState(false);
 
+  const handleMinimumPassingGradeChange = (text: string) => {
+    const onlyDigits = text.replace(/[^0-9]/g, '');
+
+    if (onlyDigits === '') {
+      setMinimumPassingGrade(null);
+      return;
+    }
+
+    const parsed = Number(onlyDigits);
+
+    if (Number.isNaN(parsed) || parsed > 10) {
+      return;
+    }
+
+    setMinimumPassingGrade(String(parsed));
+  };
+
   const onStartDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setShowStartDatePicker(false);
     if (event.type === 'set' && selectedDate) {
@@ -324,11 +341,12 @@ export default function EvaluationForm({
                 borderRadius: 5,
                 borderColor: 'grey',
               }}
-              onChangeText={setMinimumPassingGrade}
+              onChangeText={handleMinimumPassingGradeChange}
               value={minimumPassingGrade ?? ''}
               placeholder="Por ejemplo: 4"
               placeholderTextColor={placeholderColor}
               keyboardType="numeric"
+              maxLength={2}
             />
           </>
         )}
