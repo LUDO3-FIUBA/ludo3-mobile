@@ -38,7 +38,7 @@ export function EvaluationResultCard({
             progress={progress}
             formatText={() => String(circleText)}
             color={failed ? lightModeColors.failed : lightModeColors.passed}
-            unfilledColor={failed ? lightModeColors.failed_background : lightModeColors.passed_background}
+            unfilledColor={failed ? lightModeColors.failedBackground : lightModeColors.passedBackground}
             strokeCap="round"
             size={135}
             thickness={12}

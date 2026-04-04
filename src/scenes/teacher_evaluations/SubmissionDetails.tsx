@@ -136,19 +136,22 @@ export default function SubmissionDetails({ route }: any) {
 					Alert.alert('Error', 'La nota debe estar entre 0 y 10.');
 					return;
 				}
-				await teacherSubmissionsRepository.gradeSubmission(submission.student.id, evaluation.id, numericGrade);
+				const gradeChange = await teacherSubmissionsRepository.gradeSubmission(submission.student.id, evaluation.id, numericGrade);
+				setCurrentGrader(gradeChange.grader);
+				setCurrentUpdatedAt(gradeChange.updatedAt);
 			} else {
 				if (!status) {
 					Alert.alert('Error', 'Seleccioná un estado.');
 					return;
 				}
-				await teacherSubmissionsRepository.setSubmissionStatus(
+				const gradeChange = await teacherSubmissionsRepository.setSubmissionStatus(
 					submission.student.id,
 					evaluation.id,
 					status === 'aprobado' ? 'APROBADO' : 'DESAPROBADO',
 				);
+				setCurrentGrader(gradeChange.grader);
+				setCurrentUpdatedAt(gradeChange.updatedAt);
 			}
-			setCurrentUpdatedAt(moment().toISOString());
 			setEditing(false);
 		} catch (error) {
 			Alert.alert('Error', 'No pudimos guardar los cambios. Intenta nuevamente.');

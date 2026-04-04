@@ -9,8 +9,8 @@ const facultyColors = {
   black: '#000000',
   passed: '#0088cc',
   failed: '#cf0000',
-  passed_background: 'lightblue',
-  failed_background: '#ffb3b3',
+  passedBackground: 'lightblue',
+  failedBackground: '#ffb3b3',
 };
 
 const sharedColors = {

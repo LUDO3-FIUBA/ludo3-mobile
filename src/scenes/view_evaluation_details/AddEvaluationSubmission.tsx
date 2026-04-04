@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { RoundedButton } from '../../components';
-import { Evaluation, EvaluationSubmission } from '../../models';
+import { Evaluation } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 import { makeRequest } from '../authenticatedComponent';
 import VerifyIdentityForEvaluationConfiguration from '../home/subsections/evaluation_identity_configuration';
@@ -32,13 +32,13 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
     setSubmitting(true);
 
     try {
-      const submission = await makeRequest(
+      await makeRequest(
         () => evaluationsRepository.submitEvaluation(`${evaluation.id}`, submissionText),
         navigation,
-      ) as EvaluationSubmission;
+      );
 
       Alert.alert(
-        'Exito',
+        'Éxito',
         `Entrega realizada con éxito.`,
         [
           {

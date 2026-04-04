@@ -30,7 +30,7 @@ export function getLateSubmissionInfo(submissionDate: string | Date | null | und
 	if (days > 0) {
 		return {
 			isLate: true,
-			lateByText: `${days} dia${days > 1 ? 's' : ''} ${hours} hora${hours !== 1 ? 's' : ''} ${mins} minuto${mins !== 1 ? 's' : ''}`,
+			lateByText: `${days} día${days > 1 ? 's' : ''} ${hours} hora${hours !== 1 ? 's' : ''} ${mins} minuto${mins !== 1 ? 's' : ''}`,
 		};
 	}
 

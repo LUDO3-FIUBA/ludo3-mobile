@@ -36,7 +36,6 @@ export default function SubmissionsList({ route }: Props) {
   const [semesterTeachers, setSemesterTeachers] = useState<TeacherModel[]>([]);
   const [showTeacherSelectionModal, setShowTeacherSelectionModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<TeacherStudent | null>(null);
-  const [openStatusPickerStudentId, setOpenStatusPickerStudentId] = useState<number | null>(null);
 
   const { evaluation, semester: semesterFromParams } = route.params as RouteParams;
   const subjectName =
