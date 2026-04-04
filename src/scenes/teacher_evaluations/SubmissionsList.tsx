@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, ToastAndroid } from 'react-native';
+import { View, Text, Alert, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { Submission } from '../../models/Submission';
-import { teacherSubmissionsRepository } from '../../repositories';
+import { teacherEvaluationsRepository, teacherSubmissionsRepository } from '../../repositories';
 import { useNavigation } from '@react-navigation/native';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
 import { TeacherSemester } from '../../models/TeacherSemester';
@@ -52,10 +52,25 @@ export default function SubmissionsList({ route }: Props) {
   const isGradeable = (evaluation as any).isGradeable ?? true;
 
   const fetchData = useCallback(async () => {
-    if (isLoading) return;
     setIsLoading(true);
 
     try {
+      const semesterForValidation = semester || semesterFromParams;
+      if (semesterForValidation?.commission?.id) {
+        const currentEvaluations = await teacherEvaluationsRepository.fetchPresentSemesterEvaluations(
+          semesterForValidation.commission.id,
+        );
+        const evaluationExists = currentEvaluations.some((currentEvaluation) => currentEvaluation.id === evaluation.id);
+
+        if (!evaluationExists) {
+          navigation.replace('EvaluationsList', {
+            semester: semesterForValidation,
+            evaluations: currentEvaluations,
+          });
+          return;
+        }
+      }
+
       let submissions: Submission[] = await teacherSubmissionsRepository.getSubmissions(evaluation.id);
       submissions = submissions.sort((a, b) => a.student.lastName.localeCompare(b.student.lastName));
 
@@ -75,22 +90,7 @@ export default function SubmissionsList({ route }: Props) {
     } finally {
       setIsLoading(false);
     }
-  }, [evaluation.id, isLoading]);
-
-  const setNavOptions = useCallback(() => {
-
-    navigation.setOptions({
-      title: 'Entregas', // Set the screen title
-      headerRight: () => (
-        <SubmissionsHeaderRight
-          evaluation={evaluation}
-          fetchData={fetchData}
-          submissions={submissions}
-          isActualUserChiefTeacher={isActualUserChiefTeacher}
-        />
-      ),
-    });
-  }, [navigation, evaluation, fetchData, submissions, isActualUserChiefTeacher]);
+  }, [evaluation.id, navigation, semester, semesterFromParams, teachersTuples]);
 
   const updateCorrectorToSubmission = (submission: Submission) => {
     if (submission.grade) {
@@ -122,12 +122,22 @@ export default function SubmissionsList({ route }: Props) {
     const focusUnsubscribe = navigation.addListener('focus', () => {
       fetchData();
     });
-    return focusUnsubscribe;
+    return () => focusUnsubscribe();
   }, [navigation, fetchData]);
 
   useEffect(() => {
-    setNavOptions();
-  }, [setNavOptions]);
+    navigation.setOptions({
+      title: 'Entregas',
+      headerRight: () => (
+        <SubmissionsHeaderRight
+          evaluation={evaluation}
+          fetchData={fetchData}
+          submissions={submissions}
+          isActualUserChiefTeacher={isActualUserChiefTeacher}
+        />
+      ),
+    });
+  }, [navigation, evaluation, fetchData, submissions, isActualUserChiefTeacher]);
 
   const renderHeader = () => (
     <View style={styles.header}>

@@ -51,10 +51,14 @@ export default function EditEvaluation() {
     try {
       setDeleting(true);
       await teacherEvaluationsRepository.deleteEvaluation(evaluation.id);
-      navigation.navigate('EvaluationsList', {
-        semester,
-        evaluations: semester.evaluations,
-      });
+      if (navigation.canGoBack()) {
+        navigation.pop(2);
+      } else {
+        navigation.replace('EvaluationsList', {
+          semester,
+          evaluations: semester.evaluations,
+        });
+      }
     } catch {
       Alert.alert('Te fallamos', 'No pudimos eliminar esta evaluación. Volvé a intentar en unos minutos.');
     } finally {
