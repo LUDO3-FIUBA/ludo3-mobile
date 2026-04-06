@@ -7,6 +7,8 @@ import { useNavigation } from "@react-navigation/native";
 import { CalendarEvent } from "./index";
 
 
+const INSTITUTIONAL_COLOR = '#0077b6';
+
 interface IProps {
     item: CalendarEvent;
     evalColor: string;
@@ -26,11 +28,12 @@ const AgendaItem = (props: IProps) => {
             navigation.navigate('ViewFinalDetails', {
                 finalExam: { ...item.data, date: d instanceof Date ? d.toISOString() : d },
             });
-        } else {
+        } else if (item.type === 'class') {
             navigation.navigate('ViewClassDetails', {
                 classOccurrence: { ...item.data, date: item.data.date.toISOString() },
             });
         }
+        // institutional events are not navigable
     }, [item, navigation]);
 
     if (item.type === 'evaluation') {
@@ -62,6 +65,20 @@ const AgendaItem = (props: IProps) => {
                     <Icon style={[style().itemButton, { color: finalColor }]} name='school-outline' />
                 </View>
             </TouchableOpacity>
+        );
+    }
+
+    if (item.type === 'institutional') {
+        return (
+            <View style={[style().item, { borderLeftWidth: 4, borderLeftColor: INSTITUTIONAL_COLOR }]}>
+                <Icon name='calendar-star' size={18} color={INSTITUTIONAL_COLOR} style={{ marginTop: 2 }} />
+                <View style={{ flex: 1, paddingLeft: 10 }}>
+                    <Text style={style().itemTitleText}>{item.data.name}</Text>
+                    <Text style={style().itemFooterText}>
+                        {item.data.start_date} – {item.data.end_date}
+                    </Text>
+                </View>
+            </View>
         );
     }
 

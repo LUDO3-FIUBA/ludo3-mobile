@@ -3,10 +3,14 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { lightModeColors } from '../../styles/colorPalette';
 import { ViewMode } from './index';
 
+const INSTITUTIONAL_COLOR = '#0077b6';
+
 interface Props {
   mode: ViewMode;
   onChange: (m: ViewMode) => void;
   onTodayPress: () => void;
+  showInstitutional: boolean;
+  onToggleInstitutional: () => void;
 }
 
 const MODES: { key: ViewMode; label: string }[] = [
@@ -15,29 +19,42 @@ const MODES: { key: ViewMode; label: string }[] = [
   { key: 'day',   label: 'Día' },
 ];
 
-const ViewModeToggle = ({ mode, onChange, onTodayPress }: Props) => {
+const ViewModeToggle = ({ mode, onChange, onTodayPress, showInstitutional, onToggleInstitutional }: Props) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.pill}>
-        {MODES.map(({ key, label }) => {
-          const selected = mode === key;
-          return (
-            <TouchableOpacity
-              key={key}
-              style={[styles.segment, selected && styles.segmentSelected]}
-              onPress={() => onChange(key)}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.label, selected && styles.labelSelected]}>
-                {label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+    <View>
+      <View style={styles.container}>
+        <View style={styles.pill}>
+          {MODES.map(({ key, label }) => {
+            const selected = mode === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[styles.segment, selected && styles.segmentSelected]}
+                onPress={() => onChange(key)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.label, selected && styles.labelSelected]}>
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <TouchableOpacity onPress={onTodayPress} style={styles.todayBtn} activeOpacity={0.7}>
+          <Text style={styles.todayLabel}>Hoy</Text>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity onPress={onTodayPress} style={styles.todayBtn} activeOpacity={0.7}>
-        <Text style={styles.todayLabel}>Hoy</Text>
+      <TouchableOpacity
+        onPress={onToggleInstitutional}
+        style={[styles.institutionalToggle, showInstitutional && styles.institutionalToggleActive]}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.institutionalDot, showInstitutional && styles.institutionalDotActive]} />
+        <Text style={[styles.institutionalLabel, showInstitutional && styles.institutionalLabelActive]}>
+          Calendario FIUBA
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -96,5 +113,39 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: lightModeColors.institutional,
     fontWeight: '600',
+  },
+  institutionalToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    marginHorizontal: 16,
+    marginBottom: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    gap: 6,
+  },
+  institutionalToggleActive: {
+    borderColor: INSTITUTIONAL_COLOR,
+    backgroundColor: '#e8f4fd',
+  },
+  institutionalDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ccc',
+  },
+  institutionalDotActive: {
+    backgroundColor: INSTITUTIONAL_COLOR,
+  },
+  institutionalLabel: {
+    fontSize: 12,
+    color: '#aaa',
+    fontWeight: '500',
+  },
+  institutionalLabelActive: {
+    color: INSTITUTIONAL_COLOR,
   },
 });

@@ -3,10 +3,11 @@ import { ListRenderItem, View } from 'react-native';
 import { DateData, MarkedDates } from 'react-native-calendars/src/types';
 import { CommissionInscription, Evaluation, FinalExam } from '../../models';
 import { SemesterSchedule } from '../../models/Semester';
+import AcademicCalendarEvent from '../../models/AcademicCalendarEvent';
 import { calendar as style } from '../../styles';
 import { lightModeColors } from '../../styles/colorPalette';
 import AgendaItem from './AgendaItem';
-import { commissionInscriptionsRepository, evaluationsRepository, finalExamsRepository } from '../../repositories';
+import { academicCalendarRepository, commissionInscriptionsRepository, evaluationsRepository, finalExamsRepository } from '../../repositories';
 import ViewModeToggle from './ViewModeToggle';
 import MonthView from './MonthView';
 import WeekView from './WeekView';
@@ -26,7 +27,8 @@ export type ClassOccurrence = {
 export type CalendarEvent =
   | { type: 'evaluation'; data: Evaluation }
   | { type: 'final'; data: FinalExam }
-  | { type: 'class'; data: ClassOccurrence };
+  | { type: 'class'; data: ClassOccurrence }
+  | { type: 'institutional'; data: AcademicCalendarEvent };
 
 export interface AgendaSection {
   title: string;
@@ -35,22 +37,26 @@ export interface AgendaSection {
 
 export type ViewMode = 'month' | 'week' | 'day';
 
-const EVAL_COLOR  = lightModeColors.careers;  // naranja
-const FINAL_COLOR = '#e53935';                // rojo
-const CLASS_COLOR = '#6640ff';                // violeta
+const EVAL_COLOR        = lightModeColors.careers;  // naranja
+const FINAL_COLOR       = '#e53935';                // rojo
+const CLASS_COLOR       = '#6640ff';                // violeta
+const INSTITUTIONAL_COLOR = '#0077b6';              // azul FIUBA
 
-const EVAL_DOT  = { key: 'evaluation', color: EVAL_COLOR,  selectedDotColor: 'white' };
-const FINAL_DOT = { key: 'final',      color: FINAL_COLOR, selectedDotColor: 'white' };
-const CLASS_DOT = { key: 'class',      color: CLASS_COLOR, selectedDotColor: 'white' };
+const EVAL_DOT          = { key: 'evaluation',   color: EVAL_COLOR,          selectedDotColor: 'white' };
+const FINAL_DOT         = { key: 'final',        color: FINAL_COLOR,         selectedDotColor: 'white' };
+const CLASS_DOT         = { key: 'class',        color: CLASS_COLOR,         selectedDotColor: 'white' };
+const INSTITUTIONAL_DOT = { key: 'institutional', color: INSTITUTIONAL_COLOR, selectedDotColor: 'white' };
 
 const CalendarScreen = () => {
   const navigation = useNavigation<any>();
 
-  const [evaluations, setEvaluations]   = useState<Evaluation[]>([]);
-  const [finals, setFinals]             = useState<FinalExam[]>([]);
-  const [inscriptions, setInscriptions] = useState<CommissionInscription[]>([]);
-  const [viewMode, setViewMode]         = useState<ViewMode>('month');
-  const [selectedDate, setSelectedDate] = useState<string>(
+  const [evaluations, setEvaluations]           = useState<Evaluation[]>([]);
+  const [finals, setFinals]                     = useState<FinalExam[]>([]);
+  const [inscriptions, setInscriptions]         = useState<CommissionInscription[]>([]);
+  const [institutionalEvents, setInstitutional] = useState<AcademicCalendarEvent[]>([]);
+  const [showInstitutional, setShowInstitutional] = useState(true);
+  const [viewMode, setViewMode]                 = useState<ViewMode>('month');
+  const [selectedDate, setSelectedDate]         = useState<string>(
     new Date().toISOString().split('T')[0],
   );
 
@@ -58,15 +64,16 @@ const CalendarScreen = () => {
     evaluationsRepository.fetchMisExamenes().then(setEvaluations).catch(() => {});
     finalExamsRepository.fetchPending().then(setFinals).catch(() => {});
     commissionInscriptionsRepository.fetchCurrentInscriptions().then(setInscriptions).catch(() => {});
+    academicCalendarRepository.fetchEvents(new Date().getFullYear()).then(setInstitutional).catch(() => {});
   }, []);
 
   const calendarItems: AgendaSection[] = useMemo(
-    () => getAgendaItems(evaluations, finals, inscriptions),
-    [evaluations, finals, inscriptions],
+    () => getAgendaItems(evaluations, finals, inscriptions, showInstitutional ? institutionalEvents : []),
+    [evaluations, finals, inscriptions, institutionalEvents, showInstitutional],
   );
 
   const marks: MarkedDates = useMemo(() => {
-    const base = getMarkedDates(calendarItems);
+    const base = getMarkedDates(calendarItems, showInstitutional ? institutionalEvents : []);
     return {
       ...base,
       [selectedDate]: {
@@ -75,7 +82,7 @@ const CalendarScreen = () => {
         selectedColor: lightModeColors.institutional,
       },
     };
-  }, [calendarItems, selectedDate]);
+  }, [calendarItems, institutionalEvents, showInstitutional, selectedDate]);
 
   const onDayPress = useCallback((day: DateData) => {
     setSelectedDate(day.dateString);
@@ -117,6 +124,8 @@ const CalendarScreen = () => {
         mode={viewMode}
         onChange={setViewMode}
         onTodayPress={() => setSelectedDate(new Date().toISOString().split('T')[0])}
+        showInstitutional={showInstitutional}
+        onToggleInstitutional={() => setShowInstitutional(v => !v)}
       />
       <ExportToGoogleButton evaluations={evaluations} finals={finals} inscriptions={inscriptions} />
 
@@ -164,6 +173,7 @@ export function getEventDate(event: CalendarEvent): string {
     const d = event.data.date;
     return (typeof d === 'string' ? d : (d as Date).toISOString()).split('T')[0];
   }
+  if (event.type === 'institutional') return event.data.start_date;
   return event.data.date.toISOString().split('T')[0];
 }
 
@@ -206,6 +216,7 @@ function getAgendaItems(
   evaluations: Evaluation[],
   finals: FinalExam[],
   inscriptions: CommissionInscription[],
+  institutionalEvents: AcademicCalendarEvent[],
 ): AgendaSection[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -220,6 +231,7 @@ function getAgendaItems(
       .filter(f => new Date(f.date) >= today)
       .map<CalendarEvent>(data => ({ type: 'final', data })),
     ...classOccurrences.map<CalendarEvent>(data => ({ type: 'class', data })),
+    ...institutionalEvents.map<CalendarEvent>(data => ({ type: 'institutional', data })),
   ];
 
   events.sort((a, b) => {
@@ -240,8 +252,9 @@ function getAgendaItems(
   }, []);
 }
 
-function getMarkedDates(sections: AgendaSection[]): MarkedDates {
+function getMarkedDates(sections: AgendaSection[], institutionalEvents: AcademicCalendarEvent[]): MarkedDates {
   const marked: MarkedDates = {};
+
   sections.forEach(s => {
     const hasEval  = s.data.some(e => e.type === 'evaluation');
     const hasFinal = s.data.some(e => e.type === 'final');
@@ -253,5 +266,21 @@ function getMarkedDates(sections: AgendaSection[]): MarkedDates {
     ];
     marked[s.title] = { dots };
   });
+
+  // Mark every day in each institutional event's range
+  institutionalEvents.forEach(ev => {
+    const current = new Date(ev.start_date);
+    const end = new Date(ev.end_date);
+    while (current <= end) {
+      const dateStr = current.toISOString().split('T')[0];
+      const existing = marked[dateStr] ?? { dots: [] };
+      const dots = existing.dots as any[] ?? [];
+      if (!dots.some((d: any) => d.key === 'institutional')) {
+        marked[dateStr] = { ...existing, dots: [...dots, INSTITUTIONAL_DOT] };
+      }
+      current.setDate(current.getDate() + 1);
+    }
+  });
+
   return marked;
 }
