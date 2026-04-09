@@ -1,6 +1,6 @@
 // src/scenes/teacher_evaluations/EditEvaluation.tsx
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppSelector } from '../../redux/hooks';
 import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
@@ -17,6 +17,15 @@ export default function EditEvaluation() {
   const { evaluation } = route.params as Params;
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const showErrorAlert = (message: string) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.alert(message);
+      return;
+    }
+
+    Alert.alert('Te fallamos', message);
+  };
 
   const parentEvaluationId = evaluation.parentEvaluation ?? null;
   const initialParentEvaluation =
@@ -41,7 +50,7 @@ export default function EditEvaluation() {
       );
       navigation.goBack();
     } catch {
-      Alert.alert('Te fallamos', 'No pudimos editar esta evaluación. Volvé a intentar en unos minutos.');
+      showErrorAlert('No pudimos editar esta evaluación. Volvé a intentar en unos minutos.');
     } finally {
       setSaving(false);
     }
@@ -60,13 +69,25 @@ export default function EditEvaluation() {
         });
       }
     } catch {
-      Alert.alert('Te fallamos', 'No pudimos eliminar esta evaluación. Volvé a intentar en unos minutos.');
+      showErrorAlert('No pudimos eliminar esta evaluación. Volvé a intentar en unos minutos.');
     } finally {
       setDeleting(false);
     }
   };
 
   const confirmDelete = () => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const confirmed = window.confirm(
+        'Sus recuperatorios asociados también se eliminarán. Esta decisión es irreversible.',
+      );
+
+      if (confirmed) {
+        onDeleteEvaluation();
+      }
+
+      return;
+    }
+
     Alert.alert(
       '¿Estás seguro de que querés eliminar la evaluación?',
       'Sus recuperatorios asociados también se eliminarán. \nEsta decisión es irreversible.',

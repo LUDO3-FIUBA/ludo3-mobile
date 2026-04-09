@@ -1,6 +1,6 @@
 // src/scenes/teacher_evaluations/AddEvaluation.tsx
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppSelector } from '../../redux/hooks';
 import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
@@ -11,6 +11,15 @@ export default function AddEvaluation() {
   const navigation = useNavigation();
   const semester = useAppSelector(selectSemesterData)!;
   const [creating, setCreating] = useState(false);
+
+  const showErrorAlert = (message: string) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.alert(message);
+      return;
+    }
+
+    Alert.alert('Te fallamos', message);
+  };
 
   const onSubmit = async (values: EvaluationFormValues) => {
     try {
@@ -28,7 +37,7 @@ export default function AddEvaluation() {
       );
       navigation.goBack();
     } catch {
-      Alert.alert('Te fallamos', 'No pudimos crear esta evaluación. Volvé a intentar en unos minutos.');
+      showErrorAlert('No pudimos crear esta evaluación. Volvé a intentar en unos minutos.');
     } finally {
       setCreating(false);
     }

@@ -1,6 +1,6 @@
 // src/scenes/teacher_evaluations/EvaluationForm.tsx
 import React, { useEffect, useState } from 'react';
-import { Alert, Text, View, TouchableOpacity, TextInput, ScrollView, Switch } from 'react-native';
+import { Alert, Text, View, TouchableOpacity, TextInput, ScrollView, Switch, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { Loading, RoundedButton } from '../../components';
@@ -179,10 +179,7 @@ export default function EvaluationForm({
       }));
       setEvaluationsItems(items);
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'No pudimos cargar las evaluaciones. Volvé a intentar en unos minutos.',
-      );
+      showErrorAlert('No pudimos cargar las evaluaciones. Volvé a intentar en unos minutos.');
     } finally {
       setLoadingEvaluations(false);
     }
@@ -216,14 +213,20 @@ export default function EvaluationForm({
     (!isMakeUp || !!parentEvaluation) &&
     !submitting;
 
+  const showErrorAlert = (message: string) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.alert(message);
+      return;
+    }
+
+    Alert.alert('Error', message);
+  };
+
   const submit = async () => {
     if (!startDate || !startTime || !finishDate || !finishTime) return;
 
     if (!isFinishAfterStart(startDate, startTime, finishDate, finishTime)) {
-      Alert.alert(
-        'Error',
-        'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.',
-      );
+      showErrorAlert('La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.');
       return;
     }
 
