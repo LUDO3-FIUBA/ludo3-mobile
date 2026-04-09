@@ -20,12 +20,66 @@ import {
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
-import { Appearance } from 'react-native';
+import { Appearance, Platform } from 'react-native';
 import { useEffect } from 'react';
 import { configureGoogle } from './src/auth/google_signin';
 
 const Stack = createStackNavigator();
 
+const webLinking = {
+  prefixes: ['http://localhost:8081'],
+  config: {
+    screens: {
+      Splash: 'splash',
+      Landing: 'login',
+      GoogleRegister: 'registro/google',
+      PreRegister: 'registro',
+      PreRegisterPassword: 'registro/password',
+      PreRegisterDone: 'registro/completado',
+      TakePicture: 'registro/foto',
+      RootDrawer: {
+        path: 'app',
+        screens: {
+          Home: 'inicio',
+          Calendar: 'calendario',
+          CurrentCommissionInscriptions: 'materias-en-curso',
+          ApprovedSubjects: 'materias-aprobadas',
+          PendingSubjects: 'materias-pendientes',
+          ScanQR: 'escanear-qr',
+          VerifyIdentity: 'verificar-identidad',
+          StudentStats: 'estadisticas',
+          TeacherHome: 'mis-comisiones',
+          CreateSemester: 'crear-cuatrimestre',
+        },
+      },
+      ViewSemester: 'comision',
+      CorrelativeSubjects: 'correlativas',
+      ViewEvaluations: 'evaluaciones',
+      ViewEvaluationDetails: 'evaluacion',
+      Teachers: 'docentes',
+      Stats: 'estadisticas-alumno',
+      SemesterCard: 'cuatrimestre',
+      SemesterStudents: 'cuatrimestre/alumnos',
+      SemesterEditScreen: 'cuatrimestre/editar',
+      EvaluationsList: 'cuatrimestre/evaluaciones',
+      AddEvaluation: 'cuatrimestre/evaluaciones/agregar',
+      SubmissionsList: 'cuatrimestre/evaluaciones/entregas',
+      FinalsList: 'cuatrimestre/finales',
+      AddFinal: 'cuatrimestre/finales/agregar',
+      FinalExamSubmissions: 'cuatrimestre/finales/inscriptos',
+      FinalExamQR: 'cuatrimestre/finales/qr',
+      TeacherStaff: 'cuatrimestre/docentes',
+      TeachersConfiguration: 'cuatrimestre/docentes/configurar',
+      AddTeachersConfigurationList: 'cuatrimestre/docentes/agregar',
+      SemesterAttendances: 'cuatrimestre/asistencias',
+      AttendanceDetails: 'cuatrimestre/asistencias/detalle',
+      AddClassToSemester: 'cuatrimestre/asistencias/agregar-clase',
+      SemesterAttendanceQR: 'cuatrimestre/asistencias/qr',
+      EvaluationQR: 'cuatrimestre/evaluaciones/qr',
+      TeacherStats: 'cuatrimestre/estadisticas',
+    },
+  },
+};
 
 const App = () => {
   useEffect(() => {
@@ -35,7 +89,7 @@ const App = () => {
   return (
     <Provider store={store}>
       <ActionSheetProvider>
-        <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme}>
+        <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme} linking={Platform.OS === 'web' ? webLinking : undefined}>
           <Stack.Navigator
             initialRouteName="Splash"
             screenOptions={{ gestureEnabled: false }}
@@ -252,5 +306,6 @@ const App = () => {
 export default App;
 
 function isDarkTheme() {
+  if (Platform.OS === 'web') return false;
   return Appearance.getColorScheme() === 'dark';
 }

@@ -60,7 +60,7 @@ const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={style().view}>
-      {filter && (
+      {filter && filter.type !== FiltersEnum.None && (
         <FilterDescriptor
           filter={filter}
           onClose={() => dispatch(setFilterToNone())}
