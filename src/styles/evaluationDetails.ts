@@ -177,10 +177,16 @@ export const evaluationDetailsScreenStyles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 12,
   },
+  disabledButton: {
+    backgroundColor: '#b8b8b8',
+  },
   submitButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  disabledButtonText: {
+    color: '#f2f2f2',
   },
   submitHintText: {
     fontSize: 13,

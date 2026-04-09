@@ -26,7 +26,7 @@ const ViewEvaluations: React.FC<ViewEvaluationsProps> = ({ route }) => {
       <EvaluationList
         key={`ViewEvaluations-${semester_id}`}
         fetch={fetchSemesterEvaluations}
-        emptyMessage={`Esta comision no parece tener evaluaciones proximas.`}
+        emptyMessage={`Esta comisión no parece tener evaluaciones próximas.`}
       />
     </SafeAreaView>
   );
