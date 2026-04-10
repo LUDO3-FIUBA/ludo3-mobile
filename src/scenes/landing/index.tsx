@@ -167,6 +167,12 @@ const Landing = ({ navigation }: Props) => {
           enabled={!loginInProgress && dni.trim().length > 0 && password.trim().length > 0}
           onPress={handleLogin}
         />
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ForgotPasswordRequest')}
+          disabled={loginInProgress}
+        >
+          <Text style={styles.forgotPasswordLink}>¿Olvidaste tu contraseña?</Text>
+        </TouchableOpacity>
 
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
@@ -319,6 +325,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     fontWeight: '500',
+  },
+  forgotPasswordLink: {
+    color: lightModeColors.institutional,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: -4,
+    marginBottom: 4,
+    textDecorationLine: 'underline',
   },
   preregisterText: {
     fontSize: 14,
