@@ -1,7 +1,6 @@
 import React, {useMemo, useState} from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TextInput,
@@ -34,6 +33,7 @@ export default function ForgotPasswordRequestScreen({navigation, route}: Props) 
   );
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const normalizedValue = identifierValue.trim();
   const localValidationMessage = getIdentifierValidationMessage(
@@ -41,7 +41,10 @@ export default function ForgotPasswordRequestScreen({navigation, route}: Props) 
     normalizedValue,
   );
   const canSubmit =
-    !submitting && normalizedValue.length > 0 && !localValidationMessage;
+    !submitting &&
+    !successMessage &&
+    normalizedValue.length > 0 &&
+    !localValidationMessage;
 
   async function handleSubmit() {
     if (!canSubmit) {
@@ -50,6 +53,7 @@ export default function ForgotPasswordRequestScreen({navigation, route}: Props) 
 
     setSubmitting(true);
     setErrorMessage('');
+    setSuccessMessage('');
 
     try {
       const payload =
@@ -59,21 +63,14 @@ export default function ForgotPasswordRequestScreen({navigation, route}: Props) 
 
       const response: any = await authenticationRepository.forgotPassword(payload);
 
-      Alert.alert(
-        'Código enviado',
-        response?.message || 'Revisá tu correo para continuar.',
-        [
-          {
-            text: 'Continuar',
-            onPress: () =>
-              navigation.navigate('ForgotPasswordConfirm', {
-                identifierType,
-                identifierValue: normalizedValue,
-                debugCode: response?.debug_code || '',
-              }),
-          },
-        ],
-      );
+      setSuccessMessage('Si los datos corresponden a una cuenta, enviamos un código al correo asociado.');
+      setTimeout(() => {
+        navigation.navigate('ForgotPasswordConfirm', {
+          identifierType,
+          identifierValue: normalizedValue,
+          debugCode: response?.debug_code || '',
+        });
+      }, 1400);
     } catch (error) {
       setErrorMessage(authenticationRepository.getErrorMessage(error));
     } finally {
@@ -89,8 +86,7 @@ export default function ForgotPasswordRequestScreen({navigation, route}: Props) 
       <View style={styles.card}>
         <Text style={styles.title}>Recuperar contraseña</Text>
         <Text style={styles.description}>
-          Elegí si querés recuperar tu cuenta con DNI o email. Si el usuario
-          existe, el backend enviará un código OTP por correo.
+          Elegí si querés recuperar tu cuenta con DNI o email.
         </Text>
 
         <View style={styles.tabs}>
@@ -151,6 +147,11 @@ export default function ForgotPasswordRequestScreen({navigation, route}: Props) 
           <Text style={styles.error}>{localValidationMessage}</Text>
         ) : null}
         {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+        {successMessage ? (
+          <View style={styles.successBanner}>
+            <Text style={styles.successBannerText}>{successMessage}</Text>
+          </View>
+        ) : null}
 
         <RoundedButton
           text={submitting ? 'Enviando...' : 'Solicitar código'}

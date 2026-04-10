@@ -1,7 +1,6 @@
 import React, {useMemo, useState} from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TextInput,
@@ -24,6 +23,7 @@ export default function ChangePasswordScreen({navigation}: Props) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const localValidationMessage = getPasswordValidationMessage(
     newPassword,
@@ -31,6 +31,7 @@ export default function ChangePasswordScreen({navigation}: Props) {
   );
   const canSubmit =
     !submitting &&
+    !successMessage &&
     oldPassword.trim().length > 0 &&
     newPassword.length >= MIN_PASSWORD_LENGTH &&
     confirmPassword.length > 0 &&
@@ -43,6 +44,7 @@ export default function ChangePasswordScreen({navigation}: Props) {
 
     setSubmitting(true);
     setErrorMessage('');
+    setSuccessMessage('');
 
     try {
       const response: any = await authenticationRepository.changePassword(
@@ -53,13 +55,11 @@ export default function ChangePasswordScreen({navigation}: Props) {
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setSuccessMessage(response?.message || 'Contraseña actualizada correctamente.');
 
-      Alert.alert('Éxito', response?.message || 'Contraseña actualizada correctamente', [
-        {
-          text: 'Aceptar',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1400);
     } catch (error) {
       setErrorMessage(
         authenticationRepository.getErrorMessage(error, [
@@ -129,6 +129,11 @@ export default function ChangePasswordScreen({navigation}: Props) {
           <Text style={styles.error}>{localValidationMessage}</Text>
         ) : null}
         {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+        {successMessage ? (
+          <View style={styles.successBanner}>
+            <Text style={styles.successBannerText}>{successMessage}</Text>
+          </View>
+        ) : null}
 
         <RoundedButton
           text={submitting ? 'Actualizando...' : 'Actualizar contraseña'}

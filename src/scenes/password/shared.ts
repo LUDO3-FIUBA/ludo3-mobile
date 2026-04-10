@@ -71,6 +71,21 @@ export function createPasswordScreenStyles() {
       fontSize: 14,
       marginBottom: 4,
     },
+    successBanner: {
+      backgroundColor: Appearance.getColorScheme() === 'dark' ? '#143d23' : '#e8f5e9',
+      borderColor: '#2e7d32',
+      borderRadius: 10,
+      borderWidth: 1,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      marginBottom: 4,
+    },
+    successBannerText: {
+      color: Appearance.getColorScheme() === 'dark' ? '#d7f7df' : '#1b5e20',
+      fontSize: 14,
+      fontWeight: '600',
+      lineHeight: 20,
+    },
     row: {
       flexDirection: 'row',
       alignItems: 'center',

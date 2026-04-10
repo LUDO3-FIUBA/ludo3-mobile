@@ -1,7 +1,6 @@
 import React, {useMemo, useState} from 'react';
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TextInput,
@@ -37,19 +36,19 @@ export default function ForgotPasswordConfirmScreen({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState(
-    route.params?.debugCode
-      ? 'Se precargó el código OTP devuelto por el backend para pruebas locales.'
-      : '',
-  );
+  const [successMessage, setSuccessMessage] = useState('');
+  const debugMessage = route.params?.debugCode
+    ? 'Se precargó el código OTP devuelto por el backend para pruebas locales.'
+    : '';
 
   const localValidationMessage = getPasswordValidationMessage(
     code,
     newPassword,
     confirmPassword,
   );
-  const canSubmit =
+  const canSubmitForm =
     !submitting &&
+    !successMessage &&
     identifierValue.trim().length > 0 &&
     code.trim().length === 6 &&
     newPassword.length >= MIN_PASSWORD_LENGTH &&
@@ -57,7 +56,7 @@ export default function ForgotPasswordConfirmScreen({
     !localValidationMessage;
 
   async function handleSubmit() {
-    if (!canSubmit) {
+    if (!canSubmitForm) {
       return;
     }
 
@@ -71,17 +70,13 @@ export default function ForgotPasswordConfirmScreen({
         new_password: newPassword,
       });
 
-      setSuccessMessage('');
-      Alert.alert('Éxito', response?.message || 'Contraseña restablecida correctamente', [
-        {
-          text: 'Aceptar',
-          onPress: () =>
-            navigation.reset({
-              index: 0,
-              routes: [{name: 'Landing'}],
-            }),
-        },
-      ]);
+      setSuccessMessage(response?.message || 'Contraseña restablecida correctamente.');
+      setTimeout(() => {
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Landing'}],
+        });
+      }, 1400);
     } catch (error) {
       setErrorMessage(
         authenticationRepository.getErrorMessage(error, [
@@ -153,7 +148,12 @@ export default function ForgotPasswordConfirmScreen({
           />
         </View>
 
-        {successMessage ? <Text style={styles.success}>{successMessage}</Text> : null}
+        {debugMessage ? <Text style={styles.success}>{debugMessage}</Text> : null}
+        {successMessage ? (
+          <View style={styles.successBanner}>
+            <Text style={styles.successBannerText}>{successMessage}</Text>
+          </View>
+        ) : null}
         {localValidationMessage ? (
           <Text style={styles.error}>{localValidationMessage}</Text>
         ) : null}
@@ -161,7 +161,7 @@ export default function ForgotPasswordConfirmScreen({
 
         <RoundedButton
           text={submitting ? 'Restableciendo...' : 'Restablecer contraseña'}
-          enabled={canSubmit}
+          enabled={canSubmitForm}
           onPress={handleSubmit}
         />
 
