@@ -1,7 +1,19 @@
-import {post, StatusCodeError} from '../networking';
+import {post as publicPost, StatusCodeError} from '../networking';
+import {post as authenticatedPost} from './authenticatedRepository';
 
 const authUrl = 'auth';
 const accountNotApprovedErrorCode = 'user_not_approved';
+const unknownErrorMessage = 'Ocurrió un error inesperado. Intenta nuevamente.';
+
+interface ForgotPasswordPayload {
+  dni?: string;
+  email?: string;
+}
+
+interface ResetPasswordConfirmPayload extends ForgotPasswordPayload {
+  code: string;
+  new_password: string;
+}
 
 export class NotAStudent extends Error {
   constructor() {
@@ -56,7 +68,7 @@ export function preregister(
   padron: string,
   password: string,
   image?: string,  // Comentado: imagen ahora es opcional (antes era requerida para captura facial)
-): Promise<Object> {
+): Promise<object> {
   const body: any = {
     dni,
     email,
@@ -68,7 +80,7 @@ export function preregister(
   // if (image) {
   //   body.image = image;
   // }
-  return post(`${authUrl}/users`, body).catch(error => {
+  return publicPost(`${authUrl}/users`, body).catch(error => {
     // Check for: No face detected error
     if (
       error instanceof StatusCodeError &&
@@ -85,14 +97,14 @@ export function preregister(
   });
 }
 
-export function refresh(token: string): Promise<Object> {
-  return post(`${authUrl}/jwt/refresh`, {refresh: token});
+export function refresh(token: string): Promise<object> {
+  return publicPost(`${authUrl}/jwt/refresh`, {refresh: token});
 }
 
-export function login(dni: string, password: string): Promise<Object> {
-  return post(`${authUrl}/login`, {dni, password}).catch(
+export function login(dni: string, password: string): Promise<object> {
+  return publicPost(`${authUrl}/login`, {dni, password}).catch(
     (error: StatusCodeError) => {
-      if (error instanceof StatusCodeError && error.code == 404) {
+      if (error instanceof StatusCodeError && error.code === 404) {
         return Promise.reject(new NotAStudent());
       } else if (
         error instanceof StatusCodeError &&
@@ -105,10 +117,10 @@ export function login(dni: string, password: string): Promise<Object> {
   );
 }
 
-export function googleSignIn(idToken: string): Promise<Object> {
-  return post(`${authUrl}/google`, {id_token: idToken}).catch(
+export function googleSignIn(idToken: string): Promise<object> {
+  return publicPost(`${authUrl}/google`, {id_token: idToken}).catch(
     (error: StatusCodeError) => {
-      if (error instanceof StatusCodeError && error.code == 409) {
+      if (error instanceof StatusCodeError && error.code === 409) {
         return Promise.reject(new NeedsRegistration(error.info));
       }
       return Promise.reject(error);
@@ -126,8 +138,8 @@ export function googleRegistration(
   lastName: string,
   isStudent: boolean = true,
   isTeacher: boolean = false,
-): Promise<Object> {
-  return post(`${authUrl}/google/registration`, {
+): Promise<object> {
+  return publicPost(`${authUrl}/google/registration`, {
     sub,
     email,
     dni,
@@ -145,10 +157,84 @@ export function googleRegistration(
   });
 }
 
+export function changePassword(oldPassword: string, newPassword: string): Promise<object> {
+  return authenticatedPost(`${authUrl}/password/change`, {
+    old_password: oldPassword,
+    new_password: newPassword,
+  });
+}
+
+export function forgotPassword(payload: ForgotPasswordPayload): Promise<object> {
+  return publicPost(`${authUrl}/password/forgot`, payload);
+}
+
+export function resetPasswordConfirm(
+  payload: ResetPasswordConfirmPayload,
+): Promise<object> {
+  return publicPost(`${authUrl}/password/reset/confirm`, payload);
+}
+
+function getFirstMessage(value: any): string | null {
+  if (!value) {
+    return null;
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value) && value.length > 0) {
+    const firstItem = value[0];
+    if (typeof firstItem === 'string') {
+      return firstItem;
+    }
+    if (firstItem?.message && typeof firstItem.message === 'string') {
+      return firstItem.message;
+    }
+  }
+  if (value.message && typeof value.message === 'string') {
+    return value.message;
+  }
+  return null;
+}
+
+export function getErrorMessage(
+  error: unknown,
+  fields: string[] = [],
+  fallbackMessage = unknownErrorMessage,
+): string {
+  if (error instanceof StatusCodeError) {
+    for (const field of fields) {
+      const fieldMessage = getFirstMessage(error.info?.[field]);
+      if (fieldMessage) {
+        return fieldMessage;
+      }
+    }
+
+    const genericMessage =
+      getFirstMessage(error.info?.message) ||
+      getFirstMessage(error.info?.detail) ||
+      getFirstMessage(error.info?.non_field_errors) ||
+      getFirstMessage(error.info);
+
+    if (genericMessage) {
+      return genericMessage;
+    }
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallbackMessage;
+}
+
 export default {
   preregister,
   login,
   refresh,
+  changePassword,
+  forgotPassword,
+  resetPasswordConfirm,
+  getErrorMessage,
   googleSignIn,
   googleRegistration,
   NotAStudent,
