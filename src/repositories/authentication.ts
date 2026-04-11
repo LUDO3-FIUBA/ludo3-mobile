@@ -62,6 +62,13 @@ export class InvalidEmailDomain extends Error {
   }
 }
 
+export class InvalidCredentials extends Error {
+  constructor() {
+    super('El DNI o la contraseña son incorrectos.');
+    this.name = 'InvalidCredentials';
+  }
+}
+
 export function preregister(
   dni: string,
   email: string,
@@ -106,6 +113,11 @@ export function login(dni: string, password: string): Promise<object> {
     (error: StatusCodeError) => {
       if (error instanceof StatusCodeError && error.code === 404) {
         return Promise.reject(new NotAStudent());
+      } else if (
+        error instanceof StatusCodeError &&
+        (error.info?.dni || error.info?.password)
+      ) {
+        return Promise.reject(new InvalidCredentials());
       } else if (
         error instanceof StatusCodeError &&
         error.isBecauseOf(accountNotApprovedErrorCode)
@@ -243,4 +255,5 @@ export default {
   InvalidDNI,
   NeedsRegistration,
   InvalidEmailDomain,
+  InvalidCredentials,
 };

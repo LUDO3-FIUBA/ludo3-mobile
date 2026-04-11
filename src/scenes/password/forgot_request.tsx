@@ -61,14 +61,13 @@ export default function ForgotPasswordRequestScreen({navigation, route}: Props) 
           ? {dni: normalizedValue}
           : {email: normalizedValue};
 
-      const response: any = await authenticationRepository.forgotPassword(payload);
+      await authenticationRepository.forgotPassword(payload);
 
       setSuccessMessage('Si los datos corresponden a una cuenta, enviamos un código al correo asociado.');
       setTimeout(() => {
         navigation.navigate('ForgotPasswordConfirm', {
           identifierType,
           identifierValue: normalizedValue,
-          debugCode: response?.debug_code || '',
         });
       }, 1400);
     } catch (error) {

@@ -121,7 +121,7 @@ export default function ChangePasswordScreen({navigation}: Props) {
             editable={!submitting}
             secureTextEntry
             autoCapitalize="none"
-            placeholder="Repetí la nueva contraseña"
+            placeholder="Confirmá la nueva contraseña"
           />
         </View>
 

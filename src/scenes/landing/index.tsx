@@ -46,6 +46,10 @@ const Landing = ({ navigation }: Props) => {
   };
 
   const handleCommonAuthErrors = (error: any) => {
+    if (error instanceof authenticationRepository.InvalidCredentials) {
+      showInvalidCredentialsError();
+      return true;
+    }
     if (error instanceof authenticationRepository.NotAStudent) {
       showRoleError();
       return true;
@@ -231,6 +235,13 @@ const showAccountNotApprovedError = () => {
   );
 };
 
+const showInvalidCredentialsError = () => {
+  Alert.alert(
+    'Error de inicio de sesión',
+    'El DNI o la contraseña son incorrectos. Revisá los datos e intentá nuevamente.'
+  );
+};
+
 const showRoleError = () => {
   Alert.alert(
     'Error',
@@ -331,7 +342,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
-    marginTop: -4,
+    marginTop: 8,
     marginBottom: 4,
     textDecorationLine: 'underline',
   },

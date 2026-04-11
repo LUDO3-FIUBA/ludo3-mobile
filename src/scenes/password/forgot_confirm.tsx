@@ -17,7 +17,6 @@ interface Props {
     params?: {
       identifierType?: 'dni' | 'email';
       identifierValue?: string;
-      debugCode?: string;
     };
   };
 }
@@ -31,15 +30,12 @@ export default function ForgotPasswordConfirmScreen({
   const styles = useMemo(() => createPasswordScreenStyles(), []);
   const identifierType = route.params?.identifierType || 'dni';
   const identifierValue = route.params?.identifierValue || '';
-  const [code, setCode] = useState(route.params?.debugCode || '');
+  const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const debugMessage = route.params?.debugCode
-    ? 'Se precargó el código OTP devuelto por el backend para pruebas locales.'
-    : '';
 
   const localValidationMessage = getPasswordValidationMessage(
     code,
@@ -144,11 +140,10 @@ export default function ForgotPasswordConfirmScreen({
             editable={!submitting}
             secureTextEntry
             autoCapitalize="none"
-            placeholder="Repetí la nueva contraseña"
+            placeholder="Confirmá la nueva contraseña"
           />
         </View>
 
-        {debugMessage ? <Text style={styles.success}>{debugMessage}</Text> : null}
         {successMessage ? (
           <View style={styles.successBanner}>
             <Text style={styles.successBannerText}>{successMessage}</Text>
