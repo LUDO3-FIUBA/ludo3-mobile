@@ -17,23 +17,33 @@ const sharedStyle = StyleSheet.create({
     justifyContent: 'space-between',
     marginVertical: 4,
     marginHorizontal: 10,
-    borderRadius: 12
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  content: {
+    width: '100%',
+    padding: 12,
   },
   name: {
     ...basic().text,
     fontSize: 20,
     color: 'white',
+    flexWrap: 'wrap',
+    flexShrink: 1,
   },
   subjectName: {
     ...basic().text,
     fontSize: 18,
-    color: 'lightgray'
+    color: 'lightgray',
+    marginTop: 2,
+    flexWrap: 'wrap',
+    flexShrink: 1,
   },
   date: {
     ...basic().text,
     fontSize: 15,
     paddingVertical: 5,
-    color: 'lightgray'
+    color: 'lightgray',
   },
   grade: {
     ...basic().text,
