@@ -12,6 +12,11 @@ import TeacherProfileScreen from "../teacher_profile";
 import DepartmentList from "../admin_departments/DepartmentList";
 import DepartmentDetail from "../admin_departments/DepartmentDetail";
 import DepartmentForm from "../admin_departments/DepartmentForm";
+import CommissionList from "../admin_commissions/CommissionList";
+import CommissionDetail from "../admin_commissions/CommissionDetail";
+import CommissionForm from "../admin_commissions/CommissionForm";
+import UserSearch from "../admin_users/UserSearch";
+import UserDetail from "../admin_users/UserDetail";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -221,7 +226,7 @@ const RootDrawer = () => {
           <Drawer.Screen
             name="AdminDepartmentDetail"
             component={DepartmentDetail}
-            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null }}
+            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
           />
         </>
       )}
@@ -268,7 +273,7 @@ const RootDrawer = () => {
           <Drawer.Screen
             name="AdminDepartmentDetail"
             component={DepartmentDetail}
-            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null }}
+            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
           />
         </>
       )}
@@ -289,19 +294,63 @@ const RootDrawer = () => {
           <Drawer.Screen
             name="AdminDepartmentCreate"
             component={DepartmentForm}
-            options={{ headerShown: true, title: 'Nuevo Departamento', drawerLabel: () => null }}
+            options={{ headerShown: true, title: 'Nuevo Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
           />
 
           <Drawer.Screen
             name="AdminDepartmentDetail"
             component={DepartmentDetail}
-            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null }}
+            options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
           />
 
           <Drawer.Screen
             name="AdminDepartmentEdit"
             component={DepartmentForm}
-            options={{ headerShown: true, title: 'Editar Departamento', drawerLabel: () => null }}
+            options={{ headerShown: true, title: 'Editar Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+          />
+
+          <Drawer.Screen
+            name="AdminCommissionList"
+            component={CommissionList}
+            options={{
+              headerShown: true,
+              title: 'Comisiones',
+              drawerIcon: makeDrawerIcon('account-group', 'account-group-outline')
+            }}
+          />
+
+          <Drawer.Screen
+            name="AdminCommissionCreate"
+            component={CommissionForm}
+            options={{ headerShown: true, title: 'Nueva Comisión', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+          />
+
+          <Drawer.Screen
+            name="AdminCommissionDetail"
+            component={CommissionDetail}
+            options={{ headerShown: true, title: 'Comisión', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+          />
+
+          <Drawer.Screen
+            name="AdminCommissionEdit"
+            component={CommissionForm}
+            options={{ headerShown: true, title: 'Editar Comisión', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+          />
+
+          <Drawer.Screen
+            name="AdminUserSearch"
+            component={UserSearch}
+            options={{
+              headerShown: true,
+              title: 'Buscar Usuarios',
+              drawerIcon: makeDrawerIcon('account-search', 'account-search-outline')
+            }}
+          />
+
+          <Drawer.Screen
+            name="AdminUserDetail"
+            component={UserDetail}
+            options={{ headerShown: true, title: 'Usuario', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
           />
         </>
       )}
