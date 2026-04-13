@@ -25,6 +25,9 @@ export { default as AddEvaluationSubmissionScreen } from './view_evaluation_deta
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
 export { default as GoogleRegisterScreen } from './google_register';
+export { default as ChangePasswordScreen } from './password/change';
+export { default as ForgotPasswordRequestScreen } from './password/forgot_request';
+export { default as ForgotPasswordConfirmScreen } from './password/forgot_confirm';
 
 // Teacher scenes
 export { default as TeacherHomeScreen } from './teacher_home';

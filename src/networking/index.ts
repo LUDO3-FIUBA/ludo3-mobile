@@ -122,6 +122,29 @@ export function put(url: string, body: any, queryParams = [], headers = {}) {
   }).then(res => validate(res));
 }
 
+export function patch(url: string, body: any, queryParams = [], headers = {}) {
+  const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
+  const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
+  if (logRequests) {
+    if (body) {
+      console.log(
+        `PATCH ${baseUrl}/${url}/${queryParamsString}\n${JSON.stringify(body)}`,
+      );
+    } else {
+      console.log(`PATCH ${baseUrl}/${url}/${queryParamsString}`);
+    }
+  }
+  return fetch(`${baseUrl}/${url}/${queryParamsString}`, {
+    method: 'PATCH',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...headers,
+    },
+    body: JSON.stringify(body),
+  }).then(res => validate(res));
+}
+
 export function deleteMethod(url: string, body: any, queryParams = [], headers = {}) {
   const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
   const queryParamsString = `?${queryParams.reduce(reducer, '')}`;

@@ -7,6 +7,9 @@ import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
   RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
+  ChangePasswordScreen,
+  ForgotPasswordRequestScreen,
+  ForgotPasswordConfirmScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
   TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
@@ -32,9 +35,12 @@ const webLinking = {
     screens: {
       Splash: 'splash',
       Landing: 'login',
+      ForgotPasswordRequest: 'password/forgot',
+      ForgotPasswordConfirm: 'password/forgot/confirm',
       GoogleRegister: 'registro/google',
       PreRegister: 'registro',
       PreRegisterPassword: 'registro/password',
+      ChangePassword: 'app/cambiar-password',
       PreRegisterDone: 'registro/completado',
       TakePicture: 'registro/foto',
       RootDrawer: {
@@ -113,6 +119,18 @@ const App = () => {
             />
 
             <Stack.Screen
+              name="ForgotPasswordRequest"
+              component={ForgotPasswordRequestScreen}
+              options={{ headerShown: true, title: 'Recuperar contraseña' }}
+            />
+
+            <Stack.Screen
+              name="ForgotPasswordConfirm"
+              component={ForgotPasswordConfirmScreen}
+              options={{ headerShown: true, title: 'Confirmar recuperación' }}
+            />
+
+            <Stack.Screen
               name="PreRegister"
               component={PreRegisterScreen}
               options={{ headerShown: true, title: 'Pre-registro' }}
@@ -188,6 +206,12 @@ const App = () => {
               name="GoogleRegister"
               component={GoogleRegisterScreen}
               options={{ headerShown: true, title: 'Completar registro' }}
+            />
+
+            <Stack.Screen
+              name="ChangePassword"
+              component={ChangePasswordScreen}
+              options={{ headerShown: true, title: 'Cambiar contraseña' }}
             />
 
             {/* Teacher Stack screens */}

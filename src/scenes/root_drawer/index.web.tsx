@@ -17,8 +17,7 @@ import CreateSemester from "../teacher_semester/CreateSemester";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { lightModeColors, darkModeColors } from "../../styles/colorPalette";
-import { Appearance, TouchableOpacity, View, Text, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import FilterNavBarButton from "../home/filterNavBarButton";
 import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
@@ -41,7 +40,6 @@ const CustomDrawerContent = (
 ) => {
   const { user, roleView, onSwitchRole, ...drawerProps } = props;
   const hasBothRoles = user?.isStudent() && user?.isTeacher();
-  const colors = isDarkTheme() ? darkModeColors : lightModeColors;
 
   return (
     <DrawerContentScrollView {...drawerProps}>
@@ -77,6 +75,13 @@ const CustomDrawerContent = (
         </View>
       )}
       <DrawerItemList {...drawerProps} />
+      <DrawerItem
+        label="Cambiar contraseña"
+        labelStyle={{ color: lightModeColors.darkGray, fontSize: 14, fontWeight: "500", marginLeft: 4 }}
+        style={{ borderRadius: 8, marginHorizontal: 8, marginVertical: 2 }}
+        onPress={() => drawerProps.navigation.navigate('ChangePassword')}
+        icon={makeDrawerIcon("lock-reset", "lock-reset")}
+      />
       <DrawerItem
         label="Cerrar Sesión"
         labelStyle={{ color: lightModeColors.darkGray, fontSize: 14, fontWeight: "500", marginLeft: 4 }}

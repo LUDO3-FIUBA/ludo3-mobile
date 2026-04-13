@@ -35,7 +35,7 @@ const Landing = ({ navigation }: Props) => {
     await sessionManager.saveCredentials(authResponse);
     const user = await usersRepository.getInfo();
 
-    if (!user.isStudent() && !user.isTeacher()) {
+    if (!user.isStudent() && !user.isTeacher() && !user.isAdmin()) {
       throw new authenticationRepository.NotAStudent();
     }
 
@@ -46,6 +46,10 @@ const Landing = ({ navigation }: Props) => {
   };
 
   const handleCommonAuthErrors = (error: any) => {
+    if (error instanceof authenticationRepository.InvalidCredentials) {
+      showInvalidCredentialsError();
+      return true;
+    }
     if (error instanceof authenticationRepository.NotAStudent) {
       showRoleError();
       return true;
@@ -167,6 +171,12 @@ const Landing = ({ navigation }: Props) => {
           enabled={!loginInProgress && dni.trim().length > 0 && password.trim().length > 0}
           onPress={handleLogin}
         />
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ForgotPasswordRequest')}
+          disabled={loginInProgress}
+        >
+          <Text style={styles.forgotPasswordLink}>¿Olvidaste tu contraseña?</Text>
+        </TouchableOpacity>
 
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
@@ -222,6 +232,13 @@ const showAccountNotApprovedError = () => {
     'Error',
     'Tu cuenta no ha sido aprobada aún. Probablemente Admisión esté ' +
     'verificando la imagen subida.'
+  );
+};
+
+const showInvalidCredentialsError = () => {
+  Alert.alert(
+    'Error de inicio de sesión',
+    'El DNI o la contraseña son incorrectos. Revisá los datos e intentá nuevamente.'
   );
 };
 
@@ -319,6 +336,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     fontWeight: '500',
+  },
+  forgotPasswordLink: {
+    color: lightModeColors.institutional,
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 4,
+    textDecorationLine: 'underline',
   },
   preregisterText: {
     fontSize: 14,
