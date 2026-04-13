@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DrawerContentComponentProps, DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator } from "@react-navigation/drawer";
 import HomeScreen from "../home";
 import CalendarScreen from "../calendar";
@@ -12,9 +12,17 @@ import TeacherProfileScreen from "../teacher_profile";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
-import { Appearance, TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import {
+  Appearance,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import FilterNavBarButton from "../home/filterNavBarButton";
 import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
@@ -22,6 +30,7 @@ import { usersRepository } from "../../repositories";
 import User from "../../models/User";
 import { useAppDispatch } from "../../redux/hooks";
 import { fetchUserDataAsync } from "../../redux/reducers/teacherUserDataSlice";
+import notificationsRepository, { UserNotification } from "../../repositories/notifications";
 
 const Drawer = createDrawerNavigator()
 
@@ -82,10 +91,65 @@ const DrawerMenuButton = ({ color }: { color: string }) => {
 
 const RootDrawer = () => {
   const colors = isDarkTheme() ? darkModeColors : lightModeColors;
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const dispatch = useAppDispatch();
   const [user, setUser] = useState<User | null>(null);
   const [roleView, setRoleView] = useState<RoleView | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<UserNotification[]>([]);
+  const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastNotification, setToastNotification] = useState<UserNotification | null>(null);
+  const hasLoadedNotificationsRef = useRef(false);
+  const knownNotificationIdsRef = useRef<Set<number>>(new Set());
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const unreadCount = useMemo(
+    () => notifications.filter((notification) => !notification.is_read).length,
+    [notifications],
+  );
+
+  const dropdownWidth = Math.min(Math.max(screenWidth - 24, 260), 360);
+  const dropdownMaxHeight = Math.min(screenHeight * 0.65, 460);
+
+  const loadNotifications = useCallback(async () => {
+    try {
+      const data = await notificationsRepository.fetchMyNotifications();
+      const sorted = [...data].sort(
+        (left, right) =>
+          new Date(right.notification.created_at).getTime() -
+          new Date(left.notification.created_at).getTime(),
+      );
+
+      if (!hasLoadedNotificationsRef.current) {
+        knownNotificationIdsRef.current = new Set(sorted.map((item) => item.id));
+        hasLoadedNotificationsRef.current = true;
+      } else {
+        const incomingUnread = sorted.find(
+          (item) => !knownNotificationIdsRef.current.has(item.id) && !item.is_read,
+        );
+
+        knownNotificationIdsRef.current = new Set(sorted.map((item) => item.id));
+
+        if (incomingUnread && !showNotificationsDropdown) {
+          setToastNotification(incomingUnread);
+          setShowToast(true);
+
+          if (toastTimerRef.current) {
+            clearTimeout(toastTimerRef.current);
+          }
+
+          toastTimerRef.current = setTimeout(() => {
+            setShowToast(false);
+          }, 4200);
+        }
+      }
+
+      setNotifications(sorted);
+    } catch (error) {
+      console.log("RootDrawer: Failed to fetch notifications", error);
+    }
+  }, [showNotificationsDropdown]);
 
   useEffect(() => {
     async function fetchUser() {
@@ -105,6 +169,18 @@ const RootDrawer = () => {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    loadNotifications();
+    const intervalId = setInterval(loadNotifications, 10000);
+
+    return () => {
+      clearInterval(intervalId);
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
+  }, [loadNotifications]);
+
   if (loading || roleView === null) {
     return <Loading />;
   }
@@ -112,129 +188,264 @@ const RootDrawer = () => {
   const showStudentScreens = roleView === 'student' && (user?.isStudent() ?? true);
   const showTeacherScreens = roleView === 'teacher' && (user?.isTeacher() ?? false);
 
+  const markAsRead = async (item: UserNotification) => {
+    if (item.is_read) {
+      return;
+    }
+
+    try {
+      await notificationsRepository.markNotificationAsRead(item.id);
+      setNotifications((previousNotifications) =>
+        previousNotifications.map((notification) =>
+          notification.id === item.id ? { ...notification, is_read: true } : notification,
+        ),
+      );
+    } catch (error) {
+      console.log("RootDrawer: Failed marking notification as read", error);
+    }
+  };
+
+  const formatNotificationDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    if (Number.isNaN(date.getTime())) {
+      return "";
+    }
+    return date.toLocaleString();
+  };
+
+  const openDropdownFromToast = () => {
+    setShowToast(false);
+    setShowNotificationsDropdown(true);
+  };
+
   return (
-    <Drawer.Navigator
-      screenOptions={{
-        headerTintColor: colors.mainContrastColor,
-        headerLeft: () => <DrawerMenuButton color={colors.mainContrastColor} />,
-      }}
-      drawerContent={props => (
-        <CustomDrawerContent
-          {...props}
-          user={user}
-          roleView={roleView}
-          onSwitchRole={(role) => {
-            setRoleView(role);
-          }}
+    <>
+      <Drawer.Navigator
+        screenOptions={{
+          headerTintColor: colors.mainContrastColor,
+          headerLeft: () => <DrawerMenuButton color={colors.mainContrastColor} />,
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => setShowNotificationsDropdown(true)}
+              style={styles.notificationBellButton}
+              accessibilityLabel="Mostrar notificaciones"
+            >
+              <MaterialIcon name="bell-outline" fontSize={24} color={colors.mainContrastColor} />
+              {unreadCount > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ),
+        }}
+        drawerContent={props => (
+          <CustomDrawerContent
+            {...props}
+            user={user}
+            roleView={roleView}
+            onSwitchRole={(role) => {
+              setRoleView(role);
+            }}
+          />
+        )}
+      >
+        {/* Student screens */}
+        {showStudentScreens && (
+          <>
+            <Drawer.Screen
+              name="Home"
+              component={HomeScreen}
+              options={{
+                headerShown: true,
+                title: 'Inicio',
+                drawerIcon: makeDrawerIcon('home', 'home-outline')
+              }}
+            />
+
+            <Drawer.Screen
+              name="Calendar"
+              component={CalendarScreen}
+              options={{ headerShown: true, title: 'Calendario', drawerIcon: makeDrawerIcon('calendar', 'calendar-outline') }}
+            />
+
+            <Drawer.Screen
+              name="CurrentCommissionInscriptions"
+              component={CommissionInscriptionsScreen}
+              options={{
+                headerShown: true,
+                title: 'Materias en curso',
+                drawerIcon: makeDrawerIcon('text-box-multiple', 'text-box-multiple-outline')
+              }}
+            />
+
+            <Drawer.Screen
+              name="ApprovedSubjects"
+              component={ApprovedSubjectsScreen}
+              options={{
+                headerShown: true,
+                title: 'Materias aprobadas',
+                drawerIcon: makeDrawerIcon('text-box-check', 'text-box-check-outline')
+              }}
+            />
+
+            <Drawer.Screen
+              name="PendingSubjects"
+              component={PendingSubjectsScreen}
+              options={{
+                headerShown: true,
+                title: 'Materias pendientes',
+                drawerIcon: makeDrawerIcon('file-clock', 'file-clock-outline')
+              }}
+            />
+
+            <Drawer.Screen
+              name="ScanQR"
+              component={ScanQR}
+              options={{ headerShown: true, title: 'Escanear QR', drawerIcon: makeDrawerIcon('qrcode-scan', 'qrcode-scan') }}
+            />
+
+            <Drawer.Screen
+              name="VerifyIdentity"
+              component={VerifyIdentity}
+              options={{ headerShown: true, title: 'Verificar identidad', drawerIcon: makeDrawerIcon('face-recognition', 'face-recognition') }}
+            />
+
+            <Drawer.Screen
+              name="StudentStats"
+              component={StatsScreen}
+              options={{ headerShown: true, title: 'Estadisticas', drawerIcon: makeDrawerIcon('chart-box', 'chart-box-outline') }}
+            />
+          </>
+        )}
+
+        {/* Teacher screens */}
+        {showTeacherScreens && (
+          <>
+            <Drawer.Screen
+              name="TeacherHome"
+              component={TeacherHomeScreen}
+              options={{
+                headerShown: true,
+                title: 'Mis Comisiones',
+                drawerIcon: makeDrawerIcon('home', 'home-outline')
+              }}
+            />
+
+            <Drawer.Screen
+              name="CreateSemester"
+              component={CreateSemester}
+              options={{
+                headerShown: true,
+                title: 'Crear Cuatrimestre',
+                drawerIcon: makeDrawerIcon('plus-circle', 'plus-circle-outline')
+              }}
+            />
+
+            <Drawer.Screen
+              name="TeacherProfile"
+              component={TeacherProfileScreen}
+              options={{
+                headerShown: true,
+                title: 'Mi Perfil Profesional',
+                drawerIcon: makeDrawerIcon('account-details', 'account-details-outline')
+              }}
+            />
+          </>
+        )}
+      </Drawer.Navigator>
+
+      {showToast && toastNotification && !showNotificationsDropdown && (
+        <View pointerEvents="box-none" style={styles.toastLayer}>
+          <TouchableOpacity
+            activeOpacity={0.92}
+            style={styles.toastCard}
+            onPress={openDropdownFromToast}
+          >
+            <View style={styles.toastHeader}>
+              <Text style={styles.toastLabel}>Nueva notificación</Text>
+              {toastNotification.notification.is_urgent && (
+                <Text style={styles.toastUrgent}>URGENTE</Text>
+              )}
+            </View>
+            <Text numberOfLines={1} style={styles.toastTitle}>
+              {toastNotification.notification.title}
+            </Text>
+            <Text numberOfLines={2} style={styles.toastMessage}>
+              {toastNotification.notification.message}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <Modal
+        visible={showNotificationsDropdown}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowNotificationsDropdown(false)}
+      >
+        <TouchableOpacity
+          style={styles.notificationsBackdrop}
+          activeOpacity={1}
+          onPress={() => setShowNotificationsDropdown(false)}
         />
-      )}
-    >
-      {/* Student screens */}
-      {showStudentScreens && (
-        <>
-          <Drawer.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{
-              headerShown: true,
-              title: 'Inicio',
-              drawerIcon: makeDrawerIcon('home', 'home-outline')
-            }}
-          />
 
-          <Drawer.Screen
-            name="Calendar"
-            component={CalendarScreen}
-            options={{ headerShown: true, title: 'Calendario', drawerIcon: makeDrawerIcon('calendar', 'calendar-outline') }}
-          />
+        <View pointerEvents="box-none" style={styles.notificationsLayer}>
+          <View
+            style={[
+              styles.notificationsDropdown,
+              {
+                width: dropdownWidth,
+                maxHeight: dropdownMaxHeight,
+              },
+            ]}
+          >
+            <View style={styles.notificationsHeader}>
+              <Text style={styles.notificationsTitle}>Notificaciones</Text>
+              <Text style={styles.notificationsSubtitle}>{unreadCount} sin leer</Text>
+            </View>
 
-          <Drawer.Screen
-            name="CurrentCommissionInscriptions"
-            component={CommissionInscriptionsScreen}
-            options={{
-              headerShown: true,
-              title: 'Materias en curso',
-              drawerIcon: makeDrawerIcon('text-box-multiple', 'text-box-multiple-outline')
-            }}
-          />
-
-          <Drawer.Screen
-            name="ApprovedSubjects"
-            component={ApprovedSubjectsScreen}
-            options={{
-              headerShown: true,
-              title: 'Materias aprobadas',
-              headerRight: () => <FilterNavBarButton />,
-              drawerIcon: makeDrawerIcon('text-box-check', 'text-box-check-outline')
-            }}
-          />
-
-          <Drawer.Screen
-            name="PendingSubjects"
-            component={PendingSubjectsScreen}
-            options={{
-              headerShown: true,
-              title: 'Materias pendientes',
-              headerRight: () => <FilterNavBarButton />,
-              drawerIcon: makeDrawerIcon('file-clock', 'file-clock-outline')
-            }}
-          />
-
-          <Drawer.Screen
-            name="ScanQR"
-            component={ScanQR}
-            options={{ headerShown: true, title: 'Escanear QR', drawerIcon: makeDrawerIcon('qrcode-scan', 'qrcode-scan') }}
-          />
-
-          <Drawer.Screen
-            name="VerifyIdentity"
-            component={VerifyIdentity}
-            options={{ headerShown: true, title: 'Verificar identidad', drawerIcon: makeDrawerIcon('face-recognition', 'face-recognition') }}
-          />
-
-          <Drawer.Screen
-            name="StudentStats"
-            component={StatsScreen}
-            options={{ headerShown: true, title: 'Estadisticas', drawerIcon: makeDrawerIcon('chart-box', 'chart-box-outline') }}
-          />
-        </>
-      )}
-
-      {/* Teacher screens */}
-      {showTeacherScreens && (
-        <>
-          <Drawer.Screen
-            name="TeacherHome"
-            component={TeacherHomeScreen}
-            options={{
-              headerShown: true,
-              title: 'Mis Comisiones',
-              drawerIcon: makeDrawerIcon('home', 'home-outline')
-            }}
-          />
-
-          <Drawer.Screen
-            name="CreateSemester"
-            component={CreateSemester}
-            options={{
-              headerShown: true,
-              title: 'Crear Cuatrimestre',
-              drawerIcon: makeDrawerIcon('plus-circle', 'plus-circle-outline')
-            }}
-          />
-
-          <Drawer.Screen
-            name="TeacherProfile"
-            component={TeacherProfileScreen}
-            options={{
-              headerShown: true,
-              title: 'Mi Perfil Profesional',
-              drawerIcon: makeDrawerIcon('account-details', 'account-details-outline')
-            }}
-          />
-        </>
-      )}
-    </Drawer.Navigator>
+            {notifications.length === 0 ? (
+              <View style={styles.notificationsEmptyContainer}>
+                <Text style={styles.notificationsEmptyText}>No tenés notificaciones</Text>
+              </View>
+            ) : (
+              <ScrollView
+                style={styles.notificationsList}
+                contentContainerStyle={styles.notificationsListContent}
+                showsVerticalScrollIndicator
+              >
+                {notifications.slice(0, 8).map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => markAsRead(item)}
+                    style={[
+                      styles.notificationItem,
+                      !item.is_read ? styles.notificationItemUnread : undefined,
+                    ]}
+                  >
+                    <View style={styles.notificationItemHeader}>
+                      <Text numberOfLines={1} style={styles.notificationItemTitle}>
+                        {item.notification.title}
+                      </Text>
+                      {!item.is_read && <View style={styles.notificationItemDot} />}
+                    </View>
+                    <Text numberOfLines={2} style={styles.notificationItemMessage}>
+                      {item.notification.message}
+                    </Text>
+                    <Text numberOfLines={1} style={styles.notificationItemDate}>
+                      {formatNotificationDate(item.notification.created_at)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+    </>
   )
 }
 
@@ -275,6 +486,181 @@ const styles = StyleSheet.create({
   roleTabTextActive: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  notificationBellButton: {
+    marginRight: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -3,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    backgroundColor: '#c1121f',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#ffffff',
+  },
+  notificationBadgeText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  notificationsBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  notificationsLayer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'flex-end',
+    paddingTop: 70,
+    paddingHorizontal: 12,
+  },
+  notificationsDropdown: {
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#e6e8eb',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 12,
+    overflow: 'hidden',
+  },
+  notificationsHeader: {
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f1f3',
+    backgroundColor: '#fbfcfe',
+  },
+  notificationsTitle: {
+    color: '#1f2937',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  notificationsSubtitle: {
+    marginTop: 2,
+    color: '#6b7280',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  notificationsList: {
+    flexGrow: 0,
+  },
+  notificationsListContent: {
+    padding: 10,
+    gap: 8,
+  },
+  notificationsEmptyContainer: {
+    paddingHorizontal: 14,
+    paddingVertical: 20,
+  },
+  notificationsEmptyText: {
+    color: '#6b7280',
+    textAlign: 'center',
+    fontSize: 14,
+  },
+  notificationItem: {
+    borderWidth: 1,
+    borderColor: '#eceef2',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: '#ffffff',
+  },
+  notificationItemUnread: {
+    backgroundColor: '#f6f9ff',
+    borderColor: '#d6e4ff',
+  },
+  notificationItemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 4,
+  },
+  notificationItemTitle: {
+    flex: 1,
+    color: '#111827',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  notificationItemMessage: {
+    color: '#374151',
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  notificationItemDate: {
+    color: '#6b7280',
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  notificationItemDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#2563eb',
+  },
+  toastLayer: {
+    position: 'absolute',
+    top: 72,
+    left: 12,
+    right: 12,
+    alignItems: 'center',
+    zIndex: 30,
+  },
+  toastCard: {
+    width: '100%',
+    maxWidth: 480,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#dce5f6',
+    backgroundColor: '#ffffff',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  toastHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  toastLabel: {
+    color: '#334155',
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  toastUrgent: {
+    color: '#b42318',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  toastTitle: {
+    color: '#0f172a',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  toastMessage: {
+    color: '#334155',
+    fontSize: 13,
+    lineHeight: 18,
   },
 });
 
