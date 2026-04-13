@@ -53,6 +53,11 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
         </View>
       )}
       <DrawerItemList {...drawerProps} />
+      <DrawerItem
+        label="Cambiar contraseña"
+        onPress={() => drawerProps.navigation.navigate('ChangePassword')}
+        icon={makeDrawerIcon('lock-reset', 'lock-reset')}
+      />
       <DrawerItem label="Cerrar Sesión" onPress={async () => {
         await GoogleSignin.signOut();
         await SessionManager.getInstance()?.clearCredentials();
