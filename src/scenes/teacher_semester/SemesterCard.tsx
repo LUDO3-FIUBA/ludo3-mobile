@@ -33,7 +33,7 @@ export function SemesterCard({ route }: Props) {
 
   const listItems = [
     {
-      name: "Ver Instancias de Examen", onPress: () => {
+      name: "Ver Instancias de Evaluación", onPress: () => {
         navigation.navigate('EvaluationsList', {
           semester: semesterData,
           evaluations: semesterData?.evaluations,

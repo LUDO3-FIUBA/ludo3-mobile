@@ -48,6 +48,9 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const hasEvaluationStarted = detailedEvaluation.start_date
     ? moment().isSameOrAfter(moment(detailedEvaluation.start_date))
     : true;
+  const isQrRequired = Boolean(detailedEvaluation.requires_qr);
+  const isIdentityVerificationRequired = Boolean(detailedEvaluation.requires_identity);
+  const isSubmitBlockedOnWeb = !isQrRequired && isIdentityVerificationRequired;
   
   const failedExam = isNumericEvaluation
     ? evaluationSubmission?.grade !== null && evaluationSubmission?.grade !== undefined && grade < (detailedEvaluation.passing_grade || 0)
@@ -127,33 +130,35 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
           updatedAt={evaluationSubmission?.updated_at ? updatedAtDate : '–'}
         />}
 
-      {evaluationStatus === EvaluationStatus.NOT_TAKEN && hasEvaluationStarted && !detailedEvaluation.requires_qr &&
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && hasEvaluationStarted && !isQrRequired &&
         <View style={[styles.card, { marginBottom: 120 }]}>
           <TouchableOpacity
-            style={styles.submitButton}
+            style={[styles.submitButton, isSubmitBlockedOnWeb && styles.disabledButton]}
             onPress={onAddSubmissionPress}
+            disabled={isSubmitBlockedOnWeb}
           >
-            <Text style={styles.submitButtonText}>
+            <Text style={[styles.submitButtonText, isSubmitBlockedOnWeb && styles.disabledButtonText]}>
               Añadir entrega
             </Text>
           </TouchableOpacity>
           <Text style={styles.submitHintText}>
-            {detailedEvaluation.requires_identity
-              ? 'Esta evaluación no requiere QR, pero sí verificación de identidad.'
+            {isIdentityVerificationRequired
+              ? 'Esta evaluación requiere verificación de identidad y no está disponible en versión web. Por favor, utiliza la aplicación móvil.'
               : 'Esta evaluación no requiere QR ni verificación de identidad.'}
           </Text>
         </View>}
 
-      {evaluationStatus === EvaluationStatus.NOT_TAKEN && hasEvaluationStarted && detailedEvaluation.requires_qr &&
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && hasEvaluationStarted && isQrRequired &&
         <View style={[styles.card, { marginBottom: 120, alignItems: 'center' }]}>
           <TouchableOpacity
-            style={styles.qrButton}
+            style={[styles.qrButton, styles.disabledButton]}
             onPress={onScanQRPress}
+            disabled
           >
-            <MaterialIcon name="qrcode-scan" fontSize={48} color="white" />
+            <MaterialIcon name="qrcode-scan" fontSize={48} color="#f2f2f2" />
           </TouchableOpacity>
           <Text style={styles.submitHintText}>
-            Escanea el código QR para realizar la entrega.
+            Funcionalidad no disponible en versión web. Por favor, utiliza la aplicación móvil para entregar esta evaluación.
           </Text>
         </View>}
     </ScrollView>

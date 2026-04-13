@@ -1,6 +1,9 @@
 import { AppRegistry, Appearance } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
+import moment from 'moment';
+import 'moment/locale/es';
+moment.locale('es');
 
 // Force light mode on web.
 // The app's dark mode sets backgroundColor: 'black' on all views (basic.ts),

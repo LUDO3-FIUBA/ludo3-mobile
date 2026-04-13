@@ -7,21 +7,23 @@ import { EvaluationSubmission } from '../../../models';
 
 class VerifyIdentityForEvaluationConfiguration extends TakePictureStepConfiguration {
   evaluationId: string;
+  submissionText: string;
 
-  constructor(description: string, evaluationId: string) {
+  constructor(description: string, evaluationId: string, submissionText: string = '') {
     super(description, 'front', false);
     this.evaluationId = evaluationId;
+    this.submissionText = submissionText;
   }
 
   async onDataObtained(image: any, navigation: any, disableLoading: () => void) {
     await makeRequest(
-      () => evaluationsRepository.submitEvaluation(this.evaluationId),
+      () => evaluationsRepository.submitEvaluation(this.evaluationId, this.submissionText),
       navigation,
     )
       .then((evaluationSubmission: EvaluationSubmission) => {
         Alert.alert(
           'Éxito',
-          `${evaluationSubmission.student.first_name} ${evaluationSubmission.student.last_name}\n(${evaluationSubmission.student.id})\nha entregado su examen.`,
+          `Entrega realizada con éxito.`,
           [
             {
               text: 'OK',
@@ -61,6 +63,7 @@ class VerifyIdentityForEvaluationConfiguration extends TakePictureStepConfigurat
   toObject() {
     return super.toObject(Type.EvaluationFace, {
       evaluationId: this.evaluationId,
+      submissionText: this.submissionText,
     });
   }
 
@@ -68,6 +71,7 @@ class VerifyIdentityForEvaluationConfiguration extends TakePictureStepConfigurat
     return new VerifyIdentityForEvaluationConfiguration(
       object.description,
       object.evaluationId,
+      object.submissionText,
     );
   }
 }

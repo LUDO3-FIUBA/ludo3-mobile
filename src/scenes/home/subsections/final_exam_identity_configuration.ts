@@ -20,7 +20,7 @@ class VerifyIdentityForExamConfiguration extends TakePictureStepConfiguration {
       .then((user: { fullName: () => any; id: () => any; }) => {
         Alert.alert(
           'Éxito',
-          `${user.fullName()}\n(${user.id()})\nha entregado su examen.`,
+          `Entrega realizada con éxito.`,
           [
             {
               text: 'OK',

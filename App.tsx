@@ -5,21 +5,22 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   ChangePasswordScreen,
   ForgotPasswordRequestScreen,
   ForgotPasswordConfirmScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
-  TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen,
+  TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
   TeacherFinalsListScreen, TeacherAddFinalScreen,
   TeacherStaffScreen, TeacherStaffConfigurationScreen, TeacherAddStaffScreen,
   TeacherSemesterAttendancesScreen, TeacherAttendanceDetailsScreen,
   TeacherSemesterAttendanceQRScreen, TeacherEvaluationQRScreen, TeacherFinalExamQRScreen,
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
-  TeacherSemesterCardScreen,
+  TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
 } from './src/scenes';
+import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance, Platform } from 'react-native';
@@ -174,7 +175,19 @@ const App = () => {
             <Stack.Screen
               name="ViewEvaluationDetails"
               component={ViewEvaluationDetailsScreen}
-              options={{ headerShown: true, title: "Evaluacion" }}
+              options={{ headerShown: true, title: "Evaluación" }}
+            />
+
+            <Stack.Screen
+              name="ScanQRScreen"
+              component={ScanQR}
+              options={{ headerShown: true, title: 'Escanear QR' }}
+            />
+
+            <Stack.Screen
+              name="AddEvaluationSubmission"
+              component={AddEvaluationSubmissionScreen}
+              options={{ headerShown: true, title: 'Agregar entrega' }}
             />
 
             <Stack.Screen
@@ -226,6 +239,11 @@ const App = () => {
               name="SubmissionsList"
               component={TeacherSubmissionsListScreen}
               options={{ headerShown: true, title: 'Entregas' }}
+            />
+            <Stack.Screen
+              name="TeacherSubmissionDetails"
+              component={TeacherSubmissionDetailsScreen}
+              options={{ headerShown: true, title: 'Detalle de entrega' }}
             />
             <Stack.Screen
               name="FinalsList"
@@ -296,6 +314,11 @@ const App = () => {
               name="SemesterCard"
               component={TeacherSemesterCardScreen}
               options={{ headerShown: true, title: 'Cuatrimestre' }}
+            />
+            <Stack.Screen
+              name="EditEvaluation"
+              component={TeacherEditEvaluationScreen}
+              options={{ headerShown: true, title: 'Editar evaluación' }}
             />
           </Stack.Navigator>
         </NavigationContainer>

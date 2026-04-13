@@ -1,11 +1,10 @@
 import { Alert, InteractionManager } from 'react-native';
 import TakePictureStepConfiguration from '../../image_recognition/takePictureStepConfiguration';
 import VerifyIdentityForExamConfiguration from './final_exam_identity_configuration';
-import VerifyIdentityForEvaluationConfiguration from './evaluation_identity_configuration';
 import Type from '../../image_recognition/takePictureStepConfigurationType';
-import { Attendance, QRCode, qrCodeUtils } from '../../../models';
+import { Attendance, Evaluation, QRCode, qrCodeUtils } from '../../../models';
 import { makeRequest } from '../../authenticatedComponent';
-import { attendanceRepository } from '../../../repositories';
+import { attendanceRepository, evaluationsRepository } from '../../../repositories';
 
 
 class QRScannerConfiguration extends TakePictureStepConfiguration {
@@ -57,13 +56,48 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
   }
 
   private async onScannedEvaluation(navigation: any, qrCode: QRCode) {
-    await navigation.navigate('TakePicture', {
-      configuration: new VerifyIdentityForEvaluationConfiguration(
-        'Verifiquemos tu identidad',
-        qrCode.parsedUuid
-      ).toObject(),
-      title: 'Rendir exámen',
-    });
+    const parsedEvaluationId = qrCode.parsedUuid?.trim();
+
+    if (parsedEvaluationId) {
+      try {
+        const evaluations = await makeRequest(
+          () => evaluationsRepository.fetchMisExamenes(),
+          navigation,
+        ) as Evaluation[];
+
+        const scannedEvaluation = evaluations.find(
+          (evaluation) => String(evaluation.id) === parsedEvaluationId,
+        );
+
+        if (scannedEvaluation) {
+          await navigation.navigate('AddEvaluationSubmission', {
+            evaluation: scannedEvaluation,
+          });
+          return;
+        }
+
+        showNonCancelablealert(
+          'Evaluación no encontrada',
+          'No pudimos encontrar esta evaluación para cargar la entrega. Intenta nuevamente en unos minutos.',
+          () => navigation.popToTop(),
+        );
+        return;
+      } catch (error) {
+        console.log('Error al verificar requisitos del examen', error);
+        showNonCancelablealert(
+          'Error',
+          'No pudimos cargar la evaluación escaneada. Intenta nuevamente en unos minutos.',
+          () => navigation.popToTop(),
+        );
+        return;
+      }
+    }
+
+    showNonCancelablealert(
+      'QR inválido',
+      'El código QR de evaluación no es válido.',
+      () => navigation.popToTop(),
+    );
   }
 
   private async onScannedAttendance(navigation: any, qrCode: QRCode, disableLoading: () => void) {

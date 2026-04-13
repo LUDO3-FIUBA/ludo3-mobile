@@ -193,7 +193,7 @@ const Landing = ({ navigation }: Props) => {
             <View style={styles.googleIcon}>
               <GoogleLogo size={20} />
             </View>
-            <Text style={styles.googleButtonText}>Continua con Google</Text>
+            <Text style={styles.googleButtonText}>Continúa con Google</Text>
           </TouchableOpacity>
       </View>
 
