@@ -20,3 +20,6 @@ export { default as teacherQrAttendanceRepository } from './teacherQrAttendance'
 export { default as teacherStatsRepository } from './teacherStats';
 export { default as teacherStudentsRepository } from './teacherStudents';
 export { default as teacherProfileRepository } from './teacherProfile';
+export { default as departmentsRepository } from './departments';
+export { default as adminCommissionsRepository } from './adminCommissions';
+export { default as adminUsersRepository } from './adminUsers';
