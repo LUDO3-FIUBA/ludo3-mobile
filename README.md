@@ -12,6 +12,10 @@ Duplicate `.env.template` and rename it to `.env`. Inside follow the comment ins
 
 First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
 
+```bash
+npm install
+```
+
 To start Metro, run the following command from the _root_ of your React Native project:
 
 ```bash
@@ -39,8 +43,12 @@ yarn android
 ### For iOS
 
 ```bash
-# using npm
-npm run ios
+brew install cocoapods
+
+cd ios && export LANG=en_US.UTF-8 && pod install
+
+# using npx
+npx react-native run-ios --device "<device-name>"
 
 # OR using Yarn
 yarn ios

@@ -4,7 +4,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { scanQrIcon as style } from '../styles';
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
 
-Icon.loadFont()
 
 interface ScanQRCodeIconProps {
     navigation: NavigationProp<ParamListBase>

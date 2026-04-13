@@ -6,7 +6,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { calendarAgendaItem as style } from "../../styles";
 import { useNavigation } from "@react-navigation/native";
 
-Icon.loadFont()
 
 interface IProps {
     item: Evaluation;

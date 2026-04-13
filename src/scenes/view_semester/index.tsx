@@ -7,7 +7,6 @@ import { useNavigation } from '@react-navigation/native';
 import { lightModeColors } from '../../styles/colorPalette';
 import IsPassingCard from '../../components/isPassingCard';
 
-Icon.loadFont();
 
 const ViewSemestercreen: React.FC<any> = ({ route }) => {
   const navigation = useNavigation()
@@ -16,7 +15,7 @@ const ViewSemestercreen: React.FC<any> = ({ route }) => {
 
   const listItems = [
     {
-      name: "Ver Examenes",
+      name: "Ver Evaluaciones",
       onPress: () => {
         navigation.navigate('ViewEvaluations', {
           semester_id: semester.id,

@@ -10,13 +10,12 @@ import { manipulateAsync, Action } from 'expo-image-manipulator';
 import { Loading } from '../../components';
 import CameraWithPermissions from './camera/CameraWithPermissions';
 
-Icon.loadFont();
 
 interface TakePictureStepProps {
   configuration?: TakePictureStepConfiguration;
 }
 
-const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propConfiguration }) => {
+const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propConfiguration = new TakePictureStepConfiguration() }) => {
   const [loading, setLoading] = useState(false);
   const [ignoreReadings, setIgnoreReadings] = useState(false);
   const [configuration, setConfiguration] = useState<TakePictureStepConfiguration | null>(null);
@@ -105,10 +104,6 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propCo
       </SafeAreaView>
     </View>
   );
-};
-
-TakePictureStep.defaultProps = {
-  configuration: new TakePictureStepConfiguration(),
 };
 
 export default TakePictureStep;

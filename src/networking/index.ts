@@ -1,12 +1,14 @@
 import { API_URL } from "@env";
+import { Platform } from "react-native";
 
-export const baseUrl = API_URL || 'http://example.com:8007';
+export const baseUrl = Platform.OS === 'web' ? 'http://localhost:8007' : (API_URL || 'http://example.com:8007');
 
 const logRequests = true;
 
 export class StatusCodeError extends Error {
   code: number;
   info: any;
+  json: any;
   constructor(statusCode: number, info = '<not available>') {
     super(`Invalid response with status code ${statusCode}.
       More information: ${JSON.stringify(info)}`);
@@ -111,6 +113,29 @@ export function put(url: string, body: any, queryParams = [], headers = {}) {
   }
   return fetch(`${baseUrl}/${url}/${queryParamsString}`, {
     method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...headers,
+    },
+    body: JSON.stringify(body),
+  }).then(res => validate(res));
+}
+
+export function patch(url: string, body: any, queryParams = [], headers = {}) {
+  const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
+  const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
+  if (logRequests) {
+    if (body) {
+      console.log(
+        `PATCH ${baseUrl}/${url}/${queryParamsString}\n${JSON.stringify(body)}`,
+      );
+    } else {
+      console.log(`PATCH ${baseUrl}/${url}/${queryParamsString}`);
+    }
+  }
+  return fetch(`${baseUrl}/${url}/${queryParamsString}`, {
+    method: 'PATCH',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',

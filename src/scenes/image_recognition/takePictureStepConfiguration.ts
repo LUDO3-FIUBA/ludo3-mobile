@@ -45,6 +45,15 @@ export default class TakePictureStepConfiguration {
   }
 
   static fromObject(object: any): TakePictureStepConfiguration {
+    // Import Type to determine which subclass to instantiate
+    const Type = require('./takePictureStepConfigurationType').default;
+    
+    if (object.type === Type.RegisterFace) {
+      const FacePictureConfiguration = require('../preregister/face_recognition').default;
+      return FacePictureConfiguration.fromObject(object);
+    }
+    
+    // Default to base class
     return new TakePictureStepConfiguration(
       object.description,
       object.cameraType,

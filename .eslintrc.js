@@ -1,4 +1,5 @@
 module.exports = {
   root: true,
-  extends: '@react-native',
+  extends: 'expo',
+  ignorePatterns: ['dist/', 'node_modules/'],
 };

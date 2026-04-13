@@ -9,7 +9,6 @@ import CommissionInscriptionOverviewList from '../../components/commission_inscr
 import { NotificationManager } from '../../managers';
 import { CommissionInscription, Evaluation, FinalExam } from '../../models';
 
-Icon.loadFont();
 
 
 const Home: React.FC<any> = () => {
@@ -27,7 +26,15 @@ const Home: React.FC<any> = () => {
 
   const fetchEvaluations = async () => {
     const evals = await evaluationsRepository.fetchMisExamenes();
-    setEvaluations(evals.slice(0, 3));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const upcomingEvals = evals.filter((evaluation) => {
+      const evaluationDate = new Date(evaluation.end_date);
+      return evaluationDate >= today;
+    });
+
+    setEvaluations(upcomingEvals.slice(0, 3));
   };
 
   const fetchFinalExams = async () => {

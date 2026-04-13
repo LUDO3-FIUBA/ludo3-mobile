@@ -15,13 +15,24 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
   descriptions: string[];
   dni: string;
   mail: string;
+  padron: string;
+  password: string;
   images: any[];
 
-  constructor(descriptions: string[], dni: string, mail: string, images: any[] = []) {
+  constructor(
+    descriptions: string[],
+    dni: string,
+    mail: string,
+    padron: string = '',
+    password: string = '',
+    images: any[] = []
+  ) {
     super(descriptions.shift() || '', 'front', false);
     this.descriptions = descriptions;
     this.dni = dni;
     this.mail = mail;
+    this.padron = padron;
+    this.password = password;
     this.images = images;
   }
 
@@ -30,15 +41,26 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
     navigation: NavigationType,
     disableLoading: () => void
   ): Promise<void> {
+    console.log('[FacePictureConfig] onDataObtained called');
+    console.log('[FacePictureConfig] descriptions.length:', this.descriptions.length);
+    console.log('[FacePictureConfig] images.length before push:', this.images.length);
+    
     this.images.push(image);
+    
     if (this.descriptions.length === 0) {
+      console.log('[FacePictureConfig] No more descriptions, calling preregister');
+      console.log('[FacePictureConfig] DNI:', this.dni, 'Email:', this.mail, 'Padron:', this.padron);
+      
       await authenticationRepository
-        .preregister(this.dni, this.mail, image)
+        .preregister(this.dni, this.mail, this.padron, this.password, image)
         .then(() => {
+          console.log('[FacePictureConfig] Preregister successful, navigating to PreRegisterDone');
           navigation.navigate('PreRegisterDone');
           disableLoading();
         })
         .catch((error) => {
+          console.log('[FacePictureConfig] Preregister failed:', error);
+          
           if (error instanceof authenticationRepository.InvalidImage) {
             Alert.alert('Imagen inválida', 'Asegurate de que se vea bien tu cara.');
           } else if (error instanceof authenticationRepository.InvalidDNI) {
@@ -52,10 +74,11 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
               }
             );
           } else {
-            console.log('Error', error);
+            console.error('[PreRegister] Error details:', JSON.stringify(error, null, 2));
+            const errorMsg = error?.message || error?.toString() || 'Error desconocido';
             Alert.alert(
               'Error',
-              'Hubo un error inesperado. Intenta nuevamente en unos minutos.',
+              `Hubo un error inesperado. Intenta nuevamente en unos minutos.\n\nDetalles: ${errorMsg}`,
               [{ text: 'OK', onPress: () => navigation.navigate('PreRegister') }],
               {
                 cancelable: false,
@@ -65,11 +88,14 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
           disableLoading();
         });
     } else {
+      console.log('[FacePictureConfig] More descriptions remaining, navigating to next TakePicture');
       navigation.push('TakePicture', {
         configuration: new FacePictureConfiguration(
           this.descriptions,
           this.dni,
           this.mail,
+          this.padron,
+          this.password,
           this.images
         ).toObject(),
         title: 'Pre-registro'
@@ -83,6 +109,8 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
       descriptions: JSON.stringify(this.descriptions),
       dni: this.dni,
       mail: this.mail,
+      padron: this.padron,
+      password: this.password,
       images: this.images
     });
   }
@@ -94,6 +122,8 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
       descriptions,
       object.dni,
       object.mail,
+      object.padron,
+      object.password,
       object.images
     );
   }

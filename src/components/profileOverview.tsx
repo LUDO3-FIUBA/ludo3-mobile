@@ -8,7 +8,6 @@ import { SessionManager } from '../managers';
 import { useNavigation } from '@react-navigation/native';
 import { makeRequest } from '../scenes/authenticatedComponent';
 
-Icon.loadFont()
 
 export default function ProfileOverview() {
     const [user, setUser] = useState<User | null>(null);
