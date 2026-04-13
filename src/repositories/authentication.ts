@@ -1,5 +1,8 @@
 import {post as publicPost, StatusCodeError} from '../networking';
 import {post as authenticatedPost} from './authenticatedRepository';
+import {refresh} from './refreshToken';
+
+export {refresh};
 
 const authUrl = 'auth';
 const accountNotApprovedErrorCode = 'user_not_approved';
@@ -102,10 +105,6 @@ export function preregister(
     }
     return Promise.reject(error);
   });
-}
-
-export function refresh(token: string): Promise<object> {
-  return publicPost(`${authUrl}/jwt/refresh`, {refresh: token});
 }
 
 export function login(dni: string, password: string): Promise<object> {

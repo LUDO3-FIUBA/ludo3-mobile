@@ -6,7 +6,7 @@ import {
   deleteMethod as basicDelete,
   StatusCodeError,
 } from '../networking';
-import { refresh } from './authentication';
+import { refresh } from './refreshToken';
 import SessionManager from '../managers/sessionManager';
 
 export class MustLoginAgain extends Error {
