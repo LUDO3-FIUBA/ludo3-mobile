@@ -8,6 +8,7 @@ export interface Notification {
     message: string;
     created_at: string;
     is_urgent?: boolean;
+    image?: string | null;
 }
 
 export interface UserNotification {
@@ -29,7 +30,15 @@ async function markNotificationAsRead(userNotificationId: number): Promise<UserN
     return response as UserNotification;
 }
 
+async function deleteNotification(userNotificationId: number): Promise<void> {
+    await authenticatedRepository.deleteMethod(
+        `${domainUrl}/${userNotificationId}/delete_for_me`,
+        {},
+    );
+}
+
 export default {
     fetchMyNotifications,
     markNotificationAsRead,
+    deleteNotification,
 };

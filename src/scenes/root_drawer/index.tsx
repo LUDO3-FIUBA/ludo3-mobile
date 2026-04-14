@@ -14,6 +14,7 @@ import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
 import {
   Appearance,
+  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -98,6 +99,7 @@ const RootDrawer = () => {
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastNotification, setToastNotification] = useState<UserNotification | null>(null);
   const hasLoadedNotificationsRef = useRef(false);
@@ -188,7 +190,20 @@ const RootDrawer = () => {
   const showStudentScreens = roleView === 'student' && (user?.isStudent() ?? true);
   const showTeacherScreens = roleView === 'teacher' && (user?.isTeacher() ?? false);
 
-  const markAsRead = async (item: UserNotification) => {
+  const onDeleteNotification = async (item: UserNotification) => {
+    try {
+      await notificationsRepository.deleteNotification(item.id);
+      setNotifications((prev) => prev.filter((n) => n.id !== item.id));
+    } catch (error) {
+      console.log("RootDrawer: Failed deleting notification", error);
+    }
+  };
+
+  const onNotificationPress = async (item: UserNotification) => {
+    if (item.notification.image) {
+      setFullScreenImage(item.notification.image);
+    }
+
     if (item.is_read) {
       return;
     }
@@ -376,9 +391,39 @@ const RootDrawer = () => {
             <Text numberOfLines={2} style={styles.toastMessage}>
               {toastNotification.notification.message}
             </Text>
+            {toastNotification.notification.image && (
+              <Image
+                source={{ uri: toastNotification.notification.image }}
+                style={styles.toastThumbnail}
+                resizeMode="cover"
+              />
+            )}
           </TouchableOpacity>
         </View>
       )}
+
+      <Modal
+        visible={fullScreenImage !== null}
+        transparent={false}
+        animationType="fade"
+        onRequestClose={() => setFullScreenImage(null)}
+      >
+        <View style={styles.fullScreenContainer}>
+          <TouchableOpacity
+            style={styles.fullScreenCloseButton}
+            onPress={() => setFullScreenImage(null)}
+          >
+            <Text style={styles.fullScreenCloseText}>✕</Text>
+          </TouchableOpacity>
+          {fullScreenImage && (
+            <Image
+              source={{ uri: fullScreenImage }}
+              style={styles.fullScreenImage}
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
 
       <Modal
         visible={showNotificationsDropdown}
@@ -420,7 +465,7 @@ const RootDrawer = () => {
                 {notifications.slice(0, 8).map((item) => (
                   <TouchableOpacity
                     key={item.id}
-                    onPress={() => markAsRead(item)}
+                    onPress={() => onNotificationPress(item)}
                     style={[
                       styles.notificationItem,
                       !item.is_read ? styles.notificationItemUnread : undefined,
@@ -430,11 +475,26 @@ const RootDrawer = () => {
                       <Text numberOfLines={1} style={styles.notificationItemTitle}>
                         {item.notification.title}
                       </Text>
-                      {!item.is_read && <View style={styles.notificationItemDot} />}
+                      <View style={styles.notificationItemActions}>
+                        {!item.is_read && <View style={styles.notificationItemDot} />}
+                        <TouchableOpacity
+                          onPress={(e) => { e.stopPropagation(); onDeleteNotification(item); }}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                          <MaterialIcon name="trash-can-outline" fontSize={16} color="#9ca3af" />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                     <Text numberOfLines={2} style={styles.notificationItemMessage}>
                       {item.notification.message}
                     </Text>
+                    {item.notification.image && (
+                      <Image
+                        source={{ uri: item.notification.image }}
+                        style={styles.notificationItemThumbnail}
+                        resizeMode="cover"
+                      />
+                    )}
                     <Text numberOfLines={1} style={styles.notificationItemDate}>
                       {formatNotificationDate(item.notification.created_at)}
                     </Text>
@@ -604,11 +664,45 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '500',
   },
+  notificationItemActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   notificationItemDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: '#2563eb',
+  },
+  notificationItemThumbnail: {
+    width: '100%',
+    height: 120,
+    borderRadius: 6,
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  fullScreenContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenCloseButton: {
+    position: 'absolute',
+    top: 48,
+    right: 16,
+    zIndex: 1,
+    padding: 8,
+  },
+  fullScreenCloseText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  fullScreenImage: {
+    width: '100%',
+    height: '100%',
   },
   toastLayer: {
     position: 'absolute',
@@ -661,6 +755,12 @@ const styles = StyleSheet.create({
     color: '#334155',
     fontSize: 13,
     lineHeight: 18,
+  },
+  toastThumbnail: {
+    width: '100%',
+    height: 100,
+    borderRadius: 6,
+    marginTop: 8,
   },
 });
 
