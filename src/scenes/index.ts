@@ -21,9 +21,13 @@ export { default as CalendarScreen } from './calendar';
 export { default as CommissionInscriptionsScreen } from './commission_inscriptions';
 export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
+export { default as AddEvaluationSubmissionScreen } from './view_evaluation_details/AddEvaluationSubmission';
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
 export { default as GoogleRegisterScreen } from './google_register';
+export { default as ChangePasswordScreen } from './password/change';
+export { default as ForgotPasswordRequestScreen } from './password/forgot_request';
+export { default as ForgotPasswordConfirmScreen } from './password/forgot_confirm';
 
 // Teacher scenes
 export { default as TeacherHomeScreen } from './teacher_home';
@@ -33,6 +37,7 @@ export { default as TeacherSemesterEditScreen } from './teacher_semester/Semeste
 export { default as TeacherEvaluationsListScreen } from './teacher_evaluations/EvaluationsList';
 export { default as TeacherAddEvaluationScreen } from './teacher_evaluations/AddEvaluation';
 export { default as TeacherSubmissionsListScreen } from './teacher_evaluations/SubmissionsList';
+export { default as TeacherSubmissionDetailsScreen } from './teacher_evaluations/SubmissionDetails';
 export { default as TeacherFinalsListScreen } from './teacher_finals/FinalsList';
 export { default as TeacherAddFinalScreen } from './teacher_finals/AddFinal';
 export { default as TeacherStaffScreen } from './teacher_staff/Teachers';
@@ -47,3 +52,4 @@ export { default as TeacherStatsScreen } from './teacher_stats';
 export { default as TeacherFinalExamSubmissionsScreen } from './teacher_finals/FinalExamSubmissions';
 export { default as TeacherAddClassToSemesterScreen } from './teacher_attendances/AddClassToSemester';
 export { default as TeacherSemesterCardScreen } from './teacher_semester/SemesterCard';
+export { default as TeacherEditEvaluationScreen } from './teacher_evaluations/EditEvaluation';

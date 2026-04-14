@@ -2,10 +2,11 @@ import {
   get as basicGet,
   post as basicPost,
   put as basicPut,
+  patch as basicPatch,
   deleteMethod as basicDelete,
   StatusCodeError,
 } from '../networking';
-import { refresh } from './authentication';
+import { refresh } from './refreshToken';
 import SessionManager from '../managers/sessionManager';
 
 export class MustLoginAgain extends Error {
@@ -82,6 +83,30 @@ export function put(
   });
 }
 
+export function patch(
+  url: string,
+  body: any,
+  queryParams = [],
+  headers = {},
+): Promise<Object> {
+  const sessionManager: SessionManager | null = SessionManager.getInstance()
+  const token = sessionManager?.getAuthToken();
+  if (!token) {
+    return Promise.reject(new MustLoginAgain());
+  }
+  return basicPatch(url, body, queryParams, {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  }).catch(error => {
+    return reLogInIfNecessary(error).then(newToken => {
+      return basicPatch(url, body, queryParams, {
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      });
+    });
+  });
+}
+
 interface RefreshJsonObject {
   refresh?: string;
   access?: string;
@@ -134,4 +159,4 @@ export function deleteMethod(
   });
 }
 
-export default {post, get, put, deleteMethod, MustLoginAgain};
+export default {post, get, put, patch, deleteMethod, MustLoginAgain};

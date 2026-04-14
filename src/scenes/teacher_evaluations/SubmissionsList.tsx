@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Alert, FlatList, StyleSheet, TextInput, TouchableOpacity, ToastAndroid } from 'react-native';
+import { View, Text, Alert, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { Submission } from '../../models/Submission';
-import { teacherSubmissionsRepository } from '../../repositories';
+import { teacherEvaluationsRepository, teacherSubmissionsRepository } from '../../repositories';
 import { useNavigation } from '@react-navigation/native';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
+import { TeacherSemester } from '../../models/TeacherSemester';
 import { SubmissionsHeaderRight } from './SubmissionsHeaderRight';
 import { Loading } from '../../components';
 import { TeacherStudent } from '../../models/TeacherStudent';
@@ -14,7 +15,6 @@ import { TeacherTuple } from '../../models/TeacherTuple';
 import EntitySelectionModal from './EntitySelectionModal';
 import { selectStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
 import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
-import EditableText from '../../components/EditableText';
 import { MaterialIcon } from '../../components';
 
 interface Props {
@@ -23,11 +23,12 @@ interface Props {
 
 interface RouteParams {
   evaluation: TeacherEvaluation;
+  semester?: TeacherSemester;
 }
 
 
 export default function SubmissionsList({ route }: Props) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const semester = useAppSelector(selectSemesterData);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,18 +37,40 @@ export default function SubmissionsList({ route }: Props) {
   const [showTeacherSelectionModal, setShowTeacherSelectionModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<TeacherStudent | null>(null);
 
-  const { evaluation } = route.params as RouteParams;
+  const { evaluation, semester: semesterFromParams } = route.params as RouteParams;
+  const subjectName =
+    semesterFromParams?.commission.subjectName ||
+    (semesterFromParams?.commission as any)?.subject_name ||
+    (evaluation as any).subjectName ||
+    (evaluation as any).subject_name ||
+    '–';
 
   const teachersTuples: TeacherTuple[] = useAppSelector(selectStaffTeachers);
   const userData = useAppSelector(selectUserData);
 
   const isActualUserChiefTeacher = semester?.commission.chiefTeacher.id === userData?.id;
+  const isGradeable = (evaluation as any).isGradeable ?? true;
 
   const fetchData = useCallback(async () => {
-    if (isLoading) return;
     setIsLoading(true);
 
     try {
+      const semesterForValidation = semester || semesterFromParams;
+      if (semesterForValidation?.commission?.id) {
+        const currentEvaluations = await teacherEvaluationsRepository.fetchPresentSemesterEvaluations(
+          semesterForValidation.commission.id,
+        );
+        const evaluationExists = currentEvaluations.some((currentEvaluation) => currentEvaluation.id === evaluation.id);
+
+        if (!evaluationExists) {
+          navigation.replace('EvaluationsList', {
+            semester: semesterForValidation,
+            evaluations: currentEvaluations,
+          });
+          return;
+        }
+      }
+
       let submissions: Submission[] = await teacherSubmissionsRepository.getSubmissions(evaluation.id);
       submissions = submissions.sort((a, b) => a.student.lastName.localeCompare(b.student.lastName));
 
@@ -67,21 +90,7 @@ export default function SubmissionsList({ route }: Props) {
     } finally {
       setIsLoading(false);
     }
-  }, [evaluation.id, isLoading]);
-
-  const setNavOptions = useCallback(() => {
-    navigation.setOptions({
-      title: 'Entregas', // Set the screen title
-      headerRight: () => (
-        <SubmissionsHeaderRight
-          evaluation={evaluation}
-          fetchData={fetchData}
-          submissions={submissions}
-          isActualUserChiefTeacher={isActualUserChiefTeacher}
-        />
-      ),
-    });
-  }, [navigation, evaluation, fetchData, submissions, isActualUserChiefTeacher]);
+  }, [evaluation.id, navigation, semester, semesterFromParams, teachersTuples]);
 
   const updateCorrectorToSubmission = (submission: Submission) => {
     if (submission.grade) {
@@ -109,34 +118,35 @@ export default function SubmissionsList({ route }: Props) {
     }
   };
 
-  const updateSubmissionGrade = async (student: TeacherStudent, newGrade: string) => {
-    const res = await teacherSubmissionsRepository.gradeSubmission(student.id, evaluation.id, +newGrade);
-    ToastAndroid.show(`La calificación de ${student.firstName} ${student.lastName} ha sido guardada exitosamente`, ToastAndroid.LONG);
-    setSubmissions(prevSubmissions =>
-      prevSubmissions.map(submission =>
-        submission.student.id === student.id
-          ? { ...submission, grade: newGrade, grader: res.grader }
-          : submission
-      )
-    );
-  };
-
   useEffect(() => {
     const focusUnsubscribe = navigation.addListener('focus', () => {
       fetchData();
     });
-    return focusUnsubscribe;
+    return () => focusUnsubscribe();
   }, [navigation, fetchData]);
 
   useEffect(() => {
-    setNavOptions();
-  }, [setNavOptions]);
+    navigation.setOptions({
+      title: 'Entregas',
+      headerRight: () => (
+        <SubmissionsHeaderRight
+          evaluation={evaluation}
+          fetchData={fetchData}
+          submissions={submissions}
+          isActualUserChiefTeacher={isActualUserChiefTeacher}
+        />
+      ),
+    });
+  }, [navigation, evaluation, fetchData, submissions, isActualUserChiefTeacher]);
 
   const renderHeader = () => (
     <View style={styles.header}>
       <Text style={styles.headerText}>Estudiante</Text>
+      <View style={styles.headerDivider} />
       <Text style={styles.headerText}>Corrector</Text>
+      <View style={styles.headerDivider} />
       <Text style={styles.headerText}>Nota</Text>
+      <View style={styles.headerArrowSpacer} />
     </View>
   );
 
@@ -166,25 +176,37 @@ export default function SubmissionsList({ route }: Props) {
           keyExtractor={submission => submission.student.dni}
           ListHeaderComponent={renderHeader}
           renderItem={({ item: submission }) => {
-            const isEditable = editingCondition(submission);
             return (
-              <View style={[styles.row, !isEditable && styles.nonEditableRow]}>
-                <Text style={styles.cell}>{`${submission.student.firstName} ${submission.student.lastName}`}</Text>
+              <TouchableOpacity
+                style={styles.row}
+                onPress={() => navigation.navigate('TeacherSubmissionDetails', { evaluation, submission, subjectName })}
+                activeOpacity={0.8}
+              >
+                <View style={styles.cell}>
+                  <Text style={styles.text}>{`${submission.student.firstName} ${submission.student.lastName}`}</Text>
+                </View>
                 <View style={styles.divider} />
-                <TouchableOpacity
-                  style={styles.cell}
-                  disabled={!isActualUserChiefTeacher}
-                  onPress={() => updateCorrectorToSubmission(submission)}
-                >
-                  <Text style={styles.text}>{submission.grader?.lastName}</Text>
-                </TouchableOpacity>
+                <View style={styles.cell}>
+                  <Text style={styles.text}>{submission.grader?.lastName || '–'}</Text>
+                </View>
                 <View style={styles.divider} />
-                <EditableText
-                  value={submission.grade || ''}
-                  onChange={text => updateSubmissionGrade(submission.student, text)}
-                  editable={isEditable}
-                />
-              </View>
+                <View style={styles.cell}>
+                  {isGradeable ? (
+                    <Text style={styles.text}>{submission.grade || '–'}</Text>
+                  ) : (
+                    <Text style={styles.text}>
+                      {submission.submissionStatus === 'APROBADO'
+                        ? 'A'
+                        : submission.submissionStatus === 'DESAPROBADO'
+                          ? 'D'
+                          : '–'}
+                    </Text>
+                  )}
+                </View>
+                <View style={styles.arrowButton}>
+                  <MaterialIcon name="chevron-right" fontSize={28} color="#666" />
+                </View>
+              </TouchableOpacity>
             );
           }}
           ListEmptyComponent={renderEmptyComponent}
@@ -229,13 +251,22 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     marginHorizontal: 10,
     borderRadius: 8,
-    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   headerText: {
     flex: 1,
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginHorizontal: 5,
+  },
+  headerDivider: {
+    height: '100%',
+    width: 1,
+    backgroundColor: '#ccc',
+  },
+  headerArrowSpacer: {
+    width: 36,
   },
   row: {
     flexDirection: 'row',
@@ -263,6 +294,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     textAlign: 'center',
   },
+  arrowButton: {
+    width: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   divider: {
     height: '100%',
     width: 1,
@@ -276,6 +312,17 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     textAlign: 'center',
     backgroundColor: '#fff', // Make the input visible
+  },
+  statusPickerWrapper: {
+    flex: 1,
+    zIndex: 10,
+  },
+  statusPicker: {
+    minHeight: 34,
+    borderColor: '#ccc',
+  },
+  statusPickerDropdown: {
+    borderColor: '#ccc',
   },
   emptyContainer: {
     flex: 1,

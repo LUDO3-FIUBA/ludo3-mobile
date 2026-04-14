@@ -15,14 +15,10 @@ const EventCard: FC<EventCardProps> = ({ evaluation }) => {
     <View style={style().view}>
       <TouchableOpacity
         onPress={() => navigation.navigate('ViewEvaluationDetails', { evaluation })}
-        style={{ padding: 12 }}
+        style={style().content}
       >
-        <Text style={style().name}>
-          {evaluation.evaluation_name}
-          <Text style={style().subjectName}>
-            {` `}- {evaluation.semester.commission.subject_name}
-          </Text>
-        </Text>
+        <Text style={style().name}>{evaluation.evaluation_name}</Text>
+        <Text style={style().subjectName}>- {evaluation.semester.commission.subject_name}</Text>
 
         <Text style={style().date}>
           {getRemainingTime(evaluation.start_date, evaluation.end_date)}

@@ -15,7 +15,7 @@ const ViewSemestercreen: React.FC<any> = ({ route }) => {
 
   const listItems = [
     {
-      name: "Ver Examenes",
+      name: "Ver Evaluaciones",
       onPress: () => {
         navigation.navigate('ViewEvaluations', {
           semester_id: semester.id,

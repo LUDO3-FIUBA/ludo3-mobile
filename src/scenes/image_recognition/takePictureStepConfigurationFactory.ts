@@ -12,6 +12,7 @@ interface TakePictureStepConfigurationObject {
   description?: string;
   cameraType?: any;  
   searchForQRCode?: boolean;
+  submissionText?: string;
 }
 
 export default class TakePictureStepConfigurationFactory {

@@ -9,6 +9,14 @@ import StatsScreen from "../stats";
 import TeacherHomeScreen from "../teacher_home";
 import CreateSemester from "../teacher_semester/CreateSemester";
 import TeacherProfileScreen from "../teacher_profile";
+import DepartmentList from "../admin_departments/DepartmentList";
+import DepartmentDetail from "../admin_departments/DepartmentDetail";
+import DepartmentForm from "../admin_departments/DepartmentForm";
+import CommissionList from "../admin_commissions/CommissionList";
+import CommissionDetail from "../admin_commissions/CommissionDetail";
+import CommissionForm from "../admin_commissions/CommissionForm";
+import UserSearch from "../admin_users/UserSearch";
+import UserDetail from "../admin_users/UserDetail";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -35,11 +43,11 @@ import notificationsRepository, { UserNotification } from "../../repositories/no
 
 const Drawer = createDrawerNavigator()
 
-type RoleView = 'student' | 'teacher';
+type RoleView = 'student' | 'teacher' | 'admin';
 
 const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User | null, roleView: RoleView, onSwitchRole: (role: RoleView) => void }) => {
   const { user, roleView, onSwitchRole, ...drawerProps } = props;
-  const hasBothRoles = user?.isStudent() && user?.isTeacher();
+  const hasBothRoles = user?.isStudent() && user?.isTeacher() && !user?.isAdmin();
 
   return (
     <DrawerContentScrollView {...drawerProps}>
@@ -63,6 +71,11 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
         </View>
       )}
       <DrawerItemList {...drawerProps} />
+      <DrawerItem
+        label="Cambiar contraseña"
+        onPress={() => drawerProps.navigation.navigate('ChangePassword')}
+        icon={makeDrawerIcon('lock-reset', 'lock-reset')}
+      />
       <DrawerItem label="Cerrar Sesión" onPress={async () => {
         await GoogleSignin.signOut();
         await SessionManager.getInstance()?.clearCredentials();
@@ -157,7 +170,14 @@ const RootDrawer = () => {
     async function fetchUser() {
       try {
         const fetchedUser = await usersRepository.getInfo();
-        const initialRole: RoleView = (!fetchedUser.isStudent() && fetchedUser.isTeacher()) ? 'teacher' : 'student';
+        let initialRole: RoleView;
+        if (fetchedUser.isAdmin()) {
+          initialRole = 'admin';
+        } else if (!fetchedUser.isStudent() && fetchedUser.isTeacher()) {
+          initialRole = 'teacher';
+        } else {
+          initialRole = 'student';
+        }
         setUser(fetchedUser);
         setRoleView(initialRole);
         dispatch(fetchUserDataAsync(fetchedUser));
@@ -189,6 +209,10 @@ const RootDrawer = () => {
 
   const showStudentScreens = roleView === 'student' && (user?.isStudent() ?? true);
   const showTeacherScreens = roleView === 'teacher' && (user?.isTeacher() ?? false);
+  const showAdminScreens = roleView === 'admin' && (user?.isAdmin() ?? false);
+
+  const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+  const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
 
   const onDeleteNotification = async (item: UserNotification) => {
     try {
@@ -333,6 +357,18 @@ const RootDrawer = () => {
               component={StatsScreen}
               options={{ headerShown: true, title: 'Estadisticas', drawerIcon: makeDrawerIcon('chart-box', 'chart-box-outline') }}
             />
+
+            <Drawer.Screen
+              name="StudentDepartmentList"
+              component={StudentDepartmentListScreen}
+              options={{ headerShown: true, title: 'Departamentos', drawerIcon: makeDrawerIcon('office-building', 'office-building-outline') }}
+            />
+
+            <Drawer.Screen
+              name="AdminDepartmentDetail"
+              component={DepartmentDetail}
+              options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
           </>
         )}
 
@@ -367,6 +403,83 @@ const RootDrawer = () => {
                 title: 'Mi Perfil Profesional',
                 drawerIcon: makeDrawerIcon('account-details', 'account-details-outline')
               }}
+            />
+
+            <Drawer.Screen
+              name="TeacherDepartmentList"
+              component={StudentDepartmentListScreen}
+              options={{ headerShown: true, title: 'Departamentos', drawerIcon: makeDrawerIcon('office-building', 'office-building-outline') }}
+            />
+
+            <Drawer.Screen
+              name="AdminDepartmentDetail"
+              component={DepartmentDetail}
+              options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+          </>
+        )}
+
+        {/* Admin screens */}
+        {showAdminScreens && (
+          <>
+            <Drawer.Screen
+              name="AdminDepartmentList"
+              component={AdminDepartmentListScreen}
+              options={{ headerShown: true, title: 'Departamentos', drawerIcon: makeDrawerIcon('office-building', 'office-building-outline') }}
+            />
+
+            <Drawer.Screen
+              name="AdminDepartmentCreate"
+              component={DepartmentForm}
+              options={{ headerShown: true, title: 'Nuevo Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminDepartmentDetail"
+              component={DepartmentDetail}
+              options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminDepartmentEdit"
+              component={DepartmentForm}
+              options={{ headerShown: true, title: 'Editar Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminCommissionList"
+              component={CommissionList}
+              options={{ headerShown: true, title: 'Comisiones', drawerIcon: makeDrawerIcon('account-group', 'account-group-outline') }}
+            />
+
+            <Drawer.Screen
+              name="AdminCommissionCreate"
+              component={CommissionForm}
+              options={{ headerShown: true, title: 'Nueva Comisión', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminCommissionDetail"
+              component={CommissionDetail}
+              options={{ headerShown: true, title: 'Comisión', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminCommissionEdit"
+              component={CommissionForm}
+              options={{ headerShown: true, title: 'Editar Comisión', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminUserSearch"
+              component={UserSearch}
+              options={{ headerShown: true, title: 'Buscar Usuarios', drawerIcon: makeDrawerIcon('account-search', 'account-search-outline') }}
+            />
+
+            <Drawer.Screen
+              name="AdminUserDetail"
+              component={UserDetail}
+              options={{ headerShown: true, title: 'Usuario', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
           </>
         )}
