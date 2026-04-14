@@ -17,6 +17,8 @@ import CommissionDetail from "../admin_commissions/CommissionDetail";
 import CommissionForm from "../admin_commissions/CommissionForm";
 import UserSearch from "../admin_users/UserSearch";
 import UserDetail from "../admin_users/UserDetail";
+import NotificationList from "../admin_notifications/NotificationList";
+import NotificationForm from "../admin_notifications/NotificationForm";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -480,6 +482,18 @@ const RootDrawer = () => {
               name="AdminUserDetail"
               component={UserDetail}
               options={{ headerShown: true, title: 'Usuario', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminNotificationList"
+              component={NotificationList}
+              options={{ headerShown: true, title: 'Avisos', drawerIcon: makeDrawerIcon('bell', 'bell-outline') }}
+            />
+
+            <Drawer.Screen
+              name="AdminNotificationCreate"
+              component={NotificationForm}
+              options={{ headerShown: true, title: 'Nuevo Aviso', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
           </>
         )}

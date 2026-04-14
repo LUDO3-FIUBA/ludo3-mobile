@@ -25,3 +25,4 @@ export type { Notification, UserNotification } from './notifications';
 export { default as departmentsRepository } from './departments';
 export { default as adminCommissionsRepository } from './adminCommissions';
 export { default as adminUsersRepository } from './adminUsers';
+export { default as adminNotificationsRepository } from './adminNotifications';
