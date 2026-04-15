@@ -26,6 +26,10 @@ export function SubmissionsHeaderRight({ evaluation, fetchData, isActualUserChie
     navigation.navigate('EvaluationQR', { evaluation });
   }
 
+  const showEditEvaluation = () => {
+  navigation.navigate('EditEvaluation', { evaluation });
+};
+
   const addStudentSubmission = async (student: TeacherStudent) => {
     setModalVisible(false);
     await teacherEvaluationsRepository.addSubmissionToEvaluation(evaluation.id, student.id);
@@ -119,6 +123,11 @@ export function SubmissionsHeaderRight({ evaluation, fetchData, isActualUserChie
       <TouchableOpacity style={styles.navButton} onPress={showEvaluationQR}>
         <MaterialIcon name="qrcode" fontSize={24} color="gray" />
       </TouchableOpacity>
+      {isActualUserChiefTeacher && (
+        <TouchableOpacity style={styles.navButton} onPress={showEditEvaluation}>
+            <MaterialIcon name="pencil-outline" fontSize={24} color="gray" />
+          </TouchableOpacity>
+      )}
       <TouchableOpacity style={styles.navButton} onPress={() => setModalVisible(true)}>
         <MaterialIcon name="plus" fontSize={24} color="gray" />
       </TouchableOpacity>

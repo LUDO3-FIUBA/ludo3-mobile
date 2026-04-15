@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import * as Progress from 'react-native-progress';
-import { lightModeColors } from '../../styles/colorPalette';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import moment from 'moment';
-import { MaterialIcon } from '../../components';
+import { lightModeColors } from '../../styles/colorPalette';
+import {
+  EvaluationDateRangeCard,
+  EvaluationDetailsHeader,
+  EvaluationResultCard,
+  GraderUpdatedCard,
+  MaterialIcon,
+  SubmissionDateRow,
+  SubmissionTextCard,
+} from '../../components';
 import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
+import { useNavigation } from '@react-navigation/native';
+import { getLateSubmissionInfo } from '../../utils/lateSubmission';
+import { evaluationDetailsScreenStyles as styles, evaluationDetailsTextStyles } from '../../styles/evaluationDetails';
 
 
 enum EvaluationStatus {
@@ -17,106 +27,134 @@ enum EvaluationStatus {
 
 const EvaluationDetailsScreen = ({ route }: { route: any }) => {
   const { evaluation }: { evaluation: Evaluation } = route.params;
+  const navigation = useNavigation<any>();
   const [evaluationSubmission, setEvaluationSubmission] = useState<EvaluationSubmission | undefined>(undefined)
   const [evaluationStatus, setEvaluationStatus] = useState(EvaluationStatus.UNKNOWN)
-  const endDate = formatDate(evaluation.end_date);
-  const startDate = formatDate(evaluation.start_date);
+  const detailedEvaluation = evaluationSubmission?.evaluation || evaluation;
+  const subjectName = (evaluation as any).semester?.commission?.subject_name || '–';
+  const endDate = formatDate(detailedEvaluation.end_date);
+  const startDate = formatDate(detailedEvaluation.start_date);
   const graderName = getGraderName(evaluationSubmission?.grader);
   const grade: number = evaluationSubmission?.grade || 0;
   const createdAtDate = formatDate(evaluationSubmission?.created_at);
   const updatedAtDate = formatDate(evaluationSubmission?.updated_at);
-  const failedExam = evaluationSubmission?.grade && grade < evaluation.passing_grade;
+  const isNumericEvaluation = getIsNumericEvaluation(detailedEvaluation);
+  const normalizedSubmissionStatus = (evaluationSubmission?.submission_status || '').toUpperCase();
+  const isApprovedSubmission = normalizedSubmissionStatus === 'APROBADO';
+  const isFailedSubmission = normalizedSubmissionStatus === 'DESAPROBADO';
+  const lateInfo = getLateSubmissionInfo(evaluationSubmission?.created_at, detailedEvaluation.end_date);
+  const isLate = lateInfo.isLate;
+  const lateByText = lateInfo.lateByText;
+  const hasEvaluationStarted = detailedEvaluation.start_date
+    ? moment().isSameOrAfter(moment(detailedEvaluation.start_date))
+    : true;
+  
+  const failedExam = isNumericEvaluation
+    ? evaluationSubmission?.grade !== null && evaluationSubmission?.grade !== undefined && grade < (detailedEvaluation.passing_grade || 0)
+    : isFailedSubmission;
+  
+  const circleProgress = isNumericEvaluation
+    ? grade / 10
+    : (isApprovedSubmission || isFailedSubmission)
+      ? 1
+      : 0;
+  
+    const circleText = isNumericEvaluation
+    ? (evaluationSubmission?.grade ?? '–')
+    : isApprovedSubmission
+      ? 'Aprobado'
+      : isFailedSubmission
+        ? 'Desaprobado'
+        : '–';
+  
+  const fetchSubmission = async () => {
+    if (!evaluation.id) return;
+
+    try {
+      const evaluationSubmissions = await evaluationsRepository.fetchMySubmissions(evaluation.id)
+      setEvaluationSubmission(evaluationSubmissions[0])
+      setEvaluationStatus(getEvaluationStatus(evaluationSubmissions[0]))
+    } catch (err) {
+      console.error(`EvaluationDetails - ${err}`)
+    }
+  };
 
   useEffect(() => {
     if (!evaluation.id) return;
 
-    const fetch = async () => {
-      try {
-        const evaluationSubmissions = await evaluationsRepository.fetchMySubmissions(evaluation.id)
-        setEvaluationSubmission(evaluationSubmissions[0])
-        setEvaluationStatus(getEvaluationStatus(evaluationSubmissions[0]))
-      } catch (err) {
-        console.error(`EvaluationDetails - ${err}`)
-      }
-    }
-    fetch()
+    fetchSubmission()
   }, [evaluation]);
+
+  const onAddSubmissionPress = () => {
+    navigation.navigate('AddEvaluationSubmission', {
+      evaluation,
+    });
+  };
+
+  const onScanQRPress = () => {
+    navigation.push('ScanQRScreen', { evaluation });
+  };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>{evaluation.evaluation_name}</Text>
-      <Text style={styles.header2}>{evaluation.semester.commission.subject_name}</Text>
-
-      <View style={styles.card}>
-        <View style={styles.cardItem}>
-          <MaterialIcon name="calendar-clock" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-          <View style={{ flexGrow: 1 }}>
-            <Text style={styles.cardTitle}>Inicio</Text>
-            <Text style={styles.cardText}>{evaluation.start_date ? startDate : `–`}</Text>
-          </View>
-          <MaterialIcon name="chevron-right" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-          <View style={{ flexGrow: .5 }}>
-            <Text style={styles.cardTitle}>Fin</Text>
-            <Text style={styles.cardText}>{endDate}</Text>
-          </View>
-        </View>
-      </View>
+      <EvaluationDetailsHeader title={detailedEvaluation.evaluation_name} subtitle={subjectName} />
+      <EvaluationDateRangeCard startDate={detailedEvaluation.start_date ? startDate : '–'} endDate={endDate} />
 
       <View style={styles.card}>
         <View style={styles.cardItem}>
           <MaterialIcon name="information-outline" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
           <View>
-            <Text style={styles.passingGradeText}>{evaluationStatus}</Text>
-            <Text style={styles.passingGradeLabel}>Estado</Text>
+            <Text style={evaluationDetailsTextStyles.passingGradeText}>{evaluationStatus}</Text>
+            <Text style={evaluationDetailsTextStyles.passingGradeLabel}>Estado</Text>
           </View>
         </View>
-        <View style={styles.cardItem}>
-          <MaterialIcon name="calendar-today" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-          <View>
-            <Text style={styles.passingGradeText}>{evaluationSubmission?.created_at ? createdAtDate : `–`}</Text>
-            <Text style={styles.passingGradeLabel}>Fecha de entrega</Text>
-          </View>
-        </View>
+        <SubmissionDateRow dateText={evaluationSubmission?.created_at ? createdAtDate : '–'} isLate={isLate} lateByText={lateByText} />
       </View>
 
-      <View style={styles.card}>
-        <View style={{ alignItems: 'center', gap: 8 }}>
-          <Progress.Circle
-            progress={grade / 10}
-            formatText={(a) => grade || '–'}
-            color={failedExam ? lightModeColors.menuOption : lightModeColors.institutional}
-            unfilledColor='lightblue'
-            strokeCap='round'
-            size={135}
-            thickness={12}
-            showsText={true}
-            borderWidth={0}
-            textStyle={{ fontWeight: 'bold' }}
-          />
-          <Text style={styles.passingGradeLabel}>Nota obtenida</Text>
-        </View>
+      <SubmissionTextCard submissionText={evaluationSubmission?.submission_text} />
 
-        <View>
-          <Text style={styles.passingGradeLabel}>Nota mínima de aprobación: {evaluation.passing_grade}</Text>
-        </View>
-      </View>
+      <EvaluationResultCard
+        progress={circleProgress}
+        circleText={String(circleText)}
+        failed={failedExam}
+        isNumericEvaluation={isNumericEvaluation}
+        passingGrade={detailedEvaluation.passing_grade}
+      />
 
       {evaluationStatus !== EvaluationStatus.NOT_TAKEN &&
+        <GraderUpdatedCard
+          graderName={graderName}
+          updatedAt={evaluationSubmission?.updated_at ? updatedAtDate : '–'}
+        />}
+
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && hasEvaluationStarted && !detailedEvaluation.requires_qr &&
         <View style={[styles.card, { marginBottom: 120 }]}>
-          <View style={styles.cardItem}>
-            <MaterialIcon name="account-supervisor" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-            <View>
-              <Text style={styles.passingGradeText}>{graderName}</Text>
-              <Text style={styles.passingGradeLabel}>Corrector</Text>
-            </View>
-          </View>
-          <View style={styles.cardItem}>
-            <MaterialIcon name="calendar-edit" fontSize={24} color={lightModeColors.institutional} style={{ marginRight: 10 }} />
-            <View>
-              <Text style={styles.passingGradeText}>{evaluationSubmission?.updated_at ? updatedAtDate : `–`}</Text>
-              <Text style={styles.passingGradeLabel}>Última fecha de actualización</Text>
-            </View>
-          </View>
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={onAddSubmissionPress}
+          >
+            <Text style={styles.submitButtonText}>
+              Añadir entrega
+            </Text>
+          </TouchableOpacity>
+          <Text style={styles.submitHintText}>
+            {detailedEvaluation.requires_identity
+              ? 'Esta evaluación no requiere QR, pero sí verificación de identidad.'
+              : 'Esta evaluación no requiere QR ni verificación de identidad.'}
+          </Text>
+        </View>}
+
+      {evaluationStatus === EvaluationStatus.NOT_TAKEN && hasEvaluationStarted && detailedEvaluation.requires_qr &&
+        <View style={[styles.card, { marginBottom: 120, alignItems: 'center' }]}>
+          <TouchableOpacity
+            style={styles.qrButton}
+            onPress={onScanQRPress}
+          >
+            <MaterialIcon name="qrcode-scan" fontSize={48} color="white" />
+          </TouchableOpacity>
+          <Text style={styles.submitHintText}>
+            Escanea el código QR para realizar la entrega.
+          </Text>
         </View>}
     </ScrollView>
   );
@@ -127,59 +165,22 @@ function getEvaluationStatus(evaluationSubmission: EvaluationSubmission | undefi
     return EvaluationStatus.NOT_TAKEN
   }
 
-  if (!evaluationSubmission.grade) {
+  const hasNumericGrade = evaluationSubmission.grade !== null && evaluationSubmission.grade !== undefined;
+  const normalizedStatus = (evaluationSubmission.submission_status || '').toUpperCase();
+  const hasFinalStatus = normalizedStatus === 'APROBADO' || normalizedStatus === 'DESAPROBADO';
+
+  if (!hasNumericGrade && !hasFinalStatus) {
     return EvaluationStatus.TAKEN_NOT_GRADED
   }
 
   return EvaluationStatus.TAKEN_GRADED
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  header2: {
-    fontSize: 20,
-    marginBottom: 18,
-  },
-  card: {
-    flexDirection: 'column',
-    marginBottom: 20,
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 8,
-    elevation: 3,
-    gap: 18
-  },
-  cardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cardTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  cardText: {
-    color: 'gray',
-  },
-  passingGradeText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: lightModeColors.institutional,
-  },
-  passingGradeLabel: {
-    fontSize: 14,
-    color: 'gray',
-  },
-});
-
 export default EvaluationDetailsScreen;
+
+function getIsNumericEvaluation(evaluation: Evaluation | any): boolean {
+  return evaluation?.is_gradeable;
+}
 
 function formatDate(date: string | null | undefined) {
   return moment(date).format('HH:mm D/MM/YY');

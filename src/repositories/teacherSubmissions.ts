@@ -7,6 +7,7 @@ import { get, post, put } from './authenticatedRepository';
 const domainUrl = 'api/teacher/evaluations/submissions';
 const GET_SUBMISSIONS_ENDPOINT = `${domainUrl}/get_submissions`;
 const GRADE_SUBMISSION_ENDPOINT = `${domainUrl}/grade`;
+const STATUS_SUBMISSION_ENDPOINT = `${domainUrl}/grade`;
 const ASSIGN_GRADER_TO_SUBMISSION_ENDPOINT = `${domainUrl}/assign_grader`
 const AUTO_ASSIGN_GRADERS_ENDPOINT = `${domainUrl}/auto_assign_graders`
 
@@ -25,6 +26,24 @@ async function gradeSubmission(studentId: number, evaluationId: number, grade: n
   }
   const gradeChange: GradeChangeSnakeCase = await put(`${GRADE_SUBMISSION_ENDPOINT}`, snakeCaseBody) as GradeChangeSnakeCase;
   return convertSnakeToCamelCase(gradeChange) as GradeChange;
+}
+
+async function setSubmissionStatus(
+  studentId: number,
+  evaluationId: number,
+  submission_status: 'APROBADO' | 'DESAPROBADO',
+): Promise<GradeChange> {
+  const snakeCaseBody = {
+    student: studentId,
+    evaluation: evaluationId,
+    submission_status: submission_status,
+  };
+
+  const statusChange: GradeChangeSnakeCase = await put(
+    STATUS_SUBMISSION_ENDPOINT,
+    snakeCaseBody,
+  ) as GradeChangeSnakeCase;
+  return convertSnakeToCamelCase(statusChange) as GradeChange;
 }
 
 async function assignGraderToSubmission(studentId: number, evaluationId: number, graderTeacher: number) {
@@ -51,4 +70,10 @@ async function autoAssignGraders(evaluationId: number) {
   return convertSnakeToCamelCase(assignedGradersResponse) as AssignGrader[]
 }
 
-export default { getSubmissions, gradeSubmission, assignGraderToSubmission, autoAssignGraders };
+export default {
+  getSubmissions,
+  gradeSubmission,
+  setSubmissionStatus,
+  assignGraderToSubmission,
+  autoAssignGraders,
+};

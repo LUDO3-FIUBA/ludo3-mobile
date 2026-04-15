@@ -36,9 +36,12 @@ async function fetchMySubmissions(evaluation_id: number): Promise<EvaluationSubm
         .then(json => json as EvaluationSubmission[]);
 }
 
-async function submitEvaluation(evaluationId: string): Promise<EvaluationSubmission> {
+async function submitEvaluation(evaluationId: string, submissionText: string = ''): Promise<EvaluationSubmission> {
     // TODO: error handling like in finalExamsRepository.submitExam
-    return await post(`${domainUrl}/submissions/submit_evaluation`, { evaluation: evaluationId }) as EvaluationSubmission
+    return await post(`${domainUrl}/submissions/submit_evaluation`, {
+        evaluation: evaluationId,
+        submission_text: submissionText,
+    }) as EvaluationSubmission
 }
 
 function convertJsonToEvaluationsList(json: any): Evaluation[] {

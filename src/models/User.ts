@@ -5,6 +5,7 @@ export default class User {
   readonly email: string;
   readonly studentId?: string;
   readonly isTeacherFlag: boolean;
+  readonly isStaffFlag: boolean;
 
   constructor(
     dni: string,
@@ -13,6 +14,7 @@ export default class User {
     email: string,
     studentId?: string = null,
     isTeacherFlag: boolean = false,
+    isStaffFlag: boolean = false,
   ) {
     this.dni = dni;
     this.firstName = firstName;
@@ -20,6 +22,7 @@ export default class User {
     this.email = email;
     this.studentId = studentId === undefined ? null : studentId;
     this.isTeacherFlag = isTeacherFlag;
+    this.isStaffFlag = isStaffFlag;
   }
 
   fullName(): string {
@@ -32,6 +35,10 @@ export default class User {
 
   isTeacher(): boolean {
     return this.isTeacherFlag;
+  }
+
+  isAdmin(): boolean {
+    return this.isStaffFlag;
   }
 
   id(): string {
@@ -49,6 +56,7 @@ export default class User {
       email: this.email,
       studentId: this.studentId,
       isTeacherFlag: this.isTeacherFlag,
+      isStaffFlag: this.isStaffFlag,
     };
   }
 }
