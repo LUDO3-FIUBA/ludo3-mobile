@@ -53,3 +53,7 @@ export { default as TeacherFinalExamSubmissionsScreen } from './teacher_finals/F
 export { default as TeacherAddClassToSemesterScreen } from './teacher_attendances/AddClassToSemester';
 export { default as TeacherSemesterCardScreen } from './teacher_semester/SemesterCard';
 export { default as TeacherEditEvaluationScreen } from './teacher_evaluations/EditEvaluation';
+
+// Student identity screens
+export { default as StudentCredentialScreen } from './student_credential';
+export { default as StudentIdentityViewerScreen } from './student_identity_viewer';

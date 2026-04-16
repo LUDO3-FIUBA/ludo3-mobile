@@ -21,6 +21,7 @@ import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import FilterNavBarButton from "../home/filterNavBarButton";
 import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
+import StudentCredentialScreen from "../student_credential";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { usersRepository } from "../../repositories";
 import User from "../../models/User";
@@ -237,6 +238,14 @@ const RootDrawer = () => {
             options={{
               title: "Verificar identidad",
               drawerIcon: makeDrawerIcon("face-recognition", "face-recognition"),
+            }}
+          />
+          <Drawer.Screen
+            name="StudentCredential"
+            component={StudentCredentialScreen}
+            options={{
+              title: "Mi credencial",
+              drawerIcon: makeDrawerIcon("card-account-details", "card-account-details-outline"),
             }}
           />
           <Drawer.Screen
