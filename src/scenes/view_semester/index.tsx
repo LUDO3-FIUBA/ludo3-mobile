@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { View, Text, SafeAreaView, StyleSheet } from 'react-native';
 import { BasicList, MaterialIcon } from '../../components';
 import { Semester } from '../../models';
 import { useNavigation } from '@react-navigation/native';
@@ -8,8 +7,8 @@ import { lightModeColors } from '../../styles/colorPalette';
 import IsPassingCard from '../../components/isPassingCard';
 
 
-const ViewSemestercreen: React.FC<any> = ({ route }) => {
-  const navigation = useNavigation()
+const ViewSemesterScreen: React.FC<any> = ({ route }) => {
+  const navigation = useNavigation<any>()
   const semester: Semester = route.params.semester;
   const commission = semester.commission
 
@@ -58,7 +57,7 @@ const ViewSemestercreen: React.FC<any> = ({ route }) => {
   );
 };
 
-export default ViewSemestercreen;
+export default ViewSemesterScreen;
 
 
 const styles = StyleSheet.create({
