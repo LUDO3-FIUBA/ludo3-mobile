@@ -22,6 +22,7 @@ export { default as teacherStudentsRepository } from './teacherStudents';
 export { default as teacherProfileRepository } from './teacherProfile';
 export { default as notificationsRepository } from './notifications';
 export type { Notification, UserNotification } from './notifications';
+export { default as academicCalendarRepository } from './academicCalendar';
 export { default as departmentsRepository } from './departments';
 export { default as adminCommissionsRepository } from './adminCommissions';
 export { default as adminUsersRepository } from './adminUsers';
