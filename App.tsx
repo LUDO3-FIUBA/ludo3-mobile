@@ -1,11 +1,12 @@
-import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import './calendars.config';
 import * as React from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   ChangePasswordScreen,
   ForgotPasswordRequestScreen,
@@ -96,6 +97,7 @@ const App = () => {
   }, []);
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <Provider store={store}>
       <ActionSheetProvider>
         <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme} linking={Platform.OS === 'web' ? webLinking : undefined}>
@@ -191,6 +193,18 @@ const App = () => {
               name="AddEvaluationSubmission"
               component={AddEvaluationSubmissionScreen}
               options={{ headerShown: true, title: 'Agregar entrega' }}
+            />
+
+            <Stack.Screen
+              name="ViewFinalDetails"
+              component={ViewFinalDetailsScreen}
+              options={{ headerShown: true, title: "Final" }}
+            />
+
+            <Stack.Screen
+              name="ViewClassDetails"
+              component={ViewClassDetailsScreen}
+              options={{ headerShown: true, title: "Cursada" }}
             />
 
             <Stack.Screen
@@ -332,6 +346,7 @@ const App = () => {
         </NavigationContainer>
       </ActionSheetProvider>
     </Provider>
+    </GestureHandlerRootView>
   );
 };
 

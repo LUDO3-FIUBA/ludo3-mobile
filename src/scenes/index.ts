@@ -21,6 +21,8 @@ export { default as CalendarScreen } from './calendar';
 export { default as CommissionInscriptionsScreen } from './commission_inscriptions';
 export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
+export { default as ViewFinalDetailsScreen } from './view_final_details';
+export { default as ViewClassDetailsScreen } from './view_class_details';
 export { default as AddEvaluationSubmissionScreen } from './view_evaluation_details/AddEvaluationSubmission';
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
