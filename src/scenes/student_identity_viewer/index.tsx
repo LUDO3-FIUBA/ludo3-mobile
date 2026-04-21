@@ -90,7 +90,9 @@ const StudentIdentityViewerScreen: React.FC = () => {
             <Text style={[styles.validText, { color: LUDO_GREEN }]}>Credencial válida</Text>
           </View>
 
-          <Text style={styles.name}>{identity.firstName} {identity.lastName}</Text>
+          <Text style={styles.name}>
+            {[identity.firstName, identity.lastName].filter(Boolean).join(' ') || 'Nombre no disponible'}
+          </Text>
           <Text style={styles.subtitle}>Alumno — FIUBA</Text>
 
           <View style={styles.divider} />
