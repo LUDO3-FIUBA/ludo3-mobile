@@ -26,6 +26,9 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
         case qrCodeUtils.QRCodeType.AttendanceUuid:
           await this.onScannedAttendance(navigation, qrCode, disableLoading);
           break;
+        case qrCodeUtils.QRCodeType.StudentIdentityUrl:
+          await navigation.navigate('StudentIdentityViewer', { token: qrCode.parsedUuid });
+          break;
       }
     } catch (error) {
       console.error(`QRScannerConfiguration - Error ${error}`);
