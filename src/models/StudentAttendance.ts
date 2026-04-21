@@ -11,11 +11,17 @@ export interface StudentAttendanceSnakeCase {
 }
 
 export interface MyAttendance {
+    createdAt: string;
+    expiresAt: string;
     qrid: string;
-    submittedAt: string;
+    attended: boolean;
+    submittedAt: string | null;
 }
 
 export interface MyAttendanceSnakeCase {
+    created_at: string;
+    expires_at: string;
     qrid: string;
-    submitted_at: string;
+    attended: boolean;
+    submitted_at: string | null;
 }

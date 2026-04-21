@@ -36,7 +36,10 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
       try {
         const data = await makeRequest(() => attendanceRepository.getMyAttendances(semester.id), navigation);
         if (isMounted) {
-          setAttendances(data);
+          const sortedAttendances = [...data].sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          );
+          setAttendances(sortedAttendances);
         }
       } catch (error) {
         console.log('Error fetching my attendances', error);
@@ -55,16 +58,27 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
   }, [navigation, semester?.id]);
 
   const renderAttendance = ({ item }: { item: MyAttendance }) => (
-    <View style={styles.sessionContainer}>
+    <View style={[styles.sessionContainer, !item.attended && styles.absentSessionContainer]}>
       <View style={styles.headerRow}>
-        <MaterialIcon name="calendar" fontSize={24} color={lightModeColors.institutional} />
+        <MaterialIcon name="calendar" fontSize={24} color={item.attended ? lightModeColors.institutional : '#dc3545'} />
         <Text style={styles.sessionHeader}>
-          {moment(new Date(item.submittedAt)).format('DD/MM/YYYY')}
+          {moment(new Date(item.createdAt)).format('DD/MM/YYYY')}
         </Text>
+        <View style={styles.statusIconContainer}>
+          <MaterialIcon
+            name={item.attended ? 'check-circle' : 'close-circle'}
+            fontSize={24}
+            color={item.attended ? '#28a745' : '#dc3545'}
+          />
+        </View>
       </View>
-      <Text style={styles.dateText}>
-        Hora de asistencia: {moment(new Date(item.submittedAt)).format('HH:mm')}
-      </Text>
+      {item.attended && item.submittedAt ? (
+        <Text style={styles.dateText}>
+          Hora de asistencia: {moment(new Date(item.submittedAt)).format('HH:mm')}
+        </Text>
+      ) : (
+        <Text style={styles.absentText}>Ausente</Text>
+      )}
     </View>
   );
 
@@ -98,6 +112,11 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  absentSessionContainer: {
+    borderColor: '#dc3545',
   },
   headerRow: {
     flexDirection: 'row',
@@ -109,9 +128,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
   },
+  statusIconContainer: {
+    marginLeft: 'auto',
+  },
   dateText: {
     fontSize: 14,
     color: '#555',
+  },
+  absentText: {
+    fontSize: 14,
+    color: '#dc3545',
+    fontWeight: 'bold',
   },
   noDataText: {
     textAlign: 'center',
