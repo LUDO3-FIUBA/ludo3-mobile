@@ -9,3 +9,13 @@ export interface StudentAttendanceSnakeCase {
     student:      TeacherStudent;
     submitted_at: Date;
 }
+
+export interface MyAttendance {
+    qrid: string;
+    submittedAt: string;
+}
+
+export interface MyAttendanceSnakeCase {
+    qrid: string;
+    submitted_at: string;
+}
