@@ -16,6 +16,13 @@ export class CredentialExpired extends Error {
   }
 }
 
+function normalizeImageUrl(image: string | null | undefined): string | null {
+  if (!image) return null;
+  if (image.startsWith('http://') || image.startsWith('https://')) return image;
+  if (image.startsWith('/')) return `${baseUrl}${image}`;
+  return image;
+}
+
 export async function fetchMyQRBase64(): Promise<string> {
   const token = SessionManager.getInstance()?.getAuthToken();
   if (!token) throw new Error('No auth token');
@@ -60,8 +67,25 @@ export async function fetchIdentityByToken(token: string): Promise<StudentIdenti
     lastName: json.last_name,
     dni: json.dni,
     padron: json.padron,
-    image: json.image ?? null,
+    image: normalizeImageUrl(json.image),
   };
 }
 
-export default { fetchMyQRBase64, fetchIdentityByToken, CredentialExpired };
+export async function fetchMyIdentityLink(): Promise<{ url: string; expiresInHours: number }> {
+  const token = SessionManager.getInstance()?.getAuthToken();
+  if (!token) throw new Error('No auth token');
+
+  const response = await fetch(`${baseUrl}/api/student_identity/my_identity_link/`, {
+    method: 'GET',
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    throw new StatusCodeError(response.status);
+  }
+
+  const json = await response.json();
+  return { url: json.url, expiresInHours: json.expires_in_hours };
+}
+
+export default { fetchMyQRBase64, fetchIdentityByToken, fetchMyIdentityLink, CredentialExpired };

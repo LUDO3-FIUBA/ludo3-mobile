@@ -8,9 +8,10 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Appearance,
+  Linking,
 } from 'react-native';
 import { usersRepository } from '../../repositories';
-import { fetchMyQRBase64 } from '../../repositories/studentIdentity';
+import { fetchMyQRBase64, fetchMyIdentityLink } from '../../repositories/studentIdentity';
 import User from '../../models/User';
 import { darkModeColors, lightModeColors } from '../../styles/colorPalette';
 import { MaterialIcon } from '../../components';
@@ -22,6 +23,21 @@ const StudentCredentialScreen: React.FC = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [qrLoading, setQrLoading] = useState(false);
   const [qrError, setQrError] = useState(false);
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkError, setLinkError] = useState(false);
+
+  const openPublicCredential = useCallback(async () => {
+    setLinkLoading(true);
+    setLinkError(false);
+    try {
+      const { url } = await fetchMyIdentityLink();
+      await Linking.openURL(url);
+    } catch {
+      setLinkError(true);
+    } finally {
+      setLinkLoading(false);
+    }
+  }, []);
 
   const loadQR = useCallback(async () => {
     setQrLoading(true);
@@ -101,6 +117,23 @@ const StudentCredentialScreen: React.FC = () => {
         <MaterialIcon name="refresh" fontSize={18} color="white" style={{ marginRight: 6 }} />
         <Text style={styles.buttonText}>Actualizar QR</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.linkButton, linkLoading && styles.buttonDisabled]}
+        onPress={openPublicCredential}
+        disabled={linkLoading}
+      >
+        {linkLoading ? (
+          <ActivityIndicator size="small" color={colors.institutional} style={{ marginRight: 6 }} />
+        ) : (
+          <MaterialIcon name="open-in-new" fontSize={18} color={colors.institutional} style={{ marginRight: 6 }} />
+        )}
+        <Text style={[styles.buttonText, { color: colors.institutional }]}>Abrir credencial pública</Text>
+      </TouchableOpacity>
+
+      {linkError && (
+        <Text style={styles.linkErrorText}>No se pudo obtener el enlace. Intentá nuevamente.</Text>
+      )}
     </ScrollView>
   );
 };
@@ -178,6 +211,18 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 15,
+  },
+  linkButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: '#888',
+    marginTop: 8,
+  },
+  linkErrorText: {
+    fontSize: 13,
+    color: '#c0392b',
+    textAlign: 'center',
+    marginTop: 4,
   },
 });
 
