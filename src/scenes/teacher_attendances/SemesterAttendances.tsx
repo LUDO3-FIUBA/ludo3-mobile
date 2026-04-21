@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppSelector } from '../../redux/hooks';
 import { selectSemesterAttendances } from '../../redux/reducers/teacherSemesterSlice';
@@ -11,6 +11,10 @@ import moment from 'moment';
 
 const SemesterAttendances: React.FC = () => {
   const attendances = useAppSelector(selectSemesterAttendances);
+  const sortedAttendances = useMemo(
+    () => [...attendances].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+    [attendances]
+  );
   const navigation = useNavigation();
 
   const onPressAddNewClass = () => {
@@ -48,9 +52,9 @@ const SemesterAttendances: React.FC = () => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={attendances}
+        data={sortedAttendances}
         renderItem={renderClassAttendance}
-        keyExtractor={(_, index) => index.toString()}
+        keyExtractor={(item) => item.qrid}
         ListEmptyComponent={() => <Text style={styles.noDataText}>No hay clases para este cuatrimestre</Text>}
       />
     </View>
