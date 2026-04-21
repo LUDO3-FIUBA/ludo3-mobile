@@ -13,7 +13,8 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
   const [loading, setLoading] = useState(true);
   const [attendances, setAttendances] = useState<MyAttendance[]>([]);
 
-  const semester = route?.params?.semester;
+  const semesterId = route?.params?.semesterId;
+  const maxAbsences = route?.params?.maxAbsences;
 
   useEffect(() => {
     navigation.setOptions({
@@ -25,7 +26,7 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
     let isMounted = true;
 
     const fetchData = async () => {
-      if (!semester?.id) {
+      if (!semesterId) {
         if (isMounted) {
           setAttendances([]);
           setLoading(false);
@@ -34,7 +35,7 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
       }
 
       try {
-        const data = await makeRequest(() => attendanceRepository.getMyAttendances(semester.id), navigation);
+        const data = await makeRequest(() => attendanceRepository.getMyAttendances(semesterId), navigation);
         if (isMounted) {
           const sortedAttendances = [...data].sort(
             (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
@@ -55,7 +56,11 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
     return () => {
       isMounted = false;
     };
-  }, [navigation, semester?.id]);
+  }, [navigation, semesterId]);
+
+  const absentCount = attendances.filter((attendance) => !attendance.attended).length;
+  const remainingAbsences =
+    typeof maxAbsences === 'number' ? Math.max(maxAbsences - absentCount, 0) : null;
 
   const renderAttendance = ({ item }: { item: MyAttendance }) => (
     <View style={[styles.sessionContainer, !item.attended && styles.absentSessionContainer]}>
@@ -87,14 +92,21 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
       {loading ? (
         <Loading />
       ) : (
-        <FlatList
-          data={attendances}
-          renderItem={renderAttendance}
-          keyExtractor={(item, index) => `${item.qrid}-${index}`}
-          ListEmptyComponent={() => (
-            <Text style={styles.noDataText}>No hay asistencias registradas para este cuatrimestre</Text>
+        <>
+          {remainingAbsences !== null && (
+            <Text style={styles.remainingAbsencesText}>
+              Faltas restantes: {remainingAbsences}
+            </Text>
           )}
-        />
+          <FlatList
+            data={attendances}
+            renderItem={renderAttendance}
+            keyExtractor={(item, index) => `${item.qrid}-${index}`}
+            ListEmptyComponent={() => (
+              <Text style={styles.noDataText}>No hay asistencias registradas para este cuatrimestre</Text>
+            )}
+          />
+        </>
       )}
     </View>
   );
@@ -139,6 +151,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#dc3545',
     fontWeight: 'bold',
+  },
+  remainingAbsencesText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: lightModeColors.institutional,
+    marginBottom: 10,
   },
   noDataText: {
     textAlign: 'center',

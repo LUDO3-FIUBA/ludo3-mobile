@@ -5,4 +5,5 @@ export default interface Semester {
     year_moment: string;
     start_date:  Date;
     commission:  Commission;
+    max_absences?: number;
 }

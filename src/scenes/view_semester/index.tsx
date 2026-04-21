@@ -17,7 +17,8 @@ const ViewSemesterScreen: React.FC<any> = ({ route }) => {
       name: "Ver mis asistencias",
       onPress: () => {
         navigation.navigate('MyAttendances', {
-          semester,
+          semesterId: semester.id,
+          maxAbsences: semester.max_absences,
         });
       },
       materialIcon: <MaterialIcon name="calendar-check" fontSize={24} />
