@@ -15,6 +15,7 @@ export { default as PreRegisterLastInstructionsScreen } from './preregister/done
 export { default as PreRegisterPasswordScreen } from './preregister/password';
 export { default as ApprovedSubjectsScreen } from './approved_subjects';
 export { default as ViewSemesterScreen } from './view_semester';
+export { default as MyAttendancesScreen } from './view_semester/MyAttendances';
 export { default as RootDrawer } from './root_drawer';
 export { default as CorrelativeSubjects } from './correlative_subjects';
 export { default as CalendarScreen } from './calendar';

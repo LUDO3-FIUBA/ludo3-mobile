@@ -14,6 +14,15 @@ const ViewSemesterScreen: React.FC<any> = ({ route }) => {
 
   const listItems = [
     {
+      name: "Ver mis asistencias",
+      onPress: () => {
+        navigation.navigate('MyAttendances', {
+          semester,
+        });
+      },
+      materialIcon: <MaterialIcon name="calendar-check" fontSize={24} />
+    },
+    {
       name: "Ver Evaluaciones",
       onPress: () => {
         navigation.navigate('ViewEvaluations', {
