@@ -25,7 +25,7 @@ async function fetchMisExamenes(): Promise<Evaluation[]> {
         .then(json => Promise.resolve(convertJsonToEvaluationsList(json)));
 }
 
-async function fetchMySubmissions(evaluation_id: number): Promise<EvaluationSubmission[]> {
+async function fetchSubmission(evaluation_id: number): Promise<EvaluationSubmission[]> {
     return get(`${domainUrl}/${evaluation_id}/my_submissions`)
         .catch(error => {
             // if (error instanceof StatusCodeError && error.code == 404) {
@@ -53,6 +53,6 @@ function convertJsonToEvaluationsList(json: any): Evaluation[] {
 export default {
     fetchSemesterEvaluations,
     fetchMisExamenes,
-    fetchMySubmissions,
+    fetchSubmission: fetchSubmission,
     submitEvaluation
 };
