@@ -177,7 +177,11 @@ export default function SubmissionsList({ route }: Props) {
           ListHeaderComponent={renderHeader}
           renderItem={({ item: submission }) => {
             return (
-              <View style={styles.row}>
+              <TouchableOpacity
+                style={styles.row}
+                onPress={() => navigation.navigate('TeacherSubmissionDetails', { evaluation, submission, subjectName })}
+                activeOpacity={0.8}
+              >
                 <View style={styles.cell}>
                   <Text style={styles.text}>{`${submission.student.firstName} ${submission.student.lastName}`}</Text>
                 </View>
@@ -199,13 +203,10 @@ export default function SubmissionsList({ route }: Props) {
                     </Text>
                   )}
                 </View>
-                <TouchableOpacity
-                  style={styles.arrowButton}
-                  onPress={() => navigation.navigate('TeacherSubmissionDetails', { evaluation, submission, subjectName })}
-                >
+                <View style={styles.arrowButton}>
                   <MaterialIcon name="chevron-right" fontSize={28} color="#666" />
-                </TouchableOpacity>
-              </View>
+                </View>
+              </TouchableOpacity>
             );
           }}
           ListEmptyComponent={renderEmptyComponent}

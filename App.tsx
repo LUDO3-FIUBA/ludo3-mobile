@@ -1,12 +1,16 @@
-import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import './calendars.config';
 import * as React from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
+  ChangePasswordScreen,
+  ForgotPasswordRequestScreen,
+  ForgotPasswordConfirmScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
   TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
@@ -32,9 +36,12 @@ const webLinking = {
     screens: {
       Splash: 'splash',
       Landing: 'login',
+      ForgotPasswordRequest: 'password/forgot',
+      ForgotPasswordConfirm: 'password/forgot/confirm',
       GoogleRegister: 'registro/google',
       PreRegister: 'registro',
       PreRegisterPassword: 'registro/password',
+      ChangePassword: 'app/cambiar-password',
       PreRegisterDone: 'registro/completado',
       TakePicture: 'registro/foto',
       RootDrawer: {
@@ -89,6 +96,7 @@ const App = () => {
   }, []);
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <Provider store={store}>
       <ActionSheetProvider>
         <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme} linking={Platform.OS === 'web' ? webLinking : undefined}>
@@ -112,6 +120,18 @@ const App = () => {
               name="Landing"
               component={LandingScreen}
               options={{ headerShown: false, title: 'Inicio' }}
+            />
+
+            <Stack.Screen
+              name="ForgotPasswordRequest"
+              component={ForgotPasswordRequestScreen}
+              options={{ headerShown: true, title: 'Recuperar contraseña' }}
+            />
+
+            <Stack.Screen
+              name="ForgotPasswordConfirm"
+              component={ForgotPasswordConfirmScreen}
+              options={{ headerShown: true, title: 'Confirmar recuperación' }}
             />
 
             <Stack.Screen
@@ -187,6 +207,18 @@ const App = () => {
             />
 
             <Stack.Screen
+              name="ViewFinalDetails"
+              component={ViewFinalDetailsScreen}
+              options={{ headerShown: true, title: "Final" }}
+            />
+
+            <Stack.Screen
+              name="ViewClassDetails"
+              component={ViewClassDetailsScreen}
+              options={{ headerShown: true, title: "Cursada" }}
+            />
+
+            <Stack.Screen
               name="Teachers"
               component={TeachersScreen}
               options={{ headerShown: true, title: "Cuerpo Docente" }}
@@ -202,6 +234,12 @@ const App = () => {
               name="GoogleRegister"
               component={GoogleRegisterScreen}
               options={{ headerShown: true, title: 'Completar registro' }}
+            />
+
+            <Stack.Screen
+              name="ChangePassword"
+              component={ChangePasswordScreen}
+              options={{ headerShown: true, title: 'Cambiar contraseña' }}
             />
 
             {/* Teacher Stack screens */}
@@ -314,6 +352,7 @@ const App = () => {
         </NavigationContainer>
       </ActionSheetProvider>
     </Provider>
+    </GestureHandlerRootView>
   );
 };
 

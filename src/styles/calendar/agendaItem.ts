@@ -1,5 +1,4 @@
 import { StyleSheet, Appearance } from 'react-native';
-import { lightModeColors, darkModeColors } from '../colorPalette';
 
 export default function getStyleSheet() {
     return Appearance.getColorScheme() === 'dark' ? darkMode : lightMode;
@@ -7,41 +6,51 @@ export default function getStyleSheet() {
 
 const styles = StyleSheet.create({
     item: {
-        padding: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: 'lightgrey',
-        flexDirection: 'row'
+        marginHorizontal: 12,
+        marginVertical: 5,
+        borderRadius: 10,
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
+        overflow: 'hidden',
     },
     itemHourText: {
-        color: 'black'
+        color: '#888',
+        fontSize: 12,
+        width: 58,
+        flexShrink: 0,
     },
     itemDurationText: {
         color: 'grey',
         fontSize: 12,
         marginTop: 4,
-        marginLeft: 4
     },
     itemTitleText: {
-        color: 'black',
-        marginLeft: 16,
-        fontWeight: 'bold',
-        fontSize: 16
+        color: '#1a1a1a',
+        fontWeight: '600',
+        fontSize: 15,
+        marginBottom: 2,
     },
     itemFooterText: {
-        color: 'darkgray',
-        marginLeft: 16,
-        fontWeight: 'bold',
-        fontSize: 14
+        color: '#888',
+        fontSize: 13,
     },
     itemButtonContainer: {
-        flex: 1,
-        margin: 7,
-        alignItems: 'flex-end'
+        marginLeft: 'auto',
+        paddingLeft: 8,
+        alignItems: 'flex-end',
+        justifyContent: 'center',
     },
     itemButton: {
-        fontSize: 24,
-        color: 'black'
+        fontSize: 20,
+        color: '#ccc',
     },
     emptyItem: {
         paddingLeft: 20,

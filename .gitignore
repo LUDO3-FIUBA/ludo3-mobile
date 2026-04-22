@@ -75,4 +75,5 @@ yarn-error.log
 .env
 .vscode
 .claude
+.codex
 CLAUDE.md
