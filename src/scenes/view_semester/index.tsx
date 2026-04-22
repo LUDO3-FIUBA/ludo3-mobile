@@ -24,6 +24,15 @@ const ViewSemesterScreen: React.FC<any> = ({ route }) => {
       materialIcon: <MaterialIcon name="calendar-check" fontSize={24} />
     },
     {
+      name: "Ver mis entregas",
+      onPress: () => {
+        navigation.navigate('MySubmissions', {
+          semesterId: semester.id,
+        });
+      },
+      materialIcon: <MaterialIcon name="file-document" fontSize={24} />
+    },
+    {
       name: "Ver Evaluaciones",
       onPress: () => {
         navigation.navigate('ViewEvaluations', {

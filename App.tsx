@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
@@ -54,6 +54,7 @@ const webLinking = {
       },
       ViewSemester: 'comision',
       MyAttendances: 'comision/mis-asistencias',
+      MySubmissions: 'comision/mis-entregas',
       CorrelativeSubjects: 'correlativas',
       ViewEvaluations: 'evaluaciones',
       ViewEvaluationDetails: 'evaluacion',
@@ -147,6 +148,12 @@ const App = () => {
               name="MyAttendances"
               component={MyAttendancesScreen}
               options={{ headerShown: true, title: 'Mis asistencias' }}
+            />
+
+            <Stack.Screen
+              name="MySubmissions"
+              component={MySubmissionsScreen}
+              options={{ headerShown: true, title: 'Mis entregas' }}
             />
 
             <Stack.Screen
