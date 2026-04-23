@@ -3,21 +3,16 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import { Loading, MaterialIcon } from '../../components';
-import { lightModeColors } from '../../styles/colorPalette';
 import { evaluationsRepository } from '../../repositories';
 import { makeRequest } from '../../networking/makeRequest';
 import { EvaluationSubmission } from '../../models';
-
-interface SubmissionWithEvaluation extends EvaluationSubmission {
-  evaluationName: string;
-}
 
 type SubmissionResult = 'PASSED' | 'FAILED' | 'PENDING';
 
 const MySubmissionsScreen: React.FC<any> = ({ route }) => {
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
-  const [submissions, setSubmissions] = useState<SubmissionWithEvaluation[]>([]);
+  const [submissions, setSubmissions] = useState<EvaluationSubmission[]>([]);
 
   const semesterId = route?.params?.semesterId;
 
@@ -68,7 +63,7 @@ const MySubmissionsScreen: React.FC<any> = ({ route }) => {
     };
   }, [navigation, semesterId]);
 
-  const getSubmissionResult = (submission: SubmissionWithEvaluation): SubmissionResult => {
+  const getSubmissionResult = (submission: EvaluationSubmission): SubmissionResult => {
     const evaluation = submission.evaluation as (EvaluationSubmission['evaluation'] & { is_graded?: boolean }) | undefined;
     const isGradeable = evaluation?.is_gradeable;
     const passingGrade = evaluation?.passing_grade;
@@ -107,7 +102,7 @@ const MySubmissionsScreen: React.FC<any> = ({ route }) => {
     return 'Sin calificar';
   };
 
-  const renderSubmission = ({ item }: { item: SubmissionWithEvaluation }) => {
+  const renderSubmission = ({ item }: { item: EvaluationSubmission }) => {
     const result = getSubmissionResult(item);
 
     return (

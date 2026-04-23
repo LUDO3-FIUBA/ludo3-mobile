@@ -35,9 +35,8 @@ const IsPassingCard: FC<IsPassingCardProps> = ({ semesterId }) => {
     }
   };
 
-  const normalizedPassing = isPassing as (IsPassing & { is_passing?: boolean }) | null;
-  const passed = normalizedPassing?.passed ?? normalizedPassing?.is_passing ?? false;
-  const failed = normalizedPassing?.failed ?? (normalizedPassing?.is_passing === false);
+  const passed = isPassing?.passed ?? false;
+  const failed = isPassing?.failed ?? false;
   
   if (!failed && !passed) {
     return null
