@@ -20,6 +20,13 @@ export class IdentityFail extends Error {
   }
 }
 
+export class FaceRegistrationPending extends Error {
+  constructor() {
+    super('Registro facial incompleto.');
+    this.name = 'FaceRegistrationPending';
+  }
+}
+
 export async function fetchForSubject(id: string): Promise<FinalExam[]> {
   const json = await get('api/subjects/history', [
     {
@@ -61,6 +68,12 @@ export function fetchPending(): Promise<FinalExam[]> {
 export function submitExam(finalId: string, image: string): Promise<User> {
   return post(`${domainUrl}/take_exam`, {final: finalId, image: `'${image}'`})
     .catch(error => {
+      if (
+        error instanceof StatusCodeError &&
+        error.isBecauseOf('face_registration_pending')
+      ) {
+        return Promise.reject(new FaceRegistrationPending());
+      }
       if (
         error instanceof StatusCodeError &&
         error.isBecauseOf('invalid_image')
@@ -115,6 +128,7 @@ export default {
   fetchForSubject,
   submitExam,
   IdentityFail,
+  FaceRegistrationPending,
   NotAFinal,
   NotASubject,
 };

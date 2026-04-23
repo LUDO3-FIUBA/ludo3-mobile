@@ -30,6 +30,7 @@ export { default as GoogleRegisterScreen } from './google_register';
 export { default as ChangePasswordScreen } from './password/change';
 export { default as ForgotPasswordRequestScreen } from './password/forgot_request';
 export { default as ForgotPasswordConfirmScreen } from './password/forgot_confirm';
+export { default as CompleteFaceRegistrationScreen } from './complete_face_registration';
 
 // Teacher scenes
 export { default as TeacherHomeScreen } from './teacher_home';

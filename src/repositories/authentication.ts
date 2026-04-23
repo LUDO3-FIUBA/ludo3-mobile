@@ -77,7 +77,7 @@ export function preregister(
   email: string,
   padron: string,
   password: string,
-  image?: string,  // Comentado: imagen ahora es opcional (antes era requerida para captura facial)
+  image?: string,
 ): Promise<object> {
   const body: any = {
     dni,
@@ -86,10 +86,9 @@ export function preregister(
     password,
     is_student: true,
   };
-  // Comentado: campo de imagen para captura facial
-  // if (image) {
-  //   body.image = image;
-  // }
+  if (image) {
+    body.image = image;
+  }
   return publicPost(`${authUrl}/users`, body).catch(error => {
     // Check for: No face detected error
     if (
