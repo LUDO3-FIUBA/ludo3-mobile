@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, Platform } from 'react-native';
 import { RoundedButton } from '../../components';
 import { landing as style } from '../../styles';
 import { authenticationRepository, usersRepository } from '../../repositories';
@@ -222,10 +222,14 @@ const showGenericError = (error?: any) => {
 };
 
 const showInvalidDomain = () => {
-  Alert.alert(
-    'Error',
-    'Dominio de correo inválido. \nUtilizar correo FIUBA.'
-  );
+  const message = 'Dominio de correo inválido. \nUtilizar correo FIUBA.';
+
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.alert(message);
+    return;
+  }
+
+  Alert.alert('Error', message);
 };
 
 const showAccountNotApprovedError = () => {
