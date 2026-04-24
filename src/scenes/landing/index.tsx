@@ -7,7 +7,7 @@ import SessionManager from '../../managers/sessionManager';
 import { lightModeColors } from '../../styles/colorPalette';
 import Svg, { Path } from 'react-native-svg';
 const LudoIcon = require('../../assets/ludo_icon.png');
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { signInWithGoogleForLanding, signOutGoogleForLanding } from '../../auth';
 
 const GoogleLogo = ({ size = 20 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 48 48">
@@ -105,21 +105,22 @@ const Landing = ({ navigation }: Props) => {
   };
 
   const signInWithGoogle = async () => {
-  setLoginInProgress(true);
+    setLoginInProgress(true);
     console.log('[Google Sign-In] Starting Google Sign-In process');
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      console.log('[Google Sign-In] userInfo:', userInfo);
-
-      const idToken = userInfo.data?.idToken;
-      const email = userInfo.data?.user?.email;
+      const result = await signInWithGoogleForLanding();
+      const idToken = result.idToken;
+      const email = (result.email ?? '').trim().toLowerCase();
+      const hostedDomain = (result.hostedDomain ?? '').trim().toLowerCase();
 
       if (!idToken) {
         throw new Error('No se pudo obtener el token de Google');
       }
 
-      if (!email || !email.endsWith('@fi.uba.ar')) {
+      const isFiubaEmail = email.endsWith('@fi.uba.ar');
+      const hasInvalidHostedDomain = hostedDomain.length > 0 && hostedDomain !== 'fi.uba.ar';
+
+      if (!isFiubaEmail || hasInvalidHostedDomain) {
         throw new authenticationRepository.InvalidEmailDomain();
       }
 
@@ -129,7 +130,7 @@ const Landing = ({ navigation }: Props) => {
       if (!handleGoogleAuthError(error)) {
         Alert.alert('Error', `No se pudo iniciar sesión con Google: ${error.message}`);
       }
-      await GoogleSignin.signOut();
+      await signOutGoogleForLanding();
     } finally {
       setLoginInProgress(false);
     }
