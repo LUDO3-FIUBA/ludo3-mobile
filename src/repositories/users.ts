@@ -12,6 +12,20 @@ export class IdentityFail extends Error {
   }
 }
 
+export class FaceRegistrationPending extends Error {
+  constructor() {
+    super('Registro facial incompleto.');
+    this.name = 'FaceRegistrationPending';
+  }
+}
+
+export class InvalidImage extends Error {
+  constructor() {
+    super('No es una imagen válida.');
+    this.name = 'InvalidImage';
+  }
+}
+
 export function validate(image: string): Promise<User> {
   return post(`${domainUrl}/is_me`, {
     image: `'${image}'`,
@@ -19,9 +33,14 @@ export function validate(image: string): Promise<User> {
     .catch(error => {
       if (
         error instanceof StatusCodeError &&
+        error.isBecauseOf('face_registration_pending')
+      ) {
+        return Promise.reject(new FaceRegistrationPending());
+      }
+      if (
+        error instanceof StatusCodeError &&
         error.isBecauseOf('invalid_image')
       ) {
-        // No face detected error
         return Promise.reject(new IdentityFail());
       }
       return Promise.reject(error);
@@ -32,6 +51,18 @@ export function validate(image: string): Promise<User> {
       }
       return getInfo();
     });
+}
+
+export function registerFace(image: string): Promise<void> {
+  return post(`${domainUrl}/register_face`, {image}).catch(error => {
+    if (
+      error instanceof StatusCodeError &&
+      error.isBecauseOf('invalid_image')
+    ) {
+      return Promise.reject(new InvalidImage());
+    }
+    return Promise.reject(error);
+  });
 }
 
 // Example JSON:
@@ -52,6 +83,7 @@ export function getInfo(): Promise<User> {
         json.is_student ? json.file : null,
         json.is_teacher || false,
         json.is_staff || false,
+        json.face_registered === true,
       ),
     ),
   );
@@ -64,4 +96,12 @@ export function sendPushToken(token: string) {
   });
 }
 
-export default {validate, getInfo, IdentityFail, sendPushToken};
+export default {
+  validate,
+  getInfo,
+  IdentityFail,
+  FaceRegistrationPending,
+  InvalidImage,
+  registerFace,
+  sendPushToken,
+};

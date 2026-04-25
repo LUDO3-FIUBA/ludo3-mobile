@@ -78,6 +78,13 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
         onPress={() => drawerProps.navigation.navigate('ChangePassword')}
         icon={makeDrawerIcon('lock-reset', 'lock-reset')}
       />
+      {user?.faceRegistered === false && (user?.isStudent() || user?.isTeacher()) && (
+        <DrawerItem
+          label="Completar registro facial"
+          onPress={() => drawerProps.navigation.navigate('CompleteFaceRegistration')}
+          icon={makeDrawerIcon('face-recognition', 'face-recognition')}
+        />
+      )}
       <DrawerItem label="Cerrar Sesión" onPress={async () => {
         await GoogleSignin.signOut();
         await SessionManager.getInstance()?.clearCredentials();

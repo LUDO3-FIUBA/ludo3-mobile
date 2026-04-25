@@ -19,6 +19,20 @@ class VerifyIdentityConfiguration extends TakePictureStepConfiguration {
       .catch((error: any) => {
         if (error instanceof usersRepository.IdentityFail) {
           Alert.alert('Error', '¡No sos quien decís ser!');
+        } else if (error instanceof usersRepository.FaceRegistrationPending) {
+          Alert.alert(
+            'Registro facial incompleto',
+            'Todavía no completaste tu registro facial. Completálo para continuar.',
+            [
+              {
+                text: 'Completar ahora',
+                onPress: () => {
+                  navigation.navigate('CompleteFaceRegistration');
+                },
+              },
+              { text: 'Cancelar', style: 'cancel' },
+            ],
+          );
         } else {
           console.log('Error', error);
           Alert.alert('Error', 'Hubo un error, no pudimos identificarte.');

@@ -11,6 +11,7 @@ import {
   ChangePasswordScreen,
   ForgotPasswordRequestScreen,
   ForgotPasswordConfirmScreen,
+  CompleteFaceRegistrationScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
   TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
@@ -226,6 +227,12 @@ const App = () => {
               name="ChangePassword"
               component={ChangePasswordScreen}
               options={{ headerShown: true, title: 'Cambiar contraseña' }}
+            />
+
+            <Stack.Screen
+              name="CompleteFaceRegistration"
+              component={CompleteFaceRegistrationScreen}
+              options={{ headerShown: true, title: 'Completar registro facial' }}
             />
 
             {/* Teacher Stack screens */}
