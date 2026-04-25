@@ -22,6 +22,7 @@ import {
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
   TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
 } from './src/scenes';
+import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -55,6 +56,7 @@ const webLinking = {
           PendingSubjects: 'materias-pendientes',
           ScanQR: 'escanear-qr',
           VerifyIdentity: 'verificar-identidad',
+          StudentCredential: 'mi-credencial',
           StudentStats: 'estadisticas',
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
@@ -85,6 +87,7 @@ const webLinking = {
       SemesterAttendanceQR: 'cuatrimestre/asistencias/qr',
       EvaluationQR: 'cuatrimestre/evaluaciones/qr',
       TeacherStats: 'cuatrimestre/estadisticas',
+      StudentIdentityViewer: 'credencial/:token',
     },
   },
 };
@@ -340,6 +343,11 @@ const App = () => {
               name="EditEvaluation"
               component={TeacherEditEvaluationScreen}
               options={{ headerShown: true, title: 'Editar evaluación' }}
+            />
+            <Stack.Screen
+              name="StudentIdentityViewer"
+              component={StudentIdentityViewerScreen}
+              options={{ headerShown: true, title: 'Credencial estudiantil' }}
             />
           </Stack.Navigator>
         </NavigationContainer>

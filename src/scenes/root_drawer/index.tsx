@@ -36,6 +36,7 @@ import {
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
+import StudentCredentialScreen from "../student_credential";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { usersRepository } from "../../repositories";
 import User from "../../models/User";
@@ -359,6 +360,12 @@ const RootDrawer = () => {
               name="VerifyIdentity"
               component={VerifyIdentity}
               options={{ headerShown: true, title: 'Verificar identidad', drawerIcon: makeDrawerIcon('face-recognition', 'face-recognition') }}
+            />
+
+            <Drawer.Screen
+              name="StudentCredential"
+              component={StudentCredentialScreen}
+              options={{ headerShown: true, title: 'Mi credencial', drawerIcon: makeDrawerIcon('card-account-details', 'card-account-details-outline') }}
             />
 
             <Drawer.Screen
