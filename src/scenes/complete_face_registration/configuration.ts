@@ -6,7 +6,7 @@ import { makeRequest } from '../authenticatedComponent';
 
 class CompleteFaceRegistrationConfiguration extends TakePictureStepConfiguration {
   constructor(description: string) {
-    super(description, 'back', false);
+    super(description, 'front', false);
   }
 
   async onDataObtained(image: any, navigation: any, disableLoading: () => void) {

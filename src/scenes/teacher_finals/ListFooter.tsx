@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, Alert } from 'react-native';
 import { RoundedButton } from '../../components';
 import { evaluationGradesList as style } from '../../styles';
-import prompt from 'react-native-prompt-android';
 import { makeRequest } from '../../networking/makeRequest';
 import { useNavigation } from '@react-navigation/native';
 import { teacherEvaluationsRepository } from '../../repositories';
