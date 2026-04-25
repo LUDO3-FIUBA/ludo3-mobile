@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Alert, Image, StyleSheet, Text, TextInput, TouchableOpacity, Platform } from 'react-native';
 import { RoundedButton } from '../../components';
 import { landing as style } from '../../styles';
@@ -7,7 +7,12 @@ import SessionManager from '../../managers/sessionManager';
 import { lightModeColors } from '../../styles/colorPalette';
 import Svg, { Path } from 'react-native-svg';
 const LudoIcon = require('../../assets/ludo_icon.png');
-import { signInWithGoogleForLanding, signOutGoogleForLanding } from '../../auth';
+import {
+  renderGoogleWebSignInButton,
+  signInWithGoogleForLanding,
+  signOutGoogleForLanding,
+  type GoogleLandingSignInResult,
+} from '../../auth/google_landing_signin';
 
 const GoogleLogo = ({ size = 20 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 48 48">
@@ -104,28 +109,32 @@ const Landing = ({ navigation }: Props) => {
     }
   };
 
+  const handleGoogleResult = async (result: GoogleLandingSignInResult) => {
+    const idToken = result.idToken;
+    const email = (result.email ?? '').trim().toLowerCase();
+    const hostedDomain = (result.hostedDomain ?? '').trim().toLowerCase();
+
+    if (!idToken) {
+      throw new Error('No se pudo obtener el token de Google');
+    }
+
+    const isFiubaEmail = email.endsWith('@fi.uba.ar');
+    const hasInvalidHostedDomain = hostedDomain.length > 0 && hostedDomain !== 'fi.uba.ar';
+
+    if (!isFiubaEmail || hasInvalidHostedDomain) {
+      throw new authenticationRepository.InvalidEmailDomain();
+    }
+
+    const response = await authenticationRepository.googleSignIn(idToken);
+    await finalizeLogin(response);
+  };
+
   const signInWithGoogle = async () => {
     setLoginInProgress(true);
     console.log('[Google Sign-In] Starting Google Sign-In process');
     try {
       const result = await signInWithGoogleForLanding();
-      const idToken = result.idToken;
-      const email = (result.email ?? '').trim().toLowerCase();
-      const hostedDomain = (result.hostedDomain ?? '').trim().toLowerCase();
-
-      if (!idToken) {
-        throw new Error('No se pudo obtener el token de Google');
-      }
-
-      const isFiubaEmail = email.endsWith('@fi.uba.ar');
-      const hasInvalidHostedDomain = hostedDomain.length > 0 && hostedDomain !== 'fi.uba.ar';
-
-      if (!isFiubaEmail || hasInvalidHostedDomain) {
-        throw new authenticationRepository.InvalidEmailDomain();
-      }
-
-      const response = await authenticationRepository.googleSignIn(idToken);
-      await finalizeLogin(response);
+      await handleGoogleResult(result);
     } catch (error: any) {
       if (!handleGoogleAuthError(error)) {
         Alert.alert('Error', `No se pudo iniciar sesión con Google: ${error.message}`);
@@ -135,6 +144,32 @@ const Landing = ({ navigation }: Props) => {
       setLoginInProgress(false);
     }
   };
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+
+    void renderGoogleWebSignInButton(
+      'google-signin-container',
+      async (result: GoogleLandingSignInResult) => {
+        setLoginInProgress(true);
+        try {
+          await handleGoogleResult(result);
+        } catch (error: any) {
+          if (!handleGoogleAuthError(error)) {
+            window.alert(`No se pudo iniciar sesión con Google: ${error?.message || 'Error desconocido'}`);
+          }
+          await signOutGoogleForLanding();
+        } finally {
+          setLoginInProgress(false);
+        }
+      },
+      (error: Error) => {
+        window.alert(`No se pudo iniciar sesión con Google: ${error.message}`);
+      },
+    );
+  }, []);
 
   return (
     <View style={style().view}>
@@ -185,17 +220,24 @@ const Landing = ({ navigation }: Props) => {
           <View style={styles.dividerLine} />
         </View>
 
-          <TouchableOpacity
-            style={[styles.googleButton, loginInProgress && { opacity: 0.6 }]}
-            activeOpacity={0.7}
-            onPress={signInWithGoogle}
-            disabled={loginInProgress}
-          >
-            <View style={styles.googleIcon}>
-              <GoogleLogo size={20} />
-            </View>
-            <Text style={styles.googleButtonText}>Continúa con Google</Text>
-          </TouchableOpacity>
+          {Platform.OS === 'web' ? (
+            <View
+              nativeID="google-signin-container"
+              style={[styles.googleWebButtonContainer, loginInProgress && { opacity: 0.6 }]}
+            />
+          ) : (
+            <TouchableOpacity
+              style={[styles.googleButton, loginInProgress && { opacity: 0.6 }]}
+              activeOpacity={0.7}
+              onPress={signInWithGoogle}
+              disabled={loginInProgress}
+            >
+              <View style={styles.googleIcon}>
+                <GoogleLogo size={20} />
+              </View>
+              <Text style={styles.googleButtonText}>Continuar con Google</Text>
+            </TouchableOpacity>
+          )}
       </View>
 
       <View style={styles.preregisterSection}>
@@ -341,6 +383,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     fontWeight: '500',
+  },
+  googleWebButtonContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
   },
   forgotPasswordLink: {
     color: lightModeColors.institutional,

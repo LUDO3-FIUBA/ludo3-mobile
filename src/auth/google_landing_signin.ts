@@ -9,11 +9,12 @@ export type GoogleLandingSignInResult = {
   emailVerified?: boolean;
 };
 
+type GoogleCredentialResponse = {
+  credential?: string;
+};
+
 let googleScriptLoadPromise: Promise<void> | null = null;
-let googleIdentityInitialized = false;
-let pendingResolve: ((value: GoogleLandingSignInResult) => void) | null = null;
-let pendingReject: ((reason?: any) => void) | null = null;
-let pendingTimeoutId: number | null = null;
+const GOOGLE_GIS_LOCALE = 'es';
 
 function decodeJwtPayload(token: string): any {
   try {
@@ -42,7 +43,8 @@ function loadGoogleIdentityScript(): Promise<void> {
       return;
     }
 
-    const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    const scriptSrc = `https://accounts.google.com/gsi/client?hl=${GOOGLE_GIS_LOCALE}`;
+    const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
     if (existingScript) {
       existingScript.addEventListener('load', () => resolve(), { once: true });
       existingScript.addEventListener('error', () => reject(new Error('No se pudo cargar Google Identity Services')), { once: true });
@@ -50,7 +52,7 @@ function loadGoogleIdentityScript(): Promise<void> {
     }
 
     const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
+    script.src = scriptSrc;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
@@ -61,44 +63,62 @@ function loadGoogleIdentityScript(): Promise<void> {
   return googleScriptLoadPromise;
 }
 
-function clearPendingRequest() {
-  if (pendingTimeoutId !== null && typeof window !== 'undefined') {
-    window.clearTimeout(pendingTimeoutId);
+export async function renderGoogleWebSignInButton(
+  containerId: string,
+  onCredential: (result: GoogleLandingSignInResult) => void,
+  onError: (error: Error) => void,
+): Promise<void> {
+  if (Platform.OS !== 'web') {
+    return;
   }
-  pendingTimeoutId = null;
-  pendingResolve = null;
-  pendingReject = null;
-}
 
-function ensureGoogleIdentityInitialized() {
+  if (!GOOGLE_WEB_CLIENT_ID) {
+    onError(new Error('Falta GOOGLE_WEB_CLIENT_ID en el entorno'));
+    return;
+  }
+
+  if (typeof window === 'undefined') {
+    onError(new Error('Google Sign-In web no esta disponible en este entorno'));
+    return;
+  }
+
+  await loadGoogleIdentityScript();
+
+  const container = document.getElementById(containerId);
+  if (!container) {
+    onError(new Error('No se encontro el contenedor para el boton de Google'));
+    return;
+  }
+
   const googleAccounts = (window as any).google?.accounts?.id;
   if (!googleAccounts) {
-    throw new Error('Google Identity Services no esta disponible');
+    onError(new Error('Google Identity Services no esta disponible'));
+    return;
   }
 
-  if (googleIdentityInitialized) {
-    return googleAccounts;
-  }
+  container.innerHTML = '';
+
+  const onLoadDiv = document.createElement('div');
+  onLoadDiv.id = 'g_id_onload';
+  onLoadDiv.setAttribute('data-client_id', GOOGLE_WEB_CLIENT_ID);
+  onLoadDiv.setAttribute('data-auto_prompt', 'false');
+  onLoadDiv.setAttribute('data-ux_mode', 'popup');
+  container.appendChild(onLoadDiv);
+
+  const buttonDiv = document.createElement('div');
+  buttonDiv.className = 'g_id_signin';
+  container.appendChild(buttonDiv);
 
   googleAccounts.initialize({
     client_id: GOOGLE_WEB_CLIENT_ID,
-    callback: (response: { credential?: string }) => {
-      const resolve = pendingResolve;
-      const reject = pendingReject;
-
-      if (!resolve || !reject) {
-        return;
-      }
-
+    callback: (response: GoogleCredentialResponse) => {
       if (!response?.credential) {
-        clearPendingRequest();
-        reject(new Error('No se pudo obtener el token de Google'));
+        onError(new Error('No se pudo obtener el token de Google'));
         return;
       }
 
       const payload = decodeJwtPayload(response.credential);
-      clearPendingRequest();
-      resolve({
+      onCredential({
         idToken: response.credential,
         email: payload?.email,
         hostedDomain: payload?.hd,
@@ -107,45 +127,22 @@ function ensureGoogleIdentityInitialized() {
     },
     auto_select: false,
     cancel_on_tap_outside: true,
-    use_fedcm_for_prompt: true,
+    use_fedcm_for_prompt: false,
   });
 
-  googleIdentityInitialized = true;
-  return googleAccounts;
-}
-
-async function signInWithGoogleWeb(): Promise<GoogleLandingSignInResult> {
-  if (!GOOGLE_WEB_CLIENT_ID) {
-    throw new Error('Falta GOOGLE_WEB_CLIENT_ID en el entorno');
-  }
-
-  if (typeof window === 'undefined') {
-    throw new Error('Google Sign-In web no esta disponible en este entorno');
-  }
-
-  await loadGoogleIdentityScript();
-
-  return new Promise((resolve, reject) => {
-    if (pendingResolve || pendingReject) {
-      reject(new Error('Ya hay un inicio de sesion con Google en progreso'));
-      return;
-    }
-
-    const googleAccounts = ensureGoogleIdentityInitialized();
-
-    pendingResolve = resolve;
-    pendingReject = reject;
-    pendingTimeoutId = window.setTimeout(() => {
-      const currentReject = pendingReject;
-      clearPendingRequest();
-      currentReject?.(new Error('No se pudo completar el inicio de sesion con Google'));
-    }, 60000);
-
-    googleAccounts.prompt();
+  googleAccounts.renderButton(buttonDiv, {
+    type: 'standard',
+    size: 'large',
+    theme: 'outline',
+    text: 'continue_with',
+    shape: 'rectangular',
+    logo_alignment: 'left',
+    width: 320,
+    locale: GOOGLE_GIS_LOCALE,
   });
 }
 
-async function signInWithGoogleNative(): Promise<GoogleLandingSignInResult> {
+export async function signInWithGoogleForLanding(): Promise<GoogleLandingSignInResult> {
   await GoogleSignin.hasPlayServices();
   const userInfo = await GoogleSignin.signIn();
   const idToken = userInfo.data?.idToken ?? '';
@@ -159,17 +156,8 @@ async function signInWithGoogleNative(): Promise<GoogleLandingSignInResult> {
   };
 }
 
-export async function signInWithGoogleForLanding(): Promise<GoogleLandingSignInResult> {
-  if (Platform.OS === 'web') {
-    return signInWithGoogleWeb();
-  }
-
-  return signInWithGoogleNative();
-}
-
 export async function signOutGoogleForLanding(): Promise<void> {
   if (Platform.OS !== 'web') {
     await GoogleSignin.signOut();
   }
 }
-
