@@ -61,9 +61,12 @@ const ProcedureTypesScreen: React.FC = () => {
           PROCEDURE_CONFIG[section.procedure.value] ?? { icon: 'folder', color: '#757575' };
         const isExpanded = expandedId === section.procedure.id;
         return (
-          <View key={section.procedure.id}>
+          <View
+            key={section.procedure.id}
+            style={[styles.procedureBlock, { borderLeftColor: config.color }]}
+          >
             <TouchableOpacity
-              style={[styles.procedureCard, { borderLeftColor: config.color }]}
+              style={styles.procedureCard}
               onPress={() => setExpandedId(isExpanded ? null : section.procedure.id)}
               activeOpacity={0.75}
             >
@@ -93,45 +96,32 @@ const ProcedureTypesScreen: React.FC = () => {
                   section.forms.map(item => {
                     const isDocumento = item.form_type.value === 'Documento';
                     return (
-                      <View
-                        key={item.form_id}
-                        style={[styles.formCard, { borderLeftColor: config.color }]}
-                      >
-                        <Text style={styles.formName}>{item.form_name}</Text>
-                        {!!item.form_description && (
-                          <Text style={styles.formDesc}>{item.form_description}</Text>
-                        )}
-                        <View style={styles.actions}>
-                          {isDocumento && (
+                      <View key={item.form_id} style={styles.formCard}>
+                        <View style={styles.formCardRow}>
+                          <View style={styles.formMainInfo}>
+                            <Text style={styles.formName}>{item.form_name}</Text>
+                            {!!item.form_description && (
+                              <Text style={styles.formDesc}>{item.form_description}</Text>
+                            )}
+                          </View>
+                          <View style={styles.actions}>
                             <TouchableOpacity
-                              style={[styles.btn, styles.btnSecondary]}
-                              onPress={() =>
-                                navigation.navigate('DocumentForm', {
-                                  formId: item.form_id,
-                                  action: 'download',
-                                })
-                              }
+                              style={styles.btnPrimary}
+                              onPress={() => {
+                                if (isDocumento) {
+                                  navigation.navigate('DocumentForm', {
+                                    formId: item.form_id,
+                                    action: 'submit',
+                                  });
+                                } else {
+                                  navigation.navigate('DigitalForm', { formId: item.form_id });
+                                }
+                              }}
                             >
-                              <MaterialIcon name="download" fontSize={15} color="#555" />
-                              <Text style={styles.btnSecondaryText}>Descargar</Text>
+                              <MaterialIcon name="send" fontSize={15} color="white" />
+                              <Text style={styles.btnText}>Enviar</Text>
                             </TouchableOpacity>
-                          )}
-                          <TouchableOpacity
-                            style={[styles.btn, { backgroundColor: config.color }]}
-                            onPress={() => {
-                              if (isDocumento) {
-                                navigation.navigate('DocumentForm', {
-                                  formId: item.form_id,
-                                  action: 'submit',
-                                });
-                              } else {
-                                navigation.navigate('DigitalForm', { formId: item.form_id });
-                              }
-                            }}
-                          >
-                            <MaterialIcon name="send" fontSize={15} color="white" />
-                            <Text style={styles.btnText}>Enviar</Text>
-                          </TouchableOpacity>
+                          </View>
                         </View>
                       </View>
                     );
@@ -150,20 +140,25 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 16, gap: 12 },
 
-  procedureCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  procedureBlock: {
     backgroundColor: 'white',
     borderLeftWidth: 4,
     borderRadius: 10,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    gap: 10,
     elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 1 },
+  },
+  procedureCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 2,
+    paddingHorizontal: 2,
   },
   procedureCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   procedureCardRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -178,35 +173,43 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: 'white', fontSize: 12, fontWeight: '700' },
 
-  formsContainer: { marginTop: 4, gap: 8, paddingLeft: 8 },
-  emptyText: { color: '#aaa', fontSize: 13, paddingLeft: 4 },
+  formsContainer: { gap: 8 },
+  emptyText: { color: '#aaa', fontSize: 13 },
 
   formCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#f7f7f7',
     borderRadius: 10,
-    borderLeftWidth: 4,
     padding: 14,
+    borderWidth: 1,
+    borderColor: '#e2e2e2',
+  },
+  formCardRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  formMainInfo: {
+    flex: 1,
     gap: 6,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.07,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
   },
   formName: { fontSize: 15, fontWeight: '700', color: '#222' },
   formDesc: { fontSize: 13, color: '#666' },
-  actions: { flexDirection: 'row', gap: 8, marginTop: 4, alignSelf: 'flex-start' },
-  btn: {
+  actions: {
+    minWidth: 88,
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+  },
+  btnPrimary: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
     paddingVertical: 7,
     paddingHorizontal: 12,
     borderRadius: 8,
+    backgroundColor: '#455A64',
   },
   btnText: { color: 'white', fontWeight: '600', fontSize: 13 },
-  btnSecondary: { borderWidth: 1, borderColor: '#ccc', backgroundColor: '#f5f5f5' },
-  btnSecondaryText: { color: '#555', fontWeight: '600', fontSize: 13 },
 });
 
 export default ProcedureTypesScreen;
