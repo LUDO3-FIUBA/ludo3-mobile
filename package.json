@@ -27,6 +27,7 @@
     "@reduxjs/toolkit": "^2.5.0",
     "expo": "~52.0.0",
     "expo-build-properties": "~0.13.3",
+    "expo-document-picker": "~13.0.3",
     "expo-image-manipulator": "~13.0.5",
     "expo-notifications": "~0.29.11",
     "formik": "^2.4.9",
@@ -58,6 +59,7 @@
     "react-native-web": "~0.19.13",
     "react-redux": "^9.2.0",
     "validate.js": "^0.13.1",
+    "xlsx": "^0.18.5",
     "yup": "^1.7.1"
   },
   "devDependencies": {
