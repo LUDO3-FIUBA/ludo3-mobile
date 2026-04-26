@@ -14,6 +14,8 @@ import PendingSubjectsScreen from "../pending_subjects";
 import StatsScreen from "../stats";
 import TeacherHomeScreen from "../teacher_home";
 import CreateSemester from "../teacher_semester/CreateSemester";
+import ProcedureTypesScreen from "../forms/ProcedureTypesScreen";
+import FormsManagerScreen from "../admin_forms/FormsManagerScreen";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { lightModeColors, darkModeColors } from "../../styles/colorPalette";
@@ -29,7 +31,7 @@ import { fetchUserDataAsync } from "../../redux/reducers/teacherUserDataSlice";
 
 const Drawer = createDrawerNavigator();
 
-type RoleView = "student" | "teacher";
+type RoleView = "student" | "teacher" | "admin";
 
 const CustomDrawerContent = (
   props: DrawerContentComponentProps & {
@@ -39,7 +41,7 @@ const CustomDrawerContent = (
   }
 ) => {
   const { user, roleView, onSwitchRole, ...drawerProps } = props;
-  const hasBothRoles = user?.isStudent() && user?.isTeacher();
+  const hasBothRoles = user?.isStudent() && user?.isTeacher() && !user?.isAdmin();
 
   return (
     <DrawerContentScrollView {...drawerProps}>
@@ -111,8 +113,14 @@ const RootDrawer = () => {
     async function fetchUser() {
       try {
         const fetchedUser = await usersRepository.getInfo();
-        const initialRole: RoleView =
-          !fetchedUser.isStudent() && fetchedUser.isTeacher() ? "teacher" : "student";
+        let initialRole: RoleView;
+        if (fetchedUser.isAdmin()) {
+          initialRole = "admin";
+        } else if (!fetchedUser.isStudent() && fetchedUser.isTeacher()) {
+          initialRole = "teacher";
+        } else {
+          initialRole = "student";
+        }
         setUser(fetchedUser);
         setRoleView(initialRole);
         dispatch(fetchUserDataAsync(fetchedUser));
@@ -132,6 +140,7 @@ const RootDrawer = () => {
 
   const showStudentScreens = roleView === "student" && (user?.isStudent() ?? true);
   const showTeacherScreens = roleView === "teacher" && (user?.isTeacher() ?? false);
+  const showAdminScreens = roleView === "admin" && (user?.isAdmin() ?? false);
 
   return (
     <Drawer.Navigator
@@ -224,6 +233,14 @@ const RootDrawer = () => {
             }}
           />
           <Drawer.Screen
+            name="Tramites"
+            component={ProcedureTypesScreen}
+            options={{
+              title: "Trámites",
+              drawerIcon: makeDrawerIcon("archive", "archive-outline"),
+            }}
+          />
+          <Drawer.Screen
             name="ScanQR"
             component={ScanQR}
             options={{
@@ -266,6 +283,19 @@ const RootDrawer = () => {
             options={{
               title: "Crear Cuatrimestre",
               drawerIcon: makeDrawerIcon("plus-circle", "plus-circle-outline"),
+            }}
+          />
+        </>
+      )}
+
+      {showAdminScreens && (
+        <>
+          <Drawer.Screen
+            name="GestorTramites"
+            component={FormsManagerScreen}
+            options={{
+              title: "Gestor de Trámites",
+              drawerIcon: makeDrawerIcon("archive", "archive-outline"),
             }}
           />
         </>

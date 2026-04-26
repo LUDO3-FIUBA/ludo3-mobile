@@ -23,3 +23,4 @@ export { default as teacherProfileRepository } from './teacherProfile';
 export { default as departmentsRepository } from './departments';
 export { default as adminCommissionsRepository } from './adminCommissions';
 export { default as adminUsersRepository } from './adminUsers';
+export { default as formsRepository } from './forms';

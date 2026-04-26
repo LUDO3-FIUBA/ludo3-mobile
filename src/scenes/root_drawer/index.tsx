@@ -17,6 +17,8 @@ import CommissionDetail from "../admin_commissions/CommissionDetail";
 import CommissionForm from "../admin_commissions/CommissionForm";
 import UserSearch from "../admin_users/UserSearch";
 import UserDetail from "../admin_users/UserDetail";
+import ProcedureTypesScreen from "../forms/ProcedureTypesScreen";
+import FormsManagerScreen from "../admin_forms/FormsManagerScreen";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -229,6 +231,12 @@ const RootDrawer = () => {
           />
 
           <Drawer.Screen
+            name="Tramites"
+            component={ProcedureTypesScreen}
+            options={{ headerShown: true, title: 'Trámites', drawerIcon: makeDrawerIcon('file-document-multiple', 'file-document-multiple-outline') }}
+          />
+
+          <Drawer.Screen
             name="AdminDepartmentDetail"
             component={DepartmentDetail}
             options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
@@ -356,6 +364,16 @@ const RootDrawer = () => {
             name="AdminUserDetail"
             component={UserDetail}
             options={{ headerShown: true, title: 'Usuario', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+          />
+
+          <Drawer.Screen
+            name="GestorTramites"
+            component={FormsManagerScreen}
+            options={{
+              headerShown: true,
+              title: 'Gestor de Trámites',
+              drawerIcon: makeDrawerIcon('clipboard-list', 'clipboard-list-outline')
+            }}
           />
         </>
       )}

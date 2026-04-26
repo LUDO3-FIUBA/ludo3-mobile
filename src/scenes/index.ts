@@ -53,3 +53,13 @@ export { default as TeacherFinalExamSubmissionsScreen } from './teacher_finals/F
 export { default as TeacherAddClassToSemesterScreen } from './teacher_attendances/AddClassToSemester';
 export { default as TeacherSemesterCardScreen } from './teacher_semester/SemesterCard';
 export { default as TeacherEditEvaluationScreen } from './teacher_evaluations/EditEvaluation';
+
+// Forms — Student screens
+export { default as ProcedureTypesScreen } from './forms/ProcedureTypesScreen';
+export { default as FormListScreen } from './forms/FormListScreen';
+export { default as DocumentFormScreen } from './forms/DocumentFormScreen';
+export { default as DigitalFormScreen } from './forms/DigitalFormScreen';
+
+// Forms — Admin screens
+export { default as FormsManagerScreen } from './admin_forms/FormsManagerScreen';
+export { default as FormDesignerScreen } from './admin_forms/FormDesignerScreen';

@@ -19,6 +19,8 @@ import {
   TeacherSemesterAttendanceQRScreen, TeacherEvaluationQRScreen, TeacherFinalExamQRScreen,
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
   TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
+  // Forms screens
+  DocumentFormScreen, DigitalFormScreen, FormDesignerScreen,
 } from './src/scenes';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import { Provider } from 'react-redux';
@@ -56,6 +58,8 @@ const webLinking = {
           StudentStats: 'estadisticas',
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
+          Tramites: 'tramites',
+          GestorTramites: 'gestor-tramites',
         },
       },
       ViewSemester: 'comision',
@@ -83,6 +87,9 @@ const webLinking = {
       SemesterAttendanceQR: 'cuatrimestre/asistencias/qr',
       EvaluationQR: 'cuatrimestre/evaluaciones/qr',
       TeacherStats: 'cuatrimestre/estadisticas',
+      DocumentForm: 'tramites/formulario-documento',
+      DigitalForm: 'tramites/formulario-digital',
+      FormDesigner: 'tramites/nuevo-formulario',
     },
   },
 };
@@ -319,6 +326,23 @@ const App = () => {
               name="EditEvaluation"
               component={TeacherEditEvaluationScreen}
               options={{ headerShown: true, title: 'Editar evaluación' }}
+            />
+
+            {/* Forms stack screens */}
+            <Stack.Screen
+              name="DocumentForm"
+              component={DocumentFormScreen}
+              options={{ headerShown: true, title: 'Formulario' }}
+            />
+            <Stack.Screen
+              name="DigitalForm"
+              component={DigitalFormScreen}
+              options={{ headerShown: true, title: 'Completar formulario' }}
+            />
+            <Stack.Screen
+              name="FormDesigner"
+              component={FormDesignerScreen}
+              options={{ headerShown: true, title: 'Nuevo formulario' }}
             />
           </Stack.Navigator>
         </NavigationContainer>
