@@ -10,9 +10,11 @@ import {
   Linking,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
 import { MaterialIcon } from '../../components';
 import { RoundedButton } from '../../components';
 import { formsRepository } from '../../repositories';
+import { LocalFile } from '../../repositories/forms';
 import FormDetail from '../../models/FormDetail';
 import { lightModeColors } from '../../styles/colorPalette';
 
@@ -35,6 +37,7 @@ const DocumentFormScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
+  const [pickedFile, setPickedFile] = useState<LocalFile | null>(null);
 
   useEffect(() => {
     formsRepository
@@ -70,13 +73,36 @@ const DocumentFormScreen: React.FC = () => {
     );
   };
 
+  const handlePickFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled) return;
+      const asset = result.assets[0];
+      setPickedFile({
+        uri: asset.uri,
+        name: asset.name,
+        type: asset.mimeType ?? 'application/octet-stream',
+      });
+    } catch {
+      Alert.alert('Error', 'No se pudo seleccionar el archivo.');
+    }
+  };
+
   const handleSubmit = async () => {
     if (submitting) return;
+    if (!pickedFile) {
+      setSubmitStatus({ type: 'error', message: 'Seleccioná un archivo antes de enviar.' });
+      return;
+    }
 
     setSubmitting(true);
     setSubmitStatus(null);
     try {
-      await formsRepository.submitDocumentForm(formId);
+      await formsRepository.submitDocumentForm(formId, pickedFile);
       setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
       setTimeout(() => {
         navigation.goBack();
@@ -119,12 +145,21 @@ const DocumentFormScreen: React.FC = () => {
         <View style={styles.divider} />
 
         <Text style={styles.sectionLabel}>Paso 2 — Subí el formulario completado</Text>
-        <View style={styles.uploadPlaceholder}>
-          <MaterialIcon name="upload" fontSize={32} color="#aaa" />
-          <Text style={styles.uploadText}>
-            La subida de archivos estará disponible próximamente.
+        <TouchableOpacity style={styles.uploadPicker} onPress={handlePickFile} activeOpacity={0.8}>
+          <MaterialIcon
+            name={pickedFile ? 'file-check' : 'upload'}
+            fontSize={28}
+            color={pickedFile ? '#388E3C' : '#1976D2'}
+          />
+          <Text style={pickedFile ? styles.pickedText : styles.pickerText} numberOfLines={1}>
+            {pickedFile ? pickedFile.name : 'Seleccionar archivo (PDF o imagen)'}
           </Text>
-        </View>
+          {pickedFile ? (
+            <TouchableOpacity onPress={() => setPickedFile(null)} hitSlop={8}>
+              <MaterialIcon name="close-circle" fontSize={20} color="#D32F2F" />
+            </TouchableOpacity>
+          ) : null}
+        </TouchableOpacity>
 
         {submitStatus ? (
           <View
@@ -199,16 +234,19 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   downloadText: { color: 'white', fontSize: 16, fontWeight: '700' },
-  uploadPlaceholder: {
+  uploadPicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     borderWidth: 2,
     borderColor: '#ddd',
     borderStyle: 'dashed',
     borderRadius: 10,
-    paddingVertical: 32,
-    alignItems: 'center',
-    gap: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
   },
-  uploadText: { color: '#aaa', fontSize: 14, textAlign: 'center', paddingHorizontal: 16 },
+  pickerText: { flex: 1, color: '#1976D2', fontSize: 14, fontWeight: '600' },
+  pickedText: { flex: 1, color: '#388E3C', fontSize: 14, fontWeight: '600' },
   statusCard: {
     borderRadius: 8,
     paddingHorizontal: 12,

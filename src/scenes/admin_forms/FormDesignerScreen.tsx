@@ -13,8 +13,10 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
 import { MaterialIcon, RoundedButton } from '../../components';
 import { formsRepository } from '../../repositories';
+import { LocalFile } from '../../repositories/forms';
 import { StatusCodeError } from '../../networking';
 import FormProcedureType from '../../models/FormProcedureType';
 import { lightModeColors } from '../../styles/colorPalette';
@@ -66,6 +68,7 @@ const FormDesignerScreen: React.FC = () => {
   const [procedureId, setProcedureId] = useState<number | null>(null);
   const [isDigital, setIsDigital] = useState(true);
   const [documentUrl, setDocumentUrl] = useState('');
+  const [templateFile, setTemplateFile] = useState<LocalFile | null>(null);
   const [fields, setFields] = useState<DesignerField[]>([]);
 
   const [saving, setSaving] = useState(false);
@@ -298,6 +301,26 @@ const FormDesignerScreen: React.FC = () => {
     return 'No se pudo guardar el formulario. Verificá los datos e intentá nuevamente.';
   };
 
+  const handlePickTemplateFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled) return;
+      const asset = result.assets[0];
+      setTemplateFile({
+        uri: asset.uri,
+        name: asset.name,
+        type: asset.mimeType ?? 'application/pdf',
+      });
+      setDocumentUrl('');
+    } catch {
+      Alert.alert('Error', 'No se pudo seleccionar el archivo.');
+    }
+  };
+
   const handleSave = async () => {
     if (!formName.trim()) {
       Alert.alert('Error', 'El título del formulario es obligatorio.');
@@ -311,8 +334,8 @@ const FormDesignerScreen: React.FC = () => {
       Alert.alert('Error', 'Seleccioná un tipo de trámite.');
       return;
     }
-    if (!isDigital && !documentUrl.trim()) {
-      Alert.alert('Error', 'La URL del documento es obligatoria para formularios tipo Documento.');
+    if (!isDigital && !documentUrl.trim() && !templateFile) {
+      Alert.alert('Error', 'Subí un archivo o indicá una URL para el documento.');
       return;
     }
     if (isDigital && fields.length === 0) {
@@ -338,7 +361,7 @@ const FormDesignerScreen: React.FC = () => {
     };
 
     if (!isDigital) {
-      payload.document_source = documentUrl.trim();
+      if (documentUrl.trim()) payload.document_source = documentUrl.trim();
     } else {
       payload.fields = fields.map((f, i) => ({
         form_field_label: f.form_field_label,
@@ -355,6 +378,8 @@ const FormDesignerScreen: React.FC = () => {
     try {
       if (isEditing && editingFormId) {
         await formsRepository.updateForm(editingFormId, payload);
+      } else if (!isDigital && templateFile) {
+        await formsRepository.createFormWithTemplate(payload, templateFile);
       } else {
         await formsRepository.createForm(payload);
       }
@@ -460,16 +485,43 @@ const FormDesignerScreen: React.FC = () => {
         {!isDigital ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Fuente del documento</Text>
-            <Text style={styles.label}>URL del documento (PDF) *</Text>
+            <Text style={styles.label}>URL del documento (PDF)</Text>
             <TextInput
               style={styles.input}
               value={documentUrl}
-              onChangeText={setDocumentUrl}
+              onChangeText={text => {
+                setDocumentUrl(text);
+                if (text) setTemplateFile(null);
+              }}
               placeholder="https://cms.fi.uba.ar/uploads/..."
               placeholderTextColor="#aaa"
               keyboardType="url"
               autoCapitalize="none"
+              editable={!templateFile}
             />
+            <Text style={styles.label}>O subí el archivo (PDF)</Text>
+            <TouchableOpacity
+              style={styles.templatePicker}
+              onPress={handlePickTemplateFile}
+              activeOpacity={0.8}
+            >
+              <MaterialIcon
+                name={templateFile ? 'file-check' : 'upload'}
+                fontSize={22}
+                color={templateFile ? '#388E3C' : lightModeColors.institutional}
+              />
+              <Text
+                style={templateFile ? styles.templatePickedText : styles.templatePickerText}
+                numberOfLines={1}
+              >
+                {templateFile ? templateFile.name : 'Seleccionar archivo'}
+              </Text>
+              {templateFile ? (
+                <TouchableOpacity onPress={() => setTemplateFile(null)} hitSlop={8}>
+                  <MaterialIcon name="close-circle" fontSize={18} color="#D32F2F" />
+                </TouchableOpacity>
+              ) : null}
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.section}>
@@ -933,6 +985,29 @@ const styles = StyleSheet.create({
     color: lightModeColors.institutional,
     fontWeight: '600',
     fontSize: 12,
+  },
+  templatePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  templatePickerText: {
+    flex: 1,
+    color: lightModeColors.institutional,
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  templatePickedText: {
+    flex: 1,
+    color: '#388E3C',
+    fontWeight: '600',
+    fontSize: 13,
   },
 });
 

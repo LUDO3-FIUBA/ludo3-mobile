@@ -16,6 +16,7 @@ import RNFS from 'react-native-fs';
 import * as XLSX from 'xlsx';
 import { MaterialIcon } from '../../components';
 import { formsRepository } from '../../repositories';
+import SessionManager from '../../managers/sessionManager';
 import Form from '../../models/Form';
 import FormSubmission from '../../models/FormSubmission';
 import FormDetail from '../../models/FormDetail';
@@ -62,6 +63,7 @@ const FormsManagerScreen: React.FC = () => {
   const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
   const [resettingFormId, setResettingFormId] = useState<number | null>(null);
   const [exportingFormId, setExportingFormId] = useState<number | null>(null);
+  const [downloadingSubmissionId, setDownloadingSubmissionId] = useState<number | null>(null);
   const [answersModal, setAnswersModal] = useState<{ submission: FormSubmission; formId: number } | null>(null);
 
   const loadForms = useCallback(async () => {
@@ -330,6 +332,65 @@ const FormsManagerScreen: React.FC = () => {
     }
   };
 
+  const findAdjuntoUrl = (submission: FormSubmission, formId: number): string | null => {
+    const detail = formDetailsCache[formId];
+    if (!detail) return null;
+    const adjuntoField = detail.fields.find(f => f.form_field_type.value === 'adjunto');
+    if (!adjuntoField) return null;
+    const answer = submission.answers.find(a => a.field_id === adjuntoField.form_field_id);
+    return answer?.answer_value || null;
+  };
+
+  const handleDownloadAdjunto = async (submission: FormSubmission, formId: number) => {
+    if (downloadingSubmissionId === submission.submission_id) return;
+    const url = findAdjuntoUrl(submission, formId);
+    if (!url) {
+      showMessage('Sin archivo', 'Esta respuesta no tiene un archivo adjunto.');
+      return;
+    }
+
+    setDownloadingSubmissionId(submission.submission_id);
+    try {
+      const token = SessionManager.getInstance()?.getAuthToken();
+      const response = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const remoteName = url.split('/').filter(Boolean).pop() ?? `submission_${submission.submission_id}`;
+      const fileName = `submission_${submission.submission_id}_${remoteName}`;
+
+      if (Platform.OS === 'web') {
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(objectUrl);
+      } else {
+        const buffer = await response.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+        const base64 = global.btoa(binary);
+        const path = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+        await RNFS.writeFile(path, base64, 'base64');
+        await Share.share({
+          title: 'Descargar adjunto',
+          message: `Archivo descargado: ${fileName}`,
+          url: `file://${path}`,
+        });
+      }
+    } catch {
+      showMessage('Error', 'No se pudo descargar el archivo adjunto.');
+    } finally {
+      setDownloadingSubmissionId(null);
+    }
+  };
+
   const daysSince = (dateStr: string) => {
     const diff = Date.now() - new Date(dateStr).getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -502,6 +563,18 @@ const FormsManagerScreen: React.FC = () => {
                                             }
                                           >
                                             <MaterialIcon name="eye" fontSize={20} color="#1976D2" />
+                                          </TouchableOpacity>
+                                        )}
+                                        {!isDigital && (
+                                          <TouchableOpacity
+                                            onPress={() => handleDownloadAdjunto(sub, item.form_id)}
+                                            disabled={downloadingSubmissionId === sub.submission_id}
+                                          >
+                                            {downloadingSubmissionId === sub.submission_id ? (
+                                              <ActivityIndicator size="small" color="#1976D2" />
+                                            ) : (
+                                              <MaterialIcon name="download" fontSize={20} color="#1976D2" />
+                                            )}
                                           </TouchableOpacity>
                                         )}
                                         <TouchableOpacity

@@ -1,10 +1,21 @@
-import { get, post, deleteMethod, put } from './authenticatedRepository';
+import { get, post, postMultipart, deleteMethod, put } from './authenticatedRepository';
 import FormProcedureType from '../models/FormProcedureType';
 import Form from '../models/Form';
 import FormDetail from '../models/FormDetail';
 import FormSubmission from '../models/FormSubmission';
 
 const BASE = 'api';
+
+export type LocalFile = { uri: string; name: string; type: string };
+
+function appendField(fd: FormData, key: string, value: unknown) {
+  if (value === null || value === undefined) return;
+  if (typeof value === 'object') {
+    fd.append(key, JSON.stringify(value));
+  } else {
+    fd.append(key, String(value));
+  }
+}
 
 export async function fetchFormTypes(): Promise<{ id: number; value: string }[]> {
   return (await get(`${BASE}/form-types`)) as { id: number; value: string }[];
@@ -30,9 +41,10 @@ export async function submitDigitalForm(
   await post(`${BASE}/forms/${formId}/submissions`, { answers });
 }
 
-export async function submitDocumentForm(formId: number): Promise<void> {
-  // TODO: integrar Firebase Storage — enviar archivo real al endpoint
-  await post(`${BASE}/forms/${formId}/submissions/document`, {});
+export async function submitDocumentForm(formId: number, file: LocalFile): Promise<FormSubmission> {
+  const fd = new FormData();
+  fd.append('file', file as unknown as Blob);
+  return (await postMultipart(`${BASE}/forms/${formId}/submissions/document`, fd)) as FormSubmission;
 }
 
 export async function fetchFormSubmissions(formId: number): Promise<FormSubmission[]> {
@@ -53,6 +65,16 @@ export async function deleteSubmission(submissionId: number): Promise<void> {
 
 export async function createForm(formData: object): Promise<Form> {
   return (await post(`${BASE}/forms`, formData)) as Form;
+}
+
+export async function createFormWithTemplate(
+  formData: Record<string, unknown>,
+  templateFile: LocalFile,
+): Promise<Form> {
+  const fd = new FormData();
+  Object.entries(formData).forEach(([k, v]) => appendField(fd, k, v));
+  fd.append('document_source_file', templateFile as unknown as Blob);
+  return (await postMultipart(`${BASE}/forms`, fd)) as Form;
 }
 
 export async function updateForm(formId: number, formData: object): Promise<Form> {
@@ -98,6 +120,7 @@ export default {
   deleteForm,
   deleteSubmission,
   createForm,
+  createFormWithTemplate,
   updateForm,
   fetchFieldTypes,
   fetchCatalogs,

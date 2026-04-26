@@ -145,6 +145,20 @@ export function patch(url: string, body: any, queryParams = [], headers = {}) {
   }).then(res => validate(res));
 }
 
+export function postMultipart(url: string, formData: FormData, headers = {}) {
+  if (logRequests) {
+    console.log(`POST (multipart) ${baseUrl}/${url}/`);
+  }
+  return fetch(`${baseUrl}/${url}/`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      ...headers,
+    },
+    body: formData,
+  }).then(res => validate(res));
+}
+
 export function deleteMethod(url: string, body: any, queryParams = [], headers = {}) {
   const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
   const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
