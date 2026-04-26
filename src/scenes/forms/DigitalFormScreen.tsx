@@ -22,6 +22,11 @@ interface RouteParams {
 
 type AnswerMap = Record<number, string | null>;
 
+type SubmitStatus = {
+  type: 'success' | 'error';
+  message: string;
+};
+
 const DigitalFormScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
@@ -31,6 +36,7 @@ const DigitalFormScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
 
   useEffect(() => {
     formsRepository
@@ -61,16 +67,21 @@ const DigitalFormScreen: React.FC = () => {
     }
 
     setSubmitting(true);
+    setSubmitStatus(null);
     try {
       await formsRepository.submitDigitalForm(
         formId,
         form.fields.map(f => ({ field_id: f.form_field_id, answer_value: answers[f.form_field_id] ?? null })),
       );
-      Alert.alert('Éxito', 'Formulario enviado correctamente.', [
-        { text: 'OK', onPress: () => navigation.popToTop() },
-      ]);
+      setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
+      setTimeout(() => {
+        navigation.goBack();
+      }, 2000);
     } catch {
-      Alert.alert('Error', 'No se pudo enviar el formulario. Por favor intentá nuevamente.');
+      setSubmitStatus({
+        type: 'error',
+        message: 'No se pudo enviar el formulario. Por favor intentá nuevamente.',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -114,11 +125,36 @@ const DigitalFormScreen: React.FC = () => {
           </View>
         ))}
 
-        <RoundedButton
-          text={submitting ? 'Enviando...' : 'Enviar formulario'}
-          enabled={!submitting}
-          onPress={handleSubmit}
-        />
+        {submitStatus ? (
+          <View
+            style={[
+              styles.statusCard,
+              submitStatus.type === 'success' ? styles.statusCardSuccess : styles.statusCardError,
+            ]}
+          >
+            <Text
+              style={[
+                styles.statusText,
+                submitStatus.type === 'success' ? styles.statusTextSuccess : styles.statusTextError,
+              ]}
+            >
+              {submitStatus.message}
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={styles.buttonWrapper}>
+          <RoundedButton
+            text={submitting ? 'Enviando...' : 'Enviar formulario'}
+            enabled={!submitting}
+            onPress={handleSubmit}
+          />
+          {submitting ? (
+            <View style={styles.buttonSpinnerOverlay} pointerEvents="none">
+              <ActivityIndicator color="white" />
+            </View>
+          ) : null}
+        </View>
       </View>
     </ScrollView>
   );
@@ -234,6 +270,39 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#fafafa',
     overflow: 'hidden',
+  },
+  statusCard: {
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  statusCardSuccess: {
+    backgroundColor: '#E8F5E9',
+    borderWidth: 1,
+    borderColor: '#2E7D32',
+  },
+  statusCardError: {
+    backgroundColor: '#FFEBEE',
+    borderWidth: 1,
+    borderColor: '#C62828',
+  },
+  statusText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  statusTextSuccess: {
+    color: '#1B5E20',
+  },
+  statusTextError: {
+    color: '#B71C1C',
+  },
+  buttonWrapper: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  buttonSpinnerOverlay: {
+    position: 'absolute',
+    right: 18,
   },
 });
 

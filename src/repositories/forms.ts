@@ -1,4 +1,4 @@
-import { get, post, deleteMethod } from './authenticatedRepository';
+import { get, post, deleteMethod, put } from './authenticatedRepository';
 import FormProcedureType from '../models/FormProcedureType';
 import Form from '../models/Form';
 import FormDetail from '../models/FormDetail';
@@ -39,12 +39,24 @@ export async function fetchFormSubmissions(formId: number): Promise<FormSubmissi
   return (await get(`${BASE}/forms/${formId}/submissions`)) as FormSubmission[];
 }
 
+export async function resetFormSubmissions(formId: number): Promise<{ deleted_submissions: number }> {
+  return (await post(`${BASE}/forms/${formId}/reset_submissions`, {})) as { deleted_submissions: number };
+}
+
+export async function deleteForm(formId: number): Promise<void> {
+  await deleteMethod(`${BASE}/forms/${formId}`, {});
+}
+
 export async function deleteSubmission(submissionId: number): Promise<void> {
   await deleteMethod(`${BASE}/submissions/${submissionId}`, {});
 }
 
 export async function createForm(formData: object): Promise<Form> {
   return (await post(`${BASE}/forms`, formData)) as Form;
+}
+
+export async function updateForm(formId: number, formData: object): Promise<Form> {
+  return (await put(`${BASE}/forms/${formId}`, formData)) as Form;
 }
 
 export async function fetchFieldTypes(): Promise<{ id: number; value: string }[]> {
@@ -61,6 +73,19 @@ export async function fetchCatalogs(): Promise<
   }[];
 }
 
+export async function createCatalog(payload: {
+  catalog_key: string;
+  catalog_name: string;
+  catalog_description: string | null;
+  items: { catalog_item_value: string; catalog_item_label: string; catalog_item_order?: number }[];
+}): Promise<{ catalog_id: number; catalog_key: string; catalog_name: string }> {
+  return (await post(`${BASE}/catalogs`, payload)) as {
+    catalog_id: number;
+    catalog_key: string;
+    catalog_name: string;
+  };
+}
+
 export default {
   fetchFormTypes,
   fetchProcedureTypes,
@@ -69,8 +94,12 @@ export default {
   submitDigitalForm,
   submitDocumentForm,
   fetchFormSubmissions,
+  resetFormSubmissions,
+  deleteForm,
   deleteSubmission,
   createForm,
+  updateForm,
   fetchFieldTypes,
   fetchCatalogs,
+  createCatalog,
 };

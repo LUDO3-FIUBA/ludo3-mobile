@@ -21,6 +21,11 @@ interface RouteParams {
   action?: 'download' | 'submit';
 }
 
+type SubmitStatus = {
+  type: 'success' | 'error';
+  message: string;
+};
+
 const DocumentFormScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
@@ -29,6 +34,7 @@ const DocumentFormScreen: React.FC = () => {
   const [form, setForm] = useState<FormDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
 
   useEffect(() => {
     formsRepository
@@ -36,7 +42,7 @@ const DocumentFormScreen: React.FC = () => {
       .then(setForm)
       .catch(() => Alert.alert('Error', 'No se pudo cargar el formulario.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [formId]);
 
   if (loading) {
     return (
@@ -66,23 +72,23 @@ const DocumentFormScreen: React.FC = () => {
 
   const handleSubmit = async () => {
     if (submitting) return;
-    Alert.alert(
-      'Enviar formulario',
-      'Esta funcionalidad estará disponible próximamente (integración con Firebase Storage pendiente).',
-      [{ text: 'OK' }],
-    );
-    // TODO: integrar Firebase Storage — implementar selección y carga del archivo
-    // setSubmitting(true);
-    // try {
-    //   await formsRepository.submitDocumentForm(formId);
-    //   Alert.alert('Éxito', 'Formulario enviado correctamente.', [
-    //     { text: 'OK', onPress: () => navigation.popToTop() },
-    //   ]);
-    // } catch {
-    //   Alert.alert('Error', 'No se pudo enviar el formulario.');
-    // } finally {
-    //   setSubmitting(false);
-    // }
+
+    setSubmitting(true);
+    setSubmitStatus(null);
+    try {
+      await formsRepository.submitDocumentForm(formId);
+      setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
+      setTimeout(() => {
+        navigation.goBack();
+      }, 2000);
+    } catch {
+      setSubmitStatus({
+        type: 'error',
+        message: 'No se pudo enviar el formulario. Por favor intentá nuevamente.',
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -93,10 +99,13 @@ const DocumentFormScreen: React.FC = () => {
           <Text style={styles.description}>{form.form_description}</Text>
         )}
         {!!form.form_information && (
-          <View style={styles.infoBox}>
-            <MaterialIcon name="information" fontSize={18} color="#1976D2" />
-            <Text style={styles.infoText}>{form.form_information}</Text>
-          </View>
+          <div>
+            <View style={styles.divider} />
+            <View style={styles.infoBox}>
+              <MaterialIcon name="information" fontSize={18} color="#1976D2" />
+              <Text style={styles.infoText}>{form.form_information}</Text>
+            </View>
+          </div>
         )}
 
         <View style={styles.divider} />
@@ -117,11 +126,36 @@ const DocumentFormScreen: React.FC = () => {
           </Text>
         </View>
 
-        <RoundedButton
-          text={submitting ? 'Enviando...' : 'Enviar formulario'}
-          enabled={!submitting}
-          onPress={handleSubmit}
-        />
+        {submitStatus ? (
+          <View
+            style={[
+              styles.statusCard,
+              submitStatus.type === 'success' ? styles.statusCardSuccess : styles.statusCardError,
+            ]}
+          >
+            <Text
+              style={[
+                styles.statusText,
+                submitStatus.type === 'success' ? styles.statusTextSuccess : styles.statusTextError,
+              ]}
+            >
+              {submitStatus.message}
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={styles.buttonWrapper}>
+          <RoundedButton
+            text={submitting ? 'Enviando...' : 'Enviar formulario'}
+            enabled={!submitting}
+            onPress={handleSubmit}
+          />
+          {submitting ? (
+            <View style={styles.buttonSpinnerOverlay} pointerEvents="none">
+              <ActivityIndicator color="white" />
+            </View>
+          ) : null}
+        </View>
       </View>
     </ScrollView>
   );
@@ -175,6 +209,39 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   uploadText: { color: '#aaa', fontSize: 14, textAlign: 'center', paddingHorizontal: 16 },
+  statusCard: {
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  statusCardSuccess: {
+    backgroundColor: '#E8F5E9',
+    borderWidth: 1,
+    borderColor: '#2E7D32',
+  },
+  statusCardError: {
+    backgroundColor: '#FFEBEE',
+    borderWidth: 1,
+    borderColor: '#C62828',
+  },
+  statusText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  statusTextSuccess: {
+    color: '#1B5E20',
+  },
+  statusTextError: {
+    color: '#B71C1C',
+  },
+  buttonWrapper: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  buttonSpinnerOverlay: {
+    position: 'absolute',
+    right: 18,
+  },
 });
 
 export default DocumentFormScreen;
