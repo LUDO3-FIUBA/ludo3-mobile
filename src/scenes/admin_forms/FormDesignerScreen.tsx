@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 18,
   },
-  switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  switchRow: { flexDirection: 'column', alignItems: 'flex-start', gap: 8 },
   optionsSection: { gap: 8 },
   optionChip: {
     flexDirection: 'row',
