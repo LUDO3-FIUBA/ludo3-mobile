@@ -26,3 +26,4 @@ export { EvaluationDetailsHeader, EvaluationDateRangeCard, SubmissionDateRow, Su
 export { EvaluationResultCard } from './evaluationResultCard'
 export { default as ProcedureTypesAccordionList } from './ProcedureTypesAccordionList'
 export { PROCEDURE_CONFIG } from './ProcedureTypesAccordionList'
+export { default as AlertDialog } from './AlertDialog'

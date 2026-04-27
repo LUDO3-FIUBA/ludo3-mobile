@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import * as XLSX from 'xlsx';
-import { MaterialIcon, ProcedureTypesAccordionList, PROCEDURE_CONFIG } from '../../components';
+import { AlertDialog, MaterialIcon, ProcedureTypesAccordionList, PROCEDURE_CONFIG } from '../../components';
 import { formsRepository } from '../../repositories';
 import SessionManager from '../../managers/sessionManager';
 import Form from '../../models/Form';
@@ -32,19 +32,6 @@ function showMessage(title: string, message: string) {
   Alert.alert(title, message);
 }
 
-function askConfirmation(title: string, message: string): Promise<boolean> {
-  if (Platform.OS === 'web') {
-    return Promise.resolve(window.confirm(`${title}\n\n${message}`));
-  }
-
-  return new Promise(resolve => {
-    Alert.alert(title, message, [
-      { text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) },
-      { text: 'Confirmar', style: 'destructive', onPress: () => resolve(true) },
-    ]);
-  });
-}
-
 const FormsManagerScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [forms, setForms] = useState<Form[]>([]);
@@ -58,6 +45,8 @@ const FormsManagerScreen: React.FC = () => {
   const [exportingFormId, setExportingFormId] = useState<number | null>(null);
   const [downloadingSubmissionId, setDownloadingSubmissionId] = useState<number | null>(null);
   const [answersModal, setAnswersModal] = useState<{ submission: FormSubmission; formId: number } | null>(null);
+  const [submissionToDelete, setSubmissionToDelete] = useState<{ submission: FormSubmission; formId: number } | null>(null);
+  const [formToDelete, setFormToDelete] = useState<Form | null>(null);
 
   const loadForms = useCallback(async () => {
     try {
@@ -155,52 +144,53 @@ const FormsManagerScreen: React.FC = () => {
   };
 
   const handleDeleteSubmission = (submission: FormSubmission, formId: number) => {
-    askConfirmation(
-      'Eliminar respuesta',
-      `¿Estas seguro de eliminar la respuesta de ${submission.student_first_name} ${submission.student_last_name}?`,
-    ).then(async confirmed => {
-      if (!confirmed) return;
+    setSubmissionToDelete({ submission, formId });
+  };
 
-      try {
-        await formsRepository.deleteSubmission(submission.submission_id);
-        const [formsData, subs] = await Promise.all([
-          formsRepository.fetchForms(),
-          formsRepository.fetchFormSubmissions(formId),
-        ]);
-        setForms(formsData);
-        setSubmissionsCache(prev => ({ ...prev, [formId]: subs }));
-      } catch {
-        showMessage('Error', 'No se pudo eliminar la respuesta.');
-      }
-    });
+  const confirmDeleteSubmission = async () => {
+    if (!submissionToDelete) return;
+    const { submission, formId } = submissionToDelete;
+    try {
+      await formsRepository.deleteSubmission(submission.submission_id);
+      const [formsData, subs] = await Promise.all([
+        formsRepository.fetchForms(),
+        formsRepository.fetchFormSubmissions(formId),
+      ]);
+      setForms(formsData);
+      setSubmissionsCache(prev => ({ ...prev, [formId]: subs }));
+    } catch {
+      showMessage('Error', 'No se pudo eliminar la respuesta.');
+    } finally {
+      setSubmissionToDelete(null);
+    }
   };
 
   const handleDeleteForm = (form: Form) => {
-    askConfirmation(
-      'Eliminar formulario',
-      `¿Estas seguro de eliminar el formulario "${form.form_name}"? Esta acción no se puede deshacer.`,
-    ).then(async confirmed => {
-      if (!confirmed) return;
+    setFormToDelete(form);
+  };
 
-      setDeletingFormId(form.form_id);
-      try {
-        await formsRepository.deleteForm(form.form_id);
-        const formsData = await formsRepository.fetchForms();
-        setForms(formsData);
-        setSubmissionsCache(prev => {
-          const next = { ...prev };
-          delete next[form.form_id];
-          return next;
-        });
-        if (expandedFormId === form.form_id) {
-          setExpandedFormId(null);
-        }
-      } catch {
-        showMessage('Error', 'No se pudo eliminar el formulario.');
-      } finally {
-        setDeletingFormId(null);
+  const confirmDeleteForm = async () => {
+    if (!formToDelete) return;
+    const form = formToDelete;
+    setDeletingFormId(form.form_id);
+    try {
+      await formsRepository.deleteForm(form.form_id);
+      const formsData = await formsRepository.fetchForms();
+      setForms(formsData);
+      setSubmissionsCache(prev => {
+        const next = { ...prev };
+        delete next[form.form_id];
+        return next;
+      });
+      if (expandedFormId === form.form_id) {
+        setExpandedFormId(null);
       }
-    });
+    } catch {
+      showMessage('Error', 'No se pudo eliminar el formulario.');
+    } finally {
+      setDeletingFormId(null);
+      setFormToDelete(null);
+    }
   };
 
   const handleRefreshForm = async (form: Form) => {
@@ -440,6 +430,37 @@ const FormsManagerScreen: React.FC = () => {
             );
           })
         }
+      />
+
+      <AlertDialog
+        visible={!!submissionToDelete}
+        title="Eliminar respuesta"
+        message={
+          submissionToDelete
+            ? `¿Estás seguro de eliminar la respuesta de ${submissionToDelete.submission.student_first_name} ${submissionToDelete.submission.student_last_name}?`
+            : ''
+        }
+        destructive
+        confirmLabel="Eliminar"
+        onConfirm={confirmDeleteSubmission}
+        onCancel={() => setSubmissionToDelete(null)}
+      />
+
+      <AlertDialog
+        visible={!!formToDelete}
+        title="Eliminar formulario"
+        message={
+          formToDelete
+            ? `Vas a eliminar el formulario "${formToDelete.form_name}" y todas sus respuestas. Esta acción no se puede deshacer.`
+            : ''
+        }
+        mode="type-to-confirm"
+        confirmationText={formToDelete?.form_name}
+        destructive
+        loading={deletingFormId === formToDelete?.form_id}
+        confirmLabel="Eliminar formulario"
+        onConfirm={confirmDeleteForm}
+        onCancel={() => setFormToDelete(null)}
       />
 
       <Modal
