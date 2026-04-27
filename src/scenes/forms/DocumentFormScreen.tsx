@@ -38,6 +38,7 @@ const DocumentFormScreen: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
   const [pickedFile, setPickedFile] = useState<LocalFile | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   useEffect(() => {
     formsRepository
@@ -87,6 +88,7 @@ const DocumentFormScreen: React.FC = () => {
         name: asset.name,
         type: asset.mimeType ?? 'application/octet-stream',
       });
+      setFileError(null);
     } catch {
       Alert.alert('Error', 'No se pudo seleccionar el archivo.');
     }
@@ -95,11 +97,12 @@ const DocumentFormScreen: React.FC = () => {
   const handleSubmit = async () => {
     if (submitting) return;
     if (!pickedFile) {
-      setSubmitStatus({ type: 'error', message: 'Seleccioná un archivo antes de enviar.' });
+      setFileError('Seleccioná un archivo antes de enviar.');
       return;
     }
 
     setSubmitting(true);
+    setFileError(null);
     setSubmitStatus(null);
     try {
       await formsRepository.submitDocumentForm(formId, pickedFile);
@@ -160,6 +163,7 @@ const DocumentFormScreen: React.FC = () => {
             </TouchableOpacity>
           ) : null}
         </TouchableOpacity>
+        {fileError ? <Text style={styles.fieldErrorText}>{fileError}</Text> : null}
 
         {submitStatus ? (
           <View
@@ -247,6 +251,7 @@ const styles = StyleSheet.create({
   },
   pickerText: { flex: 1, color: '#1976D2', fontSize: 14, fontWeight: '600' },
   pickedText: { flex: 1, color: '#388E3C', fontSize: 14, fontWeight: '600' },
+  fieldErrorText: { color: '#D32F2F', fontSize: 12, fontWeight: '600' },
   statusCard: {
     borderRadius: 8,
     paddingHorizontal: 12,

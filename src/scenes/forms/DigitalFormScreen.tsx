@@ -35,6 +35,7 @@ const DigitalFormScreen: React.FC = () => {
   const [form, setForm] = useState<FormDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<AnswerMap>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<number, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
 
@@ -53,16 +54,47 @@ const DigitalFormScreen: React.FC = () => {
 
   const setAnswer = (fieldId: number, value: string | null) => {
     setAnswers(prev => ({ ...prev, [fieldId]: value }));
+    setFieldErrors(prev => {
+      if (!prev[fieldId]) return prev;
+      const next = { ...prev };
+      delete next[fieldId];
+      return next;
+    });
+  };
+
+  const validateField = (field: FormField, value: string | null): string | null => {
+    if (field.form_field_require && (value === null || value === '')) {
+      return 'Este campo es obligatorio.';
+    }
+
+    if (value === null || value === '') return null;
+
+    if (field.form_field_type.value === 'mail') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) return 'Ingresá un email válido.';
+    }
+
+    if (field.form_field_type.value === 'numero') {
+      if (!/^\d+$/.test(value)) return 'Ingresá un número válido.';
+    }
+
+    if (field.form_field_type.value === 'padron') {
+      if (!/^\d{5,6}$/.test(value)) return 'Ingresá un padrón válido (5 o 6 dígitos).';
+    }
+
+    return null;
   };
 
   const handleSubmit = async () => {
     if (!form || submitting) return;
 
-    const missing = form.fields.filter(
-      f => f.form_field_require && (answers[f.form_field_id] === null || answers[f.form_field_id] === ''),
-    );
-    if (missing.length > 0) {
-      Alert.alert('Campos obligatorios', `Completá: ${missing.map(f => f.form_field_label).join(', ')}`);
+    const nextErrors: Record<number, string> = {};
+    form.fields.forEach(field => {
+      const error = validateField(field, answers[field.form_field_id] ?? null);
+      if (error) nextErrors[field.form_field_id] = error;
+    });
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
       return;
     }
 
@@ -122,6 +154,9 @@ const DigitalFormScreen: React.FC = () => {
               {field.form_field_require && <Text style={styles.required}> *</Text>}
             </Text>
             <FieldInput field={field} value={answers[field.form_field_id]} onChange={v => setAnswer(field.form_field_id, v)} />
+            {fieldErrors[field.form_field_id] ? (
+              <Text style={styles.fieldErrorText}>{fieldErrors[field.form_field_id]}</Text>
+            ) : null}
           </View>
         ))}
 
@@ -254,6 +289,7 @@ const styles = StyleSheet.create({
   fieldContainer: { gap: 6 },
   fieldLabel: { fontSize: 14, fontWeight: '600', color: '#333' },
   required: { color: '#D32F2F' },
+  fieldErrorText: { color: '#D32F2F', fontSize: 12, fontWeight: '600' },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
