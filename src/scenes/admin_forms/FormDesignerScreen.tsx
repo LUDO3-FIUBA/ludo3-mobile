@@ -14,7 +14,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import { MaterialIcon, RoundedButton } from '../../components';
+import { MaterialIcon, ReorderableFieldList, RoundedButton } from '../../components';
 import { formsRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import { StatusCodeError } from '../../networking';
@@ -77,6 +77,7 @@ const FormDesignerScreen: React.FC = () => {
   const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null);
 
   const [modalLabel, setModalLabel] = useState('');
+  const [modalLabelError, setModalLabelError] = useState<string | null>(null);
   const [modalTypeId, setModalTypeId] = useState<number | null>(null);
   const [modalTypeValue, setModalTypeValue] = useState('');
   const [modalRequired, setModalRequired] = useState(false);
@@ -161,6 +162,7 @@ const FormDesignerScreen: React.FC = () => {
   const resetModal = () => {
     setEditingFieldIndex(null);
     setModalLabel('');
+    setModalLabelError(null);
     const available = fieldTypes.filter(ft => ft.value !== 'adjunto');
     setModalTypeId(available[0]?.id ?? null);
     setModalTypeValue(available[0]?.value ?? '');
@@ -175,6 +177,7 @@ const FormDesignerScreen: React.FC = () => {
     const f = fields[index];
     setEditingFieldIndex(index);
     setModalLabel(f.form_field_label);
+    setModalLabelError(null);
     setModalTypeId(f.form_field_type_id);
     setModalTypeValue(f.form_field_type_value);
     setModalRequired(f.form_field_require);
@@ -194,9 +197,10 @@ const FormDesignerScreen: React.FC = () => {
 
   const confirmAddField = () => {
     if (!modalLabel.trim()) {
-      Alert.alert('Error', 'El nombre del campo es obligatorio.');
+      setModalLabelError('El nombre del campo es obligatorio.');
       return;
     }
+    setModalLabelError(null);
     if (modalTypeValue === 'options' && modalOptions.length === 0) {
       Alert.alert('Error', 'Los campos de tipo opciones deben tener al menos una opción.');
       return;
@@ -224,6 +228,16 @@ const FormDesignerScreen: React.FC = () => {
 
   const removeField = (index: number) => {
     setFields(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const moveField = (from: number, to: number) => {
+    setFields(prev => {
+      if (to < 0 || to >= prev.length || from === to) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
   };
 
   const resetCatalogModal = () => {
@@ -526,23 +540,17 @@ const FormDesignerScreen: React.FC = () => {
         ) : (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Campos del formulario</Text>
-            {fields.length === 0 && (
-              <Text style={styles.emptyFields}>Aún no hay campos. Agregá al menos uno.</Text>
-            )}
-            {fields.map((f, i) => (
-              <TouchableOpacity key={i} style={styles.fieldChip} onPress={() => openEditModal(i)} activeOpacity={0.75}>
-                <View style={styles.fieldChipInfo}>
-                  <Text style={styles.fieldChipLabel}>{f.form_field_label}</Text>
-                  <Text style={styles.fieldChipMeta}>
-                    {FIELD_TYPE_LABELS[f.form_field_type_value] ?? f.form_field_type_value}
-                    {f.form_field_require ? ' · obligatorio' : ''}
-                  </Text>
-                </View>
-                <TouchableOpacity onPress={() => removeField(i)} hitSlop={8}>
-                  <MaterialIcon name="close-circle" fontSize={22} color="#D32F2F" />
-                </TouchableOpacity>
-              </TouchableOpacity>
-            ))}
+            <ReorderableFieldList
+              items={fields.map((f, i) => ({
+                key: i,
+                label: f.form_field_label,
+                meta: `${FIELD_TYPE_LABELS[f.form_field_type_value] ?? f.form_field_type_value}${f.form_field_require ? ' · obligatorio' : ''}`,
+              }))}
+              emptyText="Aún no hay campos. Agregá al menos uno."
+              onEdit={openEditModal}
+              onRemove={removeField}
+              onMove={moveField}
+            />
             <TouchableOpacity style={styles.addFieldBtn} onPress={() => setFieldModal(true)}>
               <MaterialIcon name="plus" fontSize={18} color={lightModeColors.institutional} />
               <Text style={styles.addFieldText}>Agregar campo</Text>
@@ -595,12 +603,18 @@ const FormDesignerScreen: React.FC = () => {
 
             <Text style={styles.label}>Nombre del campo *</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, modalLabelError && styles.inputError]}
               value={modalLabel}
-              onChangeText={setModalLabel}
+              onChangeText={text => {
+                setModalLabel(text);
+                if (modalLabelError) setModalLabelError(null);
+              }}
               placeholder="ej: Carrera"
               placeholderTextColor="#aaa"
             />
+            {modalLabelError ? (
+              <Text style={styles.fieldErrorText}>{modalLabelError}</Text>
+            ) : null}
 
             <Text style={styles.label}>Tipo de campo *</Text>
             <View style={styles.pickerWrapper}>
@@ -852,6 +866,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
   },
   multiline: { minHeight: 80, textAlignVertical: 'top' },
+  inputError: { borderColor: '#C62828', backgroundColor: '#FFF5F5' },
+  fieldErrorText: { color: '#C62828', fontSize: 12, marginTop: -4, fontWeight: '600' },
   pickerWrapper: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -879,17 +895,6 @@ const styles = StyleSheet.create({
   toggleText: { fontSize: 14, fontWeight: '600', color: '#555' },
   toggleTextActive: { color: 'white' },
   emptyFields: { color: '#aaa', fontSize: 13, fontStyle: 'italic' },
-  fieldChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f6ff',
-    borderRadius: 8,
-    padding: 10,
-    gap: 8,
-  },
-  fieldChipInfo: { flex: 1 },
-  fieldChipLabel: { fontSize: 14, fontWeight: '600', color: '#333' },
-  fieldChipMeta: { fontSize: 12, color: '#777', marginTop: 2 },
   addFieldBtn: {
     flexDirection: 'row',
     alignItems: 'center',
