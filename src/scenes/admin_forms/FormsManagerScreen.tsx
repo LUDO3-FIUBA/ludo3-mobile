@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import * as XLSX from 'xlsx';
-import { MaterialIcon } from '../../components';
+import { MaterialIcon, ProcedureTypesAccordionList, PROCEDURE_CONFIG } from '../../components';
 import { formsRepository } from '../../repositories';
 import SessionManager from '../../managers/sessionManager';
 import Form from '../../models/Form';
@@ -22,13 +22,7 @@ import FormSubmission from '../../models/FormSubmission';
 import FormDetail from '../../models/FormDetail';
 import { FormAnswer } from '../../models/FormSubmission';
 import { lightModeColors } from '../../styles/colorPalette';
-
-const PROCEDURE_CONFIG: Record<string, { icon: string; color: string }> = {
-  Administrativo: { icon: 'home-city', color: '#F9A825' },
-  Exámenes: { icon: 'file-document', color: '#388E3C' },
-  Carrera: { icon: 'school', color: '#D32F2F' },
-  Cursada: { icon: 'calendar-month', color: '#1976D2' },
-};
+import ManagerFormItem from './components/ManagerFormItem';
 
 function showMessage(title: string, message: string) {
   if (Platform.OS === 'web') {
@@ -55,7 +49,6 @@ const FormsManagerScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedProcedureId, setExpandedProcedureId] = useState<number | null>(null);
   const [expandedFormId, setExpandedFormId] = useState<number | null>(null);
   const [submissionsCache, setSubmissionsCache] = useState<Record<number, FormSubmission[]>>({});
   const [formDetailsCache, setFormDetailsCache] = useState<Record<number, FormDetail>>({});
@@ -409,202 +402,48 @@ const FormsManagerScreen: React.FC = () => {
 
   return (
     <>
-      <ScrollView contentContainerStyle={styles.list}>
-        {sections.map(({ procedure, forms: sectionForms }) => {
-          const config = PROCEDURE_CONFIG[procedure.value] ?? { icon: 'folder', color: '#757575' };
-          const isProcExpanded = expandedProcedureId === procedure.id;
+      <ProcedureTypesAccordionList
+        sections={sections.map(section => ({
+          procedure: section.procedure,
+          items: section.forms,
+        }))}
+        emptyText="Sin formularios."
+        renderItems={(items, section, config) =>
+          items.map(item => {
+            const isFormExpanded = expandedFormId === item.form_id;
+            const submissions = submissionsCache[item.form_id] ?? [];
+            const isDigital = item.form_type.value === 'Digital';
 
-          return (
-            <View key={procedure.id}>
-              <TouchableOpacity
-                style={[styles.procedureCard, { borderLeftColor: config.color }]}
-                onPress={() => setExpandedProcedureId(isProcExpanded ? null : procedure.id)}
-                activeOpacity={0.75}
-              >
-                <View style={styles.procedureCardLeft}>
-                  <MaterialIcon name={config.icon} fontSize={26} color={config.color} />
-                  <Text style={[styles.procedureTitle, { color: config.color }]}>
-                    {procedure.value}
-                  </Text>
-                </View>
-                <View style={styles.procedureCardRight}>
-                  <View style={[styles.badge, { backgroundColor: config.color }]}>
-                    <Text style={styles.badgeText}>{sectionForms.length}</Text>
-                  </View>
-                  <MaterialIcon
-                    name={isProcExpanded ? 'chevron-up' : 'chevron-down'}
-                    fontSize={20}
-                    color="#666"
-                  />
-                </View>
-              </TouchableOpacity>
-
-              {isProcExpanded && (
-                <View style={styles.formsContainer}>
-                  {sectionForms.map(item => {
-                    const isFormExpanded = expandedFormId === item.form_id;
-                    const submissions = submissionsCache[item.form_id] ?? [];
-                    const isDigital = item.form_type.value === 'Digital';
-
-                    return (
-                      <View
-                        key={item.form_id}
-                        style={[styles.formCard, { borderLeftColor: config.color }]}
-                      >
-                        <TouchableOpacity
-                          onPress={() => toggleForm(item)}
-                          activeOpacity={0.8}
-                          style={styles.formHeader}
-                        >
-                          <View style={styles.formHeaderText}>
-                            <Text style={styles.formName}>{item.form_name}</Text>
-                            <Text style={[styles.formType, { color: config.color }]}>
-                              {item.form_type.value}
-                            </Text>
-                          </View>
-                          <View style={styles.formHeaderActions}>
-                            <TouchableOpacity
-                              onPress={(event) => {
-                                event.stopPropagation();
-                                handleRequireAgainResponse(item);
-                              }}
-                              disabled={resettingFormId === item.form_id}
-                              hitSlop={8}
-                            >
-                              {resettingFormId === item.form_id ? (
-                                <ActivityIndicator size="small" color="#EF6C00" />
-                              ) : (
-                                <MaterialIcon name="refresh" fontSize={20} color="#EF6C00" />
-                              )}
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              onPress={(event) => {
-                                event.stopPropagation();
-                                navigation.navigate('FormDesigner', { formId: item.form_id });
-                              }}
-                              hitSlop={8}
-                            >
-                              <MaterialIcon name="pencil" fontSize={20} color={lightModeColors.institutional} />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              onPress={(event) => {
-                                event.stopPropagation();
-                                handleDeleteForm(item);
-                              }}
-                              disabled={deletingFormId === item.form_id}
-                              hitSlop={8}
-                            >
-                              {deletingFormId === item.form_id ? (
-                                <ActivityIndicator size="small" color="#D32F2F" />
-                              ) : (
-                                <MaterialIcon name="trash-can-outline" fontSize={20} color="#D32F2F" />
-                              )}
-                            </TouchableOpacity>
-                            <MaterialIcon
-                              name={isFormExpanded ? 'chevron-up' : 'chevron-down'}
-                              fontSize={20}
-                              color="#666"
-                            />
-                          </View>
-                        </TouchableOpacity>
-
-                        {isFormExpanded && (
-                          <View style={styles.submissionsSection}>
-                            {submissionsLoading && !submissionsCache[item.form_id] ? (
-                              <ActivityIndicator style={{ marginVertical: 12 }} />
-                            ) : (
-                              <>
-                                <View style={styles.submissionsHeader}>
-                                  <Text style={styles.submissionsCount}>
-                                    {submissions.length}{' '}
-                                    {submissions.length === 1 ? 'respuesta' : 'respuestas'}
-                                  </Text>
-                                  {isDigital && (
-                                    <TouchableOpacity
-                                      onPress={() => handleExportExcel(item, submissions)}
-                                      disabled={submissions.length === 0 || exportingFormId === item.form_id}
-                                    >
-                                      {exportingFormId === item.form_id ? (
-                                        <ActivityIndicator size="small" color="#388E3C" />
-                                      ) : (
-                                        <MaterialIcon
-                                          name="microsoft-excel"
-                                          fontSize={22}
-                                          color={submissions.length === 0 ? '#BDBDBD' : '#388E3C'}
-                                        />
-                                      )}
-                                    </TouchableOpacity>
-                                  )}
-                                </View>
-
-                                {submissions.length === 0 ? (
-                                  <Text style={styles.emptyText}>Sin respuestas aún.</Text>
-                                ) : (
-                                  submissions.map(sub => (
-                                    <View key={sub.submission_id} style={styles.submissionRow}>
-                                      <View style={styles.subInfo}>
-                                        <Text style={styles.subName}>
-                                          {sub.student_first_name} {sub.student_last_name}
-                                        </Text>
-                                        {sub.student_padron && (
-                                          <Text style={styles.subPadron}>
-                                            Padrón: {sub.student_padron}
-                                          </Text>
-                                        )}
-                                        <Text style={styles.subDate}>
-                                          {daysSince(sub.submitted_at)}
-                                        </Text>
-                                      </View>
-                                      <View style={styles.subActions}>
-                                        {isDigital && (
-                                          <TouchableOpacity
-                                            onPress={() =>
-                                              setAnswersModal({ submission: sub, formId: item.form_id })
-                                            }
-                                          >
-                                            <MaterialIcon name="eye" fontSize={20} color="#1976D2" />
-                                          </TouchableOpacity>
-                                        )}
-                                        {!isDigital && (
-                                          <TouchableOpacity
-                                            onPress={() => handleDownloadAdjunto(sub, item.form_id)}
-                                            disabled={downloadingSubmissionId === sub.submission_id}
-                                          >
-                                            {downloadingSubmissionId === sub.submission_id ? (
-                                              <ActivityIndicator size="small" color="#1976D2" />
-                                            ) : (
-                                              <MaterialIcon name="download" fontSize={20} color="#1976D2" />
-                                            )}
-                                          </TouchableOpacity>
-                                        )}
-                                        <TouchableOpacity
-                                          onPress={() =>
-                                            handleDeleteSubmission(sub, item.form_id)
-                                          }
-                                        >
-                                          <MaterialIcon
-                                            name="trash-can"
-                                            fontSize={20}
-                                            color="#D32F2F"
-                                          />
-                                        </TouchableOpacity>
-                                      </View>
-                                    </View>
-                                  ))
-                                )}
-                              </>
-                            )}
-                          </View>
-                        )}
-                      </View>
-                    );
-                  })}
-                </View>
-              )}
-            </View>
-          );
-        })}
-      </ScrollView>
+            return (
+              <ManagerFormItem
+                key={item.form_id}
+                form={item}
+                color={config.color}
+                isExpanded={isFormExpanded}
+                submissions={submissions}
+                submissionsLoading={submissionsLoading}
+                hasSubmissionsCache={!!submissionsCache[item.form_id]}
+                isDigital={isDigital}
+                isResetting={resettingFormId === item.form_id}
+                isDeleting={deletingFormId === item.form_id}
+                isExporting={exportingFormId === item.form_id}
+                downloadingSubmissionId={downloadingSubmissionId}
+                onToggle={() => toggleForm(item)}
+                onRequireAgain={() => handleRequireAgainResponse(item)}
+                onEdit={() => navigation.navigate('FormDesigner', { formId: item.form_id })}
+                onDelete={() => handleDeleteForm(item)}
+                onExport={() => handleExportExcel(item, submissions)}
+                onOpenAnswers={submission =>
+                  setAnswersModal({ submission, formId: item.form_id })
+                }
+                onDownloadAdjunto={submission => handleDownloadAdjunto(submission, item.form_id)}
+                onDeleteSubmission={submission => handleDeleteSubmission(submission, item.form_id)}
+                daysSince={daysSince}
+              />
+            );
+          })
+        }
+      />
 
       <Modal
         visible={!!answersModal}
@@ -641,87 +480,6 @@ const FormsManagerScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { padding: 16, gap: 12 },
-
-  procedureCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'white',
-    borderLeftWidth: 4,
-    borderRadius: 10,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-  },
-  procedureCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  procedureCardRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  procedureTitle: { fontSize: 17, fontWeight: '700' },
-  badge: {
-    minWidth: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  badgeText: { color: 'white', fontSize: 12, fontWeight: '700' },
-
-  formsContainer: { marginTop: 4, gap: 8, paddingLeft: 8 },
-
-  formCard: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    borderLeftWidth: 4,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-    overflow: 'hidden',
-  },
-  formHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 14,
-    gap: 8,
-  },
-  formHeaderText: { flex: 1 },
-  formHeaderActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  formName: { fontSize: 15, fontWeight: '700', color: '#222' },
-  formType: { fontSize: 12, marginTop: 2, fontWeight: '600' },
-
-  submissionsSection: { borderTopWidth: 1, borderTopColor: '#f0f0f0', padding: 14, gap: 8 },
-  submissionsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  submissionsCount: { fontSize: 13, fontWeight: '700', color: '#555' },
-  emptyText: { color: '#aaa', fontSize: 13, fontStyle: 'italic' },
-  submissionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
-    gap: 8,
-  },
-  subInfo: { flex: 1, gap: 2 },
-  subName: { fontSize: 14, fontWeight: '600', color: '#333' },
-  subPadron: { fontSize: 12, color: '#777' },
-  subDate: { fontSize: 12, color: '#999' },
-  subActions: { flexDirection: 'row', gap: 14 },
-
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',

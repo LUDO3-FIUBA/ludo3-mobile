@@ -17,7 +17,7 @@ import CommissionDetail from "../admin_commissions/CommissionDetail";
 import CommissionForm from "../admin_commissions/CommissionForm";
 import UserSearch from "../admin_users/UserSearch";
 import UserDetail from "../admin_users/UserDetail";
-import ProcedureTypesScreen from "../forms/ProcedureTypesScreen";
+import FormsListScreen from "../forms/FormsListScreen";
 import FormsManagerScreen from "../admin_forms/FormsManagerScreen";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
@@ -232,7 +232,7 @@ const RootDrawer = () => {
 
           <Drawer.Screen
             name="Tramites"
-            component={ProcedureTypesScreen}
+            component={FormsListScreen}
             options={{ headerShown: true, title: 'Trámites', drawerIcon: makeDrawerIcon('file-document-multiple', 'file-document-multiple-outline') }}
           />
 

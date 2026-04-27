@@ -55,8 +55,7 @@ export { default as TeacherSemesterCardScreen } from './teacher_semester/Semeste
 export { default as TeacherEditEvaluationScreen } from './teacher_evaluations/EditEvaluation';
 
 // Forms — Student screens
-export { default as ProcedureTypesScreen } from './forms/ProcedureTypesScreen';
-export { default as FormListScreen } from './forms/FormListScreen';
+export { default as FormsListScreen } from './forms/FormsListScreen';
 export { default as DocumentFormScreen } from './forms/DocumentFormScreen';
 export { default as DigitalFormScreen } from './forms/DigitalFormScreen';
 

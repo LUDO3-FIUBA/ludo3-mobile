@@ -24,3 +24,5 @@ export { FinalExamSubmissionStudentCard } from './FinalExamSubmissionStudentCard
 export { default as CommissionCard } from './CommissionCard'
 export { EvaluationDetailsHeader, EvaluationDateRangeCard, SubmissionDateRow, SubmissionTextCard, GraderUpdatedCard } from './evaluationDetailsShared'
 export { EvaluationResultCard } from './evaluationResultCard'
+export { default as ProcedureTypesAccordionList } from './ProcedureTypesAccordionList'
+export { PROCEDURE_CONFIG } from './ProcedureTypesAccordionList'

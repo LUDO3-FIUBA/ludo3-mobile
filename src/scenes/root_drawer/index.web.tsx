@@ -14,7 +14,7 @@ import PendingSubjectsScreen from "../pending_subjects";
 import StatsScreen from "../stats";
 import TeacherHomeScreen from "../teacher_home";
 import CreateSemester from "../teacher_semester/CreateSemester";
-import ProcedureTypesScreen from "../forms/ProcedureTypesScreen";
+import FormsListScreen from "../forms/FormsListScreen";
 import FormsManagerScreen from "../admin_forms/FormsManagerScreen";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
@@ -234,7 +234,7 @@ const RootDrawer = () => {
           />
           <Drawer.Screen
             name="Tramites"
-            component={ProcedureTypesScreen}
+            component={FormsListScreen}
             options={{
               title: "Trámites",
               drawerIcon: makeDrawerIcon("archive", "archive-outline"),
