@@ -51,9 +51,6 @@ export async function fetchFormSubmissions(formId: number): Promise<FormSubmissi
   return (await get(`${BASE}/forms/${formId}/submissions`)) as FormSubmission[];
 }
 
-export async function resetFormSubmissions(formId: number): Promise<{ deleted_submissions: number }> {
-  return (await post(`${BASE}/forms/${formId}/reset_submissions`, {})) as { deleted_submissions: number };
-}
 
 export async function deleteForm(formId: number): Promise<void> {
   await deleteMethod(`${BASE}/forms/${formId}`, {});
@@ -116,7 +113,6 @@ export default {
   submitDigitalForm,
   submitDocumentForm,
   fetchFormSubmissions,
-  resetFormSubmissions,
   deleteForm,
   deleteSubmission,
   createForm,

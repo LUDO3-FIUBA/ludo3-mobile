@@ -13,12 +13,12 @@ interface ManagerFormItemProps {
   submissionsLoading: boolean;
   hasSubmissionsCache: boolean;
   isDigital: boolean;
-  isResetting: boolean;
+  isRefreshing: boolean;
   isDeleting: boolean;
   isExporting: boolean;
   downloadingSubmissionId: number | null;
   onToggle: () => void;
-  onRequireAgain: () => void;
+  onRefresh: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onExport: () => void;
@@ -36,12 +36,12 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
   submissionsLoading,
   hasSubmissionsCache,
   isDigital,
-  isResetting,
+  isRefreshing,
   isDeleting,
   isExporting,
   downloadingSubmissionId,
   onToggle,
-  onRequireAgain,
+  onRefresh,
   onEdit,
   onDelete,
   onExport,
@@ -67,12 +67,12 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
           <TouchableOpacity
             onPress={event => {
               event.stopPropagation();
-              onRequireAgain();
+              onRefresh();
             }}
-            disabled={isResetting}
+            disabled={isRefreshing}
             hitSlop={8}
           >
-            {isResetting ? (
+            {isRefreshing ? (
               <ActivityIndicator size="small" color="#EF6C00" />
             ) : (
               <MaterialIcon name="refresh" fontSize={20} color="#EF6C00" />

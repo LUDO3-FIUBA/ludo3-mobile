@@ -54,7 +54,7 @@ const FormsManagerScreen: React.FC = () => {
   const [formDetailsCache, setFormDetailsCache] = useState<Record<number, FormDetail>>({});
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
-  const [resettingFormId, setResettingFormId] = useState<number | null>(null);
+  const [refreshingFormId, setRefreshingFormId] = useState<number | null>(null);
   const [exportingFormId, setExportingFormId] = useState<number | null>(null);
   const [downloadingSubmissionId, setDownloadingSubmissionId] = useState<number | null>(null);
   const [answersModal, setAnswersModal] = useState<{ submission: FormSubmission; formId: number } | null>(null);
@@ -203,24 +203,21 @@ const FormsManagerScreen: React.FC = () => {
     });
   };
 
-  const handleRequireAgainResponse = (form: Form) => {
-    askConfirmation(
-      'Requerir respuesta nuevamente',
-      `Se eliminarán las respuestas actuales de "${form.form_name}" para solicitar que vuelvan a completarlo. ¿Continuar?`,
-    ).then(async confirmed => {
-      if (!confirmed) return;
-
-      setResettingFormId(form.form_id);
-      try {
-        await formsRepository.resetFormSubmissions(form.form_id);
-        setSubmissionsCache(prev => ({ ...prev, [form.form_id]: [] }));
-        showMessage('Éxito', 'Ahora el formulario requiere nuevamente respuestas.');
-      } catch {
-        showMessage('Error', 'No se pudo reiniciar las respuestas del formulario.');
-      } finally {
-        setResettingFormId(null);
-      }
-    });
+  const handleRefreshForm = async (form: Form) => {
+    if (refreshingFormId === form.form_id) return;
+    setRefreshingFormId(form.form_id);
+    try {
+      const [subs, detail] = await Promise.all([
+        formsRepository.fetchFormSubmissions(form.form_id),
+        formsRepository.fetchFormDetail(form.form_id),
+      ]);
+      setSubmissionsCache(prev => ({ ...prev, [form.form_id]: subs }));
+      setFormDetailsCache(prev => ({ ...prev, [form.form_id]: detail }));
+    } catch {
+      showMessage('Error', 'No se pudieron refrescar las respuestas.');
+    } finally {
+      setRefreshingFormId(null);
+    }
   };
 
   const normalizeAnswerValue = (
@@ -424,12 +421,12 @@ const FormsManagerScreen: React.FC = () => {
                 submissionsLoading={submissionsLoading}
                 hasSubmissionsCache={!!submissionsCache[item.form_id]}
                 isDigital={isDigital}
-                isResetting={resettingFormId === item.form_id}
+                isRefreshing={refreshingFormId === item.form_id}
                 isDeleting={deletingFormId === item.form_id}
                 isExporting={exportingFormId === item.form_id}
                 downloadingSubmissionId={downloadingSubmissionId}
                 onToggle={() => toggleForm(item)}
-                onRequireAgain={() => handleRequireAgainResponse(item)}
+                onRefresh={() => handleRefreshForm(item)}
                 onEdit={() => navigation.navigate('FormDesigner', { formId: item.form_id })}
                 onDelete={() => handleDeleteForm(item)}
                 onExport={() => handleExportExcel(item, submissions)}
