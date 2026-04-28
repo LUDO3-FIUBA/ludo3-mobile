@@ -36,6 +36,12 @@ const SemesterStudents: React.FC = () => {
     return Math.round((attendancesCount / semesterData.attendanceQrsCount) * 100);
   };
 
+  const calculateAbsences = (attendancesCount: number | undefined): number => {
+    const totalQrs = semesterData?.attendanceQrsCount || 0;
+    const attended = attendancesCount || 0;
+    return Math.max(totalQrs - attended, 0);
+  };
+
   const getSubmissionLabel = (submission: any) => {
     if (!submission) {
       return '-';
@@ -160,6 +166,7 @@ const SemesterStudents: React.FC = () => {
   const renderStudent = ({ item }: { item: TeacherStudent }) => {
     const isExpanded = expandedStudentId === item.id;
     const attendancePercentage = calculateAttendancePercentage(item.attendancesCount);
+    const absences = calculateAbsences(item.attendancesCount);
 
     return (
       <TouchableOpacity
@@ -183,8 +190,14 @@ const SemesterStudents: React.FC = () => {
             color="gray"
           />
         </View>
-        {isExpanded && item.submissions && item.submissions.length > 0 && (
-          renderSubmissions(item.submissions)
+        {isExpanded && (
+          <View style={styles.submissionsContainer}>
+            <View style={styles.absencesContainer}>
+              <Text style={styles.absencesLabel}>Inasistencias</Text>
+              <Text style={styles.absencesValue}>{absences}</Text>
+            </View>
+            {item.submissions && item.submissions.length > 0 && renderSubmissions(item.submissions)}
+          </View>
         )}
       </TouchableOpacity>
     );
@@ -264,6 +277,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#007AFF',
+  },
+  absencesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingBottom: 8,
+    marginTop: -2,
+  },
+  absencesLabel: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
+  },
+  absencesValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#666',
+  },
+  absencesDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+    marginBottom: 12,
   },
   submissionsContainer: {
     marginTop: 0,
