@@ -92,6 +92,15 @@ const SemesterStudents: React.FC = () => {
     return false;
   };
 
+  const hasEvaluationStarted = (evaluation: any) => {
+    if (!evaluation || !evaluation.startDate) return true;
+    try {
+      return new Date(evaluation.startDate) <= new Date();
+    } catch (e) {
+      return true;
+    }
+  };
+
   const renderSubmissionRow = (evaluation: any, submission: any, isChild: boolean, indentLevel: number) => {
     const tone = getSubmissionTone(submission, evaluation);
     const rowStyle = [
@@ -117,6 +126,12 @@ const SemesterStudents: React.FC = () => {
   const renderEvaluationTree = (evaluation: any, submissionMap: Map<number, any>, indentLevel: number = 0): React.ReactNode => {
     const children = (semesterData?.evaluations || []).filter((childEvaluation: any) => childEvaluation.parentEvaluation === evaluation.id);
     const submission = submissionMap.get(evaluation.id);
+    const started = hasEvaluationStarted(evaluation);
+
+    if (!submission && !started) {
+      return null;
+    }
+
     const renderedChildren = isSubmissionPassed(submission, evaluation)
       ? []
       : children
