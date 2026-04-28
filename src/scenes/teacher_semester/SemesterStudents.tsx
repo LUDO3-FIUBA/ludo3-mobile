@@ -107,6 +107,12 @@ const SemesterStudents: React.FC = () => {
     }
   };
 
+  const sortByStartDate = (left: any, right: any) => {
+    const leftDate = left?.startDate ? new Date(left.startDate).getTime() : 0;
+    const rightDate = right?.startDate ? new Date(right.startDate).getTime() : 0;
+    return leftDate - rightDate;
+  };
+
   const renderSubmissionRow = (evaluation: any, submission: any, isChild: boolean, indentLevel: number) => {
     const tone = getSubmissionTone(submission, evaluation);
     const rowStyle = [
@@ -130,7 +136,9 @@ const SemesterStudents: React.FC = () => {
   };
 
   const renderEvaluationTree = (evaluation: any, submissionMap: Map<number, any>, indentLevel: number = 0): React.ReactNode => {
-    const children = (semesterData?.evaluations || []).filter((childEvaluation: any) => childEvaluation.parentEvaluation === evaluation.id);
+    const children = (semesterData?.evaluations || [])
+      .filter((childEvaluation: any) => childEvaluation.parentEvaluation === evaluation.id)
+      .sort(sortByStartDate);
     const submission = submissionMap.get(evaluation.id);
     const started = hasEvaluationStarted(evaluation);
 
@@ -154,7 +162,9 @@ const SemesterStudents: React.FC = () => {
 
   const renderSubmissions = (submissions: any[]) => {
     const submissionMap = new Map(submissions.map((submission: any) => [submission.evaluationId, submission]));
-    const rootEvaluations = (semesterData?.evaluations || []).filter((evaluation: any) => !evaluation.parentEvaluation);
+    const rootEvaluations = (semesterData?.evaluations || [])
+      .filter((evaluation: any) => !evaluation.parentEvaluation)
+      .sort(sortByStartDate);
 
     return (
       <View style={styles.submissionsContainer}>
