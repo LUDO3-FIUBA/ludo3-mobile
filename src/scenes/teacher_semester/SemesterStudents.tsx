@@ -37,6 +37,10 @@ const SemesterStudents: React.FC = () => {
   };
 
   const getSubmissionLabel = (submission: any) => {
+    if (!submission) {
+      return '-';
+    }
+
     if (submission.grade !== null && submission.grade !== undefined) {
       return String(submission.grade);
     }
@@ -49,6 +53,10 @@ const SemesterStudents: React.FC = () => {
   };
 
   const getSubmissionTone = (submission: any, evaluation: any) => {
+    if (!submission) {
+      return 'Sin calificar';
+    }
+
     if (submission.submissionStatus === 'DESAPROBADO') {
       return 'Desaprobado';
     }
@@ -64,6 +72,26 @@ const SemesterStudents: React.FC = () => {
     return 'Sin calificar';
   };
 
+  const isSubmissionPassed = (submission: any, evaluation: any) => {
+    if (!submission) {
+      return false;
+    }
+
+    if (submission.submissionStatus === 'APROBADO') {
+      return true;
+    }
+
+    if (submission.submissionStatus === 'DESAPROBADO') {
+      return false;
+    }
+
+    if (submission.grade !== null && submission.grade !== undefined && evaluation?.passingGrade !== null && evaluation?.passingGrade !== undefined) {
+      return submission.grade >= evaluation.passingGrade;
+    }
+
+    return false;
+  };
+
   const renderSubmissionRow = (evaluation: any, submission: any, isChild: boolean, indentLevel: number) => {
     const tone = getSubmissionTone(submission, evaluation);
     const rowStyle = [
@@ -76,10 +104,10 @@ const SemesterStudents: React.FC = () => {
 
     return (
       <View style={rowStyle}>
-        <Text style={[isChild ? styles.childEvaluationName : styles.evaluationName, tone === 'Aprobado' && styles.submissionTextGood, tone === 'Desaprobado' && styles.submissionTextBad]}>
+        <Text style={[isChild ? styles.childEvaluationName : styles.evaluationName, tone === 'Aprobado' && styles.submissionTextGood, tone === 'Desaprobado' && styles.submissionTextBad, tone === 'Sin calificar' && styles.submissionTextNeutral]}>
           {evaluation.evaluationName}
         </Text>
-        <Text style={[styles.grade, tone === 'Aprobado' && styles.submissionTextGood, tone === 'Desaprobado' && styles.submissionTextBad]}>
+        <Text style={[styles.grade, tone === 'Aprobado' && styles.submissionTextGood, tone === 'Desaprobado' && styles.submissionTextBad, tone === 'Sin calificar' && styles.submissionTextNeutral]}>
           {getSubmissionLabel(submission)}
         </Text>
       </View>
@@ -89,23 +117,15 @@ const SemesterStudents: React.FC = () => {
   const renderEvaluationTree = (evaluation: any, submissionMap: Map<number, any>, indentLevel: number = 0): React.ReactNode => {
     const children = (semesterData?.evaluations || []).filter((childEvaluation: any) => childEvaluation.parentEvaluation === evaluation.id);
     const submission = submissionMap.get(evaluation.id);
-    const renderedChildren = children
-      .map((childEvaluation: any) => renderEvaluationTree(childEvaluation, submissionMap, indentLevel + 1))
-      .filter(Boolean);
-
-    if (!submission && renderedChildren.length === 0) {
-      return null;
-    }
+    const renderedChildren = isSubmissionPassed(submission, evaluation)
+      ? []
+      : children
+          .map((childEvaluation: any) => renderEvaluationTree(childEvaluation, submissionMap, indentLevel + 1))
+          .filter(Boolean);
 
     return (
       <View key={evaluation.id}>
-        {submission && renderSubmissionRow(evaluation, submission, indentLevel > 0, indentLevel)}
-        {!submission && indentLevel === 0 && renderedChildren.length > 0 && (
-          <View style={styles.evaluationRow}>
-            <Text style={styles.evaluationName}>{evaluation.evaluationName}</Text>
-            <Text style={styles.grade}>-</Text>
-          </View>
-        )}
+        {renderSubmissionRow(evaluation, submission, indentLevel > 0, indentLevel)}
         {renderedChildren.length > 0 && <View style={styles.childrenContainer}>{renderedChildren}</View>}
       </View>
     );
@@ -273,6 +293,9 @@ const styles = StyleSheet.create({
   },
   submissionTextBad: {
     color: '#c0392b',
+  },
+  submissionTextNeutral: {
+    color: '#9aa0a6',
   },
   childEvaluationRow: {
     flexDirection: 'row',
