@@ -28,3 +28,4 @@ export { default as ProcedureTypesAccordionList } from './ProcedureTypesAccordio
 export { PROCEDURE_CONFIG } from './ProcedureTypesAccordionList'
 export { default as AlertDialog } from './AlertDialog'
 export { default as ReorderableFieldList } from './ReorderableFieldList'
+export { default as SubmissionStatusBadge } from './SubmissionStatusBadge'

@@ -18,7 +18,7 @@ import { AlertDialog, MaterialIcon, ProcedureTypesAccordionList, PROCEDURE_CONFI
 import { formsRepository } from '../../repositories';
 import SessionManager from '../../managers/sessionManager';
 import Form from '../../models/Form';
-import FormSubmission from '../../models/FormSubmission';
+import FormSubmission, { FormSubmissionStatusValue } from '../../models/FormSubmission';
 import FormDetail from '../../models/FormDetail';
 import { FormAnswer } from '../../models/FormSubmission';
 import { lightModeColors } from '../../styles/colorPalette';
@@ -47,6 +47,7 @@ const FormsManagerScreen: React.FC = () => {
   const [answersModal, setAnswersModal] = useState<{ submission: FormSubmission; formId: number } | null>(null);
   const [submissionToDelete, setSubmissionToDelete] = useState<{ submission: FormSubmission; formId: number } | null>(null);
   const [formToDelete, setFormToDelete] = useState<Form | null>(null);
+  const [updatingStatusSubmissionId, setUpdatingStatusSubmissionId] = useState<number | null>(null);
 
   const loadForms = useCallback(async () => {
     try {
@@ -190,6 +191,35 @@ const FormsManagerScreen: React.FC = () => {
     } finally {
       setDeletingFormId(null);
       setFormToDelete(null);
+    }
+  };
+
+  const handleChangeSubmissionStatus = async (
+    submission: FormSubmission,
+    formId: number,
+    statusValue: FormSubmissionStatusValue,
+  ) => {
+    if (updatingStatusSubmissionId === submission.submission_id) return;
+    setUpdatingStatusSubmissionId(submission.submission_id);
+    try {
+      const updated = await formsRepository.updateSubmissionStatus(
+        submission.submission_id,
+        statusValue,
+      );
+      setSubmissionsCache(prev => {
+        const cached = prev[formId];
+        if (!cached) return prev;
+        return {
+          ...prev,
+          [formId]: cached.map(s =>
+            s.submission_id === submission.submission_id ? { ...s, status: updated.status } : s,
+          ),
+        };
+      });
+    } catch {
+      showMessage('Error', 'No se pudo actualizar el estado de la respuesta.');
+    } finally {
+      setUpdatingStatusSubmissionId(null);
     }
   };
 
@@ -425,6 +455,10 @@ const FormsManagerScreen: React.FC = () => {
                 }
                 onDownloadAdjunto={submission => handleDownloadAdjunto(submission, item.form_id)}
                 onDeleteSubmission={submission => handleDeleteSubmission(submission, item.form_id)}
+                onChangeSubmissionStatus={(submission, statusValue) =>
+                  handleChangeSubmissionStatus(submission, item.form_id, statusValue)
+                }
+                updatingStatusSubmissionId={updatingStatusSubmissionId}
                 daysSince={daysSince}
               />
             );

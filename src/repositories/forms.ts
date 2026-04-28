@@ -1,8 +1,8 @@
-import { get, post, postMultipart, deleteMethod, put } from './authenticatedRepository';
+import { get, post, postMultipart, deleteMethod, put, patch } from './authenticatedRepository';
 import FormProcedureType from '../models/FormProcedureType';
 import Form from '../models/Form';
 import FormDetail from '../models/FormDetail';
-import FormSubmission from '../models/FormSubmission';
+import FormSubmission, { FormSubmissionStatusValue } from '../models/FormSubmission';
 
 const BASE = 'api';
 
@@ -49,6 +49,17 @@ export async function submitDocumentForm(formId: number, file: LocalFile): Promi
 
 export async function fetchFormSubmissions(formId: number): Promise<FormSubmission[]> {
   return (await get(`${BASE}/forms/${formId}/submissions`)) as FormSubmission[];
+}
+
+export async function fetchMyFormSubmissions(formId: number): Promise<FormSubmission[]> {
+  return (await get(`${BASE}/forms/${formId}/submissions/my_submissions`)) as FormSubmission[];
+}
+
+export async function updateSubmissionStatus(
+  submissionId: number,
+  status: FormSubmissionStatusValue,
+): Promise<FormSubmission> {
+  return (await patch(`${BASE}/submissions/${submissionId}/status`, { status })) as FormSubmission;
 }
 
 
@@ -113,6 +124,8 @@ export default {
   submitDigitalForm,
   submitDocumentForm,
   fetchFormSubmissions,
+  fetchMyFormSubmissions,
+  updateSubmissionStatus,
   deleteForm,
   deleteSubmission,
   createForm,

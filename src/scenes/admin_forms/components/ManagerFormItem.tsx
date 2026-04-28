@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MaterialIcon from '../../../components/materialIcon';
+import SubmissionStatusBadge from '../../../components/SubmissionStatusBadge';
 import { lightModeColors } from '../../../styles/colorPalette';
 import Form from '../../../models/Form';
-import FormSubmission from '../../../models/FormSubmission';
+import FormSubmission, { FormSubmissionStatusValue } from '../../../models/FormSubmission';
 
 interface ManagerFormItemProps {
   form: Form;
@@ -25,6 +26,8 @@ interface ManagerFormItemProps {
   onOpenAnswers: (submission: FormSubmission) => void;
   onDownloadAdjunto: (submission: FormSubmission) => void;
   onDeleteSubmission: (submission: FormSubmission) => void;
+  onChangeSubmissionStatus: (submission: FormSubmission, status: FormSubmissionStatusValue) => void;
+  updatingStatusSubmissionId: number | null;
   daysSince: (dateStr: string) => string;
 }
 
@@ -48,9 +51,16 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
   onOpenAnswers,
   onDownloadAdjunto,
   onDeleteSubmission,
+  onChangeSubmissionStatus,
+  updatingStatusSubmissionId,
   daysSince,
 }) => {
   const isLoadingSubmissions = submissionsLoading && !hasSubmissionsCache;
+  const [showStatusActions, setShowStatusActions] = useState<Record<number, boolean>>({});
+
+  const toggleStatusActions = (id: number) => {
+    setShowStatusActions(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <View style={styles.formCard}>
@@ -136,40 +146,122 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
               {submissions.length === 0 ? (
                 <Text style={styles.emptyText}>Sin respuestas aún.</Text>
               ) : (
-                submissions.map(sub => (
-                  <View key={sub.submission_id} style={styles.submissionRow}>
-                    <View style={styles.subInfo}>
-                      <Text style={styles.subName}>
-                        {sub.student_first_name} {sub.student_last_name}
-                      </Text>
-                      {sub.student_padron && (
-                        <Text style={styles.subPadron}>Padrón: {sub.student_padron}</Text>
-                      )}
-                      <Text style={styles.subDate}>{daysSince(sub.submitted_at)}</Text>
-                    </View>
-                    <View style={styles.subActions}>
-                      {isDigital ? (
-                        <TouchableOpacity onPress={() => onOpenAnswers(sub)}>
-                          <MaterialIcon name="eye" fontSize={20} color="#1976D2" />
-                        </TouchableOpacity>
-                      ) : (
-                        <TouchableOpacity
-                          onPress={() => onDownloadAdjunto(sub)}
-                          disabled={downloadingSubmissionId === sub.submission_id}
-                        >
-                          {downloadingSubmissionId === sub.submission_id ? (
-                            <ActivityIndicator size="small" color="#1976D2" />
-                          ) : (
-                            <MaterialIcon name="download" fontSize={20} color="#1976D2" />
+                submissions.map(sub => {
+                  const isUpdatingStatus = updatingStatusSubmissionId === sub.submission_id;
+                  const currentStatus = sub.status?.value;
+                  return (
+                    <View key={sub.submission_id} style={styles.submissionRow}>
+                      <View style={styles.subTopRow}>
+                        <View style={styles.subInfo}>
+                          <Text style={styles.subName}>
+                            {sub.student_first_name} {sub.student_last_name}
+                          </Text>
+                          {sub.student_padron && (
+                            <Text style={styles.subPadron}>Padrón: {sub.student_padron}</Text>
                           )}
-                        </TouchableOpacity>
-                      )}
-                      <TouchableOpacity onPress={() => onDeleteSubmission(sub)}>
-                        <MaterialIcon name="trash-can" fontSize={20} color="#D32F2F" />
-                      </TouchableOpacity>
+                          <Text style={styles.subDate}>{daysSince(sub.submitted_at)}</Text>
+                        </View>
+                        <View style={styles.subActions}>
+                          { showStatusActions[sub.submission_id] ?
+                            (
+                                <TouchableOpacity onPress={() => toggleStatusActions(sub.submission_id)} hitSlop={8}>
+                                  <MaterialIcon name="dots-horizontal" fontSize={20} color="#555" />
+                                </TouchableOpacity>
+                            ) : (
+                                <TouchableOpacity onPress={() => toggleStatusActions(sub.submission_id)} hitSlop={8}>
+                                    <MaterialIcon name="check-circle-outline" fontSize={20} color="#1B5E20" />
+                                </TouchableOpacity>
+                            )
+                          }
+                          {isDigital ? (
+                            <TouchableOpacity onPress={() => onOpenAnswers(sub)}>
+                              <MaterialIcon name="eye" fontSize={20} color="#1976D2" />
+                            </TouchableOpacity>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => onDownloadAdjunto(sub)}
+                              disabled={downloadingSubmissionId === sub.submission_id}
+                            >
+                              {downloadingSubmissionId === sub.submission_id ? (
+                                <ActivityIndicator size="small" color="#1976D2" />
+                              ) : (
+                                <MaterialIcon name="download" fontSize={20} color="#1976D2" />
+                              )}
+                            </TouchableOpacity>
+                          )}
+                          <TouchableOpacity onPress={() => onDeleteSubmission(sub)}>
+                            <MaterialIcon name="trash-can" fontSize={20} color="#D32F2F" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                      <View style={styles.statusRow}>
+                        {currentStatus ? <SubmissionStatusBadge value={currentStatus} /> : null}
+                        <View style={styles.statusActions}>
+                          {isUpdatingStatus ? (
+                            <ActivityIndicator size="small" color="#555" />
+                          ) : (
+                            <>
+                              {showStatusActions[sub.submission_id] ? (
+                                <>
+                                  <TouchableOpacity
+                                    style={[
+                                      styles.statusBtn,
+                                      styles.approveBtn,
+                                      currentStatus === 'approved' && styles.statusBtnActive,
+                                    ]}
+                                    onPress={() => {
+                                      onChangeSubmissionStatus(sub, 'approved');
+                                      toggleStatusActions(sub.submission_id);
+                                    }}
+                                    disabled={currentStatus === 'approved'}
+                                    hitSlop={4}
+                                  >
+                                    <MaterialIcon name="check" fontSize={14} color="#1B5E20" />
+                                    <Text style={styles.approveText}>Aprobar</Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity
+                                    style={[
+                                      styles.statusBtn,
+                                      styles.pendingBtn,
+                                      currentStatus === 'pending_approval' && styles.statusBtnActive,
+                                    ]}
+                                    onPress={() => {
+                                      onChangeSubmissionStatus(sub, 'pending_approval');
+                                      toggleStatusActions(sub.submission_id);
+                                    }}
+                                    disabled={currentStatus === 'pending_approval'}
+                                    hitSlop={4}
+                                  >
+                                    <MaterialIcon name="clock-outline" fontSize={14} color="#EF6C00" />
+                                    <Text style={styles.pendingText}>Pendiente</Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity
+                                    style={[
+                                      styles.statusBtn,
+                                      styles.denyBtn,
+                                      currentStatus === 'denied' && styles.statusBtnActive,
+                                    ]}
+                                    onPress={() => {
+                                      onChangeSubmissionStatus(sub, 'denied');
+                                      toggleStatusActions(sub.submission_id);
+                                    }}
+                                    disabled={currentStatus === 'denied'}
+                                    hitSlop={4}
+                                  >
+                                    <MaterialIcon name="close" fontSize={14} color="#B71C1C" />
+                                    <Text style={styles.denyText}>Rechazar</Text>
+                                  </TouchableOpacity>
+                                </>
+                              ) : (
+                                <></>
+                              )}
+                            </>
+                          )}
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                ))
+                  );
+                })
               )}
             </>
           )}
@@ -227,18 +319,41 @@ const styles = StyleSheet.create({
   submissionsCount: { fontSize: 13, fontWeight: '700', color: '#475569' },
   emptyText: { color: '#94a3b8', fontSize: 13, fontStyle: 'italic' },
   submissionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: 10,
     borderRadius: 10,
     backgroundColor: '#f8fafc',
     gap: 10,
   },
+  subTopRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   subInfo: { flex: 1, gap: 3 },
   subName: { fontSize: 14, fontWeight: '600', color: '#1f2937' },
   subPadron: { fontSize: 12, color: '#64748b' },
   subDate: { fontSize: 12, color: '#94a3b8' },
   subActions: { flexDirection: 'row', gap: 14 },
+  statusRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  statusActions: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  statusBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  statusBtnActive: { opacity: 0.45 },
+  approveBtn: { backgroundColor: '#E8F5E9', borderColor: '#1B5E20' },
+  approveText: { color: '#1B5E20', fontSize: 11, fontWeight: '700' },
+  pendingBtn: { backgroundColor: '#FFF3E0', borderColor: '#EF6C00' },
+  pendingText: { color: '#EF6C00', fontSize: 11, fontWeight: '700' },
+  denyBtn: { backgroundColor: '#FFEBEE', borderColor: '#B71C1C' },
+  denyText: { color: '#B71C1C', fontSize: 11, fontWeight: '700' },
 });
 
 export default ManagerFormItem;

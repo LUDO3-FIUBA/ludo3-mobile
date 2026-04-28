@@ -3,12 +3,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Form from '../../../models/Form';
 import MaterialIcon from '../../../components/materialIcon';
 
-interface ProcedureTypeFormItemProps {
+interface FormItemProps {
   form: Form;
   onSubmit: () => void;
+  onShowHistory: () => void;
 }
 
-const ProcedureTypeFormItem: React.FC<ProcedureTypeFormItemProps> = ({ form, onSubmit }) => (
+const FormItem: React.FC<FormItemProps> = ({ form, onSubmit, onShowHistory }) => (
   <View style={styles.formCard}>
     <View style={styles.formCardRow}>
       <View style={styles.formMainInfo}>
@@ -16,10 +17,17 @@ const ProcedureTypeFormItem: React.FC<ProcedureTypeFormItemProps> = ({ form, onS
         {!!form.form_description && <Text style={styles.formDesc}>{form.form_description}</Text>}
       </View>
       <View style={styles.actions}>
+        <TouchableOpacity style={styles.btnSecondary} onPress={onShowHistory}>
+          <MaterialIcon name="history" fontSize={15} color="#455A64" />
+          <Text style={styles.btnSecondaryText}>Historial</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.actions}>
         <TouchableOpacity style={styles.btnPrimary} onPress={onSubmit}>
           <MaterialIcon name="send" fontSize={15} color="white" />
           <Text style={styles.btnText}>Enviar</Text>
         </TouchableOpacity>
+
       </View>
     </View>
   </View>
@@ -49,6 +57,7 @@ const styles = StyleSheet.create({
     minWidth: 88,
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
+    gap: 6,
   },
   btnPrimary: {
     flexDirection: 'row',
@@ -60,6 +69,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#455A64',
   },
   btnText: { color: 'white', fontWeight: '600', fontSize: 13 },
+  btnSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 6,
+    paddingHorizontal: 11,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#455A64',
+  },
+  btnSecondaryText: { color: '#455A64', fontWeight: '600', fontSize: 12 },
 });
 
-export default ProcedureTypeFormItem;
+export default FormItem;
