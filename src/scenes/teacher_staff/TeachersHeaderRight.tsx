@@ -1,18 +1,19 @@
 import { View, TouchableOpacity, StyleSheet } from 'react-native'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native';
-import { TeacherModel } from '../../models/TeacherModel';
 import { TeacherTuple } from '../../models/TeacherTuple';
 import { MaterialIcon } from '../../components';
+import { useAppDispatch } from '../../redux/hooks';
+import { fetchAllTeachers } from '../../redux/reducers/teacherStaffSlice';
 
 interface Props {
   staffTeachers: TeacherTuple[];
-  allTeachers: TeacherModel[];
   commissionId: number;
 }
 
-export default function TeachersHeaderRight({ staffTeachers, allTeachers, commissionId }: Props) {
+export default function TeachersHeaderRight({ staffTeachers, commissionId }: Props) {
   const navigation = useNavigation();
+  const dispatch = useAppDispatch();
 
   const saveOpacityStyle = {
     ...styles.navButton,
@@ -26,12 +27,16 @@ export default function TeachersHeaderRight({ staffTeachers, allTeachers, commis
     });
   }
 
-  const addNewTeacherToCommission = () => {
-    navigation.navigate('AddTeachersConfigurationList', {
-      staffTeachers: staffTeachers,
-      allTeachers: allTeachers,
-      commissionId: commissionId,
-    })
+  const addNewTeacherToCommission = async () => {
+    const action = await dispatch(fetchAllTeachers());
+
+    if (fetchAllTeachers.fulfilled.match(action)) {
+      navigation.navigate('AddTeachersConfigurationList', {
+        staffTeachers: staffTeachers,
+        allTeachers: action.payload,
+        commissionId: commissionId,
+      })
+    }
   }
 
 

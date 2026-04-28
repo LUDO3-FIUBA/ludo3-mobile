@@ -25,7 +25,6 @@ export const fetchSemesterDataAsync = createAsyncThunk(
   async (commissionId: number) => {
     try {
       const semester: TeacherSemester = await fetchPresentSemesterFromCommissionId(commissionId);
-      console.log("Semester:", semester);
       const attendances: ClassAttendance[] = await teacherSemestersRepository.getSemesterAttendances(semester.id);
       const sortedAttendances = [...attendances].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 

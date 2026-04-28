@@ -3,7 +3,6 @@ import { View, Text, Alert, SafeAreaView, StyleSheet, ActivityIndicator } from '
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterDataAsync, selectSemesterData, selectSemesterError, selectSemesterLoading } from '../../redux/reducers/teacherSemesterSlice';
-import { fetchTeachers } from '../../redux/reducers/teacherStaffSlice';
 import { SemesterHeaderRight } from './SemesterHeaderRight';
 import BasicList from '../../components/basicList';
 import { lightModeColors } from '../../styles/colorPalette';
@@ -88,8 +87,7 @@ export function SemesterCard({ route }: Props) {
 
   useEffect(() => {
     dispatch(fetchSemesterDataAsync(commission.id));
-    dispatch(fetchTeachers(commission.id));
-  }, [dispatch, commission]);
+  }, [dispatch, commission.id]);
 
   useEffect(() => {
     if (error) {
