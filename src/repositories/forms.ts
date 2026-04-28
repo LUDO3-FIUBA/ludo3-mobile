@@ -6,7 +6,7 @@ import FormSubmission, { FormSubmissionStatusValue } from '../models/FormSubmiss
 
 const BASE = 'api';
 
-export type LocalFile = { uri: string; name: string; type: string };
+export type LocalFile = { uri: string; name: string; type: string; file?: File };
 
 function appendField(fd: FormData, key: string, value: unknown) {
   if (value === null || value === undefined) return;
@@ -43,7 +43,16 @@ export async function submitDigitalForm(
 
 export async function submitDocumentForm(formId: number, file: LocalFile): Promise<FormSubmission> {
   const fd = new FormData();
-  fd.append('file', file as unknown as Blob);
+  // Missing Cloud Storage Support
+  if (file.file) {
+    // Web (Expo web / browser): expo-document-picker returns a native File object.
+    // FormData.append accepts File directly and builds the correct multipart body.
+    fd.append('file', file.file, file.name);
+  } else {
+    // React Native (iOS / Android): FormData.append requires { uri, name, type }.
+    // Casting to Blob is the RN-specific workaround; the native layer handles serialization.
+    fd.append('file', { uri: file.uri, name: file.name, type: file.type } as unknown as Blob);
+  }
   return (await postMultipart(`${BASE}/forms/${formId}/submissions/document`, fd)) as FormSubmission;
 }
 
@@ -81,7 +90,14 @@ export async function createFormWithTemplate(
 ): Promise<Form> {
   const fd = new FormData();
   Object.entries(formData).forEach(([k, v]) => appendField(fd, k, v));
-  fd.append('document_source_file', templateFile as unknown as Blob);
+  // Missing Cloud Storage Support
+  if (templateFile.file) {
+    // Web (Expo web / browser): use the native browser File object.
+    fd.append('document_source_file', templateFile.file, templateFile.name);
+  } else {
+    // React Native (iOS / Android): use { uri, name, type } workaround.
+    fd.append('document_source_file', templateFile as unknown as Blob);
+  }
   return (await postMultipart(`${BASE}/forms`, fd)) as Form;
 }
 

@@ -62,6 +62,11 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
     setShowStatusActions(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Count only submissions that need attention (sent or pending approval).
+  const pendingCount = submissions.filter(
+    s => s.status?.value === 'sent' || s.status?.value === 'pending_approval',
+  ).length;
+
   return (
     <View style={styles.formCard}>
       <TouchableOpacity onPress={onToggle} activeOpacity={0.8} style={styles.formHeader}>
@@ -74,6 +79,13 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
           </View>
         </View>
         <View style={styles.formHeaderActions}>
+          {pendingCount > 0 && (
+            <View style={[styles.submissionCountBadge, { backgroundColor: color + '18', borderColor: color + '55' }]}>
+              <Text style={[styles.submissionCountText, { color }]}>
+                {pendingCount}
+              </Text>
+            </View>
+          )}
           <TouchableOpacity
             onPress={event => {
               event.stopPropagation();
@@ -303,6 +315,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   formTypeText: { fontSize: 12, fontWeight: '700' },
+  submissionCountBadge: {
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 20,
+    borderWidth: 1,
+    minWidth: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submissionCountText: {
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
 
   submissionsSection: {
     borderTopWidth: 1,

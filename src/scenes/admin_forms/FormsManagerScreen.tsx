@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -49,6 +49,9 @@ const FormsManagerScreen: React.FC = () => {
   const [formToDelete, setFormToDelete] = useState<Form | null>(null);
   const [updatingStatusSubmissionId, setUpdatingStatusSubmissionId] = useState<number | null>(null);
 
+  // Ref to track which form IDs we've already kicked off a background prefetch for.
+  const prefetchedIdsRef = useRef<Set<number>>(new Set());
+
   const loadForms = useCallback(async () => {
     try {
       const data = await formsRepository.fetchForms();
@@ -65,6 +68,28 @@ const FormsManagerScreen: React.FC = () => {
     const unsub = navigation.addListener('focus', loadForms);
     return unsub;
   }, [navigation, loadForms]);
+
+  // Pre-fetch submissions for every form in background so the count badge
+  // is visible before the admin expands any individual form.
+  useEffect(() => {
+    if (forms.length === 0) return;
+    forms.forEach(form => {
+      if (prefetchedIdsRef.current.has(form.form_id)) return;
+      prefetchedIdsRef.current.add(form.form_id);
+      Promise.all([
+        formsRepository.fetchFormSubmissions(form.form_id),
+        formsRepository.fetchFormDetail(form.form_id),
+      ])
+        .then(([subs, detail]) => {
+          setSubmissionsCache(prev => ({ ...prev, [form.form_id]: subs }));
+          setFormDetailsCache(prev => ({ ...prev, [form.form_id]: detail }));
+        })
+        .catch(() => {
+          // Allow retry on toggle if prefetch fails.
+          prefetchedIdsRef.current.delete(form.form_id);
+        });
+    });
+  }, [forms]);
 
   useEffect(() => {
     navigation.setOptions({

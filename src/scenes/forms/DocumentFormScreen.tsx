@@ -87,6 +87,9 @@ const DocumentFormScreen: React.FC = () => {
         uri: asset.uri,
         name: asset.name,
         type: asset.mimeType ?? 'application/octet-stream',
+        // On Expo web, expo-document-picker provides the native browser File object.
+        // On React Native (iOS/Android), this property is undefined.
+        file: (asset as any).file ?? undefined,
       });
       setFileError(null);
     } catch {
