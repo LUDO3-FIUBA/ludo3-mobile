@@ -25,10 +25,7 @@ export const fetchSemesterDataAsync = createAsyncThunk(
   async (commissionId: number) => {
     try {
       const semester: TeacherSemester = await fetchPresentSemesterFromCommissionId(commissionId);
-      const attendances: ClassAttendance[] = await teacherSemestersRepository.getSemesterAttendances(semester.id);
-      const sortedAttendances = [...attendances].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-
-      return { semester, attendances: sortedAttendances };
+      return { semester };
     } catch (error) {
       throw new Error('Failed to fetch semester data');
     }
@@ -82,9 +79,8 @@ const teacherSemesterSlice = createSlice({
       })
       .addCase(fetchSemesterDataAsync.fulfilled, (state, action) => {
         state.loading = false;
-        const { attendances, semester } = action.payload;
+        const { semester } = action.payload;
         state.data = semester;
-        state.attendances = attendances;
       })
       .addCase(fetchSemesterDataAsync.rejected, (state, action) => {
         state.loading = false;
