@@ -58,6 +58,8 @@ export { default as TeacherFinalExamSubmissionsScreen } from './teacher_finals/F
 export { default as TeacherAddClassToSemesterScreen } from './teacher_attendances/AddClassToSemester';
 export { default as TeacherSemesterCardScreen } from './teacher_semester/SemesterCard';
 export { default as TeacherEditEvaluationScreen } from './teacher_evaluations/EditEvaluation';
+export { default as TeacherSendCommissionNotificationScreen } from './teacher_notifications/SendCommissionNotification';
+export { default as TeacherSemesterNotificationHistoryScreen } from './teacher_notifications/SemesterNotificationHistory';
 
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
