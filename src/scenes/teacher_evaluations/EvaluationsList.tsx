@@ -19,10 +19,16 @@ interface EvaluationsRouteParams {
   evaluations: TeacherEvaluation[];
 }
 
+const sortEvaluationsByStartDate = (evaluations: TeacherEvaluation[]) => {
+  return [...evaluations].sort((left, right) => {
+    return new Date(left.startDate).getTime() - new Date(right.startDate).getTime();
+  });
+};
+
 const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const route = useRoute();
   const { semester, evaluations: evaluationsFromParams } = route.params as EvaluationsRouteParams;
-  const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>(evaluationsFromParams ?? []);
+  const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>(() => sortEvaluationsByStartDate(evaluationsFromParams ?? []));
   const navigation = useNavigation<any>();
 
   const [loading, setLoading] = useState(!evaluationsFromParams);
@@ -44,10 +50,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const fetchData = async () => {
     try {
       const evaluationsData: TeacherEvaluation[] = await teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id);
-      const sortedEvaluations = [...evaluationsData].sort((a, b) => 
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-      );
-      setEvaluations(sortedEvaluations);
+      setEvaluations(sortEvaluationsByStartDate(evaluationsData));
       setLoading(false);
     } catch (error) {
       setLoading(false);
