@@ -10,6 +10,7 @@ export interface TeacherStudent {
   submissions?: Array<{
     evaluationId: number;
     grade: number | null;
+    submissionStatus?: string | null;
   }>;
 }
 
@@ -25,5 +26,6 @@ export interface TeacherStudentSnakeCase {
   submissions?: Array<{
     evaluation_id: number;
     grade: number | null;
+    submission_status?: string | null;
   }>;
 }

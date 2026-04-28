@@ -36,73 +36,88 @@ const SemesterStudents: React.FC = () => {
     return Math.round((attendancesCount / semesterData.attendanceQrsCount) * 100);
   };
 
-  const groupEvaluationsByParent = (submissions: any[], evaluations: any[]) => {
-    const evaluationMap = new Map(evaluations.map((e: any) => [e.id, e]));
-    const grouped: any[] = [];
-    const processedIds = new Set<number>();
+  const getSubmissionLabel = (submission: any) => {
+    if (submission.grade !== null && submission.grade !== undefined) {
+      return String(submission.grade);
+    }
 
-    submissions.forEach((submission: any) => {
-      if (processedIds.has(submission.evaluationId)) return;
+    if (submission.submissionStatus) {
+      return submission.submissionStatus.charAt(0).toUpperCase() + submission.submissionStatus.slice(1).toLowerCase();
+    }
 
-      const evaluation = evaluationMap.get(submission.evaluationId);
-      if (!evaluation) return;
-
-      processedIds.add(submission.evaluationId);
-
-      if (!evaluation.parentEvaluation) {
-        grouped.push({
-          evaluation,
-          submission,
-          children: []
-        });
-
-        const childrenSubmissions = submissions.filter((s: any) => {
-          const childEval = evaluationMap.get(s.evaluationId);
-          return childEval && childEval.parentEvaluation === evaluation.id && !processedIds.has(s.evaluationId);
-        });
-
-        childrenSubmissions.forEach((childSub: any) => {
-          const childEval = evaluationMap.get(childSub.evaluationId);
-          grouped[grouped.length - 1].children.push({
-            evaluation: childEval,
-            submission: childSub
-          });
-          processedIds.add(childSub.evaluationId);
-        });
-      }
-    });
-
-    return grouped;
+    return 'Sin calificar';
   };
 
-  const renderGrade = (grade: number | null) => {
-    if (grade === null) return 'Sin calificar';
-    return String(grade);
+  const getSubmissionTone = (submission: any, evaluation: any) => {
+    if (submission.submissionStatus === 'DESAPROBADO') {
+      return 'Desaprobado';
+    }
+
+    if (submission.submissionStatus === 'APROBADO') {
+      return 'Aprobado';
+    }
+
+    if (submission.grade !== null && submission.grade !== undefined && evaluation?.passingGrade !== null && evaluation?.passingGrade !== undefined) {
+      return submission.grade >= evaluation.passingGrade ? 'Aprobado' : 'Desaprobado';
+    }
+
+    return 'Sin calificar';
+  };
+
+  const renderSubmissionRow = (evaluation: any, submission: any, isChild: boolean, indentLevel: number) => {
+    const tone = getSubmissionTone(submission, evaluation);
+    const rowStyle = [
+      isChild ? styles.childEvaluationRow : styles.evaluationRow,
+      tone === 'Aprobado' && styles.submissionGood,
+      tone === 'Desaprobado' && styles.submissionBad,
+      tone === 'Sin calificar' && styles.submissionNeutral,
+      isChild && { marginLeft: indentLevel * 12 },
+    ];
+
+    return (
+      <View style={rowStyle}>
+        <Text style={[isChild ? styles.childEvaluationName : styles.evaluationName, tone === 'Aprobado' && styles.submissionTextGood, tone === 'Desaprobado' && styles.submissionTextBad]}>
+          {evaluation.evaluationName}
+        </Text>
+        <Text style={[styles.grade, tone === 'Aprobado' && styles.submissionTextGood, tone === 'Desaprobado' && styles.submissionTextBad]}>
+          {getSubmissionLabel(submission)}
+        </Text>
+      </View>
+    );
+  };
+
+  const renderEvaluationTree = (evaluation: any, submissionMap: Map<number, any>, indentLevel: number = 0): React.ReactNode => {
+    const children = (semesterData?.evaluations || []).filter((childEvaluation: any) => childEvaluation.parentEvaluation === evaluation.id);
+    const submission = submissionMap.get(evaluation.id);
+    const renderedChildren = children
+      .map((childEvaluation: any) => renderEvaluationTree(childEvaluation, submissionMap, indentLevel + 1))
+      .filter(Boolean);
+
+    if (!submission && renderedChildren.length === 0) {
+      return null;
+    }
+
+    return (
+      <View key={evaluation.id}>
+        {submission && renderSubmissionRow(evaluation, submission, indentLevel > 0, indentLevel)}
+        {!submission && indentLevel === 0 && renderedChildren.length > 0 && (
+          <View style={styles.evaluationRow}>
+            <Text style={styles.evaluationName}>{evaluation.evaluationName}</Text>
+            <Text style={styles.grade}>-</Text>
+          </View>
+        )}
+        {renderedChildren.length > 0 && <View style={styles.childrenContainer}>{renderedChildren}</View>}
+      </View>
+    );
   };
 
   const renderSubmissions = (submissions: any[]) => {
-    const grouped = groupEvaluationsByParent(submissions, semesterData?.evaluations || []);
+    const submissionMap = new Map(submissions.map((submission: any) => [submission.evaluationId, submission]));
+    const rootEvaluations = (semesterData?.evaluations || []).filter((evaluation: any) => !evaluation.parentEvaluation);
 
     return (
       <View style={styles.submissionsContainer}>
-        {grouped.map((group: any, index: number) => (
-          <View key={`${group.evaluation.id}-${index}`}>
-            <View style={styles.evaluationRow}>
-              <Text style={styles.evaluationName}>{group.evaluation.evaluationName}</Text>
-              <Text style={styles.grade}>{renderGrade(group.submission.grade)}</Text>
-            </View>
-            {group.children.length > 0 && (
-              <View style={styles.childrenContainer}>
-                {group.children.map((child: any) => (
-                  <View key={`${child.evaluation.id}`} style={styles.childEvaluationRow}>
-                    <Text style={styles.childEvaluationName}>{child.evaluation.evaluationName}</Text>
-                    <Text style={styles.grade}>{renderGrade(child.submission.grade)}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        ))}
+        {rootEvaluations.map((evaluation: any) => renderEvaluationTree(evaluation, submissionMap))}
       </View>
     );
   };
@@ -236,11 +251,28 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderLeftColor: '#007AFF',
   },
+  submissionGood: {
+    borderLeftColor: '#1b8f3a',
+    backgroundColor: '#f1fbf4',
+  },
+  submissionBad: {
+    borderLeftColor: '#c0392b',
+    backgroundColor: '#fff4f4',
+  },
+  submissionNeutral: {
+    borderLeftColor: '#9aa0a6',
+  },
   evaluationName: {
     fontSize: 14,
     fontWeight: '500',
     color: '#333',
     flex: 1,
+  },
+  submissionTextGood: {
+    color: '#1b8f3a',
+  },
+  submissionTextBad: {
+    color: '#c0392b',
   },
   childEvaluationRow: {
     flexDirection: 'row',
