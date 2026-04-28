@@ -17,8 +17,8 @@ import { lightModeColors } from '../../styles/colorPalette';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { teacherSubmissionsRepository } from '../../repositories';
 import EntitySelectionModal from './EntitySelectionModal';
-import { useAppSelector } from '../../redux/hooks';
-import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { fetchSemesterDataAsync, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { selectStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
 import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
 import { getLateSubmissionInfo } from '../../utils/lateSubmission';
@@ -32,6 +32,7 @@ type RouteParams = {
 
 export default function SubmissionDetails({ route }: any) {
 	const { evaluation, submission, subjectName: routeSubjectName } = route.params as RouteParams;
+	const dispatch = useAppDispatch();
 	const semester = useAppSelector(selectSemesterData);
 	const teachersTuples = useAppSelector(selectStaffTeachers);
 	const userData = useAppSelector(selectUserData);
@@ -152,6 +153,9 @@ export default function SubmissionDetails({ route }: any) {
 				setCurrentGrader(gradeChange.grader);
 				setCurrentUpdatedAt(gradeChange.updatedAt);
 			}
+			if (semester?.commission?.id) {
+				await dispatch(fetchSemesterDataAsync(semester.commission.id));
+			}
 			setEditing(false);
 		} catch (error) {
 			Alert.alert('Error', 'No pudimos guardar los cambios. Intenta nuevamente.');
@@ -189,6 +193,9 @@ export default function SubmissionDetails({ route }: any) {
 			await teacherSubmissionsRepository.assignGraderToSubmission(submission.student.id, evaluation.id, newCorrector.id);
 			setCurrentGrader(newCorrector);
 			setCurrentUpdatedAt(moment().toISOString());
+			if (semester?.commission?.id) {
+				await dispatch(fetchSemesterDataAsync(semester.commission.id));
+			}
 		} catch (error) {
 			Alert.alert('Error', 'Hubo un error al agregar el corrector');
 			console.error('Error assigning grader from details', error);

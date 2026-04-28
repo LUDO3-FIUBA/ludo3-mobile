@@ -6,7 +6,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import EvaluationsListElement from './EvaluationsListElement';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
 import { TeacherSemester } from '../../models/TeacherSemester';
-import { makeRequest } from '../../networking/makeRequest';
 import { teacherEvaluationsRepository } from '../../repositories';
 import { EvaluationsListHeaderRight } from './EvaluationsListHeaderRight';
 import { FontAwesome } from '@expo/vector-icons';
@@ -22,11 +21,11 @@ interface EvaluationsRouteParams {
 
 const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const route = useRoute();
-  const semester: TeacherSemester = (route.params as EvaluationsRouteParams).semester;
-  const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>([]);
+  const { semester, evaluations: evaluationsFromParams } = route.params as EvaluationsRouteParams;
+  const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>(evaluationsFromParams ?? []);
   const navigation = useNavigation<any>();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!evaluationsFromParams);
 
   const setNavOptions = useCallback(() => {
     navigation.setOptions({
@@ -44,7 +43,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
 
   const fetchData = async () => {
     try {
-      const evaluationsData: TeacherEvaluation[] = await makeRequest(() => teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id), navigation);
+      const evaluationsData: TeacherEvaluation[] = await teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id);
       const sortedEvaluations = [...evaluationsData].sort((a, b) => 
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
@@ -62,11 +61,13 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   };
 
   useEffect(() => {
-    const focusUnsubscribe = navigation.addListener('focus', () => {
+    if (!evaluationsFromParams) {
       fetchData();
-    });
-    return () => focusUnsubscribe();
-  }, [navigation, fetchData]);
+      return;
+    }
+
+    setLoading(false);
+  }, [evaluationsFromParams, semester?.commission.id]);
 
   return (
     <View style={{ flex: 1, height: '100%' }}>

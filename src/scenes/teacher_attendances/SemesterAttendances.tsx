@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { fetchSemesterAttendances, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
+import { fetchSemesterAttendances, fetchSemesterDataAsync, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { ClassAttendance } from '../../models/ClassAttendance';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
@@ -13,7 +13,7 @@ const SemesterAttendances: React.FC = () => {
   const dispatch = useAppDispatch();
   const attendances = useAppSelector(selectSemesterAttendances);
   const semesterData = useAppSelector(selectSemesterData);
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const onPressAddNewClass = () => {
     navigation.navigate('SemesterAttendanceQR', {});
@@ -31,10 +31,24 @@ const SemesterAttendances: React.FC = () => {
   }, [navigation]);
 
   useEffect(() => {
-    if (semesterData?.id) {
-      dispatch(fetchSemesterAttendances(semesterData.id));
-    }
-  }, [dispatch, semesterData?.id]);
+    const focusUnsubscribe = navigation.addListener('focus', () => {
+      if (semesterData?.id) {
+        dispatch(fetchSemesterAttendances(semesterData.id));
+      }
+    });
+
+    return focusUnsubscribe;
+  }, [dispatch, navigation, semesterData?.id]);
+
+  useEffect(() => {
+    const beforeRemoveUnsubscribe = navigation.addListener('beforeRemove', () => {
+      if (semesterData?.commission?.id) {
+        dispatch(fetchSemesterDataAsync(semesterData.commission.id));
+      }
+    });
+
+    return beforeRemoveUnsubscribe;
+  }, [dispatch, navigation, semesterData?.commission?.id]);
 
   const renderClassAttendance = ({ item }: { item: ClassAttendance }) => (
     <TouchableOpacity onPress={() => navigation.navigate('AttendanceDetails', { classAttendance: item })} style={styles.sessionContainer}>
