@@ -357,27 +357,11 @@ const RootDrawer = () => {
               }}
             />
             <Drawer.Screen
-            name="Tramites"
-            component={FormsListScreen}
-            options={{
-              title: "Trámites",
-              drawerIcon: makeDrawerIcon("archive", "archive-outline"),
-            }}
-          />
-          <Drawer.Screen
-              name="ScanQR"
-              component={ScanQR}
+              name="Tramites"
+              component={FormsListScreen}
               options={{
-                title: "Escanear QR",
-                drawerIcon: makeDrawerIcon("qrcode-scan", "qrcode-scan"),
-              }}
-            />
-            <Drawer.Screen
-              name="VerifyIdentity"
-              component={VerifyIdentity}
-              options={{
-                title: "Verificar identidad",
-                drawerIcon: makeDrawerIcon("face-recognition", "face-recognition"),
+                title: "Trámites",
+                drawerIcon: makeDrawerIcon("archive", "archive-outline"),
               }}
             />
             <Drawer.Screen
