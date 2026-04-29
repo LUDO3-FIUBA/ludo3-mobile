@@ -13,6 +13,13 @@ export class IdentityFail extends Error {
   }
 }
 
+export class FaceRegistrationPending extends Error {
+  constructor() {
+    super('Registro facial incompleto.');
+    this.name = 'FaceRegistrationPending';
+  }
+}
+
 export async function fetchFromSubject(subjectId: number): Promise<any> {
   const response: TeacherFinalCamelCase[] = await get(`${domainUrl}`, [{ key: 'subject_siu_id', value: subjectId }]) as TeacherFinalCamelCase[]
   const allFinals = response.map((json: TeacherFinalCamelCase) => convertSnakeToCamelCase(json) as TeacherFinal);
@@ -60,6 +67,12 @@ export async function sendAct(finalId: number, image: string): Promise<boolean> 
   } catch (error) {
     if (
       error instanceof StatusCodeError &&
+      error.isBecauseOf('face_registration_pending')
+    ) {
+      return Promise.reject(new FaceRegistrationPending());
+    }
+    if (
+      error instanceof StatusCodeError &&
       error.isBecauseOf('invalid_image')
     ) {
       return Promise.reject(new IdentityFail());
@@ -95,4 +108,5 @@ export default {
   createFinal,
   notifyGrades,
   IdentityFail,
+  FaceRegistrationPending,
 };

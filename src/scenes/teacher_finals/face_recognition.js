@@ -22,6 +22,25 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
             '¡No sos quien decís ser!',
             'O no hemos podido reconocerte. Intentá de nuevo.',
           );
+        } else if (error instanceof teacherFinalsRepository.FaceRegistrationPending) {
+          Alert.alert(
+            'Registro facial incompleto',
+            'Todavía no completaste tu registro facial. Completálo para poder cerrar el acta.',
+            [
+              {
+                text: 'Completar ahora',
+                onPress: () => {
+                  navigation.navigate('CompleteFaceRegistration');
+                },
+              },
+              {
+                text: 'Cancelar',
+                style: 'cancel',
+                onPress: () => navigation.pop(),
+              },
+            ],
+            { cancelable: false },
+          );
         } else {
           Alert.alert(
             'Error',

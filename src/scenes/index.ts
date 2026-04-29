@@ -15,12 +15,16 @@ export { default as PreRegisterLastInstructionsScreen } from './preregister/done
 export { default as PreRegisterPasswordScreen } from './preregister/password';
 export { default as ApprovedSubjectsScreen } from './approved_subjects';
 export { default as ViewSemesterScreen } from './view_semester';
+export { default as MyAttendancesScreen } from './view_semester/MyAttendances';
+export { default as MySubmissionsScreen } from './view_semester/MySubmissions';
 export { default as RootDrawer } from './root_drawer';
 export { default as CorrelativeSubjects } from './correlative_subjects';
 export { default as CalendarScreen } from './calendar';
 export { default as CommissionInscriptionsScreen } from './commission_inscriptions';
 export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
+export { default as ViewFinalDetailsScreen } from './view_final_details';
+export { default as ViewClassDetailsScreen } from './view_class_details';
 export { default as AddEvaluationSubmissionScreen } from './view_evaluation_details/AddEvaluationSubmission';
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
@@ -28,6 +32,7 @@ export { default as GoogleRegisterScreen } from './google_register';
 export { default as ChangePasswordScreen } from './password/change';
 export { default as ForgotPasswordRequestScreen } from './password/forgot_request';
 export { default as ForgotPasswordConfirmScreen } from './password/forgot_confirm';
+export { default as CompleteFaceRegistrationScreen } from './complete_face_registration';
 
 // Teacher scenes
 export { default as TeacherHomeScreen } from './teacher_home';
@@ -62,3 +67,6 @@ export { default as DigitalFormScreen } from './forms/DigitalFormScreen';
 // Forms — Admin screens
 export { default as FormsManagerScreen } from './admin_forms/FormsManagerScreen';
 export { default as FormDesignerScreen } from './admin_forms/FormDesignerScreen';
+// Student identity screens
+export { default as StudentCredentialScreen } from './student_credential';
+export { default as StudentIdentityViewerScreen } from './student_identity_viewer';

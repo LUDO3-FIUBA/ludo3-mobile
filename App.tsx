@@ -1,15 +1,17 @@
-import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import './calendars.config';
 import * as React from 'react';
 import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   ChangePasswordScreen,
   ForgotPasswordRequestScreen,
   ForgotPasswordConfirmScreen,
+  CompleteFaceRegistrationScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
   TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
@@ -22,6 +24,7 @@ import {
   // Forms screens
   DocumentFormScreen, DigitalFormScreen, FormDesignerScreen,
 } from './src/scenes';
+import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -55,6 +58,7 @@ const webLinking = {
           PendingSubjects: 'materias-pendientes',
           ScanQR: 'escanear-qr',
           VerifyIdentity: 'verificar-identidad',
+          StudentCredential: 'mi-credencial',
           StudentStats: 'estadisticas',
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
@@ -63,6 +67,8 @@ const webLinking = {
         },
       },
       ViewSemester: 'comision',
+      MyAttendances: 'comision/mis-asistencias',
+      MySubmissions: 'comision/mis-entregas',
       CorrelativeSubjects: 'correlativas',
       ViewEvaluations: 'evaluaciones',
       ViewEvaluationDetails: 'evaluacion',
@@ -90,6 +96,7 @@ const webLinking = {
       DocumentForm: 'tramites/formulario-documento',
       DigitalForm: 'tramites/formulario-digital',
       FormDesigner: 'tramites/nuevo-formulario',
+      StudentIdentityViewer: 'credencial/:token',
     },
   },
 };
@@ -100,6 +107,7 @@ const App = () => {
   }, []);
 
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <Provider store={store}>
       <ActionSheetProvider>
         <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme} linking={Platform.OS === 'web' ? webLinking : undefined}>
@@ -168,6 +176,18 @@ const App = () => {
             />
 
             <Stack.Screen
+              name="MyAttendances"
+              component={MyAttendancesScreen}
+              options={{ headerShown: true, title: 'Mis asistencias' }}
+            />
+
+            <Stack.Screen
+              name="MySubmissions"
+              component={MySubmissionsScreen}
+              options={{ headerShown: true, title: 'Mis entregas' }}
+            />
+
+            <Stack.Screen
               name="CorrelativeSubjects"
               component={CorrelativeSubjects}
               options={{ headerShown: true, title: "Correlativas" }}
@@ -198,6 +218,18 @@ const App = () => {
             />
 
             <Stack.Screen
+              name="ViewFinalDetails"
+              component={ViewFinalDetailsScreen}
+              options={{ headerShown: true, title: "Final" }}
+            />
+
+            <Stack.Screen
+              name="ViewClassDetails"
+              component={ViewClassDetailsScreen}
+              options={{ headerShown: true, title: "Cursada" }}
+            />
+
+            <Stack.Screen
               name="Teachers"
               component={TeachersScreen}
               options={{ headerShown: true, title: "Cuerpo Docente" }}
@@ -219,6 +251,12 @@ const App = () => {
               name="ChangePassword"
               component={ChangePasswordScreen}
               options={{ headerShown: true, title: 'Cambiar contraseña' }}
+            />
+
+            <Stack.Screen
+              name="CompleteFaceRegistration"
+              component={CompleteFaceRegistrationScreen}
+              options={{ headerShown: true, title: 'Completar registro facial' }}
             />
 
             {/* Teacher Stack screens */}
@@ -344,10 +382,16 @@ const App = () => {
               component={FormDesignerScreen}
               options={{ headerShown: true, title: 'Nuevo formulario' }}
             />
+            <Stack.Screen
+              name="StudentIdentityViewer"
+              component={StudentIdentityViewerScreen}
+              options={{ headerShown: true, title: 'Credencial estudiantil' }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </ActionSheetProvider>
     </Provider>
+    </GestureHandlerRootView>
   );
 };
 

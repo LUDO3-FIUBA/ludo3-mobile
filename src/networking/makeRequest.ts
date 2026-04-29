@@ -7,6 +7,7 @@ export function makeRequest(f: any, navigation: any) {
         index: 0,
         routes: [{name: 'Landing'}],
       });
+      return Promise.reject(error);
     } else {
       return Promise.reject(error);
     }

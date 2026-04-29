@@ -34,19 +34,22 @@ const IsPassingCard: FC<IsPassingCardProps> = ({ semesterId }) => {
       console.log('Error', error);
     }
   };
+
+  const passed = isPassing?.passed ?? false;
+  const failed = isPassing?.failed ?? false;
   
-  if (!isPassing?.failed && !isPassing?.passed) {
+  if (!failed && !passed) {
     return null
   }
 
-  if (isPassing?.failed) {
+  if (failed) {
     cardData.cardStyle = styles.failedCard;
     cardData.icon = "close-thick"
     cardData.iconColor = '#BD4242'
     cardData.title = "No aprobaste"
     cardData.subtitle = "Has incumplido alguna de las condiciones de aprobación. Esto incluye cantidad de asistencias mínimas y/o aprobación de evaluaciones obligatorias. Para más información, consultá con el Cuerpo Docente"
   }
-  else if (isPassing?.passed) {
+  else if (passed) {
     cardData.cardStyle = styles.passedCard;
     cardData.icon = "check-bold"
     cardData.iconColor = '#82bc41'
