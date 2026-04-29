@@ -9,6 +9,7 @@ import { lightModeColors } from '../../styles/colorPalette';
 import { TeacherCommission } from '../../models/TeacherCommission';
 import { MaterialIcon } from '../../components';
 import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
+import { fetchStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
 
 interface Props {
   route: any;
@@ -87,6 +88,7 @@ export function SemesterCard({ route }: Props) {
 
   useEffect(() => {
     dispatch(fetchSemesterDataAsync(commission.id));
+    dispatch(fetchStaffTeachers(commission.id));
   }, [dispatch, commission.id]);
 
   useEffect(() => {

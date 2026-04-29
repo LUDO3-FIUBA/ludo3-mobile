@@ -9,7 +9,7 @@ const UserIcon = require('./img/usericon.jpg');
 
 const SemesterStudents: React.FC = () => {
   const semesterData = useAppSelector((state) => state.teacherSemester.data);
-  const students = semesterData?.students as TeacherStudent[];
+  const students: TeacherStudent[] = semesterData?.students ?? [];
   const [expandedStudentId, setExpandedStudentId] = useState<number | null>(null);
 
   const navigation = useNavigation()

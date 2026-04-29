@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { TeacherTuple } from '../../models/TeacherTuple';
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function TeachersHeaderRight({ staffTeachers, commissionId }: Props) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
 
   const saveOpacityStyle = {
@@ -28,14 +28,22 @@ export default function TeachersHeaderRight({ staffTeachers, commissionId }: Pro
   }
 
   const addNewTeacherToCommission = async () => {
-    const action = await dispatch(fetchAllTeachers());
+    try {
+      const action = await dispatch(fetchAllTeachers());
 
-    if (fetchAllTeachers.fulfilled.match(action)) {
-      navigation.navigate('AddTeachersConfigurationList', {
-        staffTeachers: staffTeachers,
-        allTeachers: action.payload,
-        commissionId: commissionId,
-      })
+      if (fetchAllTeachers.fulfilled.match(action)) {
+        navigation.navigate('AddTeachersConfigurationList', {
+          staffTeachers: staffTeachers,
+          allTeachers: action.payload,
+          commissionId: commissionId,
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching all teachers', error);
+      Alert.alert(
+        '¿Qué pasó?',
+        'No pudimos cargar el listado de docentes. Volvé a intentar en unos minutos.',
+      );
     }
   }
 

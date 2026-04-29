@@ -74,8 +74,6 @@ const teacherSemesterSlice = createSlice({
       .addCase(fetchSemesterDataAsync.pending, (state) => {
         state.loading = true;
         state.error = null;
-        state.data = null;
-        state.attendances = [];
       })
       .addCase(fetchSemesterDataAsync.fulfilled, (state, action) => {
         state.loading = false;
