@@ -11,6 +11,7 @@ export interface TeacherSemester {
   students: TeacherStudent[];
   classesAmount: number;
   minimumAttendance: number;
+  attendanceQrsCount?: number;
 }
 
 export interface TeacherSemesterSnakeCase {
@@ -22,4 +23,5 @@ export interface TeacherSemesterSnakeCase {
   students:           TeacherStudentSnakeCase[];
   classes_amount:     number;
   minimum_attendance: number;
+  attendance_qrs_count?: number;
 }

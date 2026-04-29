@@ -30,13 +30,24 @@ export const updateTeacherInCommission = createAsyncThunk(
   }
 );
 
-export const fetchTeachers = createAsyncThunk(
-  'teacherStaff/fetchTeachers',
+export const fetchStaffTeachers = createAsyncThunk(
+  'teacherStaff/fetchStaffTeachers',
   async (commissionId: number, { rejectWithValue }) => {
     try {
-      const allTeachers: TeacherModel[] = await teacherStaffRepository.fetchAllTeachers();
       const staffTeachers: TeacherTuple[] = await teacherStaffRepository.fetchTeachersOfCommission(commissionId);
-      return { allTeachers, staffTeachers };
+      return staffTeachers;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to fetch teachers');
+    }
+  }
+);
+
+export const fetchAllTeachers = createAsyncThunk(
+  'teacherStaff/fetchAllTeachers',
+  async (_, { rejectWithValue }) => {
+    try {
+      const allTeachers: TeacherModel[] = await teacherStaffRepository.fetchAllTeachers();
+      return allTeachers;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Failed to fetch teachers');
     }
@@ -82,15 +93,25 @@ export const teacherStaffSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTeachers.pending, (state) => {
+      .addCase(fetchStaffTeachers.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(fetchTeachers.fulfilled, (state, action) => {
+      .addCase(fetchStaffTeachers.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.staffTeachers = action.payload.staffTeachers;
-        state.allTeachers = action.payload.allTeachers;
+        state.staffTeachers = action.payload;
       })
-      .addCase(fetchTeachers.rejected, (state, action) => {
+      .addCase(fetchStaffTeachers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchAllTeachers.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchAllTeachers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.allTeachers = action.payload;
+      })
+      .addCase(fetchAllTeachers.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

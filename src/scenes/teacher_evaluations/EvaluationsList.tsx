@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, Button } from 'react-native';
 import { Loading, RoundedButton } from '../../components';
 import { evaluations as style } from '../../styles';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import EvaluationsListElement from './EvaluationsListElement';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
 import { TeacherSemester } from '../../models/TeacherSemester';
@@ -20,13 +20,20 @@ interface EvaluationsRouteParams {
   evaluations: TeacherEvaluation[];
 }
 
+const sortEvaluationsByStartDate = (evaluations: TeacherEvaluation[]) => {
+  return [...evaluations].sort((left, right) => {
+    return new Date(left.startDate).getTime() - new Date(right.startDate).getTime();
+  });
+};
+
 const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const route = useRoute();
-  const semester: TeacherSemester = (route.params as EvaluationsRouteParams).semester;
-  const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>([]);
+  const { semester, evaluations: evaluationsFromParams } = route.params as EvaluationsRouteParams;
+  const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>(() => sortEvaluationsByStartDate(evaluationsFromParams ?? []));
   const navigation = useNavigation<any>();
+  const hasFocusedOnce = useRef(false);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!evaluationsFromParams);
 
   const setNavOptions = useCallback(() => {
     navigation.setOptions({
@@ -45,10 +52,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const fetchData = async () => {
     try {
       const evaluationsData: TeacherEvaluation[] = await makeRequest(() => teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id), navigation);
-      const sortedEvaluations = [...evaluationsData].sort((a, b) => 
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-      );
-      setEvaluations(sortedEvaluations);
+      setEvaluations(sortEvaluationsByStartDate(evaluationsData));
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -61,12 +65,15 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
     }
   };
 
-  useEffect(() => {
-    const focusUnsubscribe = navigation.addListener('focus', () => {
-      fetchData();
-    });
-    return () => focusUnsubscribe();
-  }, [navigation, fetchData]);
+  useFocusEffect(
+    useCallback(() => {
+      if (hasFocusedOnce.current) {
+        fetchData();
+      }
+
+      hasFocusedOnce.current = true;
+    }, [evaluationsFromParams, semester?.commission.id, navigation]),
+  );
 
   return (
     <View style={{ flex: 1, height: '100%' }}>

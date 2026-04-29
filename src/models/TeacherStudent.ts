@@ -6,6 +6,12 @@ export interface TeacherStudent {
   dni: string;
   email: string;
   legajo?: string;
+  attendancesCount?: number;
+  submissions?: Array<{
+    evaluationId: number;
+    grade: number | null;
+    submissionStatus?: string | null;
+  }>;
 }
 
 export interface TeacherStudentSnakeCase {
@@ -15,5 +21,11 @@ export interface TeacherStudentSnakeCase {
   last_name: string;
   dni: string;
   email: string;
-  legajo?: string
+  legajo?: string;
+  attendances_count?: number;
+  submissions?: Array<{
+    evaluation_id: number;
+    grade: number | null;
+    submission_status?: string | null;
+  }>;
 }

@@ -5,7 +5,7 @@ import { lightModeColors } from '../../styles/colorPalette';
 import TeachersHeaderRight from './TeachersHeaderRight';
 import { Loading } from '../../components';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { fetchTeachers } from '../../redux/reducers/teacherStaffSlice';
+import { fetchStaffTeachers } from '../../redux/reducers/teacherStaffSlice';
 import { TeacherModel } from '../../models/TeacherModel';
 import { mapWeightToPercentage } from '../../utils/graderWeightConversions';
 import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
@@ -59,7 +59,7 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
   const commissionId = (route.params as TeachersRouteParams).commissionId;
   const chiefTeacher = (route.params as TeachersRouteParams).chiefTeacher;
 
-  const { staffTeachers, allTeachers, isLoading, error } = useAppSelector((state) => state.teacherStaff);
+  const { staffTeachers, isLoading, error } = useAppSelector((state) => state.teacherStaff);
   const semester: TeacherSemester = useAppSelector(selectSemesterData)!
   const chiefTeacherGraderWeight = semester.commission.chiefTeacherGraderWeight;
 
@@ -72,20 +72,19 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
         isActualUserChiefTeacher ?
           (<TeachersHeaderRight
             staffTeachers={staffTeachers}
-            allTeachers={allTeachers}
             commissionId={commissionId}
           />) : null
       ),
     };
     navigation.setOptions(navOptions);
-  }, [allTeachers, commissionId, navigation, staffTeachers])
+  }, [commissionId, navigation, staffTeachers])
 
 
   const fetchData = useCallback(async () => {
     if (isLoading) return;
 
     try {
-      dispatch(fetchTeachers(commissionId))
+      await dispatch(fetchStaffTeachers(commissionId)).unwrap();
     } catch (error) {
       console.error('Error fetching data', error);
       Alert.alert(
