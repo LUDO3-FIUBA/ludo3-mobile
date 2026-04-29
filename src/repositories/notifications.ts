@@ -5,6 +5,11 @@ import authenticatedRepository from './authenticatedRepository';
 const domainUrl = 'api/notifications';
 const teacherDomainUrl = 'api/teacher/notifications';
 
+export interface SemesterInfo {
+    subject_name: string;
+    period_label: string;
+}
+
 export interface Notification {
     id: number;
     title: string;
@@ -12,6 +17,8 @@ export interface Notification {
     created_at: string;
     is_urgent?: boolean;
     image?: string | null;
+    sender_name?: string | null;
+    semester_info?: SemesterInfo | null;
 }
 
 export interface UserNotification {

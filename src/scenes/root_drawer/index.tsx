@@ -19,6 +19,7 @@ import UserSearch from "../admin_users/UserSearch";
 import UserDetail from "../admin_users/UserDetail";
 import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
+import NotificationsScreen from "../notifications";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -117,6 +118,7 @@ const RootDrawer = () => {
   const colors = isDarkTheme() ? darkModeColors : lightModeColors;
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
   const [user, setUser] = useState<User | null>(null);
   const [roleView, setRoleView] = useState<RoleView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -511,6 +513,16 @@ const RootDrawer = () => {
             />
           </>
         )}
+
+        <Drawer.Screen
+          name="Notifications"
+          component={NotificationsScreen}
+          options={{
+            headerShown: true,
+            title: 'Notificaciones',
+            drawerIcon: makeDrawerIcon('bell', 'bell-outline')
+          }}
+        />
       </Drawer.Navigator>
 
       {showToast && toastNotification && !showNotificationsDropdown && (
@@ -603,7 +615,7 @@ const RootDrawer = () => {
                 contentContainerStyle={styles.notificationsListContent}
                 showsVerticalScrollIndicator
               >
-                {notifications.slice(0, 8).map((item) => (
+                {notifications.slice(0, 5).map((item) => (
                   <TouchableOpacity
                     key={item.id}
                     onPress={() => onNotificationPress(item)}
@@ -626,6 +638,24 @@ const RootDrawer = () => {
                         </TouchableOpacity>
                       </View>
                     </View>
+                    {item.notification.semester_info ? (
+                      <View style={styles.notificationItemContext}>
+                        <MaterialIcon name="school" fontSize={11} color="#6b7280" />
+                        <Text numberOfLines={1} style={styles.notificationItemContextText}>
+                          {item.notification.semester_info.subject_name}
+                          {item.notification.semester_info.period_label
+                            ? ` · ${item.notification.semester_info.period_label}`
+                            : ''}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.notificationItemContext}>
+                        <MaterialIcon name="bullhorn" fontSize={11} color="#6b7280" />
+                        <Text numberOfLines={1} style={styles.notificationItemContextText}>
+                          Aviso institucional
+                        </Text>
+                      </View>
+                    )}
                     <Text numberOfLines={2} style={styles.notificationItemMessage}>
                       {item.notification.message}
                     </Text>
@@ -637,12 +667,25 @@ const RootDrawer = () => {
                       />
                     )}
                     <Text numberOfLines={1} style={styles.notificationItemDate}>
-                      {formatNotificationDate(item.notification.created_at)}
+                      {item.notification.sender_name
+                        ? `${item.notification.sender_name} · ${formatNotificationDate(item.notification.created_at)}`
+                        : formatNotificationDate(item.notification.created_at)}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
             )}
+
+            <TouchableOpacity
+              style={styles.notificationsSeeAll}
+              onPress={() => {
+                setShowNotificationsDropdown(false);
+                navigation.navigate('RootDrawer', { screen: 'Notifications' });
+              }}
+            >
+              <Text style={styles.notificationsSeeAllText}>Ver todas las notificaciones</Text>
+              <MaterialIcon name="chevron-right" fontSize={18} color={lightModeColors.institutional} />
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -822,6 +865,32 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginTop: 6,
     marginBottom: 6,
+  },
+  notificationItemContext: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  notificationItemContextText: {
+    flex: 1,
+    fontSize: 11,
+    color: '#6b7280',
+    fontWeight: '600',
+  },
+  notificationsSeeAll: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    gap: 4,
+  },
+  notificationsSeeAllText: {
+    color: lightModeColors.institutional,
+    fontSize: 14,
+    fontWeight: '600',
   },
   fullScreenContainer: {
     flex: 1,
