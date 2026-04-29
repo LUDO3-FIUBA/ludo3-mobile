@@ -142,7 +142,7 @@ const NotificationsScreen: React.FC = () => {
                             ]}
                         >
                             <View style={styles.itemHeader}>
-                                <Text numberOfLines={1} style={styles.itemTitle}>
+                                <Text numberOfLines={1} style={[styles.itemTitle, !item.is_read && styles.itemTitleUnread]}>
                                     {item.notification.title}
                                 </Text>
                                 <View style={styles.itemActions}>
@@ -266,8 +266,15 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
     },
     itemUnread: {
-        borderLeftWidth: 3,
+        backgroundColor: '#eaf3ff',
+        borderLeftWidth: 4,
         borderLeftColor: lightModeColors.institutional,
+        elevation: 2,
+        shadowOpacity: 0.1,
+    },
+    itemTitleUnread: {
+        color: lightModeColors.institutional,
+        fontWeight: '800',
     },
     itemHeader: {
         flexDirection: 'row',

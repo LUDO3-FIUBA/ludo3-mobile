@@ -485,7 +485,7 @@ const RootDrawer = () => {
                     ]}
                   >
                     <View style={styles.notificationItemHeader}>
-                      <Text numberOfLines={1} style={styles.notificationItemTitle}>
+                      <Text numberOfLines={1} style={[styles.notificationItemTitle, !item.is_read && styles.notificationItemTitleUnread]}>
                         {item.notification.title}
                       </Text>
                       {!item.is_read && <View style={styles.notificationItemDot} />}
@@ -676,8 +676,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   notificationItemUnread: {
-    backgroundColor: '#f6f9ff',
-    borderColor: '#d6e4ff',
+    backgroundColor: '#eaf3ff',
+    borderLeftWidth: 4,
+    borderLeftColor: lightModeColors.institutional,
+  },
+  notificationItemTitleUnread: {
+    color: lightModeColors.institutional,
+    fontWeight: '800',
   },
   notificationItemHeader: {
     flexDirection: 'row',
