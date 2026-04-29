@@ -84,7 +84,7 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
     if (isLoading) return;
 
     try {
-      dispatch(fetchStaffTeachers(commissionId))
+      await dispatch(fetchStaffTeachers(commissionId)).unwrap();
     } catch (error) {
       console.error('Error fetching data', error);
       Alert.alert(

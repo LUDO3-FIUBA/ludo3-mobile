@@ -1,11 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, Button } from 'react-native';
 import { Loading, RoundedButton } from '../../components';
 import { evaluations as style } from '../../styles';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import EvaluationsListElement from './EvaluationsListElement';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
 import { TeacherSemester } from '../../models/TeacherSemester';
+import { makeRequest } from '../../networking/makeRequest';
 import { teacherEvaluationsRepository } from '../../repositories';
 import { EvaluationsListHeaderRight } from './EvaluationsListHeaderRight';
 import { FontAwesome } from '@expo/vector-icons';
@@ -30,6 +31,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const { semester, evaluations: evaluationsFromParams } = route.params as EvaluationsRouteParams;
   const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>(() => sortEvaluationsByStartDate(evaluationsFromParams ?? []));
   const navigation = useNavigation<any>();
+  const hasFocusedOnce = useRef(false);
 
   const [loading, setLoading] = useState(!evaluationsFromParams);
 
@@ -49,7 +51,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
 
   const fetchData = async () => {
     try {
-      const evaluationsData: TeacherEvaluation[] = await teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id);
+      const evaluationsData: TeacherEvaluation[] = await makeRequest(() => teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id), navigation);
       setEvaluations(sortEvaluationsByStartDate(evaluationsData));
       setLoading(false);
     } catch (error) {
@@ -63,14 +65,15 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
     }
   };
 
-  useEffect(() => {
-    if (!evaluationsFromParams) {
-      fetchData();
-      return;
-    }
+  useFocusEffect(
+    useCallback(() => {
+      if (hasFocusedOnce.current) {
+        fetchData();
+      }
 
-    setLoading(false);
-  }, [evaluationsFromParams, semester?.commission.id]);
+      hasFocusedOnce.current = true;
+    }, [evaluationsFromParams, semester?.commission.id, navigation]),
+  );
 
   return (
     <View style={{ flex: 1, height: '100%' }}>
