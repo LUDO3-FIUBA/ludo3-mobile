@@ -157,12 +157,25 @@ const FormsManagerScreen: React.FC = () => {
     const field = detail.fields.find(f => f.form_field_id === answer.field_id);
     if (!field) return answer.answer_value;
 
-    if (field.form_field_type.value === 'catalog' && field.catalog) {
+    const fieldType = field.form_field_type.value;
+
+    if (fieldType === 'checkbox') {
+      return String(answer.answer_value).toLowerCase() === 'true' ? 'Si' : 'No';
+    }
+
+    if (fieldType === 'options' && field.options) {
+      const option = field.options.find(
+        opt => String(opt.form_option_id) === String(answer.answer_value),
+      );
+      return option?.form_option_label ?? answer.answer_value;
+    }
+
+    if (fieldType === 'catalog' && field.catalog) {
       const item = field.catalog.items.find(
         catalogItem => String(catalogItem.catalog_item_id) === String(answer.answer_value),
       );
       if (item) {
-        return item.catalog_item_value;
+        return item.catalog_item_label;
       }
     }
 
@@ -298,6 +311,7 @@ const FormsManagerScreen: React.FC = () => {
     setExportingFormId(form.form_id);
     try {
       const detail = await formsRepository.fetchFormDetail(form.form_id);
+      setFormDetailsCache(prev => ({ ...prev, [form.form_id]: detail }));
       const fieldById = new Map(detail.fields.map(field => [field.form_field_id, field]));
 
       const rows = submissions.map(submission => {
