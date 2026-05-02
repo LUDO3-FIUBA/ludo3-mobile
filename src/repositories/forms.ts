@@ -41,6 +41,24 @@ export async function submitDigitalForm(
   await post(`${BASE}/forms/${formId}/submissions`, { answers });
 }
 
+export async function submitDigitalFormWithAdjunto(
+  formId: number,
+  answers: { field_id: number; answer_value: string | null }[],
+  adjuntoFile: LocalFile,
+): Promise<void> {
+  const fd = new FormData();
+  fd.append('answers', JSON.stringify(answers));
+  // Missing Cloud Storage Support
+  if (adjuntoFile.file) {
+    // Web (Expo web / browser): use the native browser File object.
+    fd.append('file', adjuntoFile.file, adjuntoFile.name);
+  } else {
+    // React Native (iOS / Android): use { uri, name, type } workaround.
+    fd.append('file', { uri: adjuntoFile.uri, name: adjuntoFile.name, type: adjuntoFile.type } as unknown as Blob);
+  }
+  await postMultipart(`${BASE}/forms/${formId}/submissions`, fd);
+}
+
 export async function submitDocumentForm(formId: number, file: LocalFile): Promise<FormSubmission> {
   const fd = new FormData();
   // Missing Cloud Storage Support
@@ -138,6 +156,7 @@ export default {
   fetchForms,
   fetchFormDetail,
   submitDigitalForm,
+  submitDigitalFormWithAdjunto,
   submitDocumentForm,
   fetchFormSubmissions,
   fetchMyFormSubmissions,

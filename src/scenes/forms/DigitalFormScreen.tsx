@@ -5,14 +5,17 @@ import {
   ScrollView,
   TextInput,
   Switch,
+  TouchableOpacity,
   ActivityIndicator,
   Alert,
   StyleSheet,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import * as DocumentPicker from 'expo-document-picker';
 import { RoundedButton, MaterialIcon } from '../../components';
 import { formsRepository } from '../../repositories';
+import { LocalFile } from '../../repositories/forms';
 import FormDetail, { FormField } from '../../models/FormDetail';
 import { lightModeColors } from '../../styles/colorPalette';
 
@@ -35,6 +38,7 @@ const DigitalFormScreen: React.FC = () => {
   const [form, setForm] = useState<FormDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<AnswerMap>({});
+  const [fileAnswers, setFileAnswers] = useState<Record<number, LocalFile | null>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<number, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
@@ -54,6 +58,16 @@ const DigitalFormScreen: React.FC = () => {
 
   const setAnswer = (fieldId: number, value: string | null) => {
     setAnswers(prev => ({ ...prev, [fieldId]: value }));
+    setFieldErrors(prev => {
+      if (!prev[fieldId]) return prev;
+      const next = { ...prev };
+      delete next[fieldId];
+      return next;
+    });
+  };
+
+  const setFileAnswer = (fieldId: number, file: LocalFile | null) => {
+    setFileAnswers(prev => ({ ...prev, [fieldId]: file }));
     setFieldErrors(prev => {
       if (!prev[fieldId]) return prev;
       const next = { ...prev };
@@ -90,21 +104,34 @@ const DigitalFormScreen: React.FC = () => {
 
     const nextErrors: Record<number, string> = {};
     form.fields.forEach(field => {
-      const error = validateField(field, answers[field.form_field_id] ?? null);
-      if (error) nextErrors[field.form_field_id] = error;
+      if (field.form_field_type.value === 'adjunto') {
+        if (field.form_field_require && !fileAnswers[field.form_field_id]) {
+          nextErrors[field.form_field_id] = 'Este campo es obligatorio.';
+        }
+      } else {
+        const error = validateField(field, answers[field.form_field_id] ?? null);
+        if (error) nextErrors[field.form_field_id] = error;
+      }
     });
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
       return;
     }
 
+    const adjuntoField = form.fields.find(f => f.form_field_type.value === 'adjunto');
+    const adjuntoFile = adjuntoField ? fileAnswers[adjuntoField.form_field_id] ?? null : null;
+    const nonAdjuntoAnswers = form.fields
+      .filter(f => f.form_field_type.value !== 'adjunto')
+      .map(f => ({ field_id: f.form_field_id, answer_value: answers[f.form_field_id] ?? null }));
+
     setSubmitting(true);
     setSubmitStatus(null);
     try {
-      await formsRepository.submitDigitalForm(
-        formId,
-        form.fields.map(f => ({ field_id: f.form_field_id, answer_value: answers[f.form_field_id] ?? null })),
-      );
+      if (adjuntoField && adjuntoFile) {
+        await formsRepository.submitDigitalFormWithAdjunto(formId, nonAdjuntoAnswers, adjuntoFile);
+      } else {
+        await formsRepository.submitDigitalForm(formId, nonAdjuntoAnswers);
+      }
       setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
       setTimeout(() => {
         navigation.goBack();

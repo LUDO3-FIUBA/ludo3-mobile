@@ -43,6 +43,7 @@ const FIELD_TYPE_LABELS: Record<string, string> = {
   options: 'Opciones (lista)',
   catalog: 'Catálogo',
   checkbox: 'Casilla de verificación',
+  adjunto: 'Archivo adjunto',
 };
 
 type SubmitStatus = {
@@ -97,10 +98,9 @@ const FormDesignerScreen: React.FC = () => {
   const [catalogError, setCatalogError] = useState<string | null>(null);
 
   useEffect(() => {
-    const availableFieldTypes = fieldTypes.filter(ft => ft.value !== 'adjunto');
-    if (availableFieldTypes.length > 0 && modalTypeId === null) {
-      setModalTypeId(availableFieldTypes[0].id);
-      setModalTypeValue(availableFieldTypes[0].value);
+    if (fieldTypes.length > 0 && modalTypeId === null) {
+      setModalTypeId(fieldTypes[0].id);
+      setModalTypeValue(fieldTypes[0].value);
     }
   }, [fieldTypes, modalTypeId]);
 
@@ -119,10 +119,9 @@ const FormDesignerScreen: React.FC = () => {
         const digital = types.find(t => t.value === 'Digital');
         if (digital && !isEditing) setIsDigital(true);
         setFieldTypes(fts);
-        const available = fts.filter(ft => ft.value !== 'adjunto');
-        if (available.length > 0) {
-          setModalTypeId(available[0].id);
-          setModalTypeValue(available[0].value);
+        if (fts.length > 0) {
+          setModalTypeId(fts[0].id);
+          setModalTypeValue(fts[0].value);
         }
         setCatalogs(cats as { catalog_id: number; catalog_name: string }[]);
 
@@ -163,9 +162,8 @@ const FormDesignerScreen: React.FC = () => {
     setEditingFieldIndex(null);
     setModalLabel('');
     setModalLabelError(null);
-    const available = fieldTypes.filter(ft => ft.value !== 'adjunto');
-    setModalTypeId(available[0]?.id ?? null);
-    setModalTypeValue(available[0]?.value ?? '');
+    setModalTypeId(fieldTypes[0]?.id ?? null);
+    setModalTypeValue(fieldTypes[0]?.value ?? '');
     setModalRequired(false);
     setModalCatalogId(null);
     setModalOptions([]);
@@ -422,8 +420,6 @@ const FormDesignerScreen: React.FC = () => {
     );
   }
 
-  const availableFieldTypes = fieldTypes.filter(ft => ft.value !== 'adjunto');
-
   return (
     <>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -624,7 +620,7 @@ const FormDesignerScreen: React.FC = () => {
               <Picker
                 selectedValue={modalTypeId}
                 onValueChange={(v) => {
-                  const ft = availableFieldTypes.find(f => f.id === Number(v));
+                  const ft = fieldTypes.find((f: { id: number; value: string }) => f.id === Number(v));
                   if (ft) {
                     setModalTypeId(ft.id);
                     setModalTypeValue(ft.value);
@@ -633,7 +629,7 @@ const FormDesignerScreen: React.FC = () => {
                   }
                 }}
               >
-                {availableFieldTypes.map(ft => (
+                {fieldTypes.map((ft: { id: number; value: string }) => (
                   <Picker.Item key={ft.id} label={FIELD_TYPE_LABELS[ft.value] ?? ft.value} value={ft.id} />
                 ))}
               </Picker>
