@@ -68,6 +68,7 @@ const FormDesignerScreen: React.FC = () => {
   const [formInformation, setFormInformation] = useState('');
   const [procedureId, setProcedureId] = useState<number | null>(null);
   const [isDigital, setIsDigital] = useState(true);
+  const [requiresTeacherValidation, setRequiresTeacherValidation] = useState(false);
   const [documentUrl, setDocumentUrl] = useState('');
   const [templateFile, setTemplateFile] = useState<LocalFile | null>(null);
   const [fields, setFields] = useState<DesignerField[]>([]);
@@ -130,6 +131,7 @@ const FormDesignerScreen: React.FC = () => {
           setFormDescription(existingForm.form_description);
           setFormInformation(existingForm.form_information ?? '');
           setProcedureId(existingForm.form_procedure.id);
+          setRequiresTeacherValidation(existingForm.requires_teacher_validation ?? false);
 
           const editingDigital = existingForm.form_type.value === 'Digital';
           setIsDigital(editingDigital);
@@ -373,6 +375,7 @@ const FormDesignerScreen: React.FC = () => {
       form_information: formInformation.trim() || null,
       form_procedure_id: procedureId,
       form_type_id: formTypeId,
+      requires_teacher_validation: requiresTeacherValidation,
     };
 
     if (!isDigital) {
@@ -472,6 +475,23 @@ const FormDesignerScreen: React.FC = () => {
                 <Picker.Item key={pt.id} label={pt.value} value={pt.id} />
               ))}
             </Picker>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Validación docente</Text>
+          <View style={styles.switchRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.label}>Requiere aprobación docente</Text>
+              <Text style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                El alumno deberá seleccionar un docente al enviar el formulario.
+              </Text>
+            </View>
+            <Switch
+              value={requiresTeacherValidation}
+              onValueChange={setRequiresTeacherValidation}
+              trackColor={{ true: lightModeColors.institutional }}
+            />
           </View>
         </View>
 

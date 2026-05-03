@@ -19,6 +19,7 @@ import UserSearch from "../admin_users/UserSearch";
 import UserDetail from "../admin_users/UserDetail";
 import FormsListScreen from "../forms/FormsListScreen";
 import FormsManagerScreen from "../admin_forms/FormsManagerScreen";
+import TeacherFormsScreen from "../teacher_forms/TeacherFormsScreen";
 import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
@@ -427,6 +428,12 @@ const RootDrawer = () => {
               name="TeacherDepartmentList"
               component={StudentDepartmentListScreen}
               options={{ headerShown: true, title: 'Departamentos', drawerIcon: makeDrawerIcon('office-building', 'office-building-outline') }}
+            />
+
+            <Drawer.Screen
+              name="TeacherTramites"
+              component={TeacherFormsScreen}
+              options={{ headerShown: true, title: 'Validación de Trámites', drawerIcon: makeDrawerIcon('clipboard-check', 'clipboard-check-outline') }}
             />
 
             <Drawer.Screen

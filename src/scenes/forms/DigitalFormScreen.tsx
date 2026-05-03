@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import { RoundedButton, MaterialIcon } from '../../components';
 import { formsRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import FormDetail, { FormField } from '../../models/FormDetail';
+import { TeacherModelSnakeCase } from '../../models/Teachers';
 import { lightModeColors } from '../../styles/colorPalette';
 
 interface RouteParams {
@@ -30,6 +31,148 @@ type SubmitStatus = {
   message: string;
 };
 
+// ── Teacher search component ──────────────────────────────────────────────────
+
+interface TeacherSearchProps {
+  selected: TeacherModelSnakeCase | null;
+  onSelect: (teacher: TeacherModelSnakeCase | null) => void;
+  error?: string | null;
+}
+
+const TeacherSearch: React.FC<TeacherSearchProps> = ({ selected, onSelect, error }) => {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<TeacherModelSnakeCase[]>([]);
+  const [searching, setSearching] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (query.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const data = await formsRepository.searchTeachers(query.trim());
+        setResults(data);
+      } catch {
+        setResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 350);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
+
+  if (selected) {
+    return (
+      <View style={tsStyles.selectedChip}>
+        <MaterialIcon name="account-check" fontSize={18} color="#1B5E20" />
+        <Text style={tsStyles.selectedName}>
+          {selected.first_name} {selected.last_name}
+        </Text>
+        <TouchableOpacity onPress={() => onSelect(null)} hitSlop={8}>
+          <MaterialIcon name="close-circle" fontSize={18} color="#D32F2F" />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View>
+      <View style={[tsStyles.inputRow, error ? tsStyles.inputRowError : null]}>
+        <MaterialIcon name="magnify" fontSize={18} color="#888" />
+        <TextInput
+          style={tsStyles.input}
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Buscar docente por nombre o legajo..."
+          placeholderTextColor="#aaa"
+          autoCapitalize="words"
+        />
+        {searching && <ActivityIndicator size="small" color={lightModeColors.institutional} />}
+      </View>
+      {error ? <Text style={tsStyles.errorText}>{error}</Text> : null}
+      {results.length > 0 && (
+        <View style={tsStyles.dropdown}>
+          {results.map(t => (
+            <TouchableOpacity
+              key={t.id}
+              style={tsStyles.dropdownItem}
+              onPress={() => {
+                onSelect(t);
+                setQuery('');
+                setResults([]);
+              }}
+            >
+              <Text style={tsStyles.dropdownName}>{t.first_name} {t.last_name}</Text>
+              {t.legajo ? <Text style={tsStyles.dropdownLegajo}>Legajo: {t.legajo}</Text> : null}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+      {query.trim().length >= 2 && !searching && results.length === 0 && (
+        <Text style={tsStyles.noResults}>Sin resultados para "{query}"</Text>
+      )}
+    </View>
+  );
+};
+
+const tsStyles = StyleSheet.create({
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    backgroundColor: '#fafafa',
+  },
+  inputRowError: { borderColor: '#C62828', backgroundColor: '#FFF5F5' },
+  input: { flex: 1, fontSize: 14, color: '#111' },
+  errorText: { color: '#C62828', fontSize: 12, marginTop: 4, fontWeight: '600' },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: 'white',
+    marginTop: 4,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  dropdownItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  dropdownName: { fontSize: 14, fontWeight: '600', color: '#222' },
+  dropdownLegajo: { fontSize: 12, color: '#888', marginTop: 2 },
+  selectedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#E8F5E9',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#1B5E20',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  selectedName: { flex: 1, fontSize: 14, fontWeight: '600', color: '#1B5E20' },
+  noResults: { fontSize: 13, color: '#aaa', fontStyle: 'italic', marginTop: 6 },
+});
+
+// ── Main screen ───────────────────────────────────────────────────────────────
+
 const DigitalFormScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
@@ -42,6 +185,8 @@ const DigitalFormScreen: React.FC = () => {
   const [fieldErrors, setFieldErrors] = useState<Record<number, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<TeacherModelSnakeCase | null>(null);
+  const [teacherError, setTeacherError] = useState<string | null>(null);
 
   useEffect(() => {
     formsRepository
@@ -118,6 +263,12 @@ const DigitalFormScreen: React.FC = () => {
       return;
     }
 
+    if (form.requires_teacher_validation && !selectedTeacher) {
+      setTeacherError('Debés seleccionar un docente validador para enviar este formulario.');
+      return;
+    }
+    setTeacherError(null);
+
     const adjuntoField = form.fields.find(f => f.form_field_type.value === 'adjunto');
     const adjuntoFile = adjuntoField ? fileAnswers[adjuntoField.form_field_id] ?? null : null;
     const nonAdjuntoAnswers = form.fields
@@ -128,9 +279,14 @@ const DigitalFormScreen: React.FC = () => {
     setSubmitStatus(null);
     try {
       if (adjuntoField && adjuntoFile) {
-        await formsRepository.submitDigitalFormWithAdjunto(formId, nonAdjuntoAnswers, adjuntoFile);
+        await formsRepository.submitDigitalFormWithAdjunto(
+          formId,
+          nonAdjuntoAnswers,
+          adjuntoFile,
+          selectedTeacher?.id,
+        );
       } else {
-        await formsRepository.submitDigitalForm(formId, nonAdjuntoAnswers);
+        await formsRepository.submitDigitalForm(formId, nonAdjuntoAnswers, selectedTeacher?.id);
       }
       setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
       setTimeout(() => {
@@ -180,12 +336,37 @@ const DigitalFormScreen: React.FC = () => {
               {field.form_field_label}
               {field.form_field_require && <Text style={styles.required}> *</Text>}
             </Text>
-            <FieldInput field={field} value={answers[field.form_field_id]} onChange={v => setAnswer(field.form_field_id, v)} />
+            <FieldInput
+              field={field}
+              value={answers[field.form_field_id]}
+              onChange={v => setAnswer(field.form_field_id, v)}
+              fileValue={fileAnswers[field.form_field_id] ?? null}
+              onFileChange={f => setFileAnswer(field.form_field_id, f)}
+            />
             {fieldErrors[field.form_field_id] ? (
               <Text style={styles.fieldErrorText}>{fieldErrors[field.form_field_id]}</Text>
             ) : null}
           </View>
         ))}
+
+        {form.requires_teacher_validation && (
+          <View style={styles.fieldContainer}>
+            <Text style={styles.fieldLabel}>
+              Docente validador <Text style={styles.required}>*</Text>
+            </Text>
+            <Text style={styles.teacherHint}>
+              Este formulario requiere la aprobación de un docente. Buscá y seleccioná el docente que avalará tu solicitud.
+            </Text>
+            <TeacherSearch
+              selected={selectedTeacher}
+              onSelect={t => {
+                setSelectedTeacher(t);
+                if (t) setTeacherError(null);
+              }}
+              error={teacherError}
+            />
+          </View>
+        )}
 
         {submitStatus ? (
           <View
@@ -226,9 +407,11 @@ interface FieldInputProps {
   field: FormField;
   value: string | null;
   onChange: (v: string | null) => void;
+  fileValue?: LocalFile | null;
+  onFileChange?: (f: LocalFile | null) => void;
 }
 
-const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }) => {
+const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange, fileValue, onFileChange }) => {
   const type = field.form_field_type.value;
 
   if (type === 'checkbox') {
@@ -264,6 +447,49 @@ const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange }) => {
           ))}
         </Picker>
       </View>
+    );
+  }
+
+  if (type === 'adjunto') {
+    const handlePick = async () => {
+      try {
+        const result = await DocumentPicker.getDocumentAsync({
+          type: ['application/pdf', 'image/*'],
+          copyToCacheDirectory: true,
+          multiple: false,
+        });
+        if (result.canceled) return;
+        const asset = result.assets[0];
+        onFileChange?.({
+          uri: asset.uri,
+          name: asset.name,
+          type: asset.mimeType ?? 'application/octet-stream',
+          file: (asset as any).file ?? undefined,
+        });
+      } catch {
+        Alert.alert('Error', 'No se pudo seleccionar el archivo.');
+      }
+    };
+
+    return (
+      <TouchableOpacity style={styles.filePicker} onPress={handlePick} activeOpacity={0.8}>
+        <MaterialIcon
+          name={fileValue ? 'file-check' : 'upload'}
+          fontSize={22}
+          color={fileValue ? '#388E3C' : lightModeColors.institutional}
+        />
+        <Text
+          style={fileValue ? styles.filePickedText : styles.filePickerText}
+          numberOfLines={1}
+        >
+          {fileValue ? fileValue.name : 'Seleccionar archivo'}
+        </Text>
+        {fileValue ? (
+          <TouchableOpacity onPress={() => onFileChange?.(null)} hitSlop={8}>
+            <MaterialIcon name="close-circle" fontSize={18} color="#D32F2F" />
+          </TouchableOpacity>
+        ) : null}
+      </TouchableOpacity>
     );
   }
 
@@ -317,6 +543,7 @@ const styles = StyleSheet.create({
   fieldLabel: { fontSize: 14, fontWeight: '600', color: '#333' },
   required: { color: '#D32F2F' },
   fieldErrorText: { color: '#D32F2F', fontSize: 12, fontWeight: '600' },
+  teacherHint: { fontSize: 13, color: '#555', fontStyle: 'italic' },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -334,6 +561,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
     overflow: 'hidden',
   },
+  filePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  filePickerText: { flex: 1, color: lightModeColors.institutional, fontWeight: '600', fontSize: 13 },
+  filePickedText: { flex: 1, color: '#388E3C', fontWeight: '600', fontSize: 13 },
   statusCard: {
     borderRadius: 8,
     paddingHorizontal: 12,

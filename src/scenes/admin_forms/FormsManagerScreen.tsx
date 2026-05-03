@@ -250,12 +250,17 @@ const FormsManagerScreen: React.FC = () => {
         return {
           ...prev,
           [formId]: cached.map(s =>
-            s.submission_id === submission.submission_id ? { ...s, status: updated.status } : s,
+            s.submission_id === submission.submission_id ? updated : s,
           ),
         };
       });
-    } catch {
-      showMessage('Error', 'No se pudo actualizar el estado de la respuesta.');
+    } catch (err: any) {
+      const detail = err?.info?.detail ?? err?.info;
+      if (typeof detail === 'string') {
+        showMessage('No se pudo actualizar', detail);
+      } else {
+        showMessage('Error', 'No se pudo actualizar el estado de la respuesta.');
+      }
     } finally {
       setUpdatingStatusSubmissionId(null);
     }

@@ -2,7 +2,8 @@ import { get, post, postMultipart, deleteMethod, put, patch } from './authentica
 import FormProcedureType from '../models/FormProcedureType';
 import Form from '../models/Form';
 import FormDetail from '../models/FormDetail';
-import FormSubmission, { FormSubmissionStatusValue } from '../models/FormSubmission';
+import FormSubmission, { FormSubmissionStatusValue, TeacherValidationStatusValue } from '../models/FormSubmission';
+import { TeacherModelSnakeCase } from '../models/Teachers';
 
 const BASE = 'api';
 
@@ -37,17 +38,20 @@ export async function fetchFormDetail(formId: number): Promise<FormDetail> {
 export async function submitDigitalForm(
   formId: number,
   answers: { field_id: number; answer_value: string | null }[],
+  teacherId?: number,
 ): Promise<void> {
-  await post(`${BASE}/forms/${formId}/submissions`, { answers });
+  await post(`${BASE}/forms/${formId}/submissions`, { answers, teacher_id: teacherId });
 }
 
 export async function submitDigitalFormWithAdjunto(
   formId: number,
   answers: { field_id: number; answer_value: string | null }[],
   adjuntoFile: LocalFile,
+  teacherId?: number,
 ): Promise<void> {
   const fd = new FormData();
   fd.append('answers', JSON.stringify(answers));
+  if (teacherId !== undefined) fd.append('teacher_id', String(teacherId));
   // Missing Cloud Storage Support
   if (adjuntoFile.file) {
     // Web (Expo web / browser): use the native browser File object.
@@ -59,8 +63,13 @@ export async function submitDigitalFormWithAdjunto(
   await postMultipart(`${BASE}/forms/${formId}/submissions`, fd);
 }
 
-export async function submitDocumentForm(formId: number, file: LocalFile): Promise<FormSubmission> {
+export async function submitDocumentForm(
+  formId: number,
+  file: LocalFile,
+  teacherId?: number,
+): Promise<FormSubmission> {
   const fd = new FormData();
+  if (teacherId !== undefined) fd.append('teacher_id', String(teacherId));
   // Missing Cloud Storage Support
   if (file.file) {
     // Web (Expo web / browser): expo-document-picker returns a native File object.
@@ -150,6 +159,25 @@ export async function createCatalog(payload: {
   };
 }
 
+export async function searchTeachers(query: string): Promise<TeacherModelSnakeCase[]> {
+  return (await get(`${BASE}/teachers/search`, [{ key: 'q', value: query }])) as TeacherModelSnakeCase[];
+}
+
+export async function fetchMyTeacherFormSubmissions(): Promise<FormSubmission[]> {
+  return (await get(`${BASE}/teacher/form-submissions`)) as FormSubmission[];
+}
+
+export async function updateTeacherSubmissionStatus(
+  submissionId: number,
+  teacherStatus: TeacherValidationStatusValue,
+  teacherComment: string,
+): Promise<FormSubmission> {
+  return (await patch(`${BASE}/teacher/form-submissions/${submissionId}/teacher-status`, {
+    teacher_status: teacherStatus,
+    teacher_comment: teacherComment,
+  })) as FormSubmission;
+}
+
 export default {
   fetchFormTypes,
   fetchProcedureTypes,
@@ -169,4 +197,7 @@ export default {
   fetchFieldTypes,
   fetchCatalogs,
   createCatalog,
+  searchTeachers,
+  fetchMyTeacherFormSubmissions,
+  updateTeacherSubmissionStatus,
 };

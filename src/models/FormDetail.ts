@@ -40,6 +40,7 @@ export default interface FormDetail {
   form_information: string | null;
   form_procedure: FormProcedureType;
   form_type: FormTypeSummary;
+  requires_teacher_validation: boolean;
   fields: FormField[];
   document_source: string | null;
 }

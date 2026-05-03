@@ -12,5 +12,6 @@ export default interface Form {
   form_information?: string | null;
   form_procedure: FormProcedureType;
   form_type: FormTypeSummary;
+  requires_teacher_validation: boolean;
   created_at: string;
 }
