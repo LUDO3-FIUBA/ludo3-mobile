@@ -21,6 +21,7 @@ import {
   TeacherSemesterAttendanceQRScreen, TeacherEvaluationQRScreen, TeacherFinalExamQRScreen,
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
   TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
+  TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
 } from './src/scenes';
 import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
@@ -357,6 +358,16 @@ const App = () => {
               name="EditEvaluation"
               component={TeacherEditEvaluationScreen}
               options={{ headerShown: true, title: 'Editar evaluación' }}
+            />
+            <Stack.Screen
+              name="SendCommissionNotification"
+              component={TeacherSendCommissionNotificationScreen}
+              options={{ headerShown: true, title: 'Enviar aviso' }}
+            />
+            <Stack.Screen
+              name="SemesterNotificationHistory"
+              component={TeacherSemesterNotificationHistoryScreen}
+              options={{ headerShown: true, title: 'Avisos enviados' }}
             />
             <Stack.Screen
               name="StudentIdentityViewer"
