@@ -71,14 +71,16 @@ interface Section {
 const FormsListScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [sections, setSections] = useState<Section[]>([]);
+  const [allForms, setAllForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
-  const [historyForm, setHistoryForm] = useState<Form | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [history, setHistory] = useState<FormSubmission[]>([]);
 
   useEffect(() => {
     Promise.all([formsRepository.fetchProcedureTypes(), formsRepository.fetchForms()])
       .then(([procedureTypes, forms]) => {
+        setAllForms(forms);
         setSections(
           procedureTypes.map(proc => ({
             procedure: proc,
@@ -90,13 +92,28 @@ const FormsListScreen: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const openHistory = async (form: Form) => {
-    setHistoryForm(form);
+  const formById = React.useMemo(() => {
+    const map = new Map<number, Form>();
+    allForms.forEach(f => map.set(f.form_id, f));
+    return map;
+  }, [allForms]);
+
+  const openHistory = async () => {
+    setHistoryOpen(true);
     setHistory([]);
     setHistoryLoading(true);
     try {
-      const data = await formsRepository.fetchMyFormSubmissions(form.form_id);
-      setHistory(data);
+      const results = await Promise.all(
+        allForms.map(f =>
+          formsRepository
+            .fetchMyFormSubmissions(f.form_id)
+            .catch(() => [] as FormSubmission[]),
+        ),
+      );
+      const merged = results
+        .flat()
+        .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
+      setHistory(merged);
     } catch {
       Alert.alert('Error', 'No se pudo cargar el historial.');
     } finally {
@@ -125,6 +142,13 @@ const FormsListScreen: React.FC = () => {
 
   return (
     <>
+      <View style={styles.toolbar}>
+        <TouchableOpacity style={styles.historyBtn} onPress={openHistory}>
+          <MaterialIcon name="history" fontSize={16} color="#455A64" />
+          <Text style={styles.historyBtnText}>Historial</Text>
+        </TouchableOpacity>
+      </View>
+
       <ProcedureTypesAccordionList
         sections={sections.map(section => ({
           procedure: section.procedure,
@@ -147,7 +171,6 @@ const FormsListScreen: React.FC = () => {
                     navigation.navigate('DigitalForm', { formId: item.form_id });
                   }
                 }}
-                onShowHistory={() => openHistory(item)}
               />
             );
           })
@@ -155,46 +178,54 @@ const FormsListScreen: React.FC = () => {
       />
 
       <Modal
-        visible={!!historyForm}
+        visible={historyOpen}
         transparent
-        animationType="slide"
-        onRequestClose={() => setHistoryForm(null)}
+        animationType="fade"
+        onRequestClose={() => setHistoryOpen(false)}
       >
         <View style={styles.overlay}>
           <View style={styles.card}>
             <View style={styles.header}>
               <Text style={styles.title} numberOfLines={1}>
-                Historial — {historyForm?.form_name}
+                Historial de envíos
               </Text>
-              <TouchableOpacity onPress={() => setHistoryForm(null)} hitSlop={8}>
+              <TouchableOpacity onPress={() => setHistoryOpen(false)} hitSlop={8}>
                 <MaterialIcon name="close" fontSize={22} color="#333" />
               </TouchableOpacity>
             </View>
             {historyLoading ? (
               <ActivityIndicator style={{ marginVertical: 16 }} />
             ) : history.length === 0 ? (
-              <Text style={styles.empty}>Aún no enviaste respuestas para este formulario.</Text>
+              <Text style={styles.empty}>Aún no enviaste respuestas.</Text>
             ) : (
               <ScrollView>
-                {history.map(submission => (
-                  <View key={submission.submission_id} style={styles.row}>
-                    <View style={styles.rowMain}>
-                      <Text style={styles.rowDate}>{formatDate(submission.submitted_at)}</Text>
+                {history.map(submission => {
+                  const form = formById.get(submission.form_id);
+                  const requiresTeacher =
+                    form?.requires_teacher_validation ?? submission.form_requires_teacher_validation;
+                  return (
+                    <View key={submission.submission_id} style={styles.row}>
+                      <View style={styles.rowMain}>
+                        <Text style={styles.rowFormName} numberOfLines={2}>
+                          {submission.form_name}
+                        </Text>
+                        <Text style={styles.rowDate}>{formatDate(submission.submitted_at)}</Text>
+                      </View>
+                      <View style={styles.badges}>
+                        {requiresTeacher && (
+                          <TeacherStatusBadge
+                            status={submission.teacher_status}
+                            teacherFirstName={submission.teacher_first_name}
+                            teacherLastName={submission.teacher_last_name}
+                          />
+                        )}
+                      </View>
+                      <View style={styles.badges}>
+                        <SubmissionStatusBadge value={submission.status.value} />
+                      </View>
                     </View>
-                    <View style={styles.badges}>
-                      {historyForm?.requires_teacher_validation && (
-                        <TeacherStatusBadge
-                          status={submission.teacher_status}
-                          teacherFirstName={submission.teacher_first_name}
-                          teacherLastName={submission.teacher_last_name}
-                        />
-                      )}
-                    </View>
-                    <View style={styles.badges}>
-                      <SubmissionStatusBadge value={submission.status.value} />
-                    </View>
-                  </View>
-                ))}
+                  );
+                })}
               </ScrollView>
             )}
           </View>
@@ -206,13 +237,38 @@ const FormsListScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  toolbar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingHorizontal: 12,
+    paddingTop: 10,
+  },
+  historyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#455A64',
+  },
+  historyBtnText: { color: '#455A64', fontWeight: '600', fontSize: 13 },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 18,
+  },
   card: {
     backgroundColor: 'white',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderRadius: 16,
     padding: 18,
-    maxHeight: '70%',
+    width: '100%',
+    maxWidth: 520,
+    maxHeight: '80%',
     gap: 12,
   },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
@@ -228,7 +284,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   rowMain: { flex: 1 },
-  rowDate: { fontSize: 14, color: '#333' },
+  rowFormName: { fontSize: 14, fontWeight: '700', color: '#222' },
+  rowDate: { fontSize: 12, color: '#666', marginTop: 2 },
   rowTeacher: { fontSize: 12, color: '#666', marginTop: 2 },
   badges: { alignItems: 'flex-end', gap: 4 },
 });

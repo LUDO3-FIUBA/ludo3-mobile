@@ -29,6 +29,10 @@ interface ProcedureTypesAccordionListProps<TItem> {
     section: ProcedureSection<TItem>,
     config: { icon: string; color: string },
   ) => React.ReactNode;
+  renderSectionAction?: (
+    section: ProcedureSection<TItem>,
+    config: { icon: string; color: string },
+  ) => React.ReactNode;
   emptyText?: string;
   contentContainerStyle?: StyleProp<ViewStyle>;
 }
@@ -36,6 +40,7 @@ interface ProcedureTypesAccordionListProps<TItem> {
 const ProcedureTypesAccordionList = <TItem,>({
   sections,
   renderItems,
+  renderSectionAction,
   emptyText = 'No hay formularios disponibles.',
   contentContainerStyle,
 }: ProcedureTypesAccordionListProps<TItem>) => {
@@ -65,6 +70,7 @@ const ProcedureTypesAccordionList = <TItem,>({
                 </Text>
               </View>
               <View style={styles.procedureCardRight}>
+                {renderSectionAction?.(section, config)}
                 <View style={[styles.badge, { backgroundColor: config.color }]}>
                   <Text style={styles.badgeText}>{section.items.length}</Text>
                 </View>

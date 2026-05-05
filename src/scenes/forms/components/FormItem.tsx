@@ -6,21 +6,14 @@ import MaterialIcon from '../../../components/materialIcon';
 interface FormItemProps {
   form: Form;
   onSubmit: () => void;
-  onShowHistory: () => void;
 }
 
-const FormItem: React.FC<FormItemProps> = ({ form, onSubmit, onShowHistory }) => (
+const FormItem: React.FC<FormItemProps> = ({ form, onSubmit }) => (
   <View style={styles.formCard}>
     <View style={styles.formCardRow}>
       <View style={styles.formMainInfo}>
         <Text style={styles.formName}>{form.form_name}</Text>
         {!!form.form_description && <Text style={styles.formDesc}>{form.form_description}</Text>}
-      </View>
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.btnSecondary} onPress={onShowHistory}>
-          <MaterialIcon name="history" fontSize={15} color="#455A64" />
-          <Text style={styles.btnSecondaryText}>Historial</Text>
-        </TouchableOpacity>
       </View>
       <View style={styles.actions}>
         <TouchableOpacity style={styles.btnPrimary} onPress={onSubmit}>
@@ -69,18 +62,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#455A64',
   },
   btnText: { color: 'white', fontWeight: '600', fontSize: 13 },
-  btnSecondary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingVertical: 6,
-    paddingHorizontal: 11,
-    borderRadius: 8,
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#455A64',
-  },
-  btnSecondaryText: { color: '#455A64', fontWeight: '600', fontSize: 12 },
 });
 
 export default FormItem;

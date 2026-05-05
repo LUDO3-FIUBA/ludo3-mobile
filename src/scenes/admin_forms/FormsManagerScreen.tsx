@@ -41,9 +41,10 @@ const FormsManagerScreen: React.FC = () => {
   const [formDetailsCache, setFormDetailsCache] = useState<Record<number, FormDetail>>({});
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
-  const [refreshingFormId, setRefreshingFormId] = useState<number | null>(null);
+  const [refreshingProcedureId, setRefreshingProcedureId] = useState<number | null>(null);
   const [exportingFormId, setExportingFormId] = useState<number | null>(null);
   const [downloadingSubmissionId, setDownloadingSubmissionId] = useState<number | null>(null);
+  const [downloadingFieldId, setDownloadingFieldId] = useState<number | null>(null);
   const [answersModal, setAnswersModal] = useState<{ submission: FormSubmission; formId: number } | null>(null);
   const [submissionToDelete, setSubmissionToDelete] = useState<{ submission: FormSubmission; formId: number } | null>(null);
   const [formToDelete, setFormToDelete] = useState<Form | null>(null);
@@ -266,20 +267,33 @@ const FormsManagerScreen: React.FC = () => {
     }
   };
 
-  const handleRefreshForm = async (form: Form) => {
-    if (refreshingFormId === form.form_id) return;
-    setRefreshingFormId(form.form_id);
+  const handleRefreshProcedure = async (procedureId: number, procedureForms: Form[]) => {
+    if (refreshingProcedureId === procedureId || procedureForms.length === 0) return;
+    setRefreshingProcedureId(procedureId);
     try {
-      const [subs, detail] = await Promise.all([
-        formsRepository.fetchFormSubmissions(form.form_id),
-        formsRepository.fetchFormDetail(form.form_id),
-      ]);
-      setSubmissionsCache(prev => ({ ...prev, [form.form_id]: subs }));
-      setFormDetailsCache(prev => ({ ...prev, [form.form_id]: detail }));
+      const results = await Promise.all(
+        procedureForms.map(async form => {
+          const [subs, detail] = await Promise.all([
+            formsRepository.fetchFormSubmissions(form.form_id),
+            formsRepository.fetchFormDetail(form.form_id),
+          ]);
+          return { formId: form.form_id, subs, detail };
+        }),
+      );
+      setSubmissionsCache(prev => {
+        const next = { ...prev };
+        results.forEach(r => { next[r.formId] = r.subs; });
+        return next;
+      });
+      setFormDetailsCache(prev => {
+        const next = { ...prev };
+        results.forEach(r => { next[r.formId] = r.detail; });
+        return next;
+      });
     } catch {
       showMessage('Error', 'No se pudieron refrescar las respuestas.');
     } finally {
-      setRefreshingFormId(null);
+      setRefreshingProcedureId(null);
     }
   };
 
@@ -395,6 +409,26 @@ const FormsManagerScreen: React.FC = () => {
     return answer?.answer_value || null;
   };
 
+  const isAdjuntoField = (fieldId: number, formId: number): boolean => {
+    const detail = formDetailsCache[formId];
+    if (!detail) return false;
+    const field = detail.fields.find(f => f.form_field_id === fieldId);
+    return field?.form_field_type.value === 'adjunto';
+  };
+
+  const handleDownloadAdjuntoFromUrl = async (url: string, fieldId: number) => {
+    if (downloadingFieldId === fieldId) return;
+    setDownloadingFieldId(fieldId);
+    try {
+      const presignedUrl = await formsRepository.getPresignedDocumentUrl(url);
+      await Linking.openURL(presignedUrl);
+    } catch {
+      showMessage('Error', 'No se pudo descargar el archivo adjunto.');
+    } finally {
+      setDownloadingFieldId(null);
+    }
+  };
+
   const handleDownloadAdjunto = async (submission: FormSubmission, formId: number) => {
     if (downloadingSubmissionId === submission.submission_id) return;
     const url = findAdjuntoUrl(submission, formId);
@@ -438,6 +472,22 @@ const FormsManagerScreen: React.FC = () => {
           items: section.forms,
         }))}
         emptyText="Sin formularios."
+        renderSectionAction={(section, config) => (
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              handleRefreshProcedure(section.procedure.id, section.items);
+            }}
+            disabled={refreshingProcedureId === section.procedure.id}
+            style={{ marginRight: 6 }}
+          >
+            {refreshingProcedureId === section.procedure.id ? (
+              <ActivityIndicator size="small" color={config.color} />
+            ) : (
+              <MaterialIcon name="refresh" fontSize={22} color={config.color} />
+            )}
+          </TouchableOpacity>
+        )}
         renderItems={(items, section, config) =>
           items.map(item => {
             const isFormExpanded = expandedFormId === item.form_id;
@@ -454,12 +504,10 @@ const FormsManagerScreen: React.FC = () => {
                 submissionsLoading={submissionsLoading}
                 hasSubmissionsCache={!!submissionsCache[item.form_id]}
                 isDigital={isDigital}
-                isRefreshing={refreshingFormId === item.form_id}
                 isDeleting={deletingFormId === item.form_id}
                 isExporting={exportingFormId === item.form_id}
                 downloadingSubmissionId={downloadingSubmissionId}
                 onToggle={() => toggleForm(item)}
-                onRefresh={() => handleRefreshForm(item)}
                 onEdit={() => navigation.navigate('FormDesigner', { formId: item.form_id })}
                 onDelete={() => handleDeleteForm(item)}
                 onExport={() => handleExportExcel(item, submissions)}
@@ -527,14 +575,40 @@ const FormsManagerScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
             <ScrollView>
-              {(answersModal?.submission.answers ?? []).map((ans, i) => (
-                <View key={i} style={styles.answerRow}>
-                  <Text style={styles.answerLabel}>{ans.field_label}</Text>
-                  <Text style={styles.answerValue}>
-                    {answersModal ? getModalAnswerValue(ans, answersModal.formId) : '—'}
-                  </Text>
-                </View>
-              ))}
+              {(answersModal?.submission.answers ?? []).map((ans, i) => {
+                const isAdjunto = answersModal
+                  ? isAdjuntoField(ans.field_id, answersModal.formId)
+                  : false;
+                const hasValue = ans.answer_value != null && ans.answer_value !== '';
+                const isDownloading = downloadingFieldId === ans.field_id;
+                return (
+                  <View key={i} style={styles.answerRow}>
+                    <Text style={styles.answerLabel}>{ans.field_label}</Text>
+                    {isAdjunto && hasValue ? (
+                      <TouchableOpacity
+                        style={styles.adjuntoButton}
+                        onPress={() =>
+                          handleDownloadAdjuntoFromUrl(ans.answer_value as string, ans.field_id)
+                        }
+                        disabled={isDownloading}
+                      >
+                        {isDownloading ? (
+                          <ActivityIndicator size="small" color="#1976D2" />
+                        ) : (
+                          <>
+                            <MaterialIcon name="download" fontSize={18} color="#1976D2" />
+                            <Text style={styles.adjuntoButtonText}>Descargar archivo</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    ) : (
+                      <Text style={styles.answerValue}>
+                        {answersModal ? getModalAnswerValue(ans, answersModal.formId) : '—'}
+                      </Text>
+                    )}
+                  </View>
+                );
+              })}
             </ScrollView>
           </View>
         </View>
@@ -568,6 +642,19 @@ const styles = StyleSheet.create({
   },
   answerLabel: { fontSize: 12, color: '#888', fontWeight: '600' },
   answerValue: { fontSize: 15, color: '#333' },
+  adjuntoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#1976D2',
+    marginTop: 2,
+  },
+  adjuntoButtonText: { color: '#1976D2', fontWeight: '600', fontSize: 13 },
 });
 
 export default FormsManagerScreen;
