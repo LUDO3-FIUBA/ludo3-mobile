@@ -16,6 +16,18 @@ import TeacherHomeScreen from "../teacher_home";
 import CreateSemester from "../teacher_semester/CreateSemester";
 import FormsListScreen from "../forms/FormsListScreen";
 import FormsManagerScreen from "../admin_forms/FormsManagerScreen";
+import TeacherFormsScreen from "../teacher_forms/TeacherFormsScreen";
+import TeacherProfileScreen from "../teacher_profile";
+import DepartmentList from "../admin_departments/DepartmentList";
+import DepartmentDetail from "../admin_departments/DepartmentDetail";
+import DepartmentForm from "../admin_departments/DepartmentForm";
+import CommissionList from "../admin_commissions/CommissionList";
+import CommissionDetail from "../admin_commissions/CommissionDetail";
+import CommissionForm from "../admin_commissions/CommissionForm";
+import UserSearch from "../admin_users/UserSearch";
+import UserDetail from "../admin_users/UserDetail";
+import NotificationList from "../admin_notifications/NotificationList";
+import NotificationForm from "../admin_notifications/NotificationForm";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { lightModeColors, darkModeColors } from "../../styles/colorPalette";
@@ -221,6 +233,9 @@ const RootDrawer = () => {
   const showTeacherScreens = roleView === "teacher" && (user?.isTeacher() ?? false);
   const showAdminScreens = roleView === "admin" && (user?.isAdmin() ?? false);
 
+  const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+  const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
+
   const markAsRead = async (item: UserNotification) => {
     if (item.is_read) {
       return;
@@ -380,6 +395,19 @@ const RootDrawer = () => {
                 drawerIcon: makeDrawerIcon("chart-box", "chart-box-outline"),
               }}
             />
+            <Drawer.Screen
+              name="StudentDepartmentList"
+              component={StudentDepartmentListScreen}
+              options={{
+                title: "Departamentos",
+                drawerIcon: makeDrawerIcon("office-building", "office-building-outline"),
+              }}
+            />
+            <Drawer.Screen
+              name="AdminDepartmentDetail"
+              component={DepartmentDetail}
+              options={{ title: "Departamento", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+            />
           </>
         )}
 
@@ -401,17 +429,118 @@ const RootDrawer = () => {
                 drawerIcon: makeDrawerIcon("plus-circle", "plus-circle-outline"),
               }}
             />
+            <Drawer.Screen
+              name="TeacherProfile"
+              component={TeacherProfileScreen}
+              options={{
+                title: "Mi Perfil Profesional",
+                drawerIcon: makeDrawerIcon("account-details", "account-details-outline"),
+              }}
+            />
+            <Drawer.Screen
+              name="TeacherDepartmentList"
+              component={StudentDepartmentListScreen}
+              options={{
+                title: "Departamentos",
+                drawerIcon: makeDrawerIcon("office-building", "office-building-outline"),
+              }}
+            />
+            <Drawer.Screen
+              name="TeacherTramites"
+              component={TeacherFormsScreen}
+              options={{
+                title: "Validación de Trámites",
+                drawerIcon: makeDrawerIcon("clipboard-check", "clipboard-check-outline"),
+              }}
+            />
+            <Drawer.Screen
+              name="AdminDepartmentDetail"
+              component={DepartmentDetail}
+              options={{ title: "Departamento", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+            />
           </>
         )}
 
       {showAdminScreens && (
         <>
           <Drawer.Screen
+            name="AdminDepartmentList"
+            component={AdminDepartmentListScreen}
+            options={{
+              title: "Departamentos",
+              drawerIcon: makeDrawerIcon("office-building", "office-building-outline"),
+            }}
+          />
+          <Drawer.Screen
+            name="AdminDepartmentCreate"
+            component={DepartmentForm}
+            options={{ title: "Nuevo Departamento", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
+            name="AdminDepartmentDetail"
+            component={DepartmentDetail}
+            options={{ title: "Departamento", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
+            name="AdminDepartmentEdit"
+            component={DepartmentForm}
+            options={{ title: "Editar Departamento", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
+            name="AdminCommissionList"
+            component={CommissionList}
+            options={{
+              title: "Comisiones",
+              drawerIcon: makeDrawerIcon("account-group", "account-group-outline"),
+            }}
+          />
+          <Drawer.Screen
+            name="AdminCommissionCreate"
+            component={CommissionForm}
+            options={{ title: "Nueva Comisión", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
+            name="AdminCommissionDetail"
+            component={CommissionDetail}
+            options={{ title: "Comisión", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
+            name="AdminCommissionEdit"
+            component={CommissionForm}
+            options={{ title: "Editar Comisión", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
+            name="AdminUserSearch"
+            component={UserSearch}
+            options={{
+              title: "Buscar Usuarios",
+              drawerIcon: makeDrawerIcon("account-search", "account-search-outline"),
+            }}
+          />
+          <Drawer.Screen
+            name="AdminUserDetail"
+            component={UserDetail}
+            options={{ title: "Usuario", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
+            name="AdminNotificationList"
+            component={NotificationList}
+            options={{
+              title: "Avisos",
+              drawerIcon: makeDrawerIcon("bell", "bell-outline"),
+            }}
+          />
+          <Drawer.Screen
+            name="AdminNotificationCreate"
+            component={NotificationForm}
+            options={{ title: "Nuevo Aviso", drawerLabel: () => null, drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
             name="GestorTramites"
             component={FormsManagerScreen}
             options={{
               title: "Gestor de Trámites",
-              drawerIcon: makeDrawerIcon("archive", "archive-outline"),
+              drawerIcon: makeDrawerIcon("clipboard-list", "clipboard-list-outline"),
             }}
           />
         </>
