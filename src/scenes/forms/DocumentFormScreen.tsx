@@ -210,14 +210,17 @@ const DocumentFormScreen: React.FC = () => {
     );
   }
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!form.document_source) {
       Alert.alert('Error', 'No hay documento disponible para descargar.');
       return;
     }
-    Linking.openURL(form.document_source).catch(() =>
-      Alert.alert('Error', 'No se pudo abrir el documento.'),
-    );
+    try {
+      const presignedUrl = await formsRepository.getPresignedDocumentUrl(form.document_source);
+      await Linking.openURL(presignedUrl);
+    } catch {
+      Alert.alert('Error', 'No se pudo abrir el documento.');
+    }
   };
 
   const handlePickFile = async () => {

@@ -395,7 +395,11 @@ const FormDesignerScreen: React.FC = () => {
     setSubmitStatus(null);
     try {
       if (isEditing && editingFormId) {
-        await formsRepository.updateForm(editingFormId, payload);
+        if (!isDigital && templateFile) {
+          await formsRepository.updateFormWithTemplate(editingFormId, payload, templateFile);
+        } else {
+          await formsRepository.updateForm(editingFormId, payload);
+        }
       } else if (!isDigital && templateFile) {
         await formsRepository.createFormWithTemplate(payload, templateFile);
       } else {

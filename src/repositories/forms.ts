@@ -1,4 +1,4 @@
-import { get, post, postMultipart, deleteMethod, put, patch } from './authenticatedRepository';
+import { get, post, postMultipart, putMultipart, deleteMethod, put, patch } from './authenticatedRepository';
 import FormProcedureType from '../models/FormProcedureType';
 import Form from '../models/Form';
 import FormDetail from '../models/FormDetail';
@@ -128,8 +128,28 @@ export async function createFormWithTemplate(
   return (await postMultipart(`${BASE}/forms`, fd)) as Form;
 }
 
+export async function getPresignedDocumentUrl(url: string): Promise<string> {
+  const result = (await get(`${BASE}/forms/presign-document`, [{ key: 'url', value: url }])) as { url: string };
+  return result.url;
+}
+
 export async function updateForm(formId: number, formData: object): Promise<Form> {
   return (await put(`${BASE}/forms/${formId}`, formData)) as Form;
+}
+
+export async function updateFormWithTemplate(
+  formId: number,
+  formData: Record<string, unknown>,
+  templateFile: LocalFile,
+): Promise<Form> {
+  const fd = new FormData();
+  Object.entries(formData).forEach(([k, v]) => appendField(fd, k, v));
+  if (templateFile.file) {
+    fd.append('document_source_file', templateFile.file, templateFile.name);
+  } else {
+    fd.append('document_source_file', templateFile as unknown as Blob);
+  }
+  return (await putMultipart(`${BASE}/forms/${formId}`, fd)) as Form;
 }
 
 export async function fetchFieldTypes(): Promise<{ id: number; value: string }[]> {
@@ -194,6 +214,8 @@ export default {
   createForm,
   createFormWithTemplate,
   updateForm,
+  updateFormWithTemplate,
+  getPresignedDocumentUrl,
   fetchFieldTypes,
   fetchCatalogs,
   createCatalog,

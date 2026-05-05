@@ -3,6 +3,7 @@ import {
   post as basicPost,
   postMultipart as basicPostMultipart,
   put as basicPut,
+  putMultipart as basicPutMultipart,
   patch as basicPatch,
   deleteMethod as basicDelete,
   StatusCodeError,
@@ -155,6 +156,25 @@ export function postMultipart(url: string, formData: FormData, headers = {}): Pr
   });
 }
 
+export function putMultipart(url: string, formData: FormData, headers = {}): Promise<Object> {
+  const sessionManager: SessionManager | null = SessionManager.getInstance();
+  const token = sessionManager?.getAuthToken();
+  if (!token) {
+    return Promise.reject(new MustLoginAgain());
+  }
+  return basicPutMultipart(url, formData, {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  }).catch(error => {
+    return reLogInIfNecessary(error).then(newToken => {
+      return basicPutMultipart(url, formData, {
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      });
+    });
+  });
+}
+
 export function deleteMethod(
   url: string,
   body: any,
@@ -179,4 +199,4 @@ export function deleteMethod(
   });
 }
 
-export default {post, postMultipart, get, put, patch, deleteMethod, MustLoginAgain};
+export default {post, postMultipart, putMultipart, get, put, patch, deleteMethod, MustLoginAgain};

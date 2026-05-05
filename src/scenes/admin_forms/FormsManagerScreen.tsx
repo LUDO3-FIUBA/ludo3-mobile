@@ -10,13 +10,13 @@ import {
   StyleSheet,
   Platform,
   Share,
+  Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import * as XLSX from 'xlsx';
 import { AlertDialog, MaterialIcon, ProcedureTypesAccordionList, PROCEDURE_CONFIG } from '../../components';
 import { formsRepository } from '../../repositories';
-import SessionManager from '../../managers/sessionManager';
 import Form from '../../models/Form';
 import FormSubmission, { FormSubmissionStatusValue } from '../../models/FormSubmission';
 import FormDetail from '../../models/FormDetail';
@@ -405,39 +405,8 @@ const FormsManagerScreen: React.FC = () => {
 
     setDownloadingSubmissionId(submission.submission_id);
     try {
-      const token = SessionManager.getInstance()?.getAuthToken();
-      const response = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const remoteName = url.split('/').filter(Boolean).pop() ?? `submission_${submission.submission_id}`;
-      const fileName = `submission_${submission.submission_id}_${remoteName}`;
-
-      if (Platform.OS === 'web') {
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = objectUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(objectUrl);
-      } else {
-        const buffer = await response.arrayBuffer();
-        const bytes = new Uint8Array(buffer);
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-        const base64 = global.btoa(binary);
-        const path = `${RNFS.DocumentDirectoryPath}/${fileName}`;
-        await RNFS.writeFile(path, base64, 'base64');
-        await Share.share({
-          title: 'Descargar adjunto',
-          message: `Archivo descargado: ${fileName}`,
-          url: `file://${path}`,
-        });
-      }
+      const presignedUrl = await formsRepository.getPresignedDocumentUrl(url);
+      await Linking.openURL(presignedUrl);
     } catch {
       showMessage('Error', 'No se pudo descargar el archivo adjunto.');
     } finally {

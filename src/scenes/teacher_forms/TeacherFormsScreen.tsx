@@ -216,14 +216,18 @@ const TeacherFormsScreen: React.FC = () => {
     }
   };
 
-  const openDocumentUrl = (sub: FormSubmission) => {
-    // For document submissions the file URL is stored in the first answer_value
+  const openDocumentUrl = async (sub: FormSubmission) => {
     const url = sub.answers?.[0]?.answer_value;
     if (!url) {
       showMessage('Sin documento', 'No hay documento disponible para esta solicitud.');
       return;
     }
-    Linking.openURL(url).catch(() => showMessage('Error', 'No se pudo abrir el documento.'));
+    try {
+      const presignedUrl = await formsRepository.getPresignedDocumentUrl(url);
+      await Linking.openURL(presignedUrl);
+    } catch {
+      showMessage('Error', 'No se pudo abrir el documento.');
+    }
   };
 
   if (loading) {

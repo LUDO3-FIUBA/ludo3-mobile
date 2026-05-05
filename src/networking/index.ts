@@ -159,6 +159,20 @@ export function postMultipart(url: string, formData: FormData, headers = {}) {
   }).then(res => validate(res));
 }
 
+export function putMultipart(url: string, formData: FormData, headers = {}) {
+  if (logRequests) {
+    console.log(`PUT (multipart) ${baseUrl}/${url}/`);
+  }
+  return fetch(`${baseUrl}/${url}/`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      ...headers,
+    },
+    body: formData,
+  }).then(res => validate(res));
+}
+
 export function deleteMethod(url: string, body: any, queryParams = [], headers = {}) {
   const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
   const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
