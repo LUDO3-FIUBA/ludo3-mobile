@@ -633,15 +633,15 @@ const RootDrawer = () => {
             </View>
 
             {notifications.length === 0 ? (
-        <View style={styles.notificationsEmptyContainer}>
-          <Text style={styles.notificationsEmptyText}>No tenés notificaciones</Text>
-        </View>
-        ) : (
-          <ScrollView
-            style={styles.notificationsList}
-            contentContainerStyle={styles.notificationsListContent}
-            showsVerticalScrollIndicator
-          >
+            <View style={styles.notificationsEmptyContainer}>
+              <Text style={styles.notificationsEmptyText}>No tenés notificaciones</Text>
+            </View>
+            ) : (
+              <ScrollView
+                style={styles.notificationsList}
+                contentContainerStyle={styles.notificationsListContent}
+                showsVerticalScrollIndicator
+              >
                 {notifications.slice(0, 5).map((item) => (
                   <TouchableOpacity
                     key={item.id}
