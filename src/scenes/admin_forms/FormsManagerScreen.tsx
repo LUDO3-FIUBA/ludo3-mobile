@@ -161,7 +161,7 @@ const FormsManagerScreen: React.FC = () => {
     const fieldType = field.form_field_type.value;
 
     if (fieldType === 'checkbox') {
-      return String(answer.answer_value).toLowerCase() === 'true' ? 'Si' : 'No';
+      return String(answer.answer_value).toLowerCase() === 'true' ? 'Sí' : 'No';
     }
 
     if (fieldType === 'options' && field.options) {
@@ -306,7 +306,7 @@ const FormsManagerScreen: React.FC = () => {
     const fieldType = field.form_field_type.value;
 
     if (fieldType === 'checkbox') {
-      return String(answerValue).toLowerCase() === 'true' ? 'Si' : 'No';
+      return String(answerValue).toLowerCase() === 'true' ? 'Sí' : 'No';
     }
 
     if (fieldType === 'options' && field.options) {
