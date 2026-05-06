@@ -352,6 +352,15 @@ const RootDrawer = () => {
                 drawerIcon: makeDrawerIcon('file-clock', 'file-clock-outline')
               }}
             />
+            
+            <Drawer.Screen
+              name="Tramites"
+              component={FormsListScreen}
+              options={{
+                title: "Trámites",
+                drawerIcon: makeDrawerIcon("archive", "archive-outline"),
+              }}
+            />
 
             <Drawer.Screen
               name="ScanQR"
@@ -415,6 +424,12 @@ const RootDrawer = () => {
             />
 
             <Drawer.Screen
+              name="TeacherTramites"
+              component={TeacherFormsScreen}
+              options={{ headerShown: true, title: 'Validación de Trámites', drawerIcon: makeDrawerIcon('clipboard-check', 'clipboard-check-outline') }}
+            />
+
+            <Drawer.Screen
               name="TeacherProfile"
               component={TeacherProfileScreen}
               options={{
@@ -428,12 +443,6 @@ const RootDrawer = () => {
               name="TeacherDepartmentList"
               component={StudentDepartmentListScreen}
               options={{ headerShown: true, title: 'Departamentos', drawerIcon: makeDrawerIcon('office-building', 'office-building-outline') }}
-            />
-
-            <Drawer.Screen
-              name="TeacherTramites"
-              component={TeacherFormsScreen}
-              options={{ headerShown: true, title: 'Validación de Trámites', drawerIcon: makeDrawerIcon('clipboard-check', 'clipboard-check-outline') }}
             />
 
             <Drawer.Screen
@@ -517,6 +526,15 @@ const RootDrawer = () => {
               name="AdminNotificationCreate"
               component={NotificationForm}
               options={{ headerShown: true, title: 'Nuevo Aviso', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="GestorTramites"
+              component={FormsManagerScreen}
+              options={{
+                title: "Gestor de Trámites",
+                drawerIcon: makeDrawerIcon("clipboard-list", "clipboard-list-outline"),
+              }}
             />
           </>
         )}

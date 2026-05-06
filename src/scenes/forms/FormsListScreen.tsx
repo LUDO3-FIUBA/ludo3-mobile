@@ -44,16 +44,13 @@ const TeacherStatusBadge: React.FC<{ status: TeacherValidationStatusValue | null
   if (!status) return null;
   const colors = TEACHER_STATUS_COLORS[status];
   return (
-    <View style={styles.row}>
+    <View style={styles.rowAlignLeft}>
       <Text style={styles.rowTeacher}>
         Docente: {teacherFirstName} {teacherLastName}
       </Text>
       <View style={[badgeStyles.container, { backgroundColor: colors.bg, borderColor: colors.border }]}>
         <Text style={[badgeStyles.text, { color: colors.text }]}>{TEACHER_STATUS_LABELS[status]}</Text>
       </View>
-      <Text style={styles.rowTeacher}>
-          |   
-      </Text>
     </View>
   );
 };
@@ -211,17 +208,22 @@ const FormsListScreen: React.FC = () => {
                         </Text>
                         <Text style={styles.rowDate}>{formatDate(submission.submitted_at)}</Text>
                       </View>
-                      <View style={styles.badges}>
+                      <View>
+                        <View style={styles.badgesLeft}>
                         {requiresTeacher && (
-                          <TeacherStatusBadge
-                            status={submission.teacher_status}
-                            teacherFirstName={submission.teacher_first_name}
-                            teacherLastName={submission.teacher_last_name}
-                          />
+                          <View style={styles.rowAlignLeft}>
+                            <TeacherStatusBadge
+                              status={submission.teacher_status}
+                              teacherFirstName={submission.teacher_first_name}
+                              teacherLastName={submission.teacher_last_name}
+                            />
+                          </View>
                         )}
-                      </View>
-                      <View style={styles.badges}>
-                        <SubmissionStatusBadge value={submission.status.value} />
+                        </View>
+                        <View style={styles.rowAlignLeft}>
+                          <Text style={styles.rowTeacher}>Estado: </Text>
+                          <SubmissionStatusBadge value={submission.status.value} />
+                        </View>
                       </View>
                     </View>
                   );
@@ -275,12 +277,26 @@ const styles = StyleSheet.create({
   title: { fontSize: 16, fontWeight: '700', color: '#222', flex: 1 },
   empty: { color: '#999', fontStyle: 'italic', paddingVertical: 12 },
   row: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    gap: 8,
+  },
+  rowEmpty: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    gap: 10,
+  },
+  rowAlignLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingVertical: 5,
     gap: 10,
   },
   rowMain: { flex: 1 },
@@ -288,6 +304,7 @@ const styles = StyleSheet.create({
   rowDate: { fontSize: 12, color: '#666', marginTop: 2 },
   rowTeacher: { fontSize: 12, color: '#666', marginTop: 2 },
   badges: { alignItems: 'flex-end', gap: 4 },
+  badgesLeft: { alignItems: 'flex-start', gap: 4 },
 });
 
 export default FormsListScreen;
