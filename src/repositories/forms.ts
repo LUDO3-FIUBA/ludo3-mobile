@@ -52,7 +52,6 @@ export async function submitDigitalFormWithAdjunto(
   const fd = new FormData();
   fd.append('answers', JSON.stringify(answers));
   if (teacherId !== undefined) fd.append('teacher_id', String(teacherId));
-  // Missing Cloud Storage Support
   if (adjuntoFile.file) {
     // Web (Expo web / browser): use the native browser File object.
     fd.append('file', adjuntoFile.file, adjuntoFile.name);
