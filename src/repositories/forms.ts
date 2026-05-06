@@ -69,7 +69,6 @@ export async function submitDocumentForm(
 ): Promise<FormSubmission> {
   const fd = new FormData();
   if (teacherId !== undefined) fd.append('teacher_id', String(teacherId));
-  // Missing Cloud Storage Support
   if (file.file) {
     // Web (Expo web / browser): expo-document-picker returns a native File object.
     // FormData.append accepts File directly and builds the correct multipart body.
@@ -116,7 +115,6 @@ export async function createFormWithTemplate(
 ): Promise<Form> {
   const fd = new FormData();
   Object.entries(formData).forEach(([k, v]) => appendField(fd, k, v));
-  // Missing Cloud Storage Support
   if (templateFile.file) {
     // Web (Expo web / browser): use the native browser File object.
     fd.append('document_source_file', templateFile.file, templateFile.name);
