@@ -508,7 +508,7 @@ const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange, fileVal
       autoCapitalize={type === 'mail' ? 'none' : 'sentences'}
       placeholder={`Ingresá ${field.form_field_label.toLowerCase()}`}
       placeholderTextColor="#aaa"
-      maxLength={type === 'padron' ? 7 : undefined}
+      maxLength={type === 'padron' ? 6 : undefined}
     />
   );
 };
