@@ -23,6 +23,7 @@ import {
   TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
   // Forms screens
   DocumentFormScreen, DigitalFormScreen, FormDesignerScreen,
+  TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
 } from './src/scenes';
 import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
@@ -381,6 +382,16 @@ const App = () => {
               name="FormDesigner"
               component={FormDesignerScreen}
               options={{ headerShown: true, title: 'Nuevo formulario' }}
+            />
+            <Stack.Screen
+              name="SendCommissionNotification"
+              component={TeacherSendCommissionNotificationScreen}
+              options={{ headerShown: true, title: 'Enviar aviso' }}
+            />
+            <Stack.Screen
+              name="SemesterNotificationHistory"
+              component={TeacherSemesterNotificationHistoryScreen}
+              options={{ headerShown: true, title: 'Avisos enviados' }}
             />
             <Stack.Screen
               name="StudentIdentityViewer"

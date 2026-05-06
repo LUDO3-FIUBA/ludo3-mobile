@@ -22,6 +22,7 @@ import FormsManagerScreen from "../admin_forms/FormsManagerScreen";
 import TeacherFormsScreen from "../teacher_forms/TeacherFormsScreen";
 import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
+import NotificationsScreen from "../notifications";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -120,6 +121,7 @@ const RootDrawer = () => {
   const colors = isDarkTheme() ? darkModeColors : lightModeColors;
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
   const [user, setUser] = useState<User | null>(null);
   const [roleView, setRoleView] = useState<RoleView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -538,6 +540,16 @@ const RootDrawer = () => {
             />
           </>
         )}
+
+        <Drawer.Screen
+          name="Notifications"
+          component={NotificationsScreen}
+          options={{
+            headerShown: true,
+            title: 'Notificaciones',
+            drawerIcon: makeDrawerIcon('bell', 'bell-outline')
+          }}
+        />
       </Drawer.Navigator>
 
       {showToast && toastNotification && !showNotificationsDropdown && (
@@ -831,46 +843,77 @@ const RootDrawer = () => {
             contentContainerStyle={styles.notificationsListContent}
             showsVerticalScrollIndicator
           >
-            {notifications.slice(0, 8).map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => onNotificationPress(item)}
-                style={[
-                  styles.notificationItem,
-                  !item.is_read ? styles.notificationItemUnread : undefined,
-                ]}
-              >
-                <View style={styles.notificationItemHeader}>
-                  <Text numberOfLines={1} style={styles.notificationItemTitle}>
-                    {item.notification.title}
-                  </Text>
-                  <View style={styles.notificationItemActions}>
-                    {!item.is_read && <View style={styles.notificationItemDot} />}
-                    <TouchableOpacity
-                      onPress={(e) => { e.stopPropagation(); onDeleteNotification(item); }}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <MaterialIcon name="trash-can-outline" fontSize={16} color="#9ca3af" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <Text numberOfLines={2} style={styles.notificationItemMessage}>
-                  {item.notification.message}
-                </Text>
-                {item.notification.image && (
-                  <Image
-                    source={{ uri: item.notification.image }}
-                    style={styles.notificationItemThumbnail}
-                    resizeMode="cover"
-                  />
-                )}
-                <Text numberOfLines={1} style={styles.notificationItemDate}>
-                  {formatNotificationDate(item.notification.created_at)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                {notifications.slice(0, 5).map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => onNotificationPress(item)}
+                    style={[
+                      styles.notificationItem,
+                      !item.is_read ? styles.notificationItemUnread : undefined,
+                    ]}
+                  >
+                    <View style={styles.notificationItemHeader}>
+                      <Text numberOfLines={1} style={[styles.notificationItemTitle, !item.is_read && styles.notificationItemTitleUnread]}>
+                        {item.notification.title}
+                      </Text>
+                      <View style={styles.notificationItemActions}>
+                        {!item.is_read && <View style={styles.notificationItemDot} />}
+                        <TouchableOpacity
+                          onPress={(e) => { e.stopPropagation(); onDeleteNotification(item); }}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                          <MaterialIcon name="trash-can-outline" fontSize={16} color="#9ca3af" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                    {item.notification.semester_info ? (
+                      <View style={styles.notificationItemContext}>
+                        <MaterialIcon name="school" fontSize={11} color="#6b7280" />
+                        <Text numberOfLines={1} style={styles.notificationItemContextText}>
+                          {item.notification.semester_info.subject_name}
+                          {item.notification.semester_info.period_label
+                            ? ` · ${item.notification.semester_info.period_label}`
+                            : ''}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.notificationItemContext}>
+                        <MaterialIcon name="bullhorn" fontSize={11} color="#6b7280" />
+                        <Text numberOfLines={1} style={styles.notificationItemContextText}>
+                          Aviso institucional
+                        </Text>
+                      </View>
+                    )}
+                    <Text numberOfLines={2} style={styles.notificationItemMessage}>
+                      {item.notification.message}
+                    </Text>
+                    {item.notification.image && (
+                      <Image
+                        source={{ uri: item.notification.image }}
+                        style={styles.notificationItemThumbnail}
+                        resizeMode="cover"
+                      />
+                    )}
+                    <Text numberOfLines={1} style={styles.notificationItemDate}>
+                      {item.notification.sender_name
+                        ? `${item.notification.sender_name} · ${formatNotificationDate(item.notification.created_at)}`
+                        : formatNotificationDate(item.notification.created_at)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             )}
+
+            <TouchableOpacity
+              style={styles.notificationsSeeAll}
+              onPress={() => {
+                setShowNotificationsDropdown(false);
+                navigation.navigate('RootDrawer', { screen: 'Notifications' });
+              }}
+            >
+              <Text style={styles.notificationsSeeAllText}>Ver todas las notificaciones</Text>
+              <MaterialIcon name="chevron-right" fontSize={18} color={lightModeColors.institutional} />
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -1006,8 +1049,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   notificationItemUnread: {
-    backgroundColor: '#f6f9ff',
-    borderColor: '#d6e4ff',
+    backgroundColor: '#eaf3ff',
+    borderLeftWidth: 4,
+    borderLeftColor: lightModeColors.institutional,
+  },
+  notificationItemTitleUnread: {
+    color: lightModeColors.institutional,
+    fontWeight: '800',
   },
   notificationItemHeader: {
     flexDirection: 'row',
@@ -1050,6 +1098,32 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginTop: 6,
     marginBottom: 6,
+  },
+  notificationItemContext: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  notificationItemContextText: {
+    flex: 1,
+    fontSize: 11,
+    color: '#6b7280',
+    fontWeight: '600',
+  },
+  notificationsSeeAll: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    gap: 4,
+  },
+  notificationsSeeAllText: {
+    color: lightModeColors.institutional,
+    fontSize: 14,
+    fontWeight: '600',
   },
   fullScreenContainer: {
     flex: 1,

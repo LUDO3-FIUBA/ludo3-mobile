@@ -46,6 +46,7 @@ import FilterNavBarButton from "../home/filterNavBarButton";
 import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
 import StudentCredentialScreen from "../student_credential";
+import NotificationsScreen from "../notifications";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { usersRepository } from "../../repositories";
 import User from "../../models/User";
@@ -130,6 +131,7 @@ const RootDrawer = () => {
   const colors = isDarkTheme() ? darkModeColors : lightModeColors;
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
   const [user, setUser] = useState<User | null>(null);
   const [roleView, setRoleView] = useState<RoleView | null>(null);
   const [loading, setLoading] = useState(true);
@@ -545,6 +547,14 @@ const RootDrawer = () => {
           />
         </>
       )}
+      <Drawer.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{
+          title: 'Notificaciones',
+          drawerIcon: makeDrawerIcon('bell', 'bell-outline'),
+        }}
+      />
       </Drawer.Navigator>
 
       {showToast && toastNotification && !showNotificationsDropdown && (
@@ -607,7 +617,7 @@ const RootDrawer = () => {
                 contentContainerStyle={styles.notificationsListContent}
                 showsVerticalScrollIndicator
               >
-                {notifications.slice(0, 10).map((item) => (
+                {notifications.slice(0, 5).map((item) => (
                   <TouchableOpacity
                     key={item.id}
                     onPress={() => markAsRead(item)}
@@ -617,21 +627,52 @@ const RootDrawer = () => {
                     ]}
                   >
                     <View style={styles.notificationItemHeader}>
-                      <Text numberOfLines={1} style={styles.notificationItemTitle}>
+                      <Text numberOfLines={1} style={[styles.notificationItemTitle, !item.is_read && styles.notificationItemTitleUnread]}>
                         {item.notification.title}
                       </Text>
                       {!item.is_read && <View style={styles.notificationItemDot} />}
                     </View>
+                    {item.notification.semester_info ? (
+                      <View style={styles.notificationItemContext}>
+                        <MaterialIcon name="school" fontSize={11} color="#6b7280" />
+                        <Text numberOfLines={1} style={styles.notificationItemContextText}>
+                          {item.notification.semester_info.subject_name}
+                          {item.notification.semester_info.period_label
+                            ? ` · ${item.notification.semester_info.period_label}`
+                            : ''}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View style={styles.notificationItemContext}>
+                        <MaterialIcon name="bullhorn" fontSize={11} color="#6b7280" />
+                        <Text numberOfLines={1} style={styles.notificationItemContextText}>
+                          Aviso institucional
+                        </Text>
+                      </View>
+                    )}
                     <Text numberOfLines={2} style={styles.notificationItemMessage}>
                       {item.notification.message}
                     </Text>
                     <Text numberOfLines={1} style={styles.notificationItemDate}>
-                      {formatNotificationDate(item.notification.created_at)}
+                      {item.notification.sender_name
+                        ? `${item.notification.sender_name} · ${formatNotificationDate(item.notification.created_at)}`
+                        : formatNotificationDate(item.notification.created_at)}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
             )}
+
+            <TouchableOpacity
+              style={styles.notificationsSeeAll}
+              onPress={() => {
+                setShowNotificationsDropdown(false);
+                navigation.navigate('RootDrawer', { screen: 'Notifications' });
+              }}
+            >
+              <Text style={styles.notificationsSeeAllText}>Ver todas las notificaciones</Text>
+              <MaterialIcon name="chevron-right" fontSize={18} color={lightModeColors.institutional} />
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -777,8 +818,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   notificationItemUnread: {
-    backgroundColor: '#f6f9ff',
-    borderColor: '#d6e4ff',
+    backgroundColor: '#eaf3ff',
+    borderLeftWidth: 4,
+    borderLeftColor: lightModeColors.institutional,
+  },
+  notificationItemTitleUnread: {
+    color: lightModeColors.institutional,
+    fontWeight: '800',
   },
   notificationItemHeader: {
     flexDirection: 'row',
@@ -809,6 +855,32 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: '#2563eb',
+  },
+  notificationItemContext: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  notificationItemContextText: {
+    flex: 1,
+    fontSize: 11,
+    color: '#6b7280',
+    fontWeight: '600',
+  },
+  notificationsSeeAll: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    gap: 4,
+  },
+  notificationsSeeAllText: {
+    color: lightModeColors.institutional,
+    fontSize: 14,
+    fontWeight: '600',
   },
   toastLayer: {
     position: 'absolute',
