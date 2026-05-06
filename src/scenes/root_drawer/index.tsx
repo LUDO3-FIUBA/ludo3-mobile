@@ -19,6 +19,9 @@ import UserSearch from "../admin_users/UserSearch";
 import UserDetail from "../admin_users/UserDetail";
 import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
+import NewsList from "../news/NewsList";
+import NewsDetail from "../news/NewsDetail";
+import NewsForm from "../news/NewsForm";
 import NotificationsScreen from "../notifications";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
@@ -225,6 +228,8 @@ const RootDrawer = () => {
 
   const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
   const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
+  const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
+  const ReadOnlyNewsListScreen = () => <NewsList isAdmin={false} />;
 
   const onDeleteNotification = async (item: UserNotification) => {
     try {
@@ -387,6 +392,18 @@ const RootDrawer = () => {
               component={DepartmentDetail}
               options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
+
+            <Drawer.Screen
+              name="StudentNewsList"
+              component={ReadOnlyNewsListScreen}
+              options={{ headerShown: true, title: 'Novedades', drawerIcon: makeDrawerIcon('newspaper', 'newspaper-variant-outline') }}
+            />
+
+            <Drawer.Screen
+              name="NewsDetail"
+              component={NewsDetail}
+              options={{ headerShown: true, title: 'Novedad', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
           </>
         )}
 
@@ -433,6 +450,18 @@ const RootDrawer = () => {
               name="AdminDepartmentDetail"
               component={DepartmentDetail}
               options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="TeacherNewsList"
+              component={ReadOnlyNewsListScreen}
+              options={{ headerShown: true, title: 'Novedades', drawerIcon: makeDrawerIcon('newspaper', 'newspaper-variant-outline') }}
+            />
+
+            <Drawer.Screen
+              name="NewsDetail"
+              component={NewsDetail}
+              options={{ headerShown: true, title: 'Novedad', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
           </>
         )}
@@ -510,6 +539,30 @@ const RootDrawer = () => {
               name="AdminNotificationCreate"
               component={NotificationForm}
               options={{ headerShown: true, title: 'Nuevo Aviso', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminNewsList"
+              component={AdminNewsListScreen}
+              options={{ headerShown: true, title: 'Novedades', drawerIcon: makeDrawerIcon('newspaper', 'newspaper-variant-outline') }}
+            />
+
+            <Drawer.Screen
+              name="AdminNewsCreate"
+              component={NewsForm}
+              options={{ headerShown: true, title: 'Nueva Novedad', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="AdminNewsEdit"
+              component={NewsForm}
+              options={{ headerShown: true, title: 'Editar Novedad', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="NewsDetail"
+              component={NewsDetail}
+              options={{ headerShown: true, title: 'Novedad', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
           </>
         )}
