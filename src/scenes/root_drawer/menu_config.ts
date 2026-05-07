@@ -186,15 +186,36 @@ function visibleOnPlatform(platform?: 'mobile' | 'web'): boolean {
   return true;
 }
 
+/** Teacher menu for mobile toggle mode: excludes shared nav items already in student menu. */
+function buildTeacherMenuForToggle(): MenuItem[] {
+  return teacherMenu.map(item => {
+    if (item.kind === 'submenu' && item.key === 'academic') {
+      return {
+        ...item,
+        children: (item as SubmenuItem).children.filter(c => c.key !== 'departments'),
+      };
+    }
+    return item;
+  });
+}
+
 export function isMergedMenu(user: User): boolean {
   return user.isStudent() && user.isTeacher() && !user.isAdmin();
 }
 
-export function resolveMenu(user: User): MenuItem[] {
+/**
+ * @param mobileRoleOverride  When provided for a merged mobile user, returns
+ *   the single-role menu instead of the combined accent view (web keeps merged).
+ */
+export function resolveMenu(user: User, mobileRoleOverride?: 'student' | 'teacher'): MenuItem[] {
   let raw: MenuItem[];
 
   if (user.isAdmin()) {
     raw = adminMenu;
+  } else if (mobileRoleOverride === 'student') {
+    raw = studentMenu;
+  } else if (mobileRoleOverride === 'teacher') {
+    raw = buildTeacherMenuForToggle();
   } else if (isMergedMenu(user)) {
     raw = buildMergedMenu();
   } else if (user.isTeacher()) {

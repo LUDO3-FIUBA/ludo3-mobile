@@ -37,6 +37,7 @@ const RootDrawer = () => {
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeRole, setActiveRole] = useState<'student' | 'teacher'>('student');
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
@@ -111,8 +112,8 @@ const RootDrawer = () => {
 
   if (loading || !user) return <Loading />;
 
-  const menuItems = resolveMenu(user);
   const merged = isMergedMenu(user);
+  const menuItems = merged ? resolveMenu(user, activeRole) : resolveMenu(user);
 
   const onDeleteNotification = async (item: UserNotification) => {
     try {
@@ -146,20 +147,44 @@ const RootDrawer = () => {
     setShowNotificationsDropdown(true);
   };
 
-  // Notification bell shown in every tab header
+  // Notification bell + optional role toggle shown in every tab header
   const headerRight = () => (
-    <TouchableOpacity
-      onPress={() => setShowNotificationsDropdown(true)}
-      style={styles.bellButton}
-      accessibilityLabel="Mostrar notificaciones"
-    >
-      <Icon name="bell-outline" size={24} color={colors.mainContrastColor} />
-      {unreadCount > 0 && (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+    <View style={styles.headerRightRow}>
+      {merged && (
+        <View style={styles.roleToggle}>
+          <TouchableOpacity
+            style={[styles.roleToggleOpt, activeRole === 'student' && { backgroundColor: colors.institutional }]}
+            onPress={() => setActiveRole('student')}
+            accessibilityLabel="Ver vista de alumno"
+          >
+            <Text style={[styles.roleToggleOptText, activeRole === 'student' && styles.roleToggleOptTextActive]}>
+              Alumno
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.roleToggleOpt, activeRole === 'teacher' && { backgroundColor: colors.teacherAccent }]}
+            onPress={() => setActiveRole('teacher')}
+            accessibilityLabel="Ver vista de docente"
+          >
+            <Text style={[styles.roleToggleOptText, activeRole === 'teacher' && styles.roleToggleOptTextActive]}>
+              Docente
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
-    </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => setShowNotificationsDropdown(true)}
+        style={styles.bellButton}
+        accessibilityLabel="Mostrar notificaciones"
+      >
+        <Icon name="bell-outline" size={24} color={colors.mainContrastColor} />
+        {unreadCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
   );
 
   // Build tabs from menu config
@@ -200,7 +225,7 @@ const RootDrawer = () => {
           submenuKey: item.key,
           title: item.label,
           items: submenuItem.children,
-          isMerged: merged,
+          isMerged: false,
         }}
         options={{
           tabBarLabel: item.label,
@@ -215,8 +240,9 @@ const RootDrawer = () => {
   return (
     <>
       <Tab.Navigator
+        key={merged ? activeRole : undefined}
         screenOptions={{
-          tabBarActiveTintColor: colors.institutional,
+          tabBarActiveTintColor: merged && activeRole === 'teacher' ? colors.teacherAccent : colors.institutional,
           tabBarInactiveTintColor: colors.darkGray,
           tabBarStyle: { borderTopColor: colors.lightGray },
           headerStyle: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1, borderBottomColor: colors.lightGray },
@@ -346,7 +372,12 @@ function isDarkTheme() {
 }
 
 const styles = StyleSheet.create({
-  bellButton: { marginRight: 16, paddingVertical: 4, paddingHorizontal: 6 },
+  headerRightRow: { flexDirection: 'row', alignItems: 'center', marginRight: 8 },
+  roleToggle: { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: '#cbd5e1', backgroundColor: '#f1f5f9', marginRight: 4, overflow: 'hidden' },
+  roleToggleOpt: { paddingHorizontal: 10, paddingVertical: 5 },
+  roleToggleOptText: { fontSize: 12, fontWeight: '600', color: '#64748b' },
+  roleToggleOptTextActive: { color: '#fff' },
+  bellButton: { paddingVertical: 4, paddingHorizontal: 6 },
   badge: {
     position: 'absolute', top: -3, right: -4, minWidth: 18, height: 18,
     borderRadius: 9, paddingHorizontal: 4, backgroundColor: '#c1121f',
