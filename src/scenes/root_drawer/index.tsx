@@ -25,7 +25,7 @@ import CalendarScreen from '../calendar';
 import TeacherHomeScreen from '../teacher_home';
 import NotificationList from '../admin_notifications/NotificationList';
 import SubmenuScreen from '../submenu';
-import { resolveMenu, isMergedMenu, MenuItem, SubmenuItem, DirectItem } from './menu_config';
+import { resolveMenu, canToggleRole, MenuItem, SubmenuItem, DirectItem } from './menu_config';
 
 const Tab = createBottomTabNavigator();
 
@@ -112,8 +112,8 @@ const RootDrawer = () => {
 
   if (loading || !user) return <Loading />;
 
-  const merged = isMergedMenu(user);
-  const menuItems = merged ? resolveMenu(user, activeRole) : resolveMenu(user);
+  const canToggle = canToggleRole(user);
+  const menuItems = resolveMenu(user, activeRole);
 
   const onDeleteNotification = async (item: UserNotification) => {
     try {
@@ -150,7 +150,7 @@ const RootDrawer = () => {
   // Notification bell + optional role toggle shown in every tab header
   const headerRight = () => (
     <View style={styles.headerRightRow}>
-      {merged && (
+      {canToggle && (
         <View style={styles.roleToggle}>
           <TouchableOpacity
             style={[styles.roleToggleOpt, activeRole === 'student' && { backgroundColor: colors.institutional }]}
@@ -207,6 +207,7 @@ const RootDrawer = () => {
           component={DirectComp}
           options={{
             tabBarLabel: item.label,
+            title: item.label,
             tabBarIcon: iconFn,
             headerRight,
           }}
@@ -220,29 +221,38 @@ const RootDrawer = () => {
       <Tab.Screen
         key={item.key}
         name={`Submenu_${item.key}`}
-        component={SubmenuScreen}
-        initialParams={{
-          submenuKey: item.key,
-          title: item.label,
-          items: submenuItem.children,
-          isMerged: false,
-        }}
         options={{
           tabBarLabel: item.label,
           tabBarIcon: iconFn,
           title: item.label,
           headerRight,
         }}
-      />
+      >
+        {(props) => (
+          <SubmenuScreen
+            {...props}
+            route={{
+              ...props.route,
+              params: {
+                ...props.route.params,
+                submenuKey: item.key,
+                title: item.label,
+                items: submenuItem.children,
+                isMerged: false,
+              },
+            }}
+          />
+        )}
+      </Tab.Screen>
     );
   }).filter(Boolean);
 
   return (
     <>
       <Tab.Navigator
-        key={merged ? activeRole : undefined}
+        key={canToggle ? activeRole : undefined}
         screenOptions={{
-          tabBarActiveTintColor: merged && activeRole === 'teacher' ? colors.teacherAccent : colors.institutional,
+          tabBarActiveTintColor: canToggle && activeRole === 'teacher' ? colors.teacherAccent : colors.institutional,
           tabBarInactiveTintColor: colors.darkGray,
           tabBarStyle: { borderTopColor: colors.lightGray },
           headerStyle: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1, borderBottomColor: colors.lightGray },

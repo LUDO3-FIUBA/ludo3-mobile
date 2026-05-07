@@ -42,9 +42,9 @@ const studentMenu: MenuItem[] = [
     kind: 'submenu', key: 'user', label: 'Usuario',
     icon: 'account', iconOutline: 'account-outline', scope: 'student',
     children: [
+      { kind: 'direct', key: 'student-credential', label: 'Mi credencial', icon: 'card-account-details', iconOutline: 'card-account-details-outline', route: 'StudentCredential', scope: 'student' },
       { kind: 'direct', key: 'scan-qr', label: 'Escanear QR', icon: 'qrcode-scan', iconOutline: 'qrcode-scan', route: 'ScanQR', scope: 'student', platform: 'mobile' },
       { kind: 'direct', key: 'verify-identity', label: 'Verificar identidad', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'VerifyIdentity', scope: 'student', platform: 'mobile' },
-      { kind: 'direct', key: 'student-credential', label: 'Mi credencial', icon: 'card-account-details', iconOutline: 'card-account-details-outline', route: 'StudentCredential', scope: 'student' },
       { kind: 'direct', key: 'face-registration', label: 'Completar registro facial', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'CompleteFaceRegistration', scope: 'shared', conditional: 'faceNotRegistered', platform: 'mobile' },
       { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
       { kind: 'direct', key: 'logout', label: 'Cerrar sesión', icon: 'logout-variant', iconOutline: 'logout-variant', action: 'logout', scope: 'shared' },
@@ -126,58 +126,6 @@ const adminMenu: MenuItem[] = [
   },
 ];
 
-// ─── Merged Student + Teacher ─────────────────────────────────────────────────
-
-function buildMergedMenu(): MenuItem[] {
-  const studentUser = studentMenu.find(i => i.kind === 'submenu' && i.key === 'user') as SubmenuItem;
-  const teacherUser = teacherMenu.find(i => i.kind === 'submenu' && i.key === 'user') as SubmenuItem;
-  const studentAcademic = studentMenu.find(i => i.kind === 'submenu' && i.key === 'academic') as SubmenuItem;
-  const teacherAcademic = teacherMenu.find(i => i.kind === 'submenu' && i.key === 'academic') as SubmenuItem;
-
-  const sharedUserItems = studentUser.children.filter(c => c.key === 'change-password' || c.key === 'logout');
-  const studentOnlyUserItems = studentUser.children.filter(c => c.key !== 'change-password' && c.key !== 'logout' && c.key !== 'face-registration');
-  const faceItem = studentUser.children.find(c => c.key === 'face-registration')!;
-  const teacherOnlyUserItems = teacherUser.children.filter(c => c.key !== 'change-password' && c.key !== 'logout');
-
-  // Mis Comisiones is demoted from top-level tab to first teacher item in Académico
-  const teacherHomeMergedItem: DirectItem = {
-    kind: 'direct', key: 'teacher-home', label: 'Mis Comisiones',
-    icon: 'home', iconOutline: 'home-outline', route: 'TeacherHome', scope: 'teacher',
-  };
-  const teacherAcademicChildren = teacherAcademic.children.filter(c => c.key !== 'departments');
-
-  return [
-    {
-      kind: 'direct', key: 'home', label: 'Inicio',
-      icon: 'home', iconOutline: 'home-outline', route: 'Home', scope: 'student',
-    },
-    {
-      kind: 'submenu', key: 'user', label: 'Usuario',
-      icon: 'account', iconOutline: 'account-outline', scope: 'shared',
-      children: [
-        ...studentOnlyUserItems,
-        faceItem,                  // conditional — filtered later
-        ...teacherOnlyUserItems,   // teacher-scoped
-        ...sharedUserItems,        // change-password + logout last
-      ],
-    },
-    {
-      kind: 'submenu', key: 'academic', label: 'Académico',
-      icon: 'school', iconOutline: 'school-outline', scope: 'shared',
-      children: [
-        ...studentAcademic.children,
-        teacherHomeMergedItem,     // teacher-scoped
-        ...teacherAcademicChildren, // teacher-scoped items (excl. Departamentos — already in student list)
-      ],
-    },
-    {
-      kind: 'direct', key: 'calendar', label: 'Calendario',
-      icon: 'calendar', iconOutline: 'calendar-outline', route: 'Calendar', scope: 'student',
-    },
-    // { kind: 'direct', key: 'map', label: 'Mapa', icon: 'map', iconOutline: 'map-outline', route: 'Map', scope: 'student' }, // Next feature
-  ];
-}
-
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 function visibleOnPlatform(platform?: 'mobile' | 'web'): boolean {
@@ -186,7 +134,7 @@ function visibleOnPlatform(platform?: 'mobile' | 'web'): boolean {
   return true;
 }
 
-/** Teacher menu for mobile toggle mode: excludes shared nav items already in student menu. */
+/** Teacher menu for toggle mode: excludes shared nav items already in student menu. */
 function buildTeacherMenuForToggle(): MenuItem[] {
   return teacherMenu.map(item => {
     if (item.kind === 'submenu' && item.key === 'academic') {
@@ -199,29 +147,27 @@ function buildTeacherMenuForToggle(): MenuItem[] {
   });
 }
 
-export function isMergedMenu(user: User): boolean {
+export function canToggleRole(user: User): boolean {
   return user.isStudent() && user.isTeacher() && !user.isAdmin();
 }
 
 /**
- * @param mobileRoleOverride  When provided for a merged mobile user, returns
- *   the single-role menu instead of the combined accent view (web keeps merged).
+ * @param roleOverride  When provided for a dual-role user, returns
+ *   the single-role menu.
  */
-export function resolveMenu(user: User, mobileRoleOverride?: 'student' | 'teacher'): MenuItem[] {
+export function resolveMenu(user: User, roleOverride?: 'student' | 'teacher'): MenuItem[] {
   let raw: MenuItem[];
 
   if (user.isAdmin()) {
     raw = adminMenu;
-  } else if (mobileRoleOverride === 'student') {
+  } else if (roleOverride === 'student') {
     raw = studentMenu;
-  } else if (mobileRoleOverride === 'teacher') {
+  } else if (roleOverride === 'teacher') {
     raw = buildTeacherMenuForToggle();
-  } else if (isMergedMenu(user)) {
-    raw = buildMergedMenu();
-  } else if (user.isTeacher()) {
+  } else if (user.isTeacher() && !user.isStudent()) {
     raw = teacherMenu;
   } else {
-    raw = studentMenu;
+    raw = studentMenu; // Default to student if dual-role but no override
   }
 
   return raw

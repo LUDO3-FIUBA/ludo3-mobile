@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -53,7 +54,7 @@ import StudentProceduresScreen from '../student_procedures';
 import TeacherProceduresValidationScreen from '../teacher_procedures_validation';
 import AdminProceduresManagerScreen from '../admin_procedures';
 
-import { resolveMenu, isMergedMenu, MenuItem, SubmenuItem, DirectItem } from './menu_config';
+import { resolveMenu, canToggleRole, MenuItem, SubmenuItem, DirectItem } from './menu_config';
 
 const LudoIcon = require('../../assets/ludo_icon.png');
 
@@ -68,13 +69,14 @@ const STORAGE_KEY = '@sidebar_expanded';
 type WebDrawerContentProps = DrawerContentComponentProps & {
   user: User | null;
   menuItems: MenuItem[];
-  merged: boolean;
+  canToggle: boolean;
+  activeRole: 'student' | 'teacher';
   expanded: boolean;
-  onToggleExpanded: () => void;
+  onSetExpanded: (val: boolean) => void;
 };
 
 function WebDrawerContent(props: WebDrawerContentProps) {
-  const { user, menuItems, merged, expanded, onToggleExpanded, navigation } = props;
+  const { user, menuItems, canToggle, activeRole, expanded, onSetExpanded, navigation } = props;
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
   const activeRoute = props.state.routes[props.state.index]?.name ?? '';
@@ -107,23 +109,41 @@ function WebDrawerContent(props: WebDrawerContentProps) {
   };
 
   const itemColor = (item: DirectItem) => {
-    if (merged && item.scope === 'teacher') return lightModeColors.teacherAccent;
+    if (canToggle && activeRole === 'teacher') return lightModeColors.teacherAccent;
     return lightModeColors.institutional;
   };
 
   const isActive = (route?: string) => !!route && route === activeRoute;
 
   return (
-    <DrawerContentScrollView {...props} scrollEnabled={false} style={styles.drawerScroll}>
-      {/* Toggle button */}
-      <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
-        <Image source={LudoIcon} style={styles.logoImage} />
-        <TouchableOpacity onPress={onToggleExpanded} style={expanded ? styles.toggleButton : styles.iconBox} accessibilityLabel={expanded ? 'Colapsar menú' : 'Expandir menú'}>
-          <Icon name={expanded ? 'chevron-left' : 'chevron-right'} size={20} color={lightModeColors.darkGray} />
-        </TouchableOpacity>
-      </View>
+    <View style={{ flex: 1 }}>
+      <DrawerContentScrollView {...props} scrollEnabled={false} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
+        {/* Toggle button */}
+        <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Image source={LudoIcon} style={styles.logoImage} />
+            {expanded && (
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 10, color: lightModeColors.institutional, letterSpacing: 1 }}>LUDO</Text>
+            )}
+          </View>
+          {expanded && (
+            <TouchableOpacity onPress={() => onSetExpanded(false)} style={styles.iconBox} accessibilityLabel="Colapsar menú">
+              <Icon name="close" size={24} color={lightModeColors.darkGray} />
+            </TouchableOpacity>
+          )}
+        </View>
 
-      {/* Profile overview — only when expanded */}
+        {/* Expand arrow — only when collapsed */}
+        {!expanded && (
+          <>
+            <TouchableOpacity onPress={() => onSetExpanded(true)} style={styles.expandArrowButton} accessibilityLabel="Expandir menú">
+              <Icon name="chevron-right" size={20} color={lightModeColors.darkGray} />
+            </TouchableOpacity>
+            <View style={styles.menuSeparator} />
+          </>
+        )}
+
+        {/* Profile overview — only when expanded */}
       {expanded && (
         <View style={styles.profileSection}>
           <ProfileOverview />
@@ -133,8 +153,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       {/* Menu items */}
       <View style={styles.menuList}>
         {menuItems.map(item => {
-          const isTeacher = merged && item.scope === 'teacher';
-          const accentColor = isTeacher ? lightModeColors.teacherAccent : lightModeColors.institutional;
+          const accentColor = canToggle && activeRole === 'teacher' ? lightModeColors.teacherAccent : lightModeColors.institutional;
 
           if (item.kind === 'direct') {
             const active = isActive(item.route);
@@ -144,17 +163,14 @@ function WebDrawerContent(props: WebDrawerContentProps) {
                 // @ts-ignore — title is a valid HTML attribute on web for native tooltips
                 title={expanded ? undefined : item.label}
                 onPress={() => handleDirectPress(item)}
-                accessibilityLabel={`${item.label}${isTeacher ? ', sólo docente' : ''}`}
-                style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, active && { backgroundColor: `${accentColor}18` }, active && isTeacher && styles.teacherActiveBorder]}
+                accessibilityLabel={item.label}
+                style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, active && { backgroundColor: `${accentColor}18` }]}
               >
                 <View style={styles.iconBox}>
                   <Icon name={active ? item.icon : item.iconOutline} size={20} color={active ? accentColor : lightModeColors.darkGray} />
                 </View>
                 {expanded && (
-                  <>
-                    <Text style={[styles.menuLabel, { color: active ? accentColor : lightModeColors.darkGray }]}>{item.label}</Text>
-                    {isTeacher && <View style={styles.teacherPill}><Text style={styles.teacherPillText}>Docente</Text></View>}
-                  </>
+                  <Text style={[styles.menuLabel, { color: active ? accentColor : lightModeColors.darkGray }]}>{item.label}</Text>
                 )}
               </TouchableOpacity>
             );
@@ -171,7 +187,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
               <TouchableOpacity
                 // @ts-ignore
                 title={expanded ? undefined : item.label}
-                onPress={() => { if (expanded) { handleSubmenuToggle(item.key); } else { onToggleExpanded(); setOpenSubmenu(item.key); } }}
+                onPress={() => { handleSubmenuToggle(item.key); }}
                 accessibilityLabel={item.label}
                 style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, hasActiveChild && !expanded && { backgroundColor: `${accentColor}18` }]}
               >
@@ -189,19 +205,17 @@ function WebDrawerContent(props: WebDrawerContentProps) {
               {expanded && isOpen && (
                 <View style={styles.submenuList}>
                   {submenuItem.children.map(child => {
-                    const childIsTeacher = merged && child.scope === 'teacher';
-                    const childAccent = childIsTeacher ? lightModeColors.teacherAccent : lightModeColors.institutional;
+                    const childAccent = canToggle && activeRole === 'teacher' ? lightModeColors.teacherAccent : lightModeColors.institutional;
                     const childActive = isActive(child.route);
                     return (
                       <TouchableOpacity
                         key={child.key}
                         onPress={() => handleDirectPress(child)}
-                        accessibilityLabel={`${child.label}${childIsTeacher ? ', sólo docente' : ''}`}
-                        style={[styles.submenuRow, childActive && { backgroundColor: `${childAccent}18` }, childActive && childIsTeacher && styles.teacherActiveBorder]}
+                        accessibilityLabel={child.label}
+                        style={[styles.submenuRow, childActive && { backgroundColor: `${childAccent}18` }]}
                       >
                         <Icon name={childActive ? child.icon : child.iconOutline} size={18} color={childActive ? childAccent : lightModeColors.darkGray} style={styles.submenuIcon} />
                         <Text style={[styles.submenuLabel, { color: childActive ? childAccent : lightModeColors.darkGray }]}>{child.label}</Text>
-                        {childIsTeacher && <View style={styles.teacherPill}><Text style={styles.teacherPillText}>Docente</Text></View>}
                       </TouchableOpacity>
                     );
                   })}
@@ -211,7 +225,8 @@ function WebDrawerContent(props: WebDrawerContentProps) {
           );
         })}
       </View>
-    </DrawerContentScrollView>
+      </DrawerContentScrollView>
+    </View>
   );
 }
 
@@ -224,6 +239,7 @@ const RootDrawer = () => {
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeRole, setActiveRole] = useState<'student' | 'teacher'>('student');
   const [expanded, setExpanded] = useState(false);
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
@@ -241,19 +257,8 @@ const RootDrawer = () => {
   const dropdownWidth = Math.min(Math.max(screenWidth - 24, 280), 380);
   const dropdownMaxHeight = Math.min(screenHeight * 0.7, 520);
 
-  // Persist expanded state
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then(val => {
-      if (val !== null) setExpanded(val === 'true');
-    });
-  }, []);
-
-  const toggleExpanded = () => {
-    setExpanded(prev => {
-      const next = !prev;
-      AsyncStorage.setItem(STORAGE_KEY, String(next));
-      return next;
-    });
+  const toggleExpanded = (val: boolean) => {
+    setExpanded(val);
   };
 
   const loadNotifications = useCallback(async () => {
@@ -308,8 +313,8 @@ const RootDrawer = () => {
 
   if (loading || !user) return <Loading />;
 
-  const menuItems = resolveMenu(user);
-  const merged = isMergedMenu(user);
+  const canToggle = canToggleRole(user);
+  const menuItems = resolveMenu(user, activeRole);
 
   const markAsRead = async (item: UserNotification) => {
     if (item.is_read) return;
@@ -327,14 +332,40 @@ const RootDrawer = () => {
   };
 
   const headerRight = () => (
-    <TouchableOpacity onPress={() => setShowNotificationsDropdown(true)} style={styles.bellButton} accessibilityLabel="Mostrar notificaciones">
-      <Icon name="bell-outline" size={24} color={lightModeColors.mainContrastColor} />
-      {unreadCount > 0 && (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+    <View style={styles.headerRightRow}>
+      {canToggle && (
+        <View style={styles.roleToggle}>
+          <TouchableOpacity
+            style={[styles.roleToggleOpt, activeRole === 'student' && { backgroundColor: lightModeColors.institutional }]}
+            onPress={() => setActiveRole('student')}
+            accessibilityLabel="Ver vista de alumno"
+          >
+            <Icon name="school" size={16} color={activeRole === 'student' ? '#fff' : lightModeColors.darkGray} style={{ marginRight: 4 }} />
+            <Text style={[styles.roleToggleOptText, activeRole === 'student' && styles.roleToggleOptTextActive]}>
+              Alumno
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.roleToggleOpt, activeRole === 'teacher' && { backgroundColor: lightModeColors.teacherAccent }]}
+            onPress={() => setActiveRole('teacher')}
+            accessibilityLabel="Ver vista de docente"
+          >
+            <Icon name="clipboard-edit-outline" size={16} color={activeRole === 'teacher' ? '#fff' : lightModeColors.darkGray} style={{ marginRight: 4 }} />
+            <Text style={[styles.roleToggleOptText, activeRole === 'teacher' && styles.roleToggleOptTextActive]}>
+              Docente
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
-    </TouchableOpacity>
+      <TouchableOpacity onPress={() => setShowNotificationsDropdown(true)} style={styles.bellButton} accessibilityLabel="Mostrar notificaciones">
+        <Icon name="bell-outline" size={24} color={lightModeColors.mainContrastColor} />
+        {unreadCount > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </View>
   );
 
   const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
@@ -346,7 +377,12 @@ const RootDrawer = () => {
       <Drawer.Navigator
         screenOptions={{
           drawerType: 'permanent',
-          drawerStyle: { width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH, borderRightWidth: 1, borderRightColor: lightModeColors.lightGray },
+          drawerStyle: { 
+            width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH, 
+            borderRightWidth: 1, 
+            borderRightColor: lightModeColors.lightGray,
+            ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } : {}) as any
+          },
           headerLeft: () => null,
           headerRight,
           headerTintColor: lightModeColors.mainContrastColor,
@@ -359,9 +395,10 @@ const RootDrawer = () => {
             {...drawerProps}
             user={user}
             menuItems={menuItems}
-            merged={merged}
+            canToggle={canToggle}
+            activeRole={activeRole}
             expanded={expanded}
-            onToggleExpanded={toggleExpanded}
+            onSetExpanded={toggleExpanded}
           />
         )}
       >
@@ -482,12 +519,20 @@ const RootDrawer = () => {
 
 const styles = StyleSheet.create({
   drawerScroll: { flex: 1, minWidth: 50 },
-  toggleButtonContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, paddingVertical: 8 },
-  toggleButtonContainerCollapsed: { alignItems: 'center', paddingVertical: 8 },
+  toggleButtonContainer: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, height: 64, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray,
+  },
+  toggleButtonContainerCollapsed: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    height: 64, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray,
+  },
   toggleButton: { padding: 12, margin: 4 },
   logoImage: { width: 40, height: 40 },
   iconBox: { width: 45, height: 45, padding: 12, margin: 2, alignItems: 'center', justifyContent: 'center' },
   profileSection: { borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray, marginBottom: 8 },
+  expandArrowButton: { alignSelf: 'center', width: 45, height: 45, alignItems: 'center', justifyContent: 'center', borderRadius: 8, marginVertical: 4 },
+  menuSeparator: { height: 1, backgroundColor: lightModeColors.lightGray, marginHorizontal: 8, marginBottom: 8 },
   menuList: { paddingHorizontal: 4, minWidth: 50, alignItems: 'center' },
   menuRow: {
     flexDirection: 'row', alignItems: 'center',
@@ -505,6 +550,11 @@ const styles = StyleSheet.create({
   teacherActiveBorder: { borderLeftWidth: 2, borderLeftColor: lightModeColors.teacherAccent },
   teacherPill: { backgroundColor: lightModeColors.teacherAccent, borderRadius: 6, paddingHorizontal: 5, paddingVertical: 1, marginLeft: 6 },
   teacherPillText: { color: '#fff', fontSize: 10, fontWeight: '700' },
+  headerRightRow: { flexDirection: 'row', alignItems: 'center', marginRight: 16 },
+  roleToggle: { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: '#cbd5e1', backgroundColor: '#f1f5f9', marginRight: 12, overflow: 'hidden' },
+  roleToggleOpt: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 5 },
+  roleToggleOptText: { fontSize: 12, fontWeight: '600', color: '#64748b' },
+  roleToggleOptTextActive: { color: '#fff' },
   bellButton: { marginRight: 16, paddingVertical: 4, paddingHorizontal: 6 },
   badge: { position: 'absolute', top: -3, right: -4, minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4, backgroundColor: '#c1121f', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#fff' },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
