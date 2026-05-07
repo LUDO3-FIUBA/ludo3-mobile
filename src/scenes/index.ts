@@ -65,3 +65,8 @@ export { default as TeacherSemesterNotificationHistoryScreen } from './teacher_n
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
 export { default as StudentIdentityViewerScreen } from './student_identity_viewer';
+
+// New screens
+export { default as StudentProceduresScreen } from './student_procedures';
+export { default as TeacherProceduresValidationScreen } from './teacher_procedures_validation';
+export { default as AdminProceduresManagerScreen } from './admin_procedures';
