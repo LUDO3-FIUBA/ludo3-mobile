@@ -3,7 +3,6 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
-    Image,
     Modal,
     RefreshControl,
     StyleSheet,
@@ -12,6 +11,7 @@ import {
     View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import ImageComponent from '../../components/ImageComponent';
 import { MaterialIcon } from '../../components';
 import { notificationsRepository } from '../../repositories';
 import { UserNotification } from '../../repositories/notifications';
@@ -186,13 +186,11 @@ const NotificationsScreen: React.FC = () => {
                             <Text style={styles.itemMessage}>
                                 {item.notification.message}
                             </Text>
-                            {item.notification.image && (
-                                <Image
-                                    source={{ uri: item.notification.image }}
-                                    style={styles.itemImage}
-                                    resizeMode="cover"
-                                />
-                            )}
+                            <ImageComponent
+                                uri={item.notification.image}
+                                imageStyle={styles.itemImage}
+                                resizeMode="cover"
+                            />
                             <Text style={styles.itemDate} numberOfLines={1}>
                                 {item.notification.sender_name
                                     ? `${item.notification.sender_name} · ${formatNotificationDate(item.notification.created_at)}`
@@ -216,13 +214,15 @@ const NotificationsScreen: React.FC = () => {
                     >
                         <MaterialIcon name="close" fontSize={28} color="white" />
                     </TouchableOpacity>
-                    {fullScreenImage && (
-                        <Image
-                            source={{ uri: fullScreenImage }}
-                            style={styles.fullScreenImage}
-                            resizeMode="contain"
-                        />
-                    )}
+                    <ImageComponent
+                        uri={fullScreenImage}
+                        imageStyle={styles.fullScreenImage}
+                        resizeMode="contain"
+                        showFallbackWhenMissing
+                        fallbackIconSize={40}
+                        fallbackIconColor="#d1d5db"
+                        fallbackContainerStyle={styles.fullScreenImageFallback}
+                    />
                 </View>
             </Modal>
         </View>
@@ -371,6 +371,9 @@ const styles = StyleSheet.create({
     fullScreenImage: {
         width: '100%',
         height: '100%',
+    },
+    fullScreenImageFallback: {
+        backgroundColor: 'transparent',
     },
 });
 

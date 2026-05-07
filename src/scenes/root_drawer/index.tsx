@@ -20,12 +20,12 @@ import UserDetail from "../admin_users/UserDetail";
 import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
 import NotificationsScreen from "../notifications";
+import ImageComponent from "../../components/ImageComponent";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
 import {
   Appearance,
-  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -544,13 +544,11 @@ const RootDrawer = () => {
             <Text numberOfLines={2} style={styles.toastMessage}>
               {toastNotification.notification.message}
             </Text>
-            {toastNotification.notification.image && (
-              <Image
-                source={{ uri: toastNotification.notification.image }}
-                style={styles.toastThumbnail}
-                resizeMode="cover"
-              />
-            )}
+            <ImageComponent
+              uri={toastNotification.notification.image}
+              imageStyle={styles.toastThumbnail}
+              resizeMode="cover"
+            />
           </TouchableOpacity>
         </View>
       )}
@@ -568,13 +566,15 @@ const RootDrawer = () => {
           >
             <Text style={styles.fullScreenCloseText}>✕</Text>
           </TouchableOpacity>
-          {fullScreenImage && (
-            <Image
-              source={{ uri: fullScreenImage }}
-              style={styles.fullScreenImage}
-              resizeMode="contain"
-            />
-          )}
+          <ImageComponent
+            uri={fullScreenImage}
+            imageStyle={styles.fullScreenImage}
+            resizeMode="contain"
+            showFallbackWhenMissing
+            fallbackIconSize={40}
+            fallbackIconColor="#d1d5db"
+            fallbackContainerStyle={styles.fullScreenImageFallback}
+          />
         </View>
       </Modal>
 
@@ -659,13 +659,11 @@ const RootDrawer = () => {
                     <Text numberOfLines={2} style={styles.notificationItemMessage}>
                       {item.notification.message}
                     </Text>
-                    {item.notification.image && (
-                      <Image
-                        source={{ uri: item.notification.image }}
-                        style={styles.notificationItemThumbnail}
-                        resizeMode="cover"
-                      />
-                    )}
+                    <ImageComponent
+                      uri={item.notification.image}
+                      imageStyle={styles.notificationItemThumbnail}
+                      resizeMode="cover"
+                    />
                     <Text numberOfLines={1} style={styles.notificationItemDate}>
                       {item.notification.sender_name
                         ? `${item.notification.sender_name} · ${formatNotificationDate(item.notification.created_at)}`
@@ -918,6 +916,9 @@ const styles = StyleSheet.create({
   fullScreenImage: {
     width: '100%',
     height: '100%',
+  },
+  fullScreenImageFallback: {
+    backgroundColor: 'transparent',
   },
   toastLayer: {
     position: 'absolute',

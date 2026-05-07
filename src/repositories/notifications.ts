@@ -82,6 +82,8 @@ async function sendCommissionNotification(
         formData.append('image', payload.image as any);
     }
 
+    console.log(`POST ${baseUrl}/${teacherDomainUrl}/ (FormData with title: ${payload.title}, message: ${payload.message}, isUrgent: ${payload.isUrgent})`);
+
     const response = await fetch(`${baseUrl}/${teacherDomainUrl}/`, {
         method: 'POST',
         headers,
@@ -89,6 +91,11 @@ async function sendCommissionNotification(
     });
 
     const data = await response.json();
+    if (response.ok) {
+        console.log(`RESPONSE\n${JSON.stringify(data)}`);
+    } else {
+        console.log(`RESPONSE: ${response.status}\n${JSON.stringify(data)}`);
+    }
     if (!response.ok) {
         throw new Error(JSON.stringify(data));
     }
