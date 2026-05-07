@@ -76,13 +76,15 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
         </View>
       )}
       <DrawerItemList {...drawerProps} />
-      {(roleView === 'student' || roleView === 'teacher') && (
-        <DrawerItem
-          label="Enlaces Útiles"
-          onPress={() => drawerProps.navigation.navigate(roleView === 'student' ? 'StudentUsefulLinks' : 'TeacherUsefulLinks')}
-          icon={makeDrawerIcon('link-variant', 'link-variant')}
-        />
-      )}
+      <DrawerItem
+        label="Enlaces Útiles"
+        onPress={() => drawerProps.navigation.navigate(
+          roleView === 'student' ? 'StudentUsefulLinks' :
+          roleView === 'teacher' ? 'TeacherUsefulLinks' :
+          'UsefulLinks'
+        )}
+        icon={makeDrawerIcon('link-variant', 'link-variant')}
+      />
       <DrawerItem
         label="Cambiar contraseña"
         onPress={() => drawerProps.navigation.navigate('ChangePassword')}
@@ -402,7 +404,8 @@ const RootDrawer = () => {
               options={{
                 headerShown: true,
                 title: 'Enlaces Útiles',
-                drawerIcon: makeDrawerIcon('link-variant', 'link-variant')
+                drawerLabel: () => null,
+                drawerItemStyle: { display: 'none' }
               }}
             />
           </>
@@ -459,7 +462,8 @@ const RootDrawer = () => {
               options={{
                 headerShown: true,
                 title: 'Enlaces Útiles',
-                drawerIcon: makeDrawerIcon('link-variant', 'link-variant')
+                drawerLabel: () => null,
+                drawerItemStyle: { display: 'none' }
               }}
             />
           </>
@@ -548,7 +552,8 @@ const RootDrawer = () => {
           options={{
             headerShown: true,
             title: 'Enlaces Útiles',
-            drawerIcon: makeDrawerIcon('link-variant', 'link-variant')
+            drawerLabel: () => null,
+            drawerItemStyle: { display: 'none' }
           }}
         />
 
