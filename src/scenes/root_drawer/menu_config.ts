@@ -16,6 +16,8 @@ export type DirectItem = {
   conditional?: 'faceNotRegistered';
   /** Omit (or leave undefined) to show on both platforms. */
   platform?: 'mobile' | 'web';
+  webOrder?: number;
+  mobileOrder?: number;
 };
 
 export type SubmenuItem = {
@@ -26,6 +28,8 @@ export type SubmenuItem = {
   iconOutline: string;
   children: DirectItem[];
   scope: Scope;
+  webOrder?: number;
+  mobileOrder?: number;
 };
 
 export type MenuItem = DirectItem | SubmenuItem;
@@ -34,13 +38,9 @@ export type MenuItem = DirectItem | SubmenuItem;
 
 const studentMenu: MenuItem[] = [
   {
-    kind: 'direct', key: 'home', label: 'Inicio',
-    icon: 'home', iconOutline: 'home-outline',
-    route: 'Home', scope: 'student',
-  },
-  {
     kind: 'submenu', key: 'user', label: 'Usuario',
     icon: 'account', iconOutline: 'account-outline', scope: 'student',
+    webOrder: 5, mobileOrder: 1,
     children: [
       { kind: 'direct', key: 'student-credential', label: 'Mi credencial', icon: 'card-account-details', iconOutline: 'card-account-details-outline', route: 'StudentCredential', scope: 'student' },
       { kind: 'direct', key: 'scan-qr', label: 'Escanear QR', icon: 'qrcode-scan', iconOutline: 'qrcode-scan', route: 'ScanQR', scope: 'student', platform: 'mobile' },
@@ -53,6 +53,7 @@ const studentMenu: MenuItem[] = [
   {
     kind: 'submenu', key: 'academic', label: 'Académico',
     icon: 'school', iconOutline: 'school-outline', scope: 'student',
+    webOrder: 3, mobileOrder: 2,
     children: [
       { kind: 'direct', key: 'commission-inscriptions', label: 'Materias en curso', icon: 'text-box-multiple', iconOutline: 'text-box-multiple-outline', route: 'CurrentCommissionInscriptions', scope: 'student' },
       { kind: 'direct', key: 'pending-subjects', label: 'Materias pendientes', icon: 'file-clock', iconOutline: 'file-clock-outline', route: 'PendingSubjects', scope: 'student' },
@@ -63,24 +64,27 @@ const studentMenu: MenuItem[] = [
     ],
   },
   {
+    kind: 'direct', key: 'home', label: 'Inicio',
+    icon: 'home', iconOutline: 'home-outline',
+    route: 'Home', scope: 'student',
+    webOrder: 1, mobileOrder: 3,
+  },
+  {
     kind: 'direct', key: 'calendar', label: 'Calendario',
     icon: 'calendar', iconOutline: 'calendar-outline',
     route: 'Calendar', scope: 'student',
+    webOrder: 2, mobileOrder: 4,
   },
-  // { kind: 'direct', key: 'map', label: 'Mapa', icon: 'map', iconOutline: 'map-outline', route: 'Map', scope: 'student' }, // Next feature
+  { kind: 'direct', key: 'map', label: 'Mapa', icon: 'map', iconOutline: 'map-outline', route: 'Map', scope: 'student', webOrder: 4, mobileOrder: 5 },
 ];
 
 // ─── Teacher ──────────────────────────────────────────────────────────────────
 
 const teacherMenu: MenuItem[] = [
   {
-    kind: 'direct', key: 'teacher-home', label: 'Mis Comisiones',
-    icon: 'home', iconOutline: 'home-outline',
-    route: 'TeacherHome', scope: 'teacher',
-  },
-  {
     kind: 'submenu', key: 'user', label: 'Usuario',
     icon: 'account', iconOutline: 'account-outline', scope: 'teacher',
+    webOrder: 3, mobileOrder: 1,
     children: [
       { kind: 'direct', key: 'teacher-profile', label: 'Mi perfil profesional', icon: 'account-details', iconOutline: 'account-details-outline', route: 'TeacherProfile', scope: 'teacher' },
       { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
@@ -88,8 +92,15 @@ const teacherMenu: MenuItem[] = [
     ],
   },
   {
+    kind: 'direct', key: 'teacher-home', label: 'Mis Comisiones',
+    icon: 'home', iconOutline: 'home-outline',
+    route: 'TeacherHome', scope: 'teacher',
+    webOrder: 1, mobileOrder: 2,
+  },
+  {
     kind: 'submenu', key: 'academic', label: 'Académico',
     icon: 'school', iconOutline: 'school-outline', scope: 'teacher',
+    webOrder: 2, mobileOrder: 3,
     children: [
       { kind: 'direct', key: 'create-semester', label: 'Crear cuatrimestre', icon: 'plus-circle', iconOutline: 'plus-circle-outline', route: 'CreateSemester', scope: 'teacher' },
       { kind: 'direct', key: 'departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'StudentDepartmentList', scope: 'shared' },
@@ -104,6 +115,7 @@ const adminMenu: MenuItem[] = [
   {
     kind: 'submenu', key: 'user', label: 'Usuario',
     icon: 'account', iconOutline: 'account-outline', scope: 'shared',
+    webOrder: 3, mobileOrder: 1,
     children: [
       { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
       { kind: 'direct', key: 'logout', label: 'Cerrar sesión', icon: 'logout-variant', iconOutline: 'logout-variant', action: 'logout', scope: 'shared' },
@@ -112,6 +124,7 @@ const adminMenu: MenuItem[] = [
   {
     kind: 'submenu', key: 'academic', label: 'Académico',
     icon: 'school', iconOutline: 'school-outline', scope: 'shared',
+    webOrder: 2, mobileOrder: 2,
     children: [
       { kind: 'direct', key: 'admin-departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'AdminDepartmentList', scope: 'shared' },
       { kind: 'direct', key: 'admin-commissions', label: 'Comisiones', icon: 'account-group', iconOutline: 'account-group-outline', route: 'AdminCommissionList', scope: 'shared' },
@@ -123,6 +136,7 @@ const adminMenu: MenuItem[] = [
     kind: 'direct', key: 'admin-notifications', label: 'Avisos',
     icon: 'bell', iconOutline: 'bell-outline',
     route: 'AdminNotificationList', scope: 'shared',
+    webOrder: 1, mobileOrder: 3,
   },
 ];
 
@@ -132,6 +146,15 @@ function visibleOnPlatform(platform?: 'mobile' | 'web'): boolean {
   if (platform === 'mobile') return Platform.OS !== 'web';
   if (platform === 'web') return Platform.OS === 'web';
   return true;
+}
+
+function sortByPlatformOrder(items: MenuItem[]): MenuItem[] {
+  const isWeb = Platform.OS === 'web';
+  return [...items].sort((a, b) => {
+    const orderA = (isWeb ? a.webOrder : a.mobileOrder) ?? Infinity;
+    const orderB = (isWeb ? b.webOrder : b.mobileOrder) ?? Infinity;
+    return orderA - orderB;
+  });
 }
 
 /** Teacher menu for toggle mode: excludes shared nav items already in student menu. */
@@ -167,10 +190,10 @@ export function resolveMenu(user: User, roleOverride?: 'student' | 'teacher'): M
   } else if (user.isTeacher() && !user.isStudent()) {
     raw = teacherMenu;
   } else {
-    raw = studentMenu; // Default to student if dual-role but no override
+    raw = studentMenu;
   }
 
-  return raw
+  const filtered = raw
     .filter(item => item.kind !== 'direct' || visibleOnPlatform(item.platform))
     .map(item => {
       if (item.kind === 'submenu') {
@@ -187,4 +210,6 @@ export function resolveMenu(user: User, roleOverride?: 'student' | 'teacher'): M
       }
       return item;
     });
+
+  return sortByPlatformOrder(filtered);
 }

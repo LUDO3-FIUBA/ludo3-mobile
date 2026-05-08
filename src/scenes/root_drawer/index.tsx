@@ -24,6 +24,7 @@ import HomeScreen from '../home';
 import CalendarScreen from '../calendar';
 import TeacherHomeScreen from '../teacher_home';
 import NotificationList from '../admin_notifications/NotificationList';
+import MapScreen from '../map';
 import SubmenuScreen from '../submenu';
 import { resolveMenu, canToggleRole, MenuItem, SubmenuItem, DirectItem } from './menu_config';
 
@@ -375,6 +376,7 @@ const DIRECT_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   Calendar: CalendarScreen,
   TeacherHome: TeacherHomeScreen,
   AdminNotificationList: NotificationList,
+  Map: MapScreen,
 };
 
 function isDarkTheme() {

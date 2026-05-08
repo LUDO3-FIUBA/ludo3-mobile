@@ -46,6 +46,7 @@ import NotificationForm from './src/scenes/admin_notifications/NotificationForm'
 import StudentProceduresScreen from './src/scenes/student_procedures';
 import TeacherProceduresValidationScreen from './src/scenes/teacher_procedures_validation';
 import AdminProceduresManagerScreen from './src/scenes/admin_procedures';
+import MapScreen from './src/scenes/map';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance, Platform } from 'react-native';
@@ -95,6 +96,7 @@ const webLinking = {
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
           AdminProceduresManager: 'admin/tramites',
+          Map: 'mapa',
         },
       },
       ViewSemester: 'comision',
@@ -243,6 +245,7 @@ const App = () => {
             <Stack.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ headerShown: true, title: 'Materias pendientes' }} />
             <Stack.Screen name="StudentDepartmentList" component={() => <DepartmentList isAdmin={false} />} options={{ headerShown: true, title: 'Departamentos' }} />
             <Stack.Screen name="StudentProcedures" component={StudentProceduresScreen} options={{ headerShown: true, title: 'Trámites' }} />
+            <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />
             <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ headerShown: true, title: 'Mi perfil profesional' }} />
             <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
             <Stack.Screen name="TeacherProceduresValidation" component={TeacherProceduresValidationScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
