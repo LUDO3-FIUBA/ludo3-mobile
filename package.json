@@ -30,6 +30,7 @@
     "expo-document-picker": "~13.0.3",
     "expo-image-manipulator": "~13.0.5",
     "expo-image-picker": "~16.0.6",
+    "expo-location": "~18.0.10",
     "expo-notifications": "~0.29.11",
     "formik": "^2.4.9",
     "moment": "^2.30.1",
