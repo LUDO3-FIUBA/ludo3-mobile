@@ -23,12 +23,13 @@ import TeacherFormsScreen from "../teacher_forms/TeacherFormsScreen";
 import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
 import NotificationsScreen from "../notifications";
+import ImageComponent from "../../components/ImageComponent";
+import UsefulLinksScreen from "../useful_links";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
 import {
   Appearance,
-  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -78,6 +79,22 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
         </View>
       )}
       <DrawerItemList {...drawerProps} />
+      {roleView === 'student' && (
+        <DrawerItem
+          label="Mi Cuenta"
+          onPress={() => drawerProps.navigation.navigate('MyAccount')}
+          icon={makeDrawerIcon('account-edit', 'account-edit-outline')}
+        />
+      )}
+      <DrawerItem
+        label="Enlaces Útiles"
+        onPress={() => drawerProps.navigation.navigate(
+          roleView === 'student' ? 'StudentUsefulLinks' :
+          roleView === 'teacher' ? 'TeacherUsefulLinks' :
+          'UsefulLinks'
+        )}
+        icon={makeDrawerIcon('link-variant', 'link-variant')}
+      />
       <DrawerItem
         label="Cambiar contraseña"
         onPress={() => drawerProps.navigation.navigate('ChangePassword')}
@@ -399,6 +416,17 @@ const RootDrawer = () => {
               component={DepartmentDetail}
               options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
+
+            <Drawer.Screen
+              name="StudentUsefulLinks"
+              component={UsefulLinksScreen}
+              options={{
+                headerShown: true,
+                title: 'Enlaces Útiles',
+                drawerLabel: () => null,
+                drawerItemStyle: { display: 'none' }
+              }}
+            />
           </>
         )}
 
@@ -451,6 +479,17 @@ const RootDrawer = () => {
               name="AdminDepartmentDetail"
               component={DepartmentDetail}
               options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="TeacherUsefulLinks"
+              component={UsefulLinksScreen}
+              options={{
+                headerShown: true,
+                title: 'Enlaces Útiles',
+                drawerLabel: () => null,
+                drawerItemStyle: { display: 'none' }
+              }}
             />
           </>
         )}
@@ -542,6 +581,17 @@ const RootDrawer = () => {
         )}
 
         <Drawer.Screen
+          name="UsefulLinks"
+          component={UsefulLinksScreen}
+          options={{
+            headerShown: true,
+            title: 'Enlaces Útiles',
+            drawerLabel: () => null,
+            drawerItemStyle: { display: 'none' }
+          }}
+        />
+
+        <Drawer.Screen
           name="Notifications"
           component={NotificationsScreen}
           options={{
@@ -571,13 +621,11 @@ const RootDrawer = () => {
             <Text numberOfLines={2} style={styles.toastMessage}>
               {toastNotification.notification.message}
             </Text>
-            {toastNotification.notification.image && (
-              <Image
-                source={{ uri: toastNotification.notification.image }}
-                style={styles.toastThumbnail}
-                resizeMode="cover"
-              />
-            )}
+            <ImageComponent
+              uri={toastNotification.notification.image}
+              imageStyle={styles.toastThumbnail}
+              resizeMode="cover"
+            />
           </TouchableOpacity>
         </View>
       )}
@@ -595,13 +643,15 @@ const RootDrawer = () => {
           >
             <Text style={styles.fullScreenCloseText}>✕</Text>
           </TouchableOpacity>
-          {fullScreenImage && (
-            <Image
-              source={{ uri: fullScreenImage }}
-              style={styles.fullScreenImage}
-              resizeMode="contain"
-            />
-          )}
+          <ImageComponent
+            uri={fullScreenImage}
+            imageStyle={styles.fullScreenImage}
+            resizeMode="contain"
+            showFallbackWhenMissing
+            fallbackIconSize={40}
+            fallbackIconColor="#d1d5db"
+            fallbackContainerStyle={styles.fullScreenImageFallback}
+          />
         </View>
       </Modal>
 
@@ -701,13 +751,11 @@ const RootDrawer = () => {
                     <Text numberOfLines={2} style={styles.notificationItemMessage}>
                       {item.notification.message}
                     </Text>
-                    {item.notification.image && (
-                      <Image
-                        source={{ uri: item.notification.image }}
-                        style={styles.notificationItemThumbnail}
-                        resizeMode="cover"
-                      />
-                    )}
+                    <ImageComponent
+                      uri={item.notification.image}
+                      imageStyle={styles.notificationItemThumbnail}
+                      resizeMode="cover"
+                    />
                     <Text numberOfLines={1} style={styles.notificationItemDate}>
                       {item.notification.sender_name
                         ? `${item.notification.sender_name} · ${formatNotificationDate(item.notification.created_at)}`
@@ -975,6 +1023,9 @@ const styles = StyleSheet.create({
   fullScreenImage: {
     width: '100%',
     height: '100%',
+  },
+  fullScreenImageFallback: {
+    backgroundColor: 'transparent',
   },
   toastLayer: {
     position: 'absolute',

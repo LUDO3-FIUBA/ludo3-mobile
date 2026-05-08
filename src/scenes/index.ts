@@ -73,3 +73,5 @@ export { default as FormDesignerScreen } from './admin_forms/FormDesignerScreen'
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
 export { default as StudentIdentityViewerScreen } from './student_identity_viewer';
+
+export { default as MyAccountScreen } from './my_account';
