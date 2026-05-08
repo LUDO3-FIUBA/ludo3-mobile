@@ -7,6 +7,7 @@ export default class User {
   readonly isTeacherFlag: boolean;
   readonly isStaffFlag: boolean;
   readonly faceRegistered: boolean;
+  readonly githubUrl: string;
 
   constructor(
     dni: string,
@@ -17,6 +18,7 @@ export default class User {
     isTeacherFlag: boolean = false,
     isStaffFlag: boolean = false,
     faceRegistered: boolean = false,
+    githubUrl: string = '',
   ) {
     this.dni = dni;
     this.firstName = firstName;
@@ -26,6 +28,7 @@ export default class User {
     this.isTeacherFlag = isTeacherFlag;
     this.isStaffFlag = isStaffFlag;
     this.faceRegistered = faceRegistered;
+    this.githubUrl = githubUrl;
   }
 
   fullName(): string {
@@ -61,6 +64,7 @@ export default class User {
       isTeacherFlag: this.isTeacherFlag,
       isStaffFlag: this.isStaffFlag,
       faceRegistered: this.faceRegistered,
+      githubUrl: this.githubUrl,
     };
   }
 }

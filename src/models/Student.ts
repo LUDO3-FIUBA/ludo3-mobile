@@ -5,4 +5,5 @@ export default interface Student {
     dni: string;
     email: string;
     padron: string;
+    github_url?: string;
 }

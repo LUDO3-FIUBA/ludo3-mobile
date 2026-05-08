@@ -21,6 +21,7 @@ import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
 import NotificationsScreen from "../notifications";
 import ImageComponent from "../../components/ImageComponent";
+import UsefulLinksScreen from "../useful_links";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -75,6 +76,22 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
         </View>
       )}
       <DrawerItemList {...drawerProps} />
+      {roleView === 'student' && (
+        <DrawerItem
+          label="Mi Cuenta"
+          onPress={() => drawerProps.navigation.navigate('MyAccount')}
+          icon={makeDrawerIcon('account-edit', 'account-edit-outline')}
+        />
+      )}
+      <DrawerItem
+        label="Enlaces Útiles"
+        onPress={() => drawerProps.navigation.navigate(
+          roleView === 'student' ? 'StudentUsefulLinks' :
+          roleView === 'teacher' ? 'TeacherUsefulLinks' :
+          'UsefulLinks'
+        )}
+        icon={makeDrawerIcon('link-variant', 'link-variant')}
+      />
       <DrawerItem
         label="Cambiar contraseña"
         onPress={() => drawerProps.navigation.navigate('ChangePassword')}
@@ -387,6 +404,17 @@ const RootDrawer = () => {
               component={DepartmentDetail}
               options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
+
+            <Drawer.Screen
+              name="StudentUsefulLinks"
+              component={UsefulLinksScreen}
+              options={{
+                headerShown: true,
+                title: 'Enlaces Útiles',
+                drawerLabel: () => null,
+                drawerItemStyle: { display: 'none' }
+              }}
+            />
           </>
         )}
 
@@ -433,6 +461,17 @@ const RootDrawer = () => {
               name="AdminDepartmentDetail"
               component={DepartmentDetail}
               options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="TeacherUsefulLinks"
+              component={UsefulLinksScreen}
+              options={{
+                headerShown: true,
+                title: 'Enlaces Útiles',
+                drawerLabel: () => null,
+                drawerItemStyle: { display: 'none' }
+              }}
             />
           </>
         )}
@@ -513,6 +552,17 @@ const RootDrawer = () => {
             />
           </>
         )}
+
+        <Drawer.Screen
+          name="UsefulLinks"
+          component={UsefulLinksScreen}
+          options={{
+            headerShown: true,
+            title: 'Enlaces Útiles',
+            drawerLabel: () => null,
+            drawerItemStyle: { display: 'none' }
+          }}
+        />
 
         <Drawer.Screen
           name="Notifications"
@@ -622,13 +672,28 @@ const RootDrawer = () => {
                     style={[
                       styles.notificationItem,
                       !item.is_read ? styles.notificationItemUnread : undefined,
+                      item.notification.is_urgent ? styles.notificationItemUrgentAccent : undefined,
                     ]}
                   >
                     <View style={styles.notificationItemHeader}>
-                      <Text numberOfLines={1} style={[styles.notificationItemTitle, !item.is_read && styles.notificationItemTitleUnread]}>
+                      {item.notification.is_urgent && (
+                        <MaterialIcon name="alert-circle" fontSize={14} color="#b42318" />
+                      )}
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.notificationItemTitle,
+                          !item.is_read && styles.notificationItemTitleUnread,
+                        ]}
+                      >
                         {item.notification.title}
                       </Text>
                       <View style={styles.notificationItemActions}>
+                        {item.notification.is_urgent && (
+                          <View style={styles.notificationItemUrgentBadge}>
+                            <Text style={styles.notificationItemUrgentText}>URGENTE</Text>
+                          </View>
+                        )}
                         {!item.is_read && <View style={styles.notificationItemDot} />}
                         <TouchableOpacity
                           onPress={(e) => { e.stopPropagation(); onDeleteNotification(item); }}
@@ -825,6 +890,21 @@ const styles = StyleSheet.create({
   },
   notificationItemTitleUnread: {
     color: lightModeColors.institutional,
+    fontWeight: '800',
+  },
+  notificationItemUrgentAccent: {
+    borderRightWidth: 4,
+    borderRightColor: '#b42318',
+  },
+  notificationItemUrgentBadge: {
+    backgroundColor: '#fee2e2',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  notificationItemUrgentText: {
+    color: '#b42318',
+    fontSize: 9,
     fontWeight: '800',
   },
   notificationItemHeader: {

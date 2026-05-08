@@ -139,10 +139,20 @@ const NotificationsScreen: React.FC = () => {
                             style={[
                                 styles.item,
                                 !item.is_read && styles.itemUnread,
+                                item.notification.is_urgent && styles.itemUrgentAccent,
                             ]}
                         >
                             <View style={styles.itemHeader}>
-                                <Text numberOfLines={1} style={[styles.itemTitle, !item.is_read && styles.itemTitleUnread]}>
+                                {item.notification.is_urgent && (
+                                    <MaterialIcon name="alert-circle" fontSize={18} color="#b42318" />
+                                )}
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.itemTitle,
+                                        !item.is_read && styles.itemTitleUnread,
+                                    ]}
+                                >
                                     {item.notification.title}
                                 </Text>
                                 <View style={styles.itemActions}>
@@ -275,6 +285,10 @@ const styles = StyleSheet.create({
     itemTitleUnread: {
         color: lightModeColors.institutional,
         fontWeight: '800',
+    },
+    itemUrgentAccent: {
+        borderRightWidth: 4,
+        borderRightColor: '#b42318',
     },
     itemHeader: {
         flexDirection: 'row',

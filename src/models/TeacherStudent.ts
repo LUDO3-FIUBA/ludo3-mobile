@@ -6,6 +6,7 @@ export interface TeacherStudent {
   dni: string;
   email: string;
   legajo?: string;
+  githubUrl?: string;
   attendancesCount?: number;
   submissions?: Array<{
     evaluationId: number;
@@ -22,6 +23,7 @@ export interface TeacherStudentSnakeCase {
   dni: string;
   email: string;
   legajo?: string;
+  github_url?: string;
   attendances_count?: number;
   submissions?: Array<{
     evaluation_id: number;
