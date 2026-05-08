@@ -76,6 +76,13 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
         </View>
       )}
       <DrawerItemList {...drawerProps} />
+      {roleView === 'student' && (
+        <DrawerItem
+          label="Mi Cuenta"
+          onPress={() => drawerProps.navigation.navigate('MyAccount')}
+          icon={makeDrawerIcon('account-edit', 'account-edit-outline')}
+        />
+      )}
       <DrawerItem
         label="Enlaces Útiles"
         onPress={() => drawerProps.navigation.navigate(

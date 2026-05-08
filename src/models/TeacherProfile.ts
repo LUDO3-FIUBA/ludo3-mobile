@@ -15,5 +15,6 @@ export interface TeacherProfile {
   yearsOfExperience?: number;
   certifications?: string;
   linkedinUrl?: string;
+  githubUrl?: string;
   workExperience: WorkExperience[];
 }

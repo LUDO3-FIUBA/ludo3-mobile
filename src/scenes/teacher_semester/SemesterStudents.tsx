@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity, Linking } from 'react-native';
 import { useAppSelector } from '../../redux/hooks';
 import { TeacherStudent } from '../../models/TeacherStudent';
 import { useNavigation } from '@react-navigation/native';
@@ -206,6 +206,15 @@ const SemesterStudents: React.FC = () => {
               <Text style={styles.absencesLabel}>Inasistencias</Text>
               <Text style={styles.absencesValue}>{absences}</Text>
             </View>
+            {item.githubUrl ? (
+              <TouchableOpacity
+                style={styles.githubRow}
+                onPress={() => Linking.openURL(item.githubUrl!)}
+              >
+                <MaterialIcon name="github" fontSize={16} color="#0d1117" />
+                <Text style={styles.githubLink}>{item.githubUrl}</Text>
+              </TouchableOpacity>
+            ) : null}
             {item.submissions && item.submissions.length > 0 && renderSubmissions(item.submissions)}
           </View>
         )}
@@ -385,6 +394,20 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     minWidth: 40,
     textAlign: 'right',
+  },
+  githubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginBottom: 4,
+  },
+  githubLink: {
+    fontSize: 13,
+    color: '#0d1117',
+    textDecorationLine: 'underline',
+    flex: 1,
   },
 });
 

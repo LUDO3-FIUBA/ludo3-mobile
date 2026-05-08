@@ -5,7 +5,8 @@ export interface TeacherModel {
   dni:        string;
   email:      string;
   legajo?:    string;
-  padron?:    string
+  padron?:    string;
+  githubUrl?: string;
 }
 
 export interface TeacherModelSnakeCase {
@@ -16,4 +17,5 @@ export interface TeacherModelSnakeCase {
   email:      string;
   legajo?:    string;
   padron?:    string;
+  github_url?: string;
 }

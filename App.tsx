@@ -12,6 +12,7 @@ import {
   ForgotPasswordRequestScreen,
   ForgotPasswordConfirmScreen,
   CompleteFaceRegistrationScreen,
+  MyAccountScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
   TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
@@ -45,6 +46,7 @@ const webLinking = {
       PreRegister: 'registro',
       PreRegisterPassword: 'registro/password',
       ChangePassword: 'app/cambiar-password',
+      MyAccount: 'app/mi-cuenta',
       PreRegisterDone: 'registro/completado',
       TakePicture: 'registro/foto',
       RootDrawer: {
@@ -250,6 +252,12 @@ const App = () => {
               name="ChangePassword"
               component={ChangePasswordScreen}
               options={{ headerShown: true, title: 'Cambiar contraseña' }}
+            />
+
+            <Stack.Screen
+              name="MyAccount"
+              component={MyAccountScreen}
+              options={{ headerShown: true, title: 'Mi Cuenta' }}
             />
 
             <Stack.Screen
