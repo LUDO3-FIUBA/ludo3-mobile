@@ -20,6 +20,7 @@ import UserDetail from "../admin_users/UserDetail";
 import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
 import NotificationsScreen from "../notifications";
+import UsefulLinksScreen from "../useful_links";
 import { Loading, MaterialIcon, ProfileOverview } from "../../components";
 import { SessionManager } from "../../managers";
 import { darkModeColors, lightModeColors } from "../../styles/colorPalette";
@@ -75,6 +76,15 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
         </View>
       )}
       <DrawerItemList {...drawerProps} />
+      <DrawerItem
+        label="Enlaces Útiles"
+        onPress={() => drawerProps.navigation.navigate(
+          roleView === 'student' ? 'StudentUsefulLinks' :
+          roleView === 'teacher' ? 'TeacherUsefulLinks' :
+          'UsefulLinks'
+        )}
+        icon={makeDrawerIcon('link-variant', 'link-variant')}
+      />
       <DrawerItem
         label="Cambiar contraseña"
         onPress={() => drawerProps.navigation.navigate('ChangePassword')}
@@ -387,6 +397,17 @@ const RootDrawer = () => {
               component={DepartmentDetail}
               options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
+
+            <Drawer.Screen
+              name="StudentUsefulLinks"
+              component={UsefulLinksScreen}
+              options={{
+                headerShown: true,
+                title: 'Enlaces Útiles',
+                drawerLabel: () => null,
+                drawerItemStyle: { display: 'none' }
+              }}
+            />
           </>
         )}
 
@@ -433,6 +454,17 @@ const RootDrawer = () => {
               name="AdminDepartmentDetail"
               component={DepartmentDetail}
               options={{ headerShown: true, title: 'Departamento', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
+            />
+
+            <Drawer.Screen
+              name="TeacherUsefulLinks"
+              component={UsefulLinksScreen}
+              options={{
+                headerShown: true,
+                title: 'Enlaces Útiles',
+                drawerLabel: () => null,
+                drawerItemStyle: { display: 'none' }
+              }}
             />
           </>
         )}
@@ -513,6 +545,17 @@ const RootDrawer = () => {
             />
           </>
         )}
+
+        <Drawer.Screen
+          name="UsefulLinks"
+          component={UsefulLinksScreen}
+          options={{
+            headerShown: true,
+            title: 'Enlaces Útiles',
+            drawerLabel: () => null,
+            drawerItemStyle: { display: 'none' }
+          }}
+        />
 
         <Drawer.Screen
           name="Notifications"
