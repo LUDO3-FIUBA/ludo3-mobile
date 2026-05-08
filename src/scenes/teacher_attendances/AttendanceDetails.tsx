@@ -60,24 +60,40 @@ const AttendanceDetails: React.FC = () => {
         setAbsentStudents(absent);
     }, [semesterData, classAttendance]);
 
-    const renderAttendance = ({ item }: { item: TeacherStudent }, isPresent: boolean) => (
-        <View style={styles.attendanceRow}>
-            <Text style={styles.attendanceText}>
-                {item.firstName} {item.lastName} ({item.padron})
-            </Text>
-            {isPresent ? (
-                <TouchableOpacity style={styles.attendanceButton} onPress={() => handleConfirmRemoveAttendance(item)}>
-                    <MaterialIcon name="check-circle" fontSize={24} color="green" />
-                    <Text style={styles.attendanceButtonText}>Presente</Text>
-                </TouchableOpacity>
-            ) : (
-                <TouchableOpacity style={styles.attendanceButton} onPress={() => handleConfirmAttendance(item)}>
-                    <MaterialIcon name="plus-circle" fontSize={24} color="orange" />
-                    <Text style={styles.attendanceButtonText}>Agregar Asistencia</Text>
-                </TouchableOpacity>
-            )}
-        </View>
-    );
+    const getLocationValid = (student: TeacherStudent): boolean | null => {
+        if (classAttendance.mode !== 'location') return null;
+        const studentAttendance = classAttendance.attendances.find(
+            (a) => a.student.padron === student.padron
+        );
+        return studentAttendance ? (studentAttendance as any).locationValid ?? null : null;
+    };
+
+    const renderAttendance = ({ item }: { item: TeacherStudent }, isPresent: boolean) => {
+        const locationValid = isPresent ? getLocationValid(item) : null;
+        return (
+            <View style={styles.attendanceRow}>
+                <View style={{ flex: 1 }}>
+                    <Text style={styles.attendanceText}>
+                        {item.firstName} {item.lastName} ({item.padron})
+                    </Text>
+                    {isPresent && locationValid === false && (
+                        <Text style={styles.locationWarning}>⚠️ Fuera del radio GPS</Text>
+                    )}
+                </View>
+                {isPresent ? (
+                    <TouchableOpacity style={styles.attendanceButton} onPress={() => handleConfirmRemoveAttendance(item)}>
+                        <MaterialIcon name="check-circle" fontSize={24} color="green" />
+                        <Text style={styles.attendanceButtonText}>Presente</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity style={styles.attendanceButton} onPress={() => handleConfirmAttendance(item)}>
+                        <MaterialIcon name="plus-circle" fontSize={24} color="orange" />
+                        <Text style={styles.attendanceButtonText}>Agregar Asistencia</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+        );
+    };
 
     const handleConfirmAttendance = (student: TeacherStudent) => {
         Alert.alert(
@@ -240,6 +256,11 @@ const styles = StyleSheet.create({
     attendanceButtonText: {
         marginLeft: 8,
         fontSize: 16,
+    },
+    locationWarning: {
+        fontSize: 12,
+        color: '#856404',
+        marginTop: 2,
     },
 });
 
