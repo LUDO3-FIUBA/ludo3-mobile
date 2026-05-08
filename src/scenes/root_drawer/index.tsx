@@ -649,13 +649,28 @@ const RootDrawer = () => {
                     style={[
                       styles.notificationItem,
                       !item.is_read ? styles.notificationItemUnread : undefined,
+                      item.notification.is_urgent ? styles.notificationItemUrgentAccent : undefined,
                     ]}
                   >
                     <View style={styles.notificationItemHeader}>
-                      <Text numberOfLines={1} style={[styles.notificationItemTitle, !item.is_read && styles.notificationItemTitleUnread]}>
+                      {item.notification.is_urgent && (
+                        <MaterialIcon name="alert-circle" fontSize={14} color="#b42318" />
+                      )}
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.notificationItemTitle,
+                          !item.is_read && styles.notificationItemTitleUnread,
+                        ]}
+                      >
                         {item.notification.title}
                       </Text>
                       <View style={styles.notificationItemActions}>
+                        {item.notification.is_urgent && (
+                          <View style={styles.notificationItemUrgentBadge}>
+                            <Text style={styles.notificationItemUrgentText}>URGENTE</Text>
+                          </View>
+                        )}
                         {!item.is_read && <View style={styles.notificationItemDot} />}
                         <TouchableOpacity
                           onPress={(e) => { e.stopPropagation(); onDeleteNotification(item); }}
@@ -854,6 +869,21 @@ const styles = StyleSheet.create({
   },
   notificationItemTitleUnread: {
     color: lightModeColors.institutional,
+    fontWeight: '800',
+  },
+  notificationItemUrgentAccent: {
+    borderRightWidth: 4,
+    borderRightColor: '#b42318',
+  },
+  notificationItemUrgentBadge: {
+    backgroundColor: '#fee2e2',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  notificationItemUrgentText: {
+    color: '#b42318',
+    fontSize: 9,
     fontWeight: '800',
   },
   notificationItemHeader: {

@@ -1,7 +1,7 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAppSelector } from '../../redux/hooks';
-import { selectSemesterAttendances } from '../../redux/reducers/teacherSemesterSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { fetchSemesterAttendances, fetchSemesterDataAsync, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { ClassAttendance } from '../../models/ClassAttendance';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
@@ -10,8 +10,10 @@ import { lightModeColors } from '../../styles/colorPalette';
 import moment from 'moment';
 
 const SemesterAttendances: React.FC = () => {
+  const dispatch = useAppDispatch();
   const attendances = useAppSelector(selectSemesterAttendances);
-  const navigation = useNavigation();
+  const semesterData = useAppSelector(selectSemesterData);
+  const navigation = useNavigation<any>();
 
   const onPressAddNewClass = () => {
     navigation.navigate('SemesterAttendanceQR', {});
@@ -27,6 +29,26 @@ const SemesterAttendances: React.FC = () => {
       ),
     });
   }, [navigation]);
+
+  useEffect(() => {
+    const focusUnsubscribe = navigation.addListener('focus', () => {
+      if (semesterData?.id) {
+        dispatch(fetchSemesterAttendances(semesterData.id));
+      }
+    });
+
+    return focusUnsubscribe;
+  }, [dispatch, navigation, semesterData?.id]);
+
+  useEffect(() => {
+    const beforeRemoveUnsubscribe = navigation.addListener('beforeRemove', () => {
+      if (semesterData?.commission?.id) {
+        dispatch(fetchSemesterDataAsync(semesterData.commission.id));
+      }
+    });
+
+    return beforeRemoveUnsubscribe;
+  }, [dispatch, navigation, semesterData?.commission?.id]);
 
   const renderClassAttendance = ({ item }: { item: ClassAttendance }) => (
     <TouchableOpacity onPress={() => navigation.navigate('AttendanceDetails', { classAttendance: item })} style={styles.sessionContainer}>
