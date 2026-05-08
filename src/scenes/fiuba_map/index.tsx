@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Platform, SafeAreaView, StyleSheet } from 'react-native';
-import WebView, { WebViewMessageEvent } from 'react-native-webview';
+import WebView from 'react-native-webview';
 import { Loading } from '../../components';
-import { finalExamsRepository } from '../../repositories';
+import { finalExamsRepository, usersRepository } from '../../repositories';
 
 const FIUBA_MAP_URI =
   Platform.OS === 'android'
@@ -12,31 +12,46 @@ const FIUBA_MAP_URI =
 const FiubaMapScreen: React.FC = () => {
   const webViewRef = useRef<WebView>(null);
   const [ready, setReady] = useState(false);
-  const [injectionPayload, setInjectionPayload] = useState<string | null>(null);
+  const [padron, setPadron] = useState<string | null>(null);
+  const [materiasPayload, setMateriasPayload] = useState<string | null>(null);
 
   useEffect(() => {
-    finalExamsRepository.fetchApproved().then((exams) => {
+    Promise.all([
+      usersRepository.getInfo(),
+      finalExamsRepository.fetchApproved(),
+    ]).then(([user, exams]) => {
+      setPadron(user.studentId ?? null);
       const materias = exams.map((exam) => ({
         id: exam.subject.code,
         nota: exam.grade ?? 4,
       }));
-      setInjectionPayload(JSON.stringify(materias));
+      setMateriasPayload(JSON.stringify(materias));
     });
   }, []);
 
-  const injectMaterias = () => {
-    if (!injectionPayload || !webViewRef.current) return;
-    webViewRef.current.injectJavaScript(`
-      window.dispatchEvent(new MessageEvent('message', {
-        data: { type: 'LUDO_SET_MATERIAS', materias: ${injectionPayload} }
-      }));
-      true;
-    `);
+  const inject = () => {
+    if (!webViewRef.current) return;
+    if (padron) {
+      webViewRef.current.injectJavaScript(`
+        window.dispatchEvent(new MessageEvent('message', {
+          data: { type: 'LUDO_INIT', padron: '${padron}' }
+        }));
+        true;
+      `);
+    }
+    if (materiasPayload) {
+      webViewRef.current.injectJavaScript(`
+        window.dispatchEvent(new MessageEvent('message', {
+          data: { type: 'LUDO_SET_MATERIAS', materias: ${materiasPayload} }
+        }));
+        true;
+      `);
+    }
   };
 
   const onLoad = () => {
     setReady(true);
-    injectMaterias();
+    inject();
   };
 
   return (
@@ -47,6 +62,7 @@ const FiubaMapScreen: React.FC = () => {
         source={{ uri: FIUBA_MAP_URI }}
         style={styles.webview}
         onLoad={onLoad}
+        scalesPageToFit
         allowFileAccess
         allowFileAccessFromFileURLs
         allowUniversalAccessFromFileURLs
