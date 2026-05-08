@@ -10,7 +10,8 @@
     "build:web": "expo export --platform web",
     "lint": "eslint .",
     "test": "jest",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "build:floors": "node scripts/build_floor_manifest.js"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -63,6 +64,7 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
+    "@xmldom/xmldom": "^0.9.9",
     "@babel/core": "^7.25.0",
     "@types/jest": "^29.5.0",
     "@types/react": "~18.3.0",
