@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import { Loading, MaterialIcon } from '../../components';
@@ -7,6 +7,7 @@ import { lightModeColors } from '../../styles/colorPalette';
 import { attendanceRepository } from '../../repositories';
 import { makeRequest } from '../../networking/makeRequest';
 import { MyAttendance } from '../../models/StudentAttendance';
+import { CAMPUS_NAMES, Campus } from '../../models/ClassAttendance';
 
 const MyAttendancesScreen: React.FC<any> = ({ route }) => {
   const navigation = useNavigation<any>();
@@ -62,6 +63,12 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
   const remainingAbsences =
     typeof maxAbsences === 'number' ? Math.max(maxAbsences - absentCount, 0) : null;
 
+  const isActiveLocationSession = (item: MyAttendance): boolean => {
+    if (item.mode !== 'location' || item.attended) return false;
+    const now = new Date();
+    return now >= new Date(item.createdAt) && now <= new Date(item.expiresAt);
+  };
+
   const renderAttendance = ({ item }: { item: MyAttendance }) => (
     <View style={[styles.sessionContainer, !item.attended && styles.absentSessionContainer]}>
       <View style={styles.headerRow}>
@@ -78,11 +85,32 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
         </View>
       </View>
       {item.attended && item.submittedAt ? (
-        <Text style={styles.dateText}>
-          Hora de asistencia: {moment(new Date(item.submittedAt)).format('HH:mm')}
-        </Text>
+        <>
+          <Text style={styles.dateText}>
+            Hora de asistencia: {moment(new Date(item.submittedAt)).format('HH:mm')}
+          </Text>
+          {item.mode === 'location' && item.locationValid === false && (
+            <Text style={styles.locationInvalidText}>⚠️ Ubicación fuera del radio — revisá con tu docente</Text>
+          )}
+        </>
       ) : (
-        <Text style={styles.absentText}>Ausente</Text>
+        <>
+          <Text style={styles.absentText}>Ausente</Text>
+          {isActiveLocationSession(item) && (
+            <TouchableOpacity
+              style={styles.locationButton}
+              onPress={() => navigation.navigate('AttendanceLocationSubmit', {
+                sessionId: item.qrid,
+                campus: item.campus as Campus,
+              })}
+            >
+              <MaterialIcon name="map-marker" fontSize={18} color="#fff" />
+              <Text style={styles.locationButtonText}>
+                Marcar presencia — {item.campus ? CAMPUS_NAMES[item.campus as Campus] : ''}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </>
       )}
     </View>
   );
@@ -162,6 +190,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     color: '#666',
+  },
+  locationInvalidText: {
+    fontSize: 13,
+    color: '#856404',
+    marginTop: 4,
+  },
+  locationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 8,
+    gap: 6,
+  },
+  locationButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
