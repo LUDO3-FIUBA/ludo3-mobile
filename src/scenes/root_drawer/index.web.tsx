@@ -33,6 +33,7 @@ import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
 import StudentCredentialScreen from "../student_credential";
 import NotificationsScreen from "../notifications";
+import FiubaMapScreen from "../fiuba_map";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { usersRepository } from "../../repositories";
 import User from "../../models/User";
@@ -373,6 +374,15 @@ const RootDrawer = () => {
                 drawerIcon: makeDrawerIcon("card-account-details", "card-account-details-outline"),
               }}
             />
+            <Drawer.Screen
+              name="FiubaMap"
+              component={FiubaMapScreen}
+              options={{
+                title: "Mapa de carrera",
+                drawerIcon: makeDrawerIcon("map", "map-outline"),
+              }}
+            />
+
             <Drawer.Screen
               name="StudentStats"
               component={StatsScreen}

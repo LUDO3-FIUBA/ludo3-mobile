@@ -7,7 +7,7 @@ import { finalExamsRepository, usersRepository } from '../../repositories';
 const FIUBA_MAP_URI =
   Platform.OS === 'android'
     ? 'file:///android_asset/fiuba-map/index.html'
-    : '';
+    : 'https://fede.dm/FIUBA-Map/';
 
 const FiubaMapScreen: React.FC = () => {
   const webViewRef = useRef<WebView>(null);
