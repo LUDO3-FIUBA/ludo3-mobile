@@ -76,6 +76,11 @@ const CustomDrawerContent = (props: DrawerContentComponentProps & { user: User |
       )}
       <DrawerItemList {...drawerProps} />
       <DrawerItem
+        label="Mi Cuenta"
+        onPress={() => drawerProps.navigation.navigate('MyAccount')}
+        icon={makeDrawerIcon('account-edit', 'account-edit-outline')}
+      />
+      <DrawerItem
         label="Cambiar contraseña"
         onPress={() => drawerProps.navigation.navigate('ChangePassword')}
         icon={makeDrawerIcon('lock-reset', 'lock-reset')}
