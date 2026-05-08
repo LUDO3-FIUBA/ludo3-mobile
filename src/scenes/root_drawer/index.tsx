@@ -38,6 +38,7 @@ import { DrawerActions, useNavigation } from "@react-navigation/native";
 import ScanQR from "../home/subsections/HomeOptions/ScanQR";
 import VerifyIdentity from "../home/subsections/HomeOptions/VerifyIdentity";
 import StudentCredentialScreen from "../student_credential";
+import FiubaMapScreen from "../fiuba_map";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { usersRepository } from "../../repositories";
 import User from "../../models/User";
@@ -368,6 +369,12 @@ const RootDrawer = () => {
               name="StudentCredential"
               component={StudentCredentialScreen}
               options={{ headerShown: true, title: 'Mi credencial', drawerIcon: makeDrawerIcon('card-account-details', 'card-account-details-outline') }}
+            />
+
+            <Drawer.Screen
+              name="FiubaMap"
+              component={FiubaMapScreen}
+              options={{ headerShown: true, title: 'Mapa de carrera', drawerIcon: makeDrawerIcon('map', 'map-outline') }}
             />
 
             <Drawer.Screen

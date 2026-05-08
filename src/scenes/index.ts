@@ -65,3 +65,5 @@ export { default as TeacherSemesterNotificationHistoryScreen } from './teacher_n
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
 export { default as StudentIdentityViewerScreen } from './student_identity_viewer';
+
+export { default as FiubaMapScreen } from './fiuba_map';
