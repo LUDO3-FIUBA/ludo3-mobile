@@ -83,6 +83,24 @@ export function SemesterCard({ route }: Props) {
         });
       },
       materialIcon: <MaterialIcon name="chart-box" fontSize={24} />
+    },
+    {
+      name: "Enviar aviso a alumnos", onPress: () => {
+        navigation.navigate('SendCommissionNotification', {
+          semesterId: semesterData?.id,
+          subjectName: commission.subjectName,
+        });
+      },
+      materialIcon: <MaterialIcon name="bell-plus" fontSize={24} />
+    },
+    {
+      name: "Avisos enviados", onPress: () => {
+        navigation.navigate('SemesterNotificationHistory', {
+          semesterId: semesterData?.id,
+          subjectName: commission.subjectName,
+        });
+      },
+      materialIcon: <MaterialIcon name="bell" fontSize={24} />
     }
   ];
 

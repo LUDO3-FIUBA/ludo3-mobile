@@ -71,7 +71,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
     if (!evaluation.id) return;
 
     try {
-      const evaluationSubmissions = await evaluationsRepository.fetchMySubmissions(evaluation.id)
+      const evaluationSubmissions = await evaluationsRepository.fetchSubmission(evaluation.id)
       setEvaluationSubmission(evaluationSubmissions[0])
       setEvaluationStatus(getEvaluationStatus(evaluationSubmissions[0]))
     } catch (err) {

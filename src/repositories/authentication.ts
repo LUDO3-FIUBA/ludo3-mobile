@@ -77,7 +77,7 @@ export function preregister(
   email: string,
   padron: string,
   password: string,
-  image?: string,  // Comentado: imagen ahora es opcional (antes era requerida para captura facial)
+  image?: string,
 ): Promise<object> {
   const body: any = {
     dni,
@@ -86,10 +86,9 @@ export function preregister(
     password,
     is_student: true,
   };
-  // Comentado: campo de imagen para captura facial
-  // if (image) {
-  //   body.image = image;
-  // }
+  if (image) {
+    body.image = image;
+  }
   return publicPost(`${authUrl}/users`, body).catch(error => {
     // Check for: No face detected error
     if (
@@ -128,8 +127,18 @@ export function login(dni: string, password: string): Promise<object> {
   );
 }
 
-export function googleSignIn(idToken: string): Promise<object> {
-  return publicPost(`${authUrl}/google`, {id_token: idToken}).catch(
+export interface GoogleSignInPayload {
+  id_token?: string;
+  authorization_code?: string;
+  code_verifier?: string;
+  redirect_uri?: string;
+}
+
+export function googleSignIn(payload: string | GoogleSignInPayload): Promise<object> {
+  const requestBody: GoogleSignInPayload =
+    typeof payload === 'string' ? { id_token: payload } : payload;
+
+  return publicPost(`${authUrl}/google`, requestBody).catch(
     (error: StatusCodeError) => {
       if (error instanceof StatusCodeError && error.code === 409) {
         return Promise.reject(new NeedsRegistration(error.info));

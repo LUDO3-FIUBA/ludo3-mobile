@@ -6,11 +6,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   ChangePasswordScreen,
   ForgotPasswordRequestScreen,
   ForgotPasswordConfirmScreen,
+  CompleteFaceRegistrationScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
   TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
@@ -20,7 +21,9 @@ import {
   TeacherSemesterAttendanceQRScreen, TeacherEvaluationQRScreen, TeacherFinalExamQRScreen,
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
   TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
+  TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
 } from './src/scenes';
+import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -54,12 +57,15 @@ const webLinking = {
           PendingSubjects: 'materias-pendientes',
           ScanQR: 'escanear-qr',
           VerifyIdentity: 'verificar-identidad',
+          StudentCredential: 'mi-credencial',
           StudentStats: 'estadisticas',
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
         },
       },
       ViewSemester: 'comision',
+      MyAttendances: 'comision/mis-asistencias',
+      MySubmissions: 'comision/mis-entregas',
       CorrelativeSubjects: 'correlativas',
       ViewEvaluations: 'evaluaciones',
       ViewEvaluationDetails: 'evaluacion',
@@ -84,6 +90,7 @@ const webLinking = {
       SemesterAttendanceQR: 'cuatrimestre/asistencias/qr',
       EvaluationQR: 'cuatrimestre/evaluaciones/qr',
       TeacherStats: 'cuatrimestre/estadisticas',
+      StudentIdentityViewer: 'credencial/:token',
     },
   },
 };
@@ -163,6 +170,18 @@ const App = () => {
             />
 
             <Stack.Screen
+              name="MyAttendances"
+              component={MyAttendancesScreen}
+              options={{ headerShown: true, title: 'Mis asistencias' }}
+            />
+
+            <Stack.Screen
+              name="MySubmissions"
+              component={MySubmissionsScreen}
+              options={{ headerShown: true, title: 'Mis entregas' }}
+            />
+
+            <Stack.Screen
               name="CorrelativeSubjects"
               component={CorrelativeSubjects}
               options={{ headerShown: true, title: "Correlativas" }}
@@ -226,6 +245,12 @@ const App = () => {
               name="ChangePassword"
               component={ChangePasswordScreen}
               options={{ headerShown: true, title: 'Cambiar contraseña' }}
+            />
+
+            <Stack.Screen
+              name="CompleteFaceRegistration"
+              component={CompleteFaceRegistrationScreen}
+              options={{ headerShown: true, title: 'Completar registro facial' }}
             />
 
             {/* Teacher Stack screens */}
@@ -333,6 +358,21 @@ const App = () => {
               name="EditEvaluation"
               component={TeacherEditEvaluationScreen}
               options={{ headerShown: true, title: 'Editar evaluación' }}
+            />
+            <Stack.Screen
+              name="SendCommissionNotification"
+              component={TeacherSendCommissionNotificationScreen}
+              options={{ headerShown: true, title: 'Enviar aviso' }}
+            />
+            <Stack.Screen
+              name="SemesterNotificationHistory"
+              component={TeacherSemesterNotificationHistoryScreen}
+              options={{ headerShown: true, title: 'Avisos enviados' }}
+            />
+            <Stack.Screen
+              name="StudentIdentityViewer"
+              component={StudentIdentityViewerScreen}
+              options={{ headerShown: true, title: 'Credencial estudiantil' }}
             />
           </Stack.Navigator>
         </NavigationContainer>

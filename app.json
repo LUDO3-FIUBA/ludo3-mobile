@@ -12,7 +12,12 @@
     ],
     "ios": {
       "bundleIdentifier": "org.fiuba.ludo",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "LUDO necesita acceso a la cámara para tomar fotos en el reconocimiento facial y escanear códigos QR de asistencia.",
+        "NSPhotoLibraryUsageDescription": "LUDO necesita acceso a tus fotos para adjuntar imágenes en avisos administrativos.",
+        "NSMicrophoneUsageDescription": "LUDO no graba audio. Este permiso lo solicita la librería de cámara y podés rechazarlo sin afectar el reconocimiento facial."
+      }
     },
     "android": {
       "package": "org.fiuba.ludo",

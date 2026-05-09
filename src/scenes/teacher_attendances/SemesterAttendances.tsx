@@ -50,7 +50,7 @@ const SemesterAttendances: React.FC = () => {
       <FlatList
         data={attendances}
         renderItem={renderClassAttendance}
-        keyExtractor={(_, index) => index.toString()}
+        keyExtractor={(item) => item.qrid}
         ListEmptyComponent={() => <Text style={styles.noDataText}>No hay clases para este cuatrimestre</Text>}
       />
     </View>

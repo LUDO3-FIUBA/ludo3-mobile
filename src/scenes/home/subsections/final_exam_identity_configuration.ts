@@ -42,6 +42,25 @@ class VerifyIdentityForExamConfiguration extends TakePictureStepConfiguration {
             '¡No sos quien decís ser!',
             'O no hemos podido reconocerte. Intentá de nuevo.',
           );
+        } else if (error instanceof finalExamsRepository.FaceRegistrationPending) {
+          Alert.alert(
+            'Registro facial incompleto',
+            'Todavía no completaste tu registro facial. Completálo para poder rendir el final.',
+            [
+              {
+                text: 'Completar ahora',
+                onPress: () => {
+                  navigation.navigate('CompleteFaceRegistration');
+                },
+              },
+              {
+                text: 'Cancelar',
+                style: 'cancel',
+                onPress: () => navigation.goBack(),
+              },
+            ],
+            { cancelable: false },
+          );
         } else if (error instanceof finalExamsRepository.NotAFinal) {
           Alert.alert(
             'QR inválido',

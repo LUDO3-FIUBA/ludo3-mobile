@@ -4,6 +4,7 @@ const TakePictureStepConfigurationType = Object.freeze({
   FinalExamFace: 3,
   VerifyIdentityFace: 4,
   EvaluationFace: 5,
+  CompleteFaceRegistration: 6,
 });
 
 export default TakePictureStepConfigurationType;

@@ -27,7 +27,7 @@ export const fetchSemesterDataAsync = createAsyncThunk(
       const semester: TeacherSemester = await fetchPresentSemesterFromCommissionId(commissionId);
       console.log("Semester:", semester);
       const attendances: ClassAttendance[] = await teacherSemestersRepository.getSemesterAttendances(semester.id);
-      const sortedAttendances = [...attendances].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const sortedAttendances = [...attendances].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
       return { semester, attendances: sortedAttendances };
     } catch (error) {
@@ -41,7 +41,7 @@ export const fetchSemesterAttendances = createAsyncThunk(
   async (semesterId: number) => {
     try {
       const attendances: ClassAttendance[] = await teacherSemestersRepository.getSemesterAttendances(semesterId);
-      const sortedAttendances = [...attendances].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const sortedAttendances = [...attendances].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       return { attendances: sortedAttendances };
     } catch (error) {
       throw new Error('Failed to fetch semester attendances');

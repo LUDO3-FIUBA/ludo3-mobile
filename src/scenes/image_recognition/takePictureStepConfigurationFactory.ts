@@ -4,13 +4,14 @@ import FinalExamFacePictureConfiguration from '../home/subsections/final_exam_id
 import VerifyIdentityFacePictureConfiguration from '../home/subsections/verify_identity_configuration';
 import TakePictureStepConfiguration from './takePictureStepConfiguration';
 import VerifyIdentityForEvaluationConfiguration from '../home/subsections/evaluation_identity_configuration';
+import CompleteFaceRegistrationConfiguration from '../complete_face_registration/configuration';
 
 import Type from './takePictureStepConfigurationType';
 
 interface TakePictureStepConfigurationObject {
   type: number;
   description?: string;
-  cameraType?: any;  
+  cameraType?: any;
   searchForQRCode?: boolean;
   submissionText?: string;
 }
@@ -27,6 +28,8 @@ export default class TakePictureStepConfigurationFactory {
       return VerifyIdentityFacePictureConfiguration.fromObject(object);
     } else if (object.type === Type.EvaluationFace) {
       return VerifyIdentityForEvaluationConfiguration.fromObject(object);
+    } else if (object.type === Type.CompleteFaceRegistration) {
+      return CompleteFaceRegistrationConfiguration.fromObject(object);
     } else {
       return TakePictureStepConfiguration.fromObject(object);
     }

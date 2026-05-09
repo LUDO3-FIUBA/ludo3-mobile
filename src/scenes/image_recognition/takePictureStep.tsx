@@ -5,8 +5,8 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { takePicture as style } from '../../styles';
 import TakePictureStepConfiguration from './takePictureStepConfiguration';
 import TakePictureStepConfigurationFactory from './takePictureStepConfigurationFactory';
-import { Camera, Code, PhotoFile } from 'react-native-vision-camera';
-import { manipulateAsync, Action } from 'expo-image-manipulator';
+import { Camera, Code } from 'react-native-vision-camera';
+import RNFS from 'react-native-fs';
 import { Loading } from '../../components';
 import CameraWithPermissions from './camera/CameraWithPermissions';
 
@@ -74,11 +74,9 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propCo
 
     try {
       const photo = await camera.takePhoto();
-      console.log(photo.orientation, photo.height, photo.width);
-      const photoActions: Action[] = [];
-      addRotationIfWrongOrientation(photo, photoActions);
-      const photoWithOrientation = await manipulateAsync(photo.path, photoActions, { compress: 0.5, base64: true });
-      const base64string = `data:image/jpeg;base64,${photoWithOrientation.base64}`
+      const filePath = photo.path.startsWith('file://') ? photo.path.replace('file://', '') : photo.path;
+      const rawBase64 = await RNFS.readFile(filePath, 'base64');
+      const base64string = `data:image/jpeg;base64,${rawBase64}`
       const disableLoading = () => setLoading(false);
       await getConfiguration()?.onDataObtained(base64string, navigation, disableLoading);
     } catch (error) {
@@ -108,15 +106,3 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propCo
 
 export default TakePictureStep;
 
-/**
- * Adds a `rotate` action of +90 degrees for manipulateAsync in case it is needed.
- * It is added in the case that the photo is `portrait` but its' width is bigger than its' height
- * This means that the saved photo orientation is incorrect and must be rotated
- * @param photo photo taken via react-native-vision-camera
- * @param photoActions 
- */
-function addRotationIfWrongOrientation(photo: PhotoFile, photoActions: Action[]) {
-  if (photo.width > photo.height) {
-    photoActions.push({ rotate: 90 })
-  }
-}

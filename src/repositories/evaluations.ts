@@ -25,7 +25,7 @@ async function fetchMisExamenes(): Promise<Evaluation[]> {
         .then(json => Promise.resolve(convertJsonToEvaluationsList(json)));
 }
 
-async function fetchMySubmissions(evaluation_id: number): Promise<EvaluationSubmission[]> {
+async function fetchSubmission(evaluation_id: number): Promise<EvaluationSubmission[]> {
     return get(`${domainUrl}/${evaluation_id}/my_submissions`)
         .catch(error => {
             // if (error instanceof StatusCodeError && error.code == 404) {
@@ -35,6 +35,16 @@ async function fetchMySubmissions(evaluation_id: number): Promise<EvaluationSubm
         })
         .then(json => json as EvaluationSubmission[]);
 }
+
+async function fetchMySubmissions(semester_id: string): Promise<EvaluationSubmission[]> {
+    return get(`${domainUrl}/submissions/my_evaluations`, [{ key: 'semester_id', value: semester_id }])
+        .catch(error => {
+            return Promise.reject(error);
+        })
+        .then(json => json as EvaluationSubmission[]);
+}
+
+
 
 async function submitEvaluation(evaluationId: string, submissionText: string = ''): Promise<EvaluationSubmission> {
     // TODO: error handling like in finalExamsRepository.submitExam
@@ -53,6 +63,7 @@ function convertJsonToEvaluationsList(json: any): Evaluation[] {
 export default {
     fetchSemesterEvaluations,
     fetchMisExamenes,
+    fetchSubmission: fetchSubmission,
     fetchMySubmissions,
     submitEvaluation
 };

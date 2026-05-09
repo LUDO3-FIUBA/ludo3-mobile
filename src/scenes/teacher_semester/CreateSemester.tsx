@@ -23,7 +23,7 @@ const CreateSemester = () => {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
 
-  const navigation = useNavigation()
+  const navigation = useNavigation<any>()
 
   // Commission Picker
   const [chosenCommission, setChosenCommission] = useState(null)
@@ -37,6 +37,22 @@ const CreateSemester = () => {
   const [openYearMomentPicker, setOpenYearMomentPicker] = useState(false);
   const [itemsToShowInYearMomentPicker, setItemsToShowInYearMomentPicker] = useState(
     [{ label: 'Primer Cuatrimestre', value: 'FS' }, { label: 'Segundo Cuatrimestre', value: 'SS' }])
+
+  const handleMinAttendanceChange = (text: string) => {
+    if (!text) {
+      setMinAttendance('');
+      return;
+    }
+
+    const filteredText = text.replace(/[^0-9]/g, '');
+    if (!filteredText) {
+      setMinAttendance('');
+      return;
+    }
+
+    const clampedValue = Math.min(100, Math.max(0, Number(filteredText)));
+    setMinAttendance(String(clampedValue));
+  };
 
   // Reset the values when navigation switches
   useFocusEffect(
@@ -183,21 +199,12 @@ const CreateSemester = () => {
           placeholder="Ingrese la cantidad de clases"
         />
 
-        <Text style={styles.label}>Porcentaje mínimo de asistencia (del 1 al 100) </Text>
+        <Text style={styles.label}>Porcentaje mínimo de asistencia (del 0 al 100) </Text>
         <TextInput
           style={styles.input}
           keyboardType='numeric'
           value={minAttendance}
-          onChangeText={(text) => {
-            if (text) {
-              const filteredText = text.replace(/[^0-9]/g, ''); // Allow only numbers
-              if (parseInt(filteredText) <= 100) {
-                setMinAttendance(filteredText);
-              }
-            } else {
-              setMinAttendance('')
-            }
-          }}
+          onChangeText={handleMinAttendanceChange}
           placeholder="Ingrese el porcentaje"
         />
         <View

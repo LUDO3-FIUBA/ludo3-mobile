@@ -7,6 +7,7 @@ enum QRCodeType {
     FinalExamUuid = 'FinalExamUuid',
     AttendanceUuid = 'AttendanceUuid',
     EvaluationUuid = 'EvaluationUuid',
+    StudentIdentityUrl = 'StudentIdentityUrl',
 }
 
 class UnsupportedQRSchema extends Error {
@@ -32,6 +33,18 @@ class UnsupportedQRSchema extends Error {
  * @returns parsed QRCode interface. Raises error if format is incorrect.
  */
 function parseQrCodeData(rawData: string): QRCode {
+    if (rawData.startsWith('http://') || rawData.startsWith('https://')) {
+        const frontendMatch = rawData.match(/\/credencial\/(.+)$/);
+        if (frontendMatch?.[1]) {
+            return { type: QRCodeType.StudentIdentityUrl, parsedUuid: frontendMatch[1] };
+        }
+        const backendMatch = rawData.match(/\/api\/student_identity\/identity\/(.+?)\/?$/);
+        if (backendMatch?.[1]) {
+            return { type: QRCodeType.StudentIdentityUrl, parsedUuid: backendMatch[1] };
+        }
+        throw new UnsupportedQRSchema();
+    }
+
     const values = rawData.split(':')
 
     if (values.length === 1) {
