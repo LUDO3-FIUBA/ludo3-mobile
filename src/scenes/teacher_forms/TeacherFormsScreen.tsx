@@ -165,6 +165,7 @@ const TeacherFormsScreen: React.FC = () => {
 
   // Answers modal
   const [answersModal, setAnswersModal] = useState<FormSubmission | null>(null);
+  const [downloadingFieldId, setDownloadingFieldId] = useState<number | null>(null);
 
   // Validate modal
   const [validateModal, setValidateModal] = useState<FormSubmission | null>(null);
@@ -216,8 +217,23 @@ const TeacherFormsScreen: React.FC = () => {
     }
   };
 
+  const handleDownloadAdjunto = async (url: string, fieldId: number) => {
+    if (downloadingFieldId === fieldId) return;
+    setDownloadingFieldId(fieldId);
+    try {
+      const presignedUrl = await formsRepository.getPresignedDocumentUrl(url);
+      await Linking.openURL(presignedUrl);
+    } catch {
+      showMessage('Error', 'No se pudo descargar el archivo adjunto.');
+    } finally {
+      setDownloadingFieldId(null);
+    }
+  };
+
   const openDocumentUrl = async (sub: FormSubmission) => {
-    const url = sub.answers?.[0]?.answer_value;
+    const url = sub.answers?.find(
+      a => typeof a.answer_value === 'string' && a.answer_value.startsWith('https://'),
+    )?.answer_value;
     if (!url) {
       showMessage('Sin documento', 'No hay documento disponible para esta solicitud.');
       return;
@@ -266,7 +282,7 @@ const TeacherFormsScreen: React.FC = () => {
               <SubmissionCard
                 key={sub.submission_id}
                 submission={sub}
-                isDocument={sub.answers.length === 0 || (sub.answers.length === 1 && (sub.answers[0].answer_value ?? '').startsWith('http'))}
+                isDocument={sub.answers.every(a => !a.answer_value || (a.answer_value ?? '').startsWith('https://'))}
                 onViewAnswers={() => setAnswersModal(sub)}
                 onValidate={() => openValidateModal(sub)}
                 onOpenDocument={() => openDocumentUrl(sub)}
@@ -282,7 +298,7 @@ const TeacherFormsScreen: React.FC = () => {
               <SubmissionCard
                 key={sub.submission_id}
                 submission={sub}
-                isDocument={sub.answers.length === 0 || (sub.answers.length === 1 && (sub.answers[0].answer_value ?? '').startsWith('http'))}
+                isDocument={sub.answers.every(a => !a.answer_value || (a.answer_value ?? '').startsWith('https://'))}
                 onViewAnswers={() => setAnswersModal(sub)}
                 onValidate={() => openValidateModal(sub)}
                 onOpenDocument={() => openDocumentUrl(sub)}
@@ -311,12 +327,33 @@ const TeacherFormsScreen: React.FC = () => {
             </View>
             <Text style={styles.modalFormName}>{answersModal?.form_name}</Text>
             <ScrollView>
-              {(answersModal?.answers ?? []).map((ans, i) => (
-                <View key={i} style={styles.answerRow}>
-                  <Text style={styles.answerLabel}>{ans.field_label}</Text>
-                  <Text style={styles.answerValue}>{ans.answer_value ?? '—'}</Text>
-                </View>
-              ))}
+              {(answersModal?.answers ?? []).map((ans, i) => {
+                const isAdjunto = typeof ans.answer_value === 'string' && ans.answer_value.startsWith('https://');
+                const isDownloading = downloadingFieldId === ans.field_id;
+                return (
+                  <View key={i} style={styles.answerRow}>
+                    <Text style={styles.answerLabel}>{ans.field_label}</Text>
+                    {isAdjunto ? (
+                      <TouchableOpacity
+                        style={styles.adjuntoButton}
+                        onPress={() => handleDownloadAdjunto(ans.answer_value as string, ans.field_id)}
+                        disabled={isDownloading}
+                      >
+                        {isDownloading ? (
+                          <ActivityIndicator size="small" color="#1976D2" />
+                        ) : (
+                          <>
+                            <MaterialIcon name="download" fontSize={18} color="#1976D2" />
+                            <Text style={styles.adjuntoButtonText}>Descargar archivo</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    ) : (
+                      <Text style={styles.answerValue}>{ans.answer_value ?? '—'}</Text>
+                    )}
+                  </View>
+                );
+              })}
             </ScrollView>
             <TouchableOpacity
               style={styles.validateFromAnswersBtn}
@@ -433,6 +470,19 @@ const styles = StyleSheet.create({
   answerRow: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0', gap: 3 },
   answerLabel: { fontSize: 12, color: '#888', fontWeight: '600' },
   answerValue: { fontSize: 15, color: '#333' },
+  adjuntoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#1976D2',
+    marginTop: 2,
+  },
+  adjuntoButtonText: { color: '#1976D2', fontWeight: '600', fontSize: 13 },
   validateFromAnswersBtn: {
     flexDirection: 'row',
     alignItems: 'center',
