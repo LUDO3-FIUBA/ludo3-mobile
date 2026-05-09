@@ -13,4 +13,5 @@ export default interface AcademicCalendarEvent {
   end_date: string;   // 'YYYY-MM-DD'
   category: AcademicCalendarCategory;
   year: number;
+  is_deadline: boolean;
 }
