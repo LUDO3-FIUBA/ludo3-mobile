@@ -82,8 +82,14 @@ const AttendanceDetails: React.FC = () => {
                 </View>
                 {isPresent ? (
                     <TouchableOpacity style={styles.attendanceButton} onPress={() => handleConfirmRemoveAttendance(item)}>
-                        <MaterialIcon name="check-circle" fontSize={24} color="green" />
-                        <Text style={styles.attendanceButtonText}>Presente</Text>
+                        <MaterialIcon
+                            name={locationValid === false ? 'map-marker-off' : 'check-circle'}
+                            fontSize={24}
+                            color={locationValid === false ? '#856404' : 'green'}
+                        />
+                        <Text style={styles.attendanceButtonText}>
+                            {locationValid === false ? 'Fuera de ubicación' : 'Presente'}
+                        </Text>
                     </TouchableOpacity>
                 ) : (
                     <TouchableOpacity style={styles.attendanceButton} onPress={() => handleConfirmAttendance(item)}>

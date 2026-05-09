@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import { Loading, MaterialIcon } from '../../components';
 import { lightModeColors } from '../../styles/colorPalette';
@@ -8,6 +8,8 @@ import { attendanceRepository } from '../../repositories';
 import { makeRequest } from '../../networking/makeRequest';
 import { MyAttendance } from '../../models/StudentAttendance';
 import { CAMPUS_NAMES, Campus } from '../../models/ClassAttendance';
+
+const LOCATION_SUBMIT_WINDOW_MS = 10 * 60 * 1000;
 
 const MyAttendancesScreen: React.FC<any> = ({ route }) => {
   const navigation = useNavigation<any>();
@@ -23,64 +25,89 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
     });
   }, [navigation]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchData = useCallback(async () => {
+    if (!semesterId) {
+      setAttendances([]);
+      setLoading(false);
+      return;
+    }
 
-    const fetchData = async () => {
-      if (!semesterId) {
-        if (isMounted) {
-          setAttendances([]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      try {
-        const data = await makeRequest(() => attendanceRepository.getMyAttendances(semesterId), navigation);
-        if (isMounted) {
-          const sortedAttendances = [...data].sort(
-            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-          );
-          setAttendances(sortedAttendances);
-        }
-      } catch (error) {
-        console.log('Error fetching my attendances', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void fetchData();
-
-    return () => {
-      isMounted = false;
-    };
+    try {
+      const data = await makeRequest(() => attendanceRepository.getMyAttendances(semesterId), navigation);
+      const sortedAttendances = [...data].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+      setAttendances(sortedAttendances);
+    } catch (error) {
+      console.log('Error fetching my attendances', error);
+    } finally {
+      setLoading(false);
+    }
   }, [navigation, semesterId]);
 
-  const absentCount = attendances.filter((attendance) => !attendance.attended).length;
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const refreshData = async () => {
+        setLoading(true);
+        await fetchData();
+        if (!isActive) return;
+      };
+
+      void refreshData();
+
+      return () => {
+        isActive = false;
+      };
+    }, [fetchData]),
+  );
+
+  const isValidAttendance = (item: MyAttendance): boolean =>
+    item.attended && (item.mode !== 'location' || item.locationValid !== false);
+
+  const absentCount = attendances.filter((attendance) => !isValidAttendance(attendance)).length;
   const remainingAbsences =
     typeof maxAbsences === 'number' ? Math.max(maxAbsences - absentCount, 0) : null;
 
-  const isActiveLocationSession = (item: MyAttendance): boolean => {
-    if (item.mode !== 'location' || item.attended) return false;
+  const isWithinLocationSubmitWindow = (item: MyAttendance): boolean => {
     const now = new Date();
-    return now >= new Date(item.createdAt) && now <= new Date(item.expiresAt);
+    const createdAt = new Date(item.createdAt);
+    return now >= createdAt && now.getTime() <= createdAt.getTime() + LOCATION_SUBMIT_WINDOW_MS;
+  };
+
+  const canSubmitLocation = (item: MyAttendance): boolean => {
+    if (item.mode !== 'location') return false;
+    if (item.locationValid === true) return false;
+    return isWithinLocationSubmitWindow(item);
+  };
+
+  const getStatusIcon = (item: MyAttendance) => {
+    if (item.mode === 'location' && item.locationValid === false) {
+      return { name: 'map-marker-off', color: '#856404' };
+    }
+    if (isValidAttendance(item)) {
+      return { name: 'check-circle', color: '#28a745' };
+    }
+    return { name: 'close-circle', color: '#dc3545' };
   };
 
   const renderAttendance = ({ item }: { item: MyAttendance }) => (
-    <View style={[styles.sessionContainer, !item.attended && styles.absentSessionContainer]}>
+    <View style={[
+      styles.sessionContainer,
+      !isValidAttendance(item) && styles.absentSessionContainer,
+      item.mode === 'location' && item.locationValid === false && styles.locationInvalidContainer,
+    ]}>
       <View style={styles.headerRow}>
-        <MaterialIcon name="calendar" fontSize={24} color={item.attended ? lightModeColors.institutional : '#dc3545'} />
+        <MaterialIcon name="calendar" fontSize={24} color={isValidAttendance(item) ? lightModeColors.institutional : '#dc3545'} />
         <Text style={styles.sessionHeader}>
           {moment(new Date(item.createdAt)).format('DD/MM/YYYY')}
         </Text>
         <View style={styles.statusIconContainer}>
           <MaterialIcon
-            name={item.attended ? 'check-circle' : 'close-circle'}
+            name={getStatusIcon(item).name}
             fontSize={24}
-            color={item.attended ? '#28a745' : '#dc3545'}
+            color={getStatusIcon(item).color}
           />
         </View>
       </View>
@@ -90,18 +117,34 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
             Hora de asistencia: {moment(new Date(item.submittedAt)).format('HH:mm')}
           </Text>
           {item.mode === 'location' && item.locationValid === false && (
-            <Text style={styles.locationInvalidText}>⚠️ Ubicación fuera del radio — revisá con tu docente</Text>
+            <Text style={styles.locationInvalidText}>⚠️ Fuera de ubicación — podés reintentar si seguís dentro de los 10 minutos</Text>
           )}
-        </>
-      ) : (
-        <>
-          <Text style={styles.absentText}>Ausente</Text>
-          {isActiveLocationSession(item) && (
+          {canSubmitLocation(item) && (
             <TouchableOpacity
               style={styles.locationButton}
               onPress={() => navigation.navigate('AttendanceLocationSubmit', {
                 sessionId: item.qrid,
                 campus: item.campus as Campus,
+                createdAt: item.createdAt,
+              })}
+            >
+              <MaterialIcon name="map-marker" fontSize={18} color="#fff" />
+              <Text style={styles.locationButtonText}>
+                Reintentar ubicación — {item.campus ? CAMPUS_NAMES[item.campus as Campus] : ''}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </>
+      ) : (
+        <>
+          <Text style={styles.absentText}>Ausente</Text>
+          {canSubmitLocation(item) && (
+            <TouchableOpacity
+              style={styles.locationButton}
+              onPress={() => navigation.navigate('AttendanceLocationSubmit', {
+                sessionId: item.qrid,
+                campus: item.campus as Campus,
+                createdAt: item.createdAt,
               })}
             >
               <MaterialIcon name="map-marker" fontSize={18} color="#fff" />
@@ -157,6 +200,9 @@ const styles = StyleSheet.create({
   },
   absentSessionContainer: {
     borderColor: '#dc3545',
+  },
+  locationInvalidContainer: {
+    borderColor: '#ffc107',
   },
   headerRow: {
     flexDirection: 'row',

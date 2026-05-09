@@ -2,12 +2,14 @@ import { TeacherStudent } from "./TeacherStudent";
 
 export interface StudentAttendance {
     student: TeacherStudent,
-    submittedAt: Date
+    submittedAt: Date;
+    locationValid?: boolean | null;
 }
 
 export interface StudentAttendanceSnakeCase {
     student:      TeacherStudent;
     submitted_at: Date;
+    location_valid?: boolean | null;
 }
 
 export interface MyAttendance {

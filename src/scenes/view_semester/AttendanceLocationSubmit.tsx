@@ -6,16 +6,22 @@ import { RoundedButton } from '../../components';
 import { CAMPUS_NAMES, Campus } from '../../models/ClassAttendance';
 import { attendanceRepository } from '../../repositories';
 import { makeRequest } from '../../networking/makeRequest';
+import { StatusCodeError } from '../../networking';
 
 interface RouteParams {
     sessionId: string;
     campus: Campus;
+    createdAt: string;
 }
 
 interface Coordinates {
     latitude: number;
     longitude: number;
 }
+
+const LOCATION_SUBMIT_WINDOW_MS = 10 * 60 * 1000;
+const ALREADY_PRESENT_MESSAGE = 'Ya diste tu presente y fuiste anotado en la planilla.';
+const LOCATION_WINDOW_EXPIRED_MESSAGE = 'Ya pasaron los 10 minutos disponibles para marcar presencia por ubicación.';
 
 class LocationAccessError extends Error {
     title: string;
@@ -85,10 +91,43 @@ const getCurrentCoordinates = async (): Promise<Coordinates> => {
     };
 };
 
+const isWithinLocationSubmitWindow = (createdAt: string): boolean => {
+    const createdAtDate = new Date(createdAt);
+    return new Date().getTime() <= createdAtDate.getTime() + LOCATION_SUBMIT_WINDOW_MS;
+};
+
+const getErrorInfoText = (error: StatusCodeError): string => {
+    if (!error.info) return '';
+    if (typeof error.info === 'string') return error.info;
+    return JSON.stringify(error.info);
+};
+
+const isAlreadyPresentError = (error: unknown): boolean => {
+    if (!(error instanceof StatusCodeError)) return false;
+    const info = getErrorInfoText(error).toLowerCase();
+    return error.code === 403 && (
+        info.includes('duplic') ||
+        info.includes('already') ||
+        info.includes('presente') ||
+        info.includes('asistencia')
+    );
+};
+
+const isWindowExpiredError = (error: unknown): boolean => {
+    if (!(error instanceof StatusCodeError)) return false;
+    const info = getErrorInfoText(error).toLowerCase();
+    return error.code === 403 && (
+        info.includes('expir') ||
+        info.includes('venc') ||
+        info.includes('timeout') ||
+        info.includes('10')
+    );
+};
+
 const AttendanceLocationSubmitScreen: React.FC = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<RouteProp<{ params: RouteParams }, 'params'>>();
-    const { sessionId, campus } = route.params;
+    const { sessionId, campus, createdAt } = route.params;
 
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -96,6 +135,11 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
 
     const handleMarkPresence = async () => {
         if (loading || submitted) return;
+        if (!isWithinLocationSubmitWindow(createdAt)) {
+            Alert.alert('Tiempo agotado', LOCATION_WINDOW_EXPIRED_MESSAGE);
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -118,6 +162,16 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
                 Alert.alert(error.title, error.message);
                 return;
             }
+            if (isAlreadyPresentError(error)) {
+                Alert.alert('Asistencia registrada', ALREADY_PRESENT_MESSAGE);
+                setSubmitted(true);
+                setLocationValid(true);
+                return;
+            }
+            if (isWindowExpiredError(error)) {
+                Alert.alert('Tiempo agotado', LOCATION_WINDOW_EXPIRED_MESSAGE);
+                return;
+            }
 
             Alert.alert('Error', 'No pudimos registrar tu asistencia. Intentá nuevamente.');
         } finally {
@@ -133,7 +187,7 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
                 Sede: <Text style={styles.campusName}>{CAMPUS_NAMES[campus]}</Text>
             </Text>
             <Text style={styles.info}>
-                Presioná el botón para que la app capture tu ubicación y confirme que estás en la sede.
+                Presioná el botón para que la app capture tu ubicación y confirme que estás en la sede. Tenés 10 minutos desde que se inició la sesión.
             </Text>
 
             {!submitted ? (
@@ -152,8 +206,19 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
                     <Text style={styles.resultDescription}>
                         {locationValid
                             ? 'Tu asistencia fue registrada correctamente.'
-                            : 'Tu ubicación está fuera del radio permitido. Tu asistencia quedó registrada pero marcada como inválida. Consultá con tu docente.'}
+                            : 'Tu ubicación está fuera del radio permitido. Podés volver a Mis asistencias y reintentar mientras sigas dentro de los 10 minutos.'}
                     </Text>
+                    {!locationValid && isWithinLocationSubmitWindow(createdAt) && (
+                        <RoundedButton
+                            text="Intentar nuevamente"
+                            style={{ MainContainer: styles.retryButton }}
+                            enabled={!loading}
+                            onPress={() => {
+                                setSubmitted(false);
+                                setLocationValid(null);
+                            }}
+                        />
+                    )}
                 </View>
             )}
         </View>
@@ -234,6 +299,10 @@ const styles = StyleSheet.create({
         color: '#555',
         textAlign: 'center',
         lineHeight: 20,
+    },
+    retryButton: {
+        width: '100%',
+        marginTop: 16,
     },
 });
 
