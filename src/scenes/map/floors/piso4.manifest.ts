@@ -19,8 +19,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "laboratorio",
       "bbox": {
-        "x": 574.90363,
-        "y": 106.20985,
+        "x": 571.88025,
+        "y": 166.76337,
         "width": 290.535,
         "height": 40.428265
       },
@@ -34,8 +34,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "laboratorio",
       "bbox": {
-        "x": 640,
-        "y": 146.63812,
+        "x": 636.97662,
+        "y": 207.19164,
         "width": 115.803,
         "height": 40.428265
       },
@@ -49,8 +49,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "sala",
       "bbox": {
-        "x": 752.37689,
-        "y": 153.49037,
+        "x": 749.35352,
+        "y": 214.04388,
         "width": 113.74732,
         "height": 183.64026
       },
@@ -65,8 +65,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 491.30621,
-        "y": 265.86725,
+        "x": 488.28284,
+        "y": 326.42078,
         "width": 148.009,
         "height": 214.47537
       },
@@ -81,8 +81,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 492.67667,
-        "y": 484.11136,
+        "x": 489.65329,
+        "y": 544.66486,
         "width": 84.625,
         "height": 61.327625
       },
@@ -96,9 +96,9 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 491.31055,
-        "y": 546.54688,
-        "width": 87.21483999999992,
+        "x": 488.28718,
+        "y": 607.1004,
+        "width": 87.21484000000004,
         "height": 51.82617000000005
       },
       "shapeId": "room-bedelia"
@@ -111,8 +111,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "departamento",
       "bbox": {
-        "x": 491.31055,
-        "y": 592.0918,
+        "x": 488.28718,
+        "y": 652.64532,
         "width": 85.27734000000004,
         "height": 119.19335999999998
       },
@@ -127,8 +127,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "instituto",
       "bbox": {
-        "x": 491.79504,
-        "y": 710.80133,
+        "x": 488.77167,
+        "y": 771.35486,
         "width": 85.277,
         "height": 69.771912
       },
@@ -143,8 +143,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "instituto",
       "bbox": {
-        "x": 630.40686,
-        "y": 710.57819,
+        "x": 627.38348,
+        "y": 771.13171,
         "width": 67.836998,
         "height": 69.20771
       },
@@ -159,8 +159,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 629.88525,
-        "y": 647.32825,
+        "x": 626.86188,
+        "y": 707.88177,
         "width": 121.132,
         "height": 65.895691
       },
@@ -174,8 +174,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "laboratorio",
       "bbox": {
-        "x": 698.24414,
-        "y": 711.26337,
+        "x": 695.22076,
+        "y": 771.81689,
         "width": 108.266,
         "height": 63.72591
       },
@@ -190,8 +190,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 751.01709,
-        "y": 646.35919,
+        "x": 747.99371,
+        "y": 706.91272,
         "width": 55.236,
         "height": 64.926636
       },
@@ -206,8 +206,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 809.25055,
-        "y": 678.37262,
+        "x": 806.22717,
+        "y": 738.92615,
         "width": 185.69594,
         "height": 95.93148
       },
@@ -222,8 +222,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 994.94647,
-        "y": 678.37262,
+        "x": 991.9231,
+        "y": 738.92615,
         "width": 116.48823,
         "height": 96.616707
       },
@@ -238,8 +238,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 970.96362,
-        "y": 600.9422,
+        "x": 967.94025,
+        "y": 661.49573,
         "width": 82.226997,
         "height": 47.96574
       },
@@ -254,8 +254,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1110.7495,
-        "y": 711.26337,
+        "x": 1107.7262,
+        "y": 771.81689,
         "width": 108.95075,
         "height": 65.096359
       },
@@ -270,8 +270,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1153.9187,
-        "y": 647.53748,
+        "x": 1150.8954,
+        "y": 708.091,
         "width": 128.82227,
         "height": 62.355461
       },
@@ -286,8 +286,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1219.015,
-        "y": 712.63385,
+        "x": 1215.9917,
+        "y": 773.18738,
         "width": 63.726002,
         "height": 63.040688
       },
@@ -302,8 +302,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "departamento",
       "bbox": {
-        "x": 1277.2592,
-        "y": 779.10065,
+        "x": 1274.2358,
+        "y": 839.65417,
         "width": 66.467003,
         "height": 78.115631
       },
@@ -317,8 +317,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "oficina",
       "bbox": {
-        "x": 1346.4668,
-        "y": 724.28265,
+        "x": 1343.4435,
+        "y": 784.83618,
         "width": 81.542,
         "height": 50.706638
       },
@@ -332,8 +332,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "sala",
       "bbox": {
-        "x": 1344.4111,
-        "y": 585.18201,
+        "x": 1341.3878,
+        "y": 645.73553,
         "width": 80.856529,
         "height": 139.10065
       },
@@ -347,8 +347,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "sala",
       "bbox": {
-        "x": 1344.4111,
-        "y": 585.18201,
+        "x": 1341.3878,
+        "y": 645.73553,
         "width": 80.856529,
         "height": 139.10065
       },
@@ -362,8 +362,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 1344.4111,
-        "y": 476.9165,
+        "x": 1341.3878,
+        "y": 537.47003,
         "width": 82.912003,
         "height": 108.26553
       },
@@ -378,8 +378,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 1052.5054,
-        "y": 515.9743,
+        "x": 1049.4821,
+        "y": 576.52783,
         "width": 260.38501,
         "height": 26.72377
       },
@@ -393,8 +393,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "sala",
       "bbox": {
-        "x": 1345.0964,
-        "y": 357.68738,
+        "x": 1342.0731,
+        "y": 418.24091,
         "width": 84.282654,
         "height": 119.91435
       },
@@ -409,8 +409,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1276.7452,
-        "y": 402.31262,
+        "x": 1273.7219,
+        "y": 462.86615,
         "width": 5.7981277,
         "height": 80.770897
       },
@@ -425,8 +425,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1173.105,
-        "y": 398.80087,
+        "x": 1170.0817,
+        "y": 459.3544,
         "width": 106.21,
         "height": 80.17131
       },
@@ -440,8 +440,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "bano",
       "bbox": {
-        "x": 1110.7495,
-        "y": 399.48608,
+        "x": 1107.7262,
+        "y": 460.03961,
         "width": 63.040688,
         "height": 78.800858
       },
@@ -456,8 +456,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 641.37048,
-        "y": 398.11563,
+        "x": 638.34711,
+        "y": 458.66916,
         "width": 54.132999,
         "height": 82.226982
       },
@@ -472,8 +472,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 695.50323,
-        "y": 399.48608,
+        "x": 692.47986,
+        "y": 460.03961,
         "width": 50.706638,
         "height": 78.800858
       },
@@ -487,8 +487,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "bano",
       "bbox": {
-        "x": 746.89508,
-        "y": 399.48608,
+        "x": 743.8717,
+        "y": 460.03961,
         "width": 61.669998,
         "height": 80.17131
       },
@@ -502,8 +502,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "deposito",
       "bbox": {
-        "x": 864.06854,
-        "y": 339.87152,
+        "x": 861.04517,
+        "y": 400.42505,
         "width": 189.80701,
         "height": 121.97002
       },
@@ -517,8 +517,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "deposito",
       "bbox": {
-        "x": 1052.5054,
-        "y": 109.63598,
+        "x": 1049.4821,
+        "y": 170.1895,
         "width": 110.3212,
         "height": 232.29123
       },
@@ -532,8 +532,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "deposito",
       "bbox": {
-        "x": 1052.5054,
-        "y": 109.63598,
+        "x": 1049.4821,
+        "y": 170.1895,
         "width": 110.3212,
         "height": 232.29123
       },
@@ -547,8 +547,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 1166.2527,
-        "y": 107.5803,
+        "x": 1163.2294,
+        "y": 168.13382,
         "width": 111.00642,
         "height": 79.486084
       },
@@ -562,8 +562,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "oficina",
       "bbox": {
-        "x": 606.42401,
-        "y": 545.43896,
+        "x": 603.40063,
+        "y": 605.99249,
         "width": 59.271999,
         "height": 52.077087
       },
@@ -577,8 +577,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "oficina",
       "bbox": {
-        "x": 605.73877,
-        "y": 597.8587,
+        "x": 602.71539,
+        "y": 658.41223,
         "width": 62.013,
         "height": 48.308353
       },
@@ -593,8 +593,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 626.29553,
-        "y": 513.2334,
+        "x": 623.27216,
+        "y": 573.78693,
         "width": 73.319,
         "height": 30.835119
       },
@@ -609,8 +609,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "oficina",
       "bbox": {
-        "x": 698.24414,
-        "y": 513.2334,
+        "x": 695.22076,
+        "y": 573.78693,
         "width": 107.58,
         "height": 29.464668
       },
@@ -625,10 +625,10 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "departamento",
       "bbox": {
-        "x": 1346.4668,
-        "y": 262.44113,
-        "width": 80.857002,
-        "height": 96.616707
+        "x": 425.9278,
+        "y": 162.30352,
+        "width": 1063.4687,
+        "height": 759.73828
       },
       "shapeId": "room-dpto-de-compu"
     },
@@ -640,8 +640,8 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 574.52808,
-        "y": 779.84644,
+        "x": 571.5047,
+        "y": 840.39996,
         "width": 66.414001,
         "height": 74.971558
       },

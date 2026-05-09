@@ -15,6 +15,7 @@ const OUT_DIR = path.resolve(__dirname, '../src/scenes/map/floors');
 
 const FLOOR_CONFIGS = [
   { floorId: 'piso4', label: 'Piso 4', svgFile: 'Piso4.svg' },
+  { floorId: 'subsuelo1', label: 'Primer Subsuelo', svgFile: 'Subsuelo1.svg' },
   // { floorId: 'piso3', label: 'Piso 3', svgFile: 'Piso3.svg' },
 ];
 
