@@ -9,6 +9,9 @@ import {
 import moment from 'moment';
 import { lightModeColors } from '../../styles/colorPalette';
 import { AgendaSection, CalendarEvent } from './index';
+import AcademicCalendarEvent from '../../models/AcademicCalendarEvent';
+
+const INSTITUTIONAL_COLOR = '#0077b6';
 
 const EVAL_COLOR  = lightModeColors.careers;
 const FINAL_COLOR = '#e53935';
@@ -25,6 +28,7 @@ interface Props {
   selectedDate: string;
   onDateChange: (dateStr: string) => void;
   onEventPress: (event: CalendarEvent) => void;
+  institutionalEvents?: AcademicCalendarEvent[];
 }
 
 // ─── time helpers ─────────────────────────────────────────────────────────────
@@ -51,6 +55,8 @@ function getEventTop(event: CalendarEvent): number {
     const t = parseTime(event.data.end_date.split('T')[1] ?? '00:00:00');
     h = t.h;
     m = t.m;
+  } else if (event.type === 'institutional') {
+    return 0;
   } else {
     // final
     const dateVal = event.data.date;
@@ -82,6 +88,9 @@ function getEventTime(event: CalendarEvent): string {
   if (event.type === 'evaluation') {
     const timePart = event.data.end_date.split('T')[1] ?? '00:00:00';
     return timePart.slice(0, 5);
+  }
+  if (event.type === 'institutional') {
+    return '';
   }
   // final
   const dateVal = event.data.date;
@@ -148,6 +157,11 @@ const EventBlock = ({ event, onPress }: EventBlockProps) => {
     );
   }
 
+  if (event.type === 'institutional') {
+    // institutional events are shown in the all-day banner, not in the time grid
+    return null;
+  }
+
   // final
   return (
     <TouchableOpacity
@@ -170,7 +184,7 @@ const EventBlock = ({ event, onPress }: EventBlockProps) => {
 
 // ─── DayView ──────────────────────────────────────────────────────────────────
 
-const DayView = ({ calendarItems, selectedDate, onDateChange, onEventPress }: Props) => {
+const DayView = ({ calendarItems, selectedDate, onDateChange, onEventPress, institutionalEvents = [] }: Props) => {
   const scrollRef = useRef<ScrollView>(null);
 
   const daySection = useMemo(
@@ -178,7 +192,11 @@ const DayView = ({ calendarItems, selectedDate, onDateChange, onEventPress }: Pr
     [calendarItems, selectedDate],
   );
 
-  const events = daySection?.data ?? [];
+  const events = (daySection?.data ?? []).filter(e => e.type !== 'institutional');
+
+  const activeInstitutional = institutionalEvents.filter(ev =>
+    ev.start_date <= selectedDate && ev.end_date >= selectedDate,
+  );
 
   // Auto-scroll to first event or to 7:00
   useEffect(() => {
@@ -231,6 +249,17 @@ const DayView = ({ calendarItems, selectedDate, onDateChange, onEventPress }: Pr
         </TouchableOpacity>
       </View>
 
+      {/* Institutional (all-day) events banner */}
+      {activeInstitutional.length > 0 && (
+        <View style={styles.allDayBanner}>
+          {activeInstitutional.map((ev, idx) => (
+            <Text key={idx} style={styles.allDayChip} numberOfLines={1}>
+              {ev.name}
+            </Text>
+          ))}
+        </View>
+      )}
+
       {/* Time grid */}
       <ScrollView ref={scrollRef} style={styles.gridScroll} showsVerticalScrollIndicator={false}>
         <View style={styles.gridContainer}>
@@ -269,6 +298,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+
+  // ── all-day banner ──
+  allDayBanner: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#f7fbff',
+  },
+  allDayChip: {
+    fontSize: 12,
+    color: INSTITUTIONAL_COLOR,
+    backgroundColor: INSTITUTIONAL_COLOR + '18',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    overflow: 'hidden',
   },
 
   // ── day nav ──
