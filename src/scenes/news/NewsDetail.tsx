@@ -99,9 +99,7 @@ const NewsDetail: React.FC = () => {
 
       <Text style={styles.title}>{post.title}</Text>
 
-      <Text style={styles.meta}>
-        {post.authorName ? `Por ${post.authorName} · ` : ''}{formatDate(post.createdAt)}
-      </Text>
+      <Text style={styles.meta}>{formatDate(post.createdAt)}</Text>
 
       {post.description ? (
         <Text style={styles.description}>{post.description}</Text>

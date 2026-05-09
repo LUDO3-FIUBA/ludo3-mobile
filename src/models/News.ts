@@ -12,8 +12,6 @@ export default interface News {
   tag: string;
   tagLabel: string;
   tagColor: string;
-  author: number | null;
-  authorName: string | null;
   createdAt: string;
   updatedAt: string;
 }
