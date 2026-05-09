@@ -70,3 +70,5 @@ export { default as StudentIdentityViewerScreen } from './student_identity_viewe
 export { default as StudentProceduresScreen } from './student_procedures';
 export { default as TeacherProceduresValidationScreen } from './teacher_procedures_validation';
 export { default as AdminProceduresManagerScreen } from './admin_procedures';
+export { default as MyAccountScreen } from './my_account';
+export { default as UsefulLinksScreen } from './useful_links';

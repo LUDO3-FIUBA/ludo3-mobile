@@ -1,6 +1,6 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, Alert, ToastAndroid } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, Alert, ToastAndroid, TouchableOpacity, Linking } from 'react-native';
 import { lightModeColors } from '../../styles/colorPalette';
 import { Teacher, TeacherTuple, ChiefTeacher } from '../../models';
 import { commissionsRepository } from '../../repositories';
@@ -8,7 +8,7 @@ import { CopyableEmailText } from '../../components';
 const UserIcon = require('./img/usericon.jpg');
 
 
-const ChiefCard = ({ first_name, last_name, email }: ChiefTeacher) => {
+const ChiefCard = ({ first_name, last_name, email, github_url }: ChiefTeacher) => {
   return (
     <View style={styles.leaderCardContainer}>
       <Image source={UserIcon} style={styles.leaderImage} />
@@ -16,6 +16,11 @@ const ChiefCard = ({ first_name, last_name, email }: ChiefTeacher) => {
         <Text style={styles.leaderName}>{first_name} {last_name}</Text>
         <Text style={styles.leaderRole}>Profesor Titular</Text>
         <CopyableEmailText email={email} />
+        {github_url ? (
+          <TouchableOpacity onPress={() => Linking.openURL(github_url)}>
+            <Text style={styles.githubLink}>GitHub</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
     </View>
   );
@@ -30,6 +35,11 @@ const TeacherCard = ({ teacher, role}: { teacher: Teacher, role: string }) => {
         <Text style={styles.name}>{teacher.first_name + ' ' + teacher.last_name} </Text>
         <Text style={styles.role}>{role}</Text>
         <CopyableEmailText email={teacher.email} />
+        {teacher.github_url ? (
+          <TouchableOpacity onPress={() => Linking.openURL(teacher.github_url!)}>
+            <Text style={styles.githubLink}>GitHub</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
     </View>
   );
@@ -187,11 +197,18 @@ const styles = StyleSheet.create({
     color: 'gray',
     fontSize: 18,
   },
-  emptyStaffTeachersList: { 
-    textAlign: 'center', 
-    marginTop: 20, 
-    fontSize: 18 
-  }
+  emptyStaffTeachersList: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 18
+  },
+  githubLink: {
+    color: '#0d1117',
+    fontSize: 13,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+    marginTop: 2,
+  },
 });
 
 export default TeachersScreen;

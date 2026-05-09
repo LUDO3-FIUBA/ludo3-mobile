@@ -17,6 +17,8 @@ import {
   ApprovedSubjectsScreen,
   PendingSubjectsScreen,
   StudentCredentialScreen,
+  MyAccountScreen,
+  UsefulLinksScreen,
   // Teacher screens
   TeacherSemesterStudentsScreen, TeacherSemesterEditScreen,
   TeacherEvaluationsListScreen, TeacherAddEvaluationScreen, TeacherSubmissionsListScreen, TeacherSubmissionDetailsScreen,
@@ -67,6 +69,7 @@ const webLinking = {
       PreRegister: 'registro',
       PreRegisterPassword: 'registro/password',
       ChangePassword: 'app/cambiar-password',
+      MyAccount: 'app/mi-cuenta',
       PreRegisterDone: 'registro/completado',
       TakePicture: 'registro/foto',
       RootDrawer: {
@@ -85,11 +88,14 @@ const webLinking = {
           ScanQR: 'escanear-qr',
           VerifyIdentity: 'verificar-identidad',
           StudentCredential: 'mi-credencial',
+          StudentUsefulLinks: 'enlaces-utiles',
           // Teacher
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
           TeacherProfile: 'mi-perfil',
           TeacherProceduresValidation: 'validacion-tramites',
+          TeacherDepartmentList: 'docente/departamentos',
+          TeacherUsefulLinks: 'docente/enlaces-utiles',
           // Admin
           AdminDepartmentList: 'admin/departamentos',
           AdminCommissionList: 'admin/comisiones',
@@ -97,6 +103,7 @@ const webLinking = {
           AdminNotificationList: 'admin/avisos',
           AdminProceduresManager: 'admin/tramites',
           Map: 'mapa',
+          Notifications: 'notificaciones',
         },
       },
       ViewSemester: 'comision',
@@ -245,6 +252,8 @@ const App = () => {
             <Stack.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ headerShown: true, title: 'Materias pendientes' }} />
             <Stack.Screen name="StudentDepartmentList" component={() => <DepartmentList isAdmin={false} />} options={{ headerShown: true, title: 'Departamentos' }} />
             <Stack.Screen name="StudentProcedures" component={StudentProceduresScreen} options={{ headerShown: true, title: 'Trámites' }} />
+            <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
+            <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
             <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />
             <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ headerShown: true, title: 'Mi perfil profesional' }} />
             <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
@@ -305,6 +314,12 @@ const App = () => {
               name="ChangePassword"
               component={ChangePasswordScreen}
               options={{ headerShown: true, title: 'Cambiar contraseña' }}
+            />
+
+            <Stack.Screen
+              name="MyAccount"
+              component={MyAccountScreen}
+              options={{ headerShown: true, title: 'Mi Cuenta' }}
             />
 
             <Stack.Screen
