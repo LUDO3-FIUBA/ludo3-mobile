@@ -1,37 +1,41 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, StyleSheet, useWindowDimensions, Platform } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 
-import piso4Svg from './floors/piso4SvgXml';
-import piso4Manifest from './floors/piso4.manifest';
-import type { Room } from './floors/piso4.manifest';
-import { searchRooms } from './searchRooms';
+import { FLOORS, FLOOR_ORDER } from './floors/index';
+import { searchAllFloors } from './searchRooms';
+import type { RoomResult } from './searchRooms';
+import type { Room } from './floors/types';
 import { useMapTransform } from './useMapTransform';
 import FloorMap from './FloorMap';
 import MapSearchBar from './MapSearchBar';
 import ZoomControls from './ZoomControls';
+import FloorPicker from './FloorPicker';
 
 type MapRouteParams = { q?: string };
 
 export default function MapScreen() {
   const { width, height } = useWindowDimensions();
-  // Account for header (~56 px) so the fit is within the visible area
   const canvasH = height - 56;
 
   const [query, setQuery] = useState('');
   const [highlightedRoom, setHighlightedRoom] = useState<Room | null>(null);
+  const [currentFloorId, setCurrentFloorId] = useState(FLOOR_ORDER[0]);
 
-  const suggestions = useMemo(() => searchRooms(piso4Manifest, query), [query]);
+  const allFloors = useMemo(() => FLOOR_ORDER.map(id => FLOORS[id]), []);
+  const currentFloor = FLOORS[currentFloorId];
+
+  const suggestions = useMemo(() => searchAllFloors(allFloors, query), [allFloors, query]);
   const transformHandle = useMapTransform(width, canvasH);
 
-  // Deep-link pre-fill
   const route = useRoute<RouteProp<{ Map: MapRouteParams }, 'Map'>>();
   const q = (route.params as MapRouteParams | undefined)?.q;
   useEffect(() => {
     if (q) {
       setQuery(q);
-      const match = searchRooms(piso4Manifest, q)[0];
+      const match = searchAllFloors(allFloors, q)[0];
       if (match) {
+        setCurrentFloorId(match.floorId);
         setHighlightedRoom(match);
         transformHandle.focusOnBbox(match.bbox);
       }
@@ -39,10 +43,17 @@ export default function MapScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
-  const handleSelect = useCallback((room: Room) => {
+  const handleSelect = useCallback((room: RoomResult) => {
     setQuery(room.label);
+    setCurrentFloorId(room.floorId);
     setHighlightedRoom(room);
     transformHandle.focusOnBbox(room.bbox);
+  }, [transformHandle]);
+
+  const handleFloorSelect = useCallback((floorId: string) => {
+    setCurrentFloorId(floorId);
+    setHighlightedRoom(null);
+    transformHandle.reset();
   }, [transformHandle]);
 
   const handleClear = useCallback(() => {
@@ -58,7 +69,7 @@ export default function MapScreen() {
   return (
     <View style={styles.screen}>
       <FloorMap
-        svgXml={piso4Svg}
+        svgXml={currentFloor.svgXml}
         highlightedRoom={highlightedRoom}
         transformHandle={transformHandle}
         canvasStyle={styles.canvas}
@@ -74,6 +85,11 @@ export default function MapScreen() {
         onZoomIn={() => transformHandle.stepZoom(1.25)}
         onZoomOut={() => transformHandle.stepZoom(1 / 1.25)}
         onReset={transformHandle.reset}
+      />
+      <FloorPicker
+        floors={allFloors}
+        currentFloorId={currentFloorId}
+        onSelect={handleFloorSelect}
       />
     </View>
   );

@@ -9,7 +9,8 @@ import {
   Platform,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import type { Room, RoomCategory } from './floors/piso4.manifest';
+import type { RoomCategory } from './floors/types';
+import type { RoomResult } from './searchRooms';
 import { lightModeColors } from '../../styles/colorPalette';
 
 const categoryIcon: Record<RoomCategory, string> = {
@@ -26,9 +27,9 @@ const categoryIcon: Record<RoomCategory, string> = {
 
 type Props = {
   query: string;
-  results: Room[];
+  results: RoomResult[];
   onChange: (q: string) => void;
-  onSelect: (room: Room) => void;
+  onSelect: (room: RoomResult) => void;
   onClear: () => void;
 };
 
@@ -71,12 +72,13 @@ export default function MapSearchBar({ query, results, onChange, onSelect, onCle
             renderItem={({ item }) => (
               <TouchableOpacity style={styles.suggestion} onPress={() => { setDismissed(true); inputRef.current?.blur(); onSelect(item); }}>
                 <MaterialCommunityIcons
-                  name={categoryIcon[item.category]}
+                  name={categoryIcon[item.category as RoomCategory]}
                   size={18}
                   color={lightModeColors.institutional}
                   style={styles.catIcon}
                 />
                 <Text style={styles.suggestionText}>{item.label}</Text>
+                <Text style={styles.floorBadge}>{item.floorLabel}</Text>
               </TouchableOpacity>
             )}
             ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -154,5 +156,10 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: lightModeColors.lightGray,
     marginHorizontal: 14,
+  },
+  floorBadge: {
+    fontSize: 11,
+    color: '#888',
+    marginLeft: 8,
   },
 });

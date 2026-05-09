@@ -1,4 +1,7 @@
-import type { FloorManifest, Room } from './floors/piso4.manifest';
+import type { FloorManifest, Room } from './floors/types';
+import type { FloorEntry } from './floors/index';
+
+export type RoomResult = Room & { floorId: string; floorLabel: string };
 
 function normalize(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -38,6 +41,29 @@ export function searchRooms(manifest: FloorManifest, query: string, limit = 8): 
   for (const room of manifest.rooms) {
     const score = scoreRoom(room, q);
     if (score > 0) scored.push({ room, score });
+  }
+
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(s => s.room);
+}
+
+export function searchAllFloors(floors: FloorEntry[], query: string, limit = 8): RoomResult[] {
+  const q = normalize(query);
+  if (!q) return [];
+
+  const scored: { room: RoomResult; score: number }[] = [];
+  for (const floor of floors) {
+    for (const room of floor.manifest.rooms) {
+      const score = scoreRoom(room, q);
+      if (score > 0) {
+        scored.push({
+          room: { ...room, floorId: floor.id, floorLabel: floor.label },
+          score,
+        });
+      }
+    }
   }
 
   return scored
