@@ -265,7 +265,7 @@ const RootDrawer = () => {
 
       {/* Toast */}
       {showToast && toastNotification && !showNotificationsDropdown && (
-        <View pointerEvents="box-none" style={styles.toastLayer}>
+        <View style={[styles.toastLayer, { pointerEvents: 'box-none' }]}>
           <TouchableOpacity activeOpacity={0.92} style={styles.toastCard} onPress={openDropdownFromToast}>
             <View style={styles.toastHeader}>
               <Text style={styles.toastLabel}>Nueva notificación</Text>
@@ -309,7 +309,7 @@ const RootDrawer = () => {
       {/* Notifications dropdown */}
       <Modal visible={showNotificationsDropdown} transparent animationType="fade" onRequestClose={() => setShowNotificationsDropdown(false)}>
         <TouchableOpacity style={styles.notificationsBackdrop} activeOpacity={1} onPress={() => setShowNotificationsDropdown(false)} />
-        <View pointerEvents="box-none" style={styles.notificationsLayer}>
+        <View style={[styles.notificationsLayer, { pointerEvents: 'box-none' }]}>
           <View style={[styles.notificationsDropdown, { width: dropdownWidth, maxHeight: dropdownMaxHeight }]}>
             <View style={styles.notificationsHeader}>
               <Text style={styles.notificationsTitle}>Notificaciones</Text>

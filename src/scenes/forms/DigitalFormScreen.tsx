@@ -251,7 +251,7 @@ const DigitalFormScreen: React.FC = () => {
             onPress={handleSubmit}
           />
           {submitting ? (
-            <View style={styles.buttonSpinnerOverlay} pointerEvents="none">
+            <View style={[styles.buttonSpinnerOverlay, { pointerEvents: 'none' }]}>
               <ActivityIndicator color="white" />
             </View>
           ) : null}

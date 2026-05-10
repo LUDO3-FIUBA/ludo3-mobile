@@ -15,7 +15,7 @@ export default function FloorPicker({ floors, currentFloorId, onSelect }: Props)
   const currentFloor = floors.find(f => f.id === currentFloorId);
 
   return (
-    <View style={styles.container} pointerEvents="box-none">
+    <View style={[styles.container, { pointerEvents: 'box-none' }]}>
       {open && (
         <View style={styles.menu}>
           {[...floors].reverse().map(floor => (
