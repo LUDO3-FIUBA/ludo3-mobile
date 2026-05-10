@@ -9,8 +9,9 @@ export const CAMPUS_NAMES: Record<Campus, string> = {
 };
 
 export interface ClassAttendance {
-    createdAt:  Date;
-    expiresAt:  Date;
+    createdAt:   Date;
+    expiresAt:   Date;
+    validUntil:  Date;
     qrid:        string;
     attendances: StudentAttendance[];
     mode:        AttendanceMode;
@@ -20,6 +21,7 @@ export interface ClassAttendance {
 export interface ClassAttendanceSnakeCase {
     created_at:  Date;
     expires_at:  Date;
+    valid_until: Date;
     qrid:        string;
     attendances: StudentAttendanceSnakeCase[];
     mode:        AttendanceMode;

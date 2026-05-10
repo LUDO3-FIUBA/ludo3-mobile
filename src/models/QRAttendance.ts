@@ -7,6 +7,7 @@ export interface QRAttendance {
   ownerTeacher:   TeacherModel;
   createdAt:      Date;
   expiresAt:      Date;
+  validUntil:     Date;
   qrid:           string;
   mode:           AttendanceMode;
   campus:         Campus | null;
@@ -17,6 +18,7 @@ export interface QRAttendanceSnakeCase {
   owner_teacher:  TeacherModel;
   created_at:     Date;
   expires_at:     Date;
+  valid_until:    Date;
   qrid:           string;
   mode:           AttendanceMode;
   campus:         Campus | null;

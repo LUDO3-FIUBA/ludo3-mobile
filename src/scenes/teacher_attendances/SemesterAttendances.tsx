@@ -1,11 +1,12 @@
 import React, { useEffect, useLayoutEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterAttendances, fetchSemesterDataAsync, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { ClassAttendance } from '../../models/ClassAttendance';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
 import { lightModeColors } from '../../styles/colorPalette';
+import { teacherQrAttendanceRepository } from '../../repositories';
 
 import moment from 'moment';
 
@@ -50,6 +51,30 @@ const SemesterAttendances: React.FC = () => {
     return beforeRemoveUnsubscribe;
   }, [dispatch, navigation, semesterData?.commission?.id]);
 
+  const handleDeleteSession = (item: ClassAttendance) => {
+    Alert.alert(
+      'Eliminar sesión',
+      `¿Seguro que querés eliminar la sesión del ${moment(new Date(item.createdAt)).format('DD/MM/YYYY HH:mm')}? Se borrarán todas las asistencias registradas.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await teacherQrAttendanceRepository.deleteAttendanceSession(item.qrid);
+              if (semesterData?.id) {
+                dispatch(fetchSemesterAttendances(semesterData.id));
+              }
+            } catch {
+              Alert.alert('Error', 'No se pudo eliminar la sesión. Intentá de nuevo más tarde.');
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const renderClassAttendance = ({ item }: { item: ClassAttendance }) => (
     <TouchableOpacity onPress={() => navigation.navigate('AttendanceDetails', { classAttendance: item })} style={styles.sessionContainer}>
       <View style={styles.headerRow}>
@@ -57,9 +82,15 @@ const SemesterAttendances: React.FC = () => {
         <Text style={styles.sessionHeader}>
           {moment(new Date(item.createdAt)).format('DD/MM/YYYY')}
         </Text>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteSession(item)}>
+          <MaterialIcon name="delete" fontSize={22} color="#c0392b" />
+        </TouchableOpacity>
       </View>
       <Text style={styles.dateText}>
-        Horario de validez del QR: {moment(new Date(item.createdAt)).format('HH:mm')} - {moment(new Date(item.expiresAt)).format('HH:mm')}
+        {item.mode === 'qr'
+          ? `Horario de validez del QR: ${moment(new Date(item.createdAt)).format('HH:mm')} - ${moment(new Date(item.validUntil)).format('HH:mm')}`
+          : `Ventana de marcado por ubicación: hasta ${moment(new Date(item.validUntil)).format('HH:mm')}`
+        }
       </Text>
       <Text style={styles.dateText}>
         Cantidad de asistencias: {item.attendances.length}
@@ -96,6 +127,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+  },
+  deleteButton: {
+    marginLeft: 'auto',
+    padding: 4,
   },
   sessionHeader: {
     fontSize: 18,

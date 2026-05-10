@@ -102,26 +102,25 @@ const getErrorInfoText = (error: StatusCodeError): string => {
     return JSON.stringify(error.info);
 };
 
+const getErrorCode = (error: StatusCodeError): string | null => {
+    if (!error.info || typeof error.info !== 'object') return null;
+    return (error.info as Record<string, unknown>).code as string ?? null;
+};
+
 const isAlreadyPresentError = (error: unknown): boolean => {
-    if (!(error instanceof StatusCodeError)) return false;
+    if (!(error instanceof StatusCodeError) || error.code !== 403) return false;
+    if (getErrorCode(error) === 'attendance_already_valid') return true;
     const info = getErrorInfoText(error).toLowerCase();
-    return error.code === 403 && (
-        info.includes('duplic') ||
-        info.includes('already') ||
-        info.includes('presente') ||
-        info.includes('asistencia')
-    );
+    return info.includes('duplic') || info.includes('already') ||
+        info.includes('presente') || info.includes('asistencia');
 };
 
 const isWindowExpiredError = (error: unknown): boolean => {
-    if (!(error instanceof StatusCodeError)) return false;
+    if (!(error instanceof StatusCodeError) || error.code !== 403) return false;
+    if (getErrorCode(error) === 'location_attendance_window_expired') return true;
     const info = getErrorInfoText(error).toLowerCase();
-    return error.code === 403 && (
-        info.includes('expir') ||
-        info.includes('venc') ||
-        info.includes('timeout') ||
-        info.includes('10')
-    );
+    return info.includes('expir') || info.includes('venc') ||
+        info.includes('timeout') || info.includes('10');
 };
 
 const AttendanceLocationSubmitScreen: React.FC = () => {
