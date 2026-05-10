@@ -5,7 +5,6 @@ import {
   createDrawerNavigator,
 } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Modal,
   Platform,
@@ -18,7 +17,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Loading, ProfileOverview } from '../../components';
+import { Loading, MaterialIcon, ProfileOverview } from '../../components';
 import { SessionManager } from '../../managers';
 import { lightModeColors } from '../../styles/colorPalette';
 import { usersRepository } from '../../repositories';
@@ -50,9 +49,9 @@ import NotificationList from '../admin_notifications/NotificationList';
 import NotificationForm from '../admin_notifications/NotificationForm';
 import NotificationsScreen from '../notifications';
 import StudentCredentialScreen from '../student_credential';
-import StudentProceduresScreen from '../student_procedures';
-import TeacherProceduresValidationScreen from '../teacher_procedures_validation';
-import AdminProceduresManagerScreen from '../admin_procedures';
+import FormsListScreen from '../forms/FormsListScreen';
+import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
+import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
 
 import { resolveMenu, canToggleRole, MenuItem, SubmenuItem, DirectItem } from './menu_config';
 
@@ -411,20 +410,20 @@ const RootDrawer = () => {
         <Drawer.Screen name="StudentCredential" component={StudentCredentialScreen} options={{ title: 'Mi credencial' }} />
         <Drawer.Screen name="StudentStats" component={StatsScreen} options={{ title: 'Estadísticas' }} />
         <Drawer.Screen name="StudentDepartmentList" component={StudentDepartmentListScreen} options={{ title: 'Departamentos' }} />
-        <Drawer.Screen name="StudentProcedures" component={StudentProceduresScreen} options={{ title: 'Trámites' }} />
+        <Drawer.Screen name="FormsList" component={FormsListScreen} options={{ title: 'Trámites' }} />
 
         {/* ── Teacher ── */}
         <Drawer.Screen name="TeacherHome" component={TeacherHomeScreen} options={{ title: 'Mis Comisiones' }} />
         <Drawer.Screen name="CreateSemester" component={CreateSemester} options={{ title: 'Crear cuatrimestre' }} />
         <Drawer.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ title: 'Mi perfil profesional' }} />
-        <Drawer.Screen name="TeacherProceduresValidation" component={TeacherProceduresValidationScreen} options={{ title: 'Validación de trámites' }} />
+        <Drawer.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ title: 'Validación de trámites' }} />
 
         {/* ── Admin ── */}
         <Drawer.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ title: 'Departamentos' }} />
         <Drawer.Screen name="AdminCommissionList" component={CommissionList} options={{ title: 'Comisiones' }} />
         <Drawer.Screen name="AdminUserSearch" component={UserSearch} options={{ title: 'Buscar Usuarios' }} />
         <Drawer.Screen name="AdminNotificationList" component={NotificationList} options={{ title: 'Avisos' }} />
-        <Drawer.Screen name="AdminProceduresManager" component={AdminProceduresManagerScreen} options={{ title: 'Gestor de Trámites' }} />
+        <Drawer.Screen name="FormsManager" component={FormsManagerScreen} options={{ title: 'Gestor de Trámites' }} />
 
         {/* ── Hidden detail routes ── */}
         <Drawer.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ title: 'Departamento', ...hidden }} />
@@ -806,35 +805,6 @@ const styles = StyleSheet.create({
   bellButton: { marginRight: 16, paddingVertical: 4, paddingHorizontal: 6 },
   badge: { position: 'absolute', top: -3, right: -4, minWidth: 18, height: 18, borderRadius: 9, paddingHorizontal: 4, backgroundColor: '#c1121f', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#fff' },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  notificationsBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)' },
-  notificationsLayer: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', paddingTop: 76, paddingHorizontal: 14 },
-  notificationsDropdown: { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#e6e8eb', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 16, elevation: 12, overflow: 'hidden' },
-  notificationsHeader: { paddingHorizontal: 14, paddingTop: 14, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#f0f1f3', backgroundColor: '#fbfcfe' },
-  notificationsTitle: { color: '#1f2937', fontSize: 16, fontWeight: '700' },
-  notificationsSubtitle: { marginTop: 2, color: '#6b7280', fontSize: 12, fontWeight: '500' },
-  notificationsList: { flexGrow: 0 },
-  notificationsListContent: { padding: 10, gap: 8 },
-  notificationsEmptyContainer: { paddingHorizontal: 14, paddingVertical: 20 },
-  notificationsEmptyText: { color: '#6b7280', textAlign: 'center', fontSize: 14 },
-  notificationItem: { borderWidth: 1, borderColor: '#eceef2', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 10, backgroundColor: '#fff' },
-  notificationItemUnread: { backgroundColor: '#eaf3ff', borderLeftWidth: 4, borderLeftColor: lightModeColors.institutional },
-  notificationItemTitleUnread: { color: lightModeColors.institutional, fontWeight: '800' },
-  notificationItemHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 },
-  notificationItemTitle: { flex: 1, color: '#111827', fontSize: 14, fontWeight: '700' },
-  notificationItemMessage: { color: '#374151', fontSize: 13, lineHeight: 18, marginBottom: 6 },
-  notificationItemDate: { color: '#6b7280', fontSize: 11, fontWeight: '500' },
-  notificationItemDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#2563eb' },
-  notificationItemContext: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
-  notificationItemContextText: { flex: 1, fontSize: 11, color: '#6b7280', fontWeight: '600' },
-  notificationsSeeAll: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#eee', gap: 4 },
-  notificationsSeeAllText: { color: lightModeColors.institutional, fontSize: 14, fontWeight: '600' },
-  toastLayer: { position: 'absolute', top: 72, left: 12, right: 12, alignItems: 'center', zIndex: 30 },
-  toastCard: { width: '100%', maxWidth: 520, borderRadius: 14, borderWidth: 1, borderColor: '#dce5f6', backgroundColor: '#fff', paddingVertical: 10, paddingHorizontal: 12, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.12, shadowRadius: 18, elevation: 8 },
-  toastHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-  toastLabel: { color: '#334155', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
-  toastUrgent: { color: '#b42318', fontSize: 10, fontWeight: '800' },
-  toastTitle: { color: '#0f172a', fontSize: 14, fontWeight: '700', marginBottom: 2 },
-  toastMessage: { color: '#334155', fontSize: 13, lineHeight: 18 },
 });
 
 export default RootDrawer;

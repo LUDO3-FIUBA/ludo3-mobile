@@ -316,9 +316,9 @@ const RootDrawer = () => {
               <Text style={styles.notificationsSubtitle}>{unreadCount} sin leer</Text>
             </View>
             {notifications.length === 0 ? (
-              <View style={styles.notificationsEmptyContainer}>
-                <Text style={styles.notificationsEmptyText}>No tenés notificaciones</Text>
-              </View>
+            <View style={styles.notificationsEmptyContainer}>
+              <Text style={styles.notificationsEmptyText}>No tenés notificaciones</Text>
+            </View>
             ) : (
               <ScrollView style={styles.notificationsList} contentContainerStyle={styles.notificationsListContent} showsVerticalScrollIndicator>
                 {notifications.slice(0, 5).map(item => (
@@ -723,42 +723,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  notificationsBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)' },
-  notificationsLayer: { ...StyleSheet.absoluteFillObject, alignItems: 'flex-end', paddingTop: 70, paddingHorizontal: 12 },
-  notificationsDropdown: { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#e6e8eb', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 16, elevation: 12, overflow: 'hidden' },
-  notificationsHeader: { paddingHorizontal: 14, paddingTop: 14, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#f0f1f3', backgroundColor: '#fbfcfe' },
-  notificationsTitle: { color: '#1f2937', fontSize: 16, fontWeight: '700' },
-  notificationsSubtitle: { marginTop: 2, color: '#6b7280', fontSize: 12, fontWeight: '500' },
-  notificationsList: { flexGrow: 0 },
-  notificationsListContent: { padding: 10, gap: 8 },
-  notificationsEmptyContainer: { paddingHorizontal: 14, paddingVertical: 20 },
-  notificationsEmptyText: { color: '#6b7280', textAlign: 'center', fontSize: 14 },
-  notificationItem: { borderWidth: 1, borderColor: '#eceef2', borderRadius: 10, paddingVertical: 10, paddingHorizontal: 10, backgroundColor: '#fff' },
-  notificationItemUnread: { backgroundColor: '#eaf3ff', borderLeftWidth: 4, borderLeftColor: lightModeColors.institutional },
-  notificationItemTitleUnread: { color: lightModeColors.institutional, fontWeight: '800' },
-  notificationItemHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 },
-  notificationItemTitle: { flex: 1, color: '#111827', fontSize: 14, fontWeight: '700' },
-  notificationItemMessage: { color: '#374151', fontSize: 13, lineHeight: 18, marginBottom: 6 },
-  notificationItemDate: { color: '#6b7280', fontSize: 11, fontWeight: '500' },
-  notificationItemActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  notificationItemDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#2563eb' },
-  notificationItemThumbnail: { width: '100%', height: 120, borderRadius: 6, marginTop: 6, marginBottom: 6 },
-  notificationItemContext: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
-  notificationItemContextText: { flex: 1, fontSize: 11, color: '#6b7280', fontWeight: '600' },
-  notificationsSeeAll: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#eee', gap: 4 },
-  notificationsSeeAllText: { color: lightModeColors.institutional, fontSize: 14, fontWeight: '600' },
-  fullScreenContainer: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
-  fullScreenCloseButton: { position: 'absolute', top: 48, right: 16, zIndex: 1, padding: 8 },
-  fullScreenCloseText: { color: '#fff', fontSize: 24, fontWeight: '700' },
-  fullScreenImage: { width: '100%', height: '100%' },
-  toastLayer: { position: 'absolute', top: 72, left: 12, right: 12, alignItems: 'center', zIndex: 30 },
-  toastCard: { width: '100%', maxWidth: 480, borderRadius: 14, borderWidth: 1, borderColor: '#dce5f6', backgroundColor: '#fff', paddingVertical: 10, paddingHorizontal: 12, shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.12, shadowRadius: 18, elevation: 8 },
-  toastHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
-  toastLabel: { color: '#334155', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.4 },
-  toastUrgent: { color: '#b42318', fontSize: 10, fontWeight: '800' },
-  toastTitle: { color: '#0f172a', fontSize: 14, fontWeight: '700', marginBottom: 2 },
-  toastMessage: { color: '#334155', fontSize: 13, lineHeight: 18 },
-  toastThumbnail: { width: '100%', height: 100, borderRadius: 6, marginTop: 8 },
 });
 
 export default RootDrawer;

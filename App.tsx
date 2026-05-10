@@ -28,6 +28,9 @@ import {
   TeacherSemesterAttendanceQRScreen, TeacherEvaluationQRScreen, TeacherFinalExamQRScreen,
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
   TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
+  // Forms screens
+  FormsListScreen, DocumentFormScreen, DigitalFormScreen,
+  TeacherFormsScreen, FormsManagerScreen, FormDesignerScreen,
   TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
 } from './src/scenes';
 import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
@@ -45,9 +48,6 @@ import UserSearch from './src/scenes/admin_users/UserSearch';
 import UserDetail from './src/scenes/admin_users/UserDetail';
 import NotificationList from './src/scenes/admin_notifications/NotificationList';
 import NotificationForm from './src/scenes/admin_notifications/NotificationForm';
-import StudentProceduresScreen from './src/scenes/student_procedures';
-import TeacherProceduresValidationScreen from './src/scenes/teacher_procedures_validation';
-import AdminProceduresManagerScreen from './src/scenes/admin_procedures';
 import MapScreen from './src/scenes/map';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -84,16 +84,18 @@ const webLinking = {
           PendingSubjects: 'materias-pendientes',
           StudentStats: 'estadisticas',
           StudentDepartmentList: 'departamentos',
-          StudentProcedures: 'tramites',
+          FormsList: 'tramites',
           ScanQR: 'escanear-qr',
           VerifyIdentity: 'verificar-identidad',
           StudentCredential: 'mi-credencial',
           StudentUsefulLinks: 'enlaces-utiles',
+          Tramites: 'tramites',
           // Teacher
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
           TeacherProfile: 'mi-perfil',
-          TeacherProceduresValidation: 'validacion-tramites',
+          TeacherForms: 'validacion-tramites',
+          GestorTramites: 'gestor-tramites',
           TeacherDepartmentList: 'docente/departamentos',
           TeacherUsefulLinks: 'docente/enlaces-utiles',
           // Admin
@@ -101,7 +103,7 @@ const webLinking = {
           AdminCommissionList: 'admin/comisiones',
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
-          AdminProceduresManager: 'admin/tramites',
+          FormsManager: 'admin/tramites',
           Map: 'mapa',
           Notifications: 'notificaciones',
         },
@@ -133,6 +135,9 @@ const webLinking = {
       SemesterAttendanceQR: 'cuatrimestre/asistencias/qr',
       EvaluationQR: 'cuatrimestre/evaluaciones/qr',
       TeacherStats: 'cuatrimestre/estadisticas',
+      DocumentForm: 'tramites/formulario-documento',
+      DigitalForm: 'tramites/formulario-digital',
+      FormDesigner: 'tramites/nuevo-formulario',
       StudentIdentityViewer: 'credencial/:token',
     },
   },
@@ -251,18 +256,18 @@ const App = () => {
             <Stack.Screen name="ApprovedSubjects" component={ApprovedSubjectsScreen} options={{ headerShown: true, title: 'Materias aprobadas' }} />
             <Stack.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ headerShown: true, title: 'Materias pendientes' }} />
             <Stack.Screen name="StudentDepartmentList" component={() => <DepartmentList isAdmin={false} />} options={{ headerShown: true, title: 'Departamentos' }} />
-            <Stack.Screen name="StudentProcedures" component={StudentProceduresScreen} options={{ headerShown: true, title: 'Trámites' }} />
+            <Stack.Screen name="FormsList" component={FormsListScreen} options={{ headerShown: true, title: 'Trámites' }} />
             <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
             <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
             <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />
             <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ headerShown: true, title: 'Mi perfil profesional' }} />
             <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
-            <Stack.Screen name="TeacherProceduresValidation" component={TeacherProceduresValidationScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
+            <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
             <Stack.Screen name="AdminDepartmentList" component={() => <DepartmentList isAdmin={true} />} options={{ headerShown: true, title: 'Departamentos' }} />
             <Stack.Screen name="AdminCommissionList" component={CommissionList} options={{ headerShown: true, title: 'Comisiones' }} />
             <Stack.Screen name="AdminUserSearch" component={UserSearch} options={{ headerShown: true, title: 'Buscar Usuarios' }} />
             <Stack.Screen name="AdminNotificationList" component={NotificationList} options={{ headerShown: true, title: 'Avisos' }} />
-            <Stack.Screen name="AdminProceduresManager" component={AdminProceduresManagerScreen} options={{ headerShown: true, title: 'Gestor de Trámites' }} />
+            <Stack.Screen name="FormsManager" component={FormsManagerScreen} options={{ headerShown: true, title: 'Gestor de Trámites' }} />
             {/* Detail routes (formerly hidden drawer screens) */}
             <Stack.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />
             <Stack.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ headerShown: true, title: 'Nuevo Departamento' }} />
@@ -433,6 +438,23 @@ const App = () => {
               name="EditEvaluation"
               component={TeacherEditEvaluationScreen}
               options={{ headerShown: true, title: 'Editar evaluación' }}
+            />
+
+            {/* Forms stack screens */}
+            <Stack.Screen
+              name="DocumentForm"
+              component={DocumentFormScreen}
+              options={{ headerShown: true, title: 'Formulario' }}
+            />
+            <Stack.Screen
+              name="DigitalForm"
+              component={DigitalFormScreen}
+              options={{ headerShown: true, title: 'Completar formulario' }}
+            />
+            <Stack.Screen
+              name="FormDesigner"
+              component={FormDesignerScreen}
+              options={{ headerShown: true, title: 'Nuevo formulario' }}
             />
             <Stack.Screen
               name="SendCommissionNotification"

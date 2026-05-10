@@ -62,7 +62,7 @@ const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'approved-subjects', label: 'Materias aprobadas', icon: 'text-box-check', iconOutline: 'text-box-check-outline', route: 'ApprovedSubjects', scope: 'student' },
       { kind: 'direct', key: 'student-stats', label: 'Estadísticas', icon: 'chart-box', iconOutline: 'chart-box-outline', route: 'StudentStats', scope: 'student' },
       { kind: 'direct', key: 'departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'StudentDepartmentList', scope: 'shared' },
-      { kind: 'direct', key: 'student-procedures', label: 'Trámites', icon: 'file-document-edit', iconOutline: 'file-document-edit-outline', route: 'StudentProcedures', scope: 'student' },
+      { kind: 'direct', key: 'student-procedures', label: 'Trámites', icon: 'file-document-edit', iconOutline: 'file-document-edit-outline', route: 'FormsList', scope: 'student' },
     ],
   },
   {
@@ -108,7 +108,7 @@ const teacherMenu: MenuItem[] = [
     children: [
       { kind: 'direct', key: 'create-semester', label: 'Crear cuatrimestre', icon: 'plus-circle', iconOutline: 'plus-circle-outline', route: 'CreateSemester', scope: 'teacher' },
       { kind: 'direct', key: 'departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'StudentDepartmentList', scope: 'shared' },
-      { kind: 'direct', key: 'teacher-procedures', label: 'Validación de trámites', icon: 'clipboard-check', iconOutline: 'clipboard-check-outline', route: 'TeacherProceduresValidation', scope: 'teacher' },
+      { kind: 'direct', key: 'teacher-procedures', label: 'Validación de trámites', icon: 'clipboard-check', iconOutline: 'clipboard-check-outline', route: 'TeacherForms', scope: 'teacher' },
     ],
   },
 ];
@@ -133,7 +133,7 @@ const adminMenu: MenuItem[] = [
       { kind: 'direct', key: 'admin-departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'AdminDepartmentList', scope: 'shared' },
       { kind: 'direct', key: 'admin-commissions', label: 'Comisiones', icon: 'account-group', iconOutline: 'account-group-outline', route: 'AdminCommissionList', scope: 'shared' },
       { kind: 'direct', key: 'admin-user-search', label: 'Buscar Usuarios', icon: 'account-search', iconOutline: 'account-search-outline', route: 'AdminUserSearch', scope: 'shared' },
-      { kind: 'direct', key: 'admin-procedures', label: 'Gestor de Trámites', icon: 'clipboard-list', iconOutline: 'clipboard-list-outline', route: 'AdminProceduresManager', scope: 'shared' },
+      { kind: 'direct', key: 'admin-procedures', label: 'Gestor de Trámites', icon: 'clipboard-list', iconOutline: 'clipboard-list-outline', route: 'FormsManager', scope: 'shared' },
     ],
   },
   {
