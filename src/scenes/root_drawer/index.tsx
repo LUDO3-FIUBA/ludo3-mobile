@@ -17,6 +17,9 @@ import CommissionDetail from "../admin_commissions/CommissionDetail";
 import CommissionForm from "../admin_commissions/CommissionForm";
 import UserSearch from "../admin_users/UserSearch";
 import UserDetail from "../admin_users/UserDetail";
+import FormsListScreen from "../forms/FormsListScreen";
+import FormsManagerScreen from "../admin_forms/FormsManagerScreen";
+import TeacherFormsScreen from "../teacher_forms/TeacherFormsScreen";
 import NotificationList from "../admin_notifications/NotificationList";
 import NotificationForm from "../admin_notifications/NotificationForm";
 import NotificationsScreen from "../notifications";
@@ -368,6 +371,15 @@ const RootDrawer = () => {
                 drawerIcon: makeDrawerIcon('file-clock', 'file-clock-outline')
               }}
             />
+            
+            <Drawer.Screen
+              name="Tramites"
+              component={FormsListScreen}
+              options={{
+                title: "Trámites",
+                drawerIcon: makeDrawerIcon("archive", "archive-outline"),
+              }}
+            />
 
             <Drawer.Screen
               name="ScanQR"
@@ -439,6 +451,12 @@ const RootDrawer = () => {
                 title: 'Crear Cuatrimestre',
                 drawerIcon: makeDrawerIcon('plus-circle', 'plus-circle-outline')
               }}
+            />
+
+            <Drawer.Screen
+              name="TeacherTramites"
+              component={TeacherFormsScreen}
+              options={{ headerShown: true, title: 'Validación de Trámites', drawerIcon: makeDrawerIcon('clipboard-check', 'clipboard-check-outline') }}
             />
 
             <Drawer.Screen
@@ -550,6 +568,15 @@ const RootDrawer = () => {
               component={NotificationForm}
               options={{ headerShown: true, title: 'Nuevo Aviso', drawerLabel: () => null, drawerItemStyle: { display: 'none' } }}
             />
+
+            <Drawer.Screen
+              name="GestorTramites"
+              component={FormsManagerScreen}
+              options={{
+                title: "Gestor de Trámites",
+                drawerIcon: makeDrawerIcon("clipboard-list", "clipboard-list-outline"),
+              }}
+            />
           </>
         )}
 
@@ -656,9 +683,9 @@ const RootDrawer = () => {
             </View>
 
             {notifications.length === 0 ? (
-              <View style={styles.notificationsEmptyContainer}>
-                <Text style={styles.notificationsEmptyText}>No tenés notificaciones</Text>
-              </View>
+            <View style={styles.notificationsEmptyContainer}>
+              <Text style={styles.notificationsEmptyText}>No tenés notificaciones</Text>
+            </View>
             ) : (
               <ScrollView
                 style={styles.notificationsList}

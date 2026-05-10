@@ -62,6 +62,14 @@ export { default as TeacherEditEvaluationScreen } from './teacher_evaluations/Ed
 export { default as TeacherSendCommissionNotificationScreen } from './teacher_notifications/SendCommissionNotification';
 export { default as TeacherSemesterNotificationHistoryScreen } from './teacher_notifications/SemesterNotificationHistory';
 
+// Forms — Student screens
+export { default as FormsListScreen } from './forms/FormsListScreen';
+export { default as DocumentFormScreen } from './forms/DocumentFormScreen';
+export { default as DigitalFormScreen } from './forms/DigitalFormScreen';
+
+// Forms — Admin screens
+export { default as FormsManagerScreen } from './admin_forms/FormsManagerScreen';
+export { default as FormDesignerScreen } from './admin_forms/FormDesignerScreen';
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
 export { default as StudentIdentityViewerScreen } from './student_identity_viewer';

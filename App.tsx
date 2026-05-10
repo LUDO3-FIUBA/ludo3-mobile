@@ -22,6 +22,8 @@ import {
   TeacherSemesterAttendanceQRScreen, TeacherEvaluationQRScreen, TeacherFinalExamQRScreen,
   TeacherStatsScreen, TeacherFinalExamSubmissionsScreen, TeacherAddClassToSemesterScreen,
   TeacherSemesterCardScreen, TeacherEditEvaluationScreen,
+  // Forms screens
+  DocumentFormScreen, DigitalFormScreen, FormDesignerScreen,
   TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
 } from './src/scenes';
 import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
@@ -65,6 +67,8 @@ const webLinking = {
           StudentUsefulLinks: 'enlaces-utiles',
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
+          Tramites: 'tramites',
+          GestorTramites: 'gestor-tramites',
           TeacherDepartmentList: 'docente/departamentos',
           TeacherUsefulLinks: 'docente/enlaces-utiles',
           Notifications: 'notificaciones',
@@ -97,6 +101,9 @@ const webLinking = {
       SemesterAttendanceQR: 'cuatrimestre/asistencias/qr',
       EvaluationQR: 'cuatrimestre/evaluaciones/qr',
       TeacherStats: 'cuatrimestre/estadisticas',
+      DocumentForm: 'tramites/formulario-documento',
+      DigitalForm: 'tramites/formulario-digital',
+      FormDesigner: 'tramites/nuevo-formulario',
       StudentIdentityViewer: 'credencial/:token',
     },
   },
@@ -371,6 +378,23 @@ const App = () => {
               name="EditEvaluation"
               component={TeacherEditEvaluationScreen}
               options={{ headerShown: true, title: 'Editar evaluación' }}
+            />
+
+            {/* Forms stack screens */}
+            <Stack.Screen
+              name="DocumentForm"
+              component={DocumentFormScreen}
+              options={{ headerShown: true, title: 'Formulario' }}
+            />
+            <Stack.Screen
+              name="DigitalForm"
+              component={DigitalFormScreen}
+              options={{ headerShown: true, title: 'Completar formulario' }}
+            />
+            <Stack.Screen
+              name="FormDesigner"
+              component={FormDesignerScreen}
+              options={{ headerShown: true, title: 'Nuevo formulario' }}
             />
             <Stack.Screen
               name="SendCommissionNotification"
