@@ -625,10 +625,10 @@ const piso4Manifest: FloorManifest = {
       ],
       "category": "departamento",
       "bbox": {
-        "x": 425.9278,
-        "y": 162.30352,
-        "width": 1063.4687,
-        "height": 759.73828
+        "x": 1343.4435,
+        "y": 322.99466,
+        "width": 80.857002,
+        "height": 96.616707
       },
       "shapeId": "room-dpto-de-compu"
     },

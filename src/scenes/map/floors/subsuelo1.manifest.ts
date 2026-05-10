@@ -19,10 +19,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 761.02838,
-        "y": 98.668434,
-        "width": 224.66516,
-        "height": 86.849129
+        "x": 757.846862,
+        "y": 175.13408900000002,
+        "width": 224.66516000000001,
+        "height": 86.84912899999995
       },
       "shapeId": "room-taller-de-mecanica-de-ensenanza"
     },
@@ -34,10 +34,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1072.2367,
-        "y": 189.19899,
-        "width": 79.428436,
-        "height": 121.45364
+        "x": 1069.0551819999998,
+        "y": 265.664645,
+        "width": 79.42843599999992,
+        "height": 121.45364000000001
       },
       "shapeId": "room-aula-e32"
     },
@@ -49,10 +49,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1099.4495,
-        "y": 98.534271,
-        "width": 54.31353,
-        "height": 85.534126
+        "x": 1096.2679819999998,
+        "y": 174.99992600000002,
+        "width": 54.3135299999999,
+        "height": 85.53412599999996
       },
       "shapeId": "room-aula-e33"
     },
@@ -64,9 +64,9 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 1340.546,
-        "y": 264.3913,
-        "width": 159.49272,
+        "x": 1337.364482,
+        "y": 340.85695499999997,
+        "width": 159.49271999999996,
         "height": 230.32227
       },
       "shapeId": "room-comedor"
@@ -79,10 +79,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 1414.2919,
-        "y": 493.78775,
-        "width": 83.464996,
-        "height": 57.618923
+        "x": 1411.1103819999998,
+        "y": 570.253405,
+        "width": 83.46499599999993,
+        "height": 57.618922999999995
       },
       "shapeId": "room-comedor-docente"
     },
@@ -94,10 +94,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1226.1163,
-        "y": 494.81088,
-        "width": 96.487953,
-        "height": 68.06778
+        "x": 1222.9347819999998,
+        "y": 571.276535,
+        "width": 96.48795300000006,
+        "height": 68.06777999999997
       },
       "shapeId": "room-aula-e14"
     },
@@ -109,9 +109,9 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1218.561,
-        "y": 409.62891,
-        "width": 120.98738,
+        "x": 1215.3794819999998,
+        "y": 486.094565,
+        "width": 120.98738000000003,
         "height": 86.272606
       },
       "shapeId": "room-aula-e16"
@@ -125,10 +125,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "departamento",
       "bbox": {
-        "x": 1022.1707,
-        "y": 347.15692,
-        "width": 191.12402,
-        "height": 57.401463
+        "x": 1018.989182,
+        "y": 423.622575,
+        "width": 191.12401999999997,
+        "height": 57.401463000000035
       },
       "shapeId": "room-depto-mecanica-aplicada"
     },
@@ -141,10 +141,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "oficina",
       "bbox": {
-        "x": 793.45813,
-        "y": 352.1041,
-        "width": 178.52199,
-        "height": 57.446339
+        "x": 790.276612,
+        "y": 428.569755,
+        "width": 178.52198999999996,
+        "height": 57.44633900000008
       },
       "shapeId": "room-oficinas-de-lab-de-fluido-dinamico"
     },
@@ -157,9 +157,9 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "laboratorio",
       "bbox": {
-        "x": 494.3024,
-        "y": 265.38614,
-        "width": 84.560616,
+        "x": 491.120882,
+        "y": 341.85179500000004,
+        "width": 84.56061600000004,
         "height": 47.597622
       },
       "shapeId": "room-lab-solidos-amorfos"
@@ -173,10 +173,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "oficina",
       "bbox": {
-        "x": 526.07349,
-        "y": 314.55423,
-        "width": 64.590378,
-        "height": 56.770428
+        "x": 522.891972,
+        "y": 391.01988500000004,
+        "width": 64.59037799999999,
+        "height": 56.770427999999924
       },
       "shapeId": "room-oficina-sol-amor"
     },
@@ -188,10 +188,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 582.96497,
-        "y": 495.90039,
-        "width": 90.754257,
-        "height": 94.753487
+        "x": 579.783452,
+        "y": 572.366045,
+        "width": 90.75425700000005,
+        "height": 94.75348699999995
       },
       "shapeId": "room-aula-e29"
     },
@@ -203,10 +203,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 582.9494,
-        "y": 591.59424,
-        "width": 89.010643,
-        "height": 83.475533
+        "x": 579.767882,
+        "y": 668.059895,
+        "width": 89.01064299999996,
+        "height": 83.47553300000004
       },
       "shapeId": "room-aula-e7"
     },
@@ -218,10 +218,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 497.09314,
-        "y": 628.88635,
-        "width": 81.963852,
-        "height": 84.940231
+        "x": 493.911622,
+        "y": 705.352005,
+        "width": 81.96385200000003,
+        "height": 84.94023100000004
       },
       "shapeId": "room-aula-e5"
     },
@@ -233,10 +233,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 495.80432,
-        "y": 717.10724,
+        "x": 492.62280200000004,
+        "y": 793.572895,
         "width": 82.588547,
-        "height": 97.567207
+        "height": 97.56720700000005
       },
       "shapeId": "room-aula-e3"
     },
@@ -248,10 +248,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 584.18677,
-        "y": 819.24103,
-        "width": 68.382019,
-        "height": 82.198929
+        "x": 581.005252,
+        "y": 895.706685,
+        "width": 68.38201900000001,
+        "height": 82.19892900000002
       },
       "shapeId": "room-aula-e1"
     },
@@ -263,10 +263,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 645.05841,
-        "y": 407.68619,
-        "width": 117.30956,
-        "height": 26.411133
+        "x": 641.876892,
+        "y": 484.151845,
+        "width": 117.30956000000003,
+        "height": 26.411133000000063
       },
       "shapeId": "room-jardin-maternal"
     },
@@ -278,10 +278,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1315.1306,
-        "y": 656.83289,
-        "width": 92.075363,
-        "height": 90.429413
+        "x": 1311.9490819999999,
+        "y": 733.298545,
+        "width": 92.07536299999992,
+        "height": 90.42941299999995
       },
       "shapeId": "room-aula-e8"
     },
@@ -293,10 +293,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1300.0737,
-        "y": 567.74353,
+        "x": 1296.8921819999998,
+        "y": 644.2091849999999,
         "width": 75.228386,
-        "height": 88.485191
+        "height": 88.48519099999999
       },
       "shapeId": "room-aula-e10"
     },
@@ -309,10 +309,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 1158.9663,
-        "y": 675.94843,
-        "width": 58.741425,
-        "height": 50.699509
+        "x": 1155.784782,
+        "y": 752.414085,
+        "width": 58.741424999999936,
+        "height": 50.699509000000035
       },
       "shapeId": "room-gab-e11"
     },
@@ -324,10 +324,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 613.62903,
-        "y": 676.66089,
-        "width": 153.15375,
-        "height": 68.309151
+        "x": 610.447512,
+        "y": 753.126545,
+        "width": 153.15375000000006,
+        "height": 68.30915100000004
       },
       "shapeId": "room-aula-e9"
     },
@@ -339,10 +339,10 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "sala",
       "bbox": {
-        "x": 1271.5647,
-        "y": 749.92401,
-        "width": 70.197647,
-        "height": 69.950722
+        "x": 1268.3831819999998,
+        "y": 826.3896649999999,
+        "width": 70.19764699999996,
+        "height": 69.95072200000004
       },
       "shapeId": "room-sala-de-compu"
     }

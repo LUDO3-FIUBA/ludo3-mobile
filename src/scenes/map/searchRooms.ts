@@ -53,21 +53,41 @@ export function searchAllFloors(floors: FloorEntry[], query: string, limit = 8):
   const q = normalize(query);
   if (!q) return [];
 
-  const scored: { room: RoomResult; score: number }[] = [];
-  for (const floor of floors) {
+  // Score per floor, then sort each floor's matches by score desc.
+  const perFloor = floors.map(floor => {
+    const items: { room: RoomResult; score: number }[] = [];
     for (const room of floor.manifest.rooms) {
       const score = scoreRoom(room, q);
       if (score > 0) {
-        scored.push({
+        items.push({
           room: { ...room, floorId: floor.id, floorLabel: floor.label },
           score,
         });
       }
     }
-  }
+    items.sort((a, b) => b.score - a.score);
+    return items;
+  });
 
-  return scored
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map(s => s.room);
+  // Merge: pick head of highest score; ties broken by which floor contributed fewer
+  // entries so far, so results alternate across floors when scores are equal.
+  const idx = perFloor.map(() => 0);
+  const taken = perFloor.map(() => 0);
+  const result: RoomResult[] = [];
+  while (result.length < limit) {
+    let pick = -1;
+    for (let i = 0; i < perFloor.length; i++) {
+      if (idx[i] >= perFloor[i].length) continue;
+      if (pick === -1) { pick = i; continue; }
+      const headScore = perFloor[i][idx[i]].score;
+      const pickScore = perFloor[pick][idx[pick]].score;
+      if (headScore > pickScore) pick = i;
+      else if (headScore === pickScore && taken[i] < taken[pick]) pick = i;
+    }
+    if (pick === -1) break;
+    result.push(perFloor[pick][idx[pick]].room);
+    idx[pick]++;
+    taken[pick]++;
+  }
+  return result;
 }

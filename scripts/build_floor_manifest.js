@@ -74,6 +74,106 @@ function rectBbox(el) {
   return { x, y, width: w, height: h };
 }
 
+// ─── SVG transform helpers ────────────────────────────────────────────────────
+// 2x3 affine matrix [a, b, c, d, e, f]:  [x', y'] = [a c e; b d f] * [x, y, 1]^T
+
+function composeMatrix(a, b) {
+  return [
+    a[0]*b[0] + a[2]*b[1],
+    a[1]*b[0] + a[3]*b[1],
+    a[0]*b[2] + a[2]*b[3],
+    a[1]*b[2] + a[3]*b[3],
+    a[0]*b[4] + a[2]*b[5] + a[4],
+    a[1]*b[4] + a[3]*b[5] + a[5],
+  ];
+}
+
+function applyMatrix(m, x, y) {
+  return { x: m[0]*x + m[2]*y + m[4], y: m[1]*x + m[3]*y + m[5] };
+}
+
+function parseTransform(str) {
+  let m = [1, 0, 0, 1, 0, 0];
+  if (!str) return m;
+  const re = /(translate|scale|rotate|matrix|skewX|skewY)\s*\(\s*([^)]*)\)/g;
+  let match;
+  while ((match = re.exec(str)) !== null) {
+    const args = match[2].split(/[\s,]+/).filter(Boolean).map(Number);
+    let t;
+    switch (match[1]) {
+      case 'translate':
+        t = [1, 0, 0, 1, args[0] || 0, args[1] || 0];
+        break;
+      case 'scale': {
+        const sx = args[0] || 0;
+        const sy = args.length > 1 ? args[1] : sx;
+        t = [sx, 0, 0, sy, 0, 0];
+        break;
+      }
+      case 'rotate': {
+        const rad = ((args[0] || 0) * Math.PI) / 180;
+        const cos = Math.cos(rad), sin = Math.sin(rad);
+        const r = [cos, sin, -sin, cos, 0, 0];
+        if (args.length === 3) {
+          const cx = args[1], cy = args[2];
+          t = composeMatrix(composeMatrix([1, 0, 0, 1, cx, cy], r), [1, 0, 0, 1, -cx, -cy]);
+        } else {
+          t = r;
+        }
+        break;
+      }
+      case 'matrix':
+        t = [args[0]||0, args[1]||0, args[2]||0, args[3]||0, args[4]||0, args[5]||0];
+        break;
+      case 'skewX': {
+        const tan = Math.tan(((args[0] || 0) * Math.PI) / 180);
+        t = [1, 0, tan, 1, 0, 0];
+        break;
+      }
+      case 'skewY': {
+        const tan = Math.tan(((args[0] || 0) * Math.PI) / 180);
+        t = [1, tan, 0, 1, 0, 0];
+        break;
+      }
+      default:
+        t = [1, 0, 0, 1, 0, 0];
+    }
+    m = composeMatrix(m, t);
+  }
+  return m;
+}
+
+// Cumulative transform from `node`'s local coords to root SVG coords.
+// Returns null if no ancestor has a transform attribute (caller can skip work).
+function elementToRootMatrix(node) {
+  const chain = [];
+  let cur = node;
+  while (cur && cur.nodeType === 1) {
+    const t = cur.getAttribute && cur.getAttribute('transform');
+    if (t) chain.push(parseTransform(t));
+    cur = cur.parentNode;
+  }
+  if (chain.length === 0) return null;
+  let m = [1, 0, 0, 1, 0, 0];
+  for (let i = chain.length - 1; i >= 0; i--) m = composeMatrix(m, chain[i]);
+  return m;
+}
+
+function transformBbox(bbox, m) {
+  if (!m) return bbox;
+  const corners = [
+    applyMatrix(m, bbox.x, bbox.y),
+    applyMatrix(m, bbox.x + bbox.width, bbox.y),
+    applyMatrix(m, bbox.x, bbox.y + bbox.height),
+    applyMatrix(m, bbox.x + bbox.width, bbox.y + bbox.height),
+  ];
+  const xs = corners.map(c => c.x);
+  const ys = corners.map(c => c.y);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
 function pathBbox(el) {
   const d = el.getAttribute('d') || '';
   const xs = [], ys = [];
@@ -155,12 +255,12 @@ function processFloor(svgSrc) {
     const id = node.getAttribute && node.getAttribute('id');
     if (id === 'labels') return;
     const tag = node.tagName && node.tagName.toLowerCase();
-    if (tag === 'rect') {
-      const bbox = rectBbox(node);
-      if (bbox) allShapes.push({ el: node, bbox });
-    } else if (tag === 'path') {
-      const bbox = pathBbox(node);
-      if (bbox) allShapes.push({ el: node, bbox });
+    if (tag === 'rect' || tag === 'path') {
+      const local = tag === 'rect' ? rectBbox(node) : pathBbox(node);
+      if (local) {
+        const bbox = transformBbox(local, elementToRootMatrix(node));
+        allShapes.push({ el: node, bbox });
+      }
     }
     if (node.childNodes) {
       for (let i = 0; i < node.childNodes.length; i++) collectShapes(node.childNodes[i]);
@@ -201,8 +301,12 @@ function processFloor(svgSrc) {
     if (!label) continue;
 
     const firstTspan = tspans[0];
-    const ax = parseFloat((firstTspan && firstTspan.getAttribute('x')) || textEl.getAttribute('x') || '0');
-    const ay = parseFloat((firstTspan && firstTspan.getAttribute('y')) || textEl.getAttribute('y') || '0');
+    const localAx = parseFloat((firstTspan && firstTspan.getAttribute('x')) || textEl.getAttribute('x') || '0');
+    const localAy = parseFloat((firstTspan && firstTspan.getAttribute('y')) || textEl.getAttribute('y') || '0');
+    const labelMatrix = elementToRootMatrix(firstTspan || textEl);
+    const { x: ax, y: ay } = labelMatrix
+      ? applyMatrix(labelMatrix, localAx, localAy)
+      : { x: localAx, y: localAy };
 
     let best = null;
     for (const shape of allShapes) {
