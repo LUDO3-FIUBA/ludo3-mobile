@@ -57,6 +57,9 @@ import { configureGoogle } from './src/auth/google_signin';
 
 const Stack = createStackNavigator();
 
+const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
+const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+
 const webLinking = {
   prefixes: ['http://localhost:8081'],
   config: {
@@ -254,7 +257,7 @@ const App = () => {
             <Stack.Screen name="CurrentCommissionInscriptions" component={CommissionInscriptionsScreen} options={{ headerShown: true, title: 'Materias en curso' }} />
             <Stack.Screen name="ApprovedSubjects" component={ApprovedSubjectsScreen} options={{ headerShown: true, title: 'Materias aprobadas' }} />
             <Stack.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ headerShown: true, title: 'Materias pendientes' }} />
-            <Stack.Screen name="StudentDepartmentList" component={() => <DepartmentList isAdmin={false} />} options={{ headerShown: true, title: 'Departamentos' }} />
+            <Stack.Screen name="StudentDepartmentList" component={StudentDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />
             <Stack.Screen name="FormsList" component={FormsListScreen} options={{ headerShown: true, title: 'Trámites' }} />
             <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
             <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
@@ -262,7 +265,7 @@ const App = () => {
             <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ headerShown: true, title: 'Mi perfil profesional' }} />
             <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
             <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
-            <Stack.Screen name="AdminDepartmentList" component={() => <DepartmentList isAdmin={true} />} options={{ headerShown: true, title: 'Departamentos' }} />
+            <Stack.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />
             <Stack.Screen name="AdminCommissionList" component={CommissionList} options={{ headerShown: true, title: 'Comisiones' }} />
             <Stack.Screen name="AdminUserSearch" component={UserSearch} options={{ headerShown: true, title: 'Buscar Usuarios' }} />
             <Stack.Screen name="AdminNotificationList" component={NotificationList} options={{ headerShown: true, title: 'Avisos' }} />
