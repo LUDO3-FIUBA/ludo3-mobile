@@ -42,6 +42,20 @@ const SemesterStudents: React.FC = () => {
     return Math.max(totalQrs - attended, 0);
   };
 
+  const getGithubUsername = (githubUrl: string): string => {
+    try {
+      const normalizedUrl = githubUrl.trim().replace(/\/+$/, '');
+      const url = normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://')
+        ? new URL(normalizedUrl)
+        : new URL(`https://${normalizedUrl}`);
+      const segments = url.pathname.split('/').filter(Boolean);
+      const username = segments[segments.length - 1] || normalizedUrl;
+      return username.replace(/\.git$/, '');
+    } catch (error) {
+      return githubUrl.replace(/^https?:\/\/github\.com\//i, '').replace(/\/+$/, '').replace(/\.git$/, '');
+    }
+  };
+
   const getSubmissionLabel = (submission: any) => {
     if (!submission) {
       return '-';
@@ -189,6 +203,15 @@ const SemesterStudents: React.FC = () => {
           <View style={styles.infoContainer}>
             <Text style={styles.studentName}>{item.firstName} {item.lastName}</Text>
             <Text style={styles.studentDetail}>Padrón: {item.padron || 'Padrón faltante'}</Text>
+            {isExpanded && item.githubUrl ? (
+              <TouchableOpacity
+                style={styles.githubRow}
+                onPress={() => Linking.openURL(item.githubUrl!)}
+              >
+                <MaterialIcon name="github" fontSize={16} color="#0d1117" />
+                <Text style={styles.githubLink}>{getGithubUsername(item.githubUrl)}</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
           <View style={styles.attendanceColumn}>
             <Text style={styles.attendanceLabel}>Asistencia</Text>
@@ -206,15 +229,6 @@ const SemesterStudents: React.FC = () => {
               <Text style={styles.absencesLabel}>Inasistencias</Text>
               <Text style={styles.absencesValue}>{absences}</Text>
             </View>
-            {item.githubUrl ? (
-              <TouchableOpacity
-                style={styles.githubRow}
-                onPress={() => Linking.openURL(item.githubUrl!)}
-              >
-                <MaterialIcon name="github" fontSize={16} color="#0d1117" />
-                <Text style={styles.githubLink}>{item.githubUrl}</Text>
-              </TouchableOpacity>
-            ) : null}
             {item.submissions && item.submissions.length > 0 && renderSubmissions(item.submissions)}
           </View>
         )}
@@ -260,7 +274,7 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     padding: 10,
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 10,
   },
   image: {
@@ -280,11 +294,13 @@ const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
     justifyContent: 'center',
+    paddingTop: 1,
   },
   attendanceColumn: {
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     minWidth: 60,
+    paddingTop: 1,
   },
   attendanceLabel: {
     fontSize: 12,
@@ -301,24 +317,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingBottom: 8,
-    marginTop: -2,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e6e8eb',
   },
   absencesLabel: {
     fontSize: 13,
-    color: '#666',
-    fontWeight: '500',
+    color: '#4b5563',
+    fontWeight: '600',
   },
   absencesValue: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#666',
-  },
-  absencesDivider: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
-    marginBottom: 12,
+    color: '#111827',
+    minWidth: 24,
+    textAlign: 'right',
   },
   submissionsContainer: {
     marginTop: 0,
@@ -399,9 +416,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginBottom: 4,
+    paddingTop: 4,
+    marginTop: 6,
   },
   githubLink: {
     fontSize: 13,
