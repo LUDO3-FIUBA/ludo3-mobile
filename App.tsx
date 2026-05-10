@@ -89,7 +89,6 @@ const webLinking = {
           VerifyIdentity: 'verificar-identidad',
           StudentCredential: 'mi-credencial',
           StudentUsefulLinks: 'enlaces-utiles',
-          Tramites: 'tramites',
           // Teacher
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
