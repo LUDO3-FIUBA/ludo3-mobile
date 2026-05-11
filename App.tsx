@@ -97,7 +97,6 @@ const webLinking = {
           CreateSemester: 'crear-cuatrimestre',
           TeacherProfile: 'mi-perfil',
           TeacherForms: 'validacion-tramites',
-          GestorTramites: 'gestor-tramites',
           TeacherDepartmentList: 'docente/departamentos',
           TeacherUsefulLinks: 'docente/enlaces-utiles',
           // Admin
