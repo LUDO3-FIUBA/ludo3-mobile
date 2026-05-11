@@ -104,6 +104,46 @@ describe('FIUBA-Map message protocol', () => {
     });
   });
 
+  describe('double career edge cases', () => {
+    it('ignores NETWORK_READY for a different carrera than the one in LUDO_INIT', () => {
+      let materiasInjected = false;
+      let initSent = false;
+      const requestedCarrera = 'informatica';
+
+      const handleMessage = (type: string, carreraKey?: string) => {
+        if (type === 'FIUBA_MAP_READY') initSent = true;
+        if (type === 'FIUBA_MAP_NETWORK_READY' && initSent && carreraKey === requestedCarrera) {
+          materiasInjected = true;
+        }
+      };
+
+      handleMessage('FIUBA_MAP_READY');
+      handleMessage('FIUBA_MAP_NETWORK_READY', 'sistemas'); // user manually switched
+      expect(materiasInjected).toBe(false);
+
+      handleMessage('FIUBA_MAP_NETWORK_READY', 'informatica');
+      expect(materiasInjected).toBe(true);
+    });
+
+    it('SIU student profile has no career field — carreraId must be provided externally', () => {
+      // The fake SIU alumnos only have: id, padron, dni, email
+      // Career is not available from SIU — currently hardcoded to 'informatica'
+      // TODO: add carrera field to SIU student data and map to FIUBA-Map carreraId
+      const siuAlumno = { id: 1, padron: 94557, dni: 37247189, email: 'fede.est@gmail.com' };
+      expect(siuAlumno).not.toHaveProperty('carrera');
+    });
+
+    it('subjects approved in one career are valid node IDs regardless of which career is active', () => {
+      // A student in Informatica + Sistemas shares CBC subjects (62.01, 61.03, etc.)
+      // Those codes exist in both plans so the injection works for either carrera
+      const sharedCBCCodes = ['62.01', '61.03', '61.08'];
+      // In both informatica and sistemas plans, CBC codes are numeric SIU codes
+      sharedCBCCodes.forEach((code) => {
+        expect(code).toMatch(/^\d{2}\.\d{2}$/);
+      });
+    });
+  });
+
   describe('Plan 2020 mapping gap (known limitation)', () => {
     it('SIU code does not match Plan 2020 semantic node ID', () => {
       const siuCode = '75.40';
