@@ -26,9 +26,10 @@ export default function MapScreen() {
 
   const allFloors = useMemo(() => FLOOR_ORDER.map(id => FLOORS[id]), []);
   const currentFloor = FLOORS[currentFloorId];
+  const [, , svgW, svgH] = currentFloor.manifest.viewBox;
 
   const suggestions = useMemo(() => searchAllFloors(allFloors, query), [allFloors, query]);
-  const transformHandle = useMapTransform(width, canvasH);
+  const transformHandle = useMapTransform(width, canvasH, svgW, svgH);
 
   const route = useRoute<RouteProp<{ Map: MapRouteParams }, 'Map'>>();
   const q = (route.params as MapRouteParams | undefined)?.q;
@@ -72,6 +73,8 @@ export default function MapScreen() {
     <View style={styles.screen}>
       <FloorMap
         svgXml={currentFloor.svgXml}
+        svgW={svgW}
+        svgH={svgH}
         highlightedRoom={highlightedRoom}
         transformHandle={transformHandle}
         canvasStyle={styles.canvas}

@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -20,7 +20,7 @@ function clampScale(s: number) {
   return Math.min(Math.max(s, SCALE_MIN), SCALE_MAX);
 }
 
-export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW = 1920, svgH = 1080) {
+export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW: number, svgH: number) {
   const fitScale = Math.min(
     (canvasWidth - 48) / svgW,
     (canvasHeight - 48) / svgH
@@ -118,23 +118,31 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW 
     ],
   }));
 
-  function focusOnBbox(bbox: { x: number; y: number; width: number; height: number }) {
+  useEffect(() => {
+    scale.value = withTiming(fitScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    tx.value = withTiming(fitTx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    ty.value = withTiming(fitTy, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasWidth, canvasHeight, svgW, svgH]);
+
+  const focusOnBbox = useCallback((bbox: { x: number; y: number; width: number; height: number }) => {
     const minSide = Math.min(canvasWidth, canvasHeight);
     const bboxScale = clampScale((minSide * 0.6) / Math.max(bbox.width, bbox.height));
     const centerX = bbox.x + bbox.width / 2;
     const centerY = bbox.y + bbox.height / 2;
     const newTx = canvasWidth / 2 - centerX * bboxScale;
     const newTy = canvasHeight / 2 - centerY * bboxScale;
+    const clamped = clampTranslation(newTx, newTy, bboxScale);
     scale.value = withTiming(bboxScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-    tx.value = withTiming(newTx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-    ty.value = withTiming(newTy, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-  }
+    tx.value = withTiming(clamped.tx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    ty.value = withTiming(clamped.ty, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+  }, [canvasWidth, canvasHeight, clampTranslation, scale, tx, ty]);
 
-  function reset() {
+  const reset = useCallback(() => {
     scale.value = withTiming(fitScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
     tx.value = withTiming(fitTx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
     ty.value = withTiming(fitTy, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-  }
+  }, [fitScale, fitTx, fitTy, scale, tx, ty]);
 
   function stepZoom(factor: number) {
     const newScale = clampScale(scale.value * factor);
