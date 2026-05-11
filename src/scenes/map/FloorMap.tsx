@@ -23,7 +23,6 @@ type Props = {
   canvasStyle?: StyleProp<ViewStyle>;
 };
 
-const HIGHLIGHT_COLOR = lightModeColors.institutional;
 const SVG_W = 1920;
 const SVG_H = 1080;
 
@@ -50,37 +49,14 @@ export default function FloorMap({
     );
   }, []);
 
-  const prevRoomId = useRef<string | null>(null);
-  if (highlightedRoom && highlightedRoom.id !== prevRoomId.current) {
-    prevRoomId.current = highlightedRoom.id;
-    triggerPulse();
-  }
-  if (!highlightedRoom && prevRoomId.current !== null) {
-    prevRoomId.current = null;
-    pulseOpacity.value = 0;
-    pulseScale.value = 1;
-  }
-
-  const overlayStyle = useAnimatedStyle(() => {
-    if (!highlightedRoom) return { opacity: 0 };
-    const { bbox } = highlightedRoom;
-    const cx = bbox.x + bbox.width / 2;
-    const cy = bbox.y + bbox.height / 2;
-    return {
-      position: 'absolute',
-      left: bbox.x,
-      top: bbox.y,
-      width: bbox.width,
-      height: bbox.height,
-      opacity: pulseOpacity.value,
-      transform: [
-        { translateX: (bbox.width / 2) * (pulseScale.value - 1) * -1 },
-        { translateY: (bbox.height / 2) * (pulseScale.value - 1) * -1 },
-        { scaleX: pulseScale.value },
-        { scaleY: pulseScale.value },
-      ],
-    };
-  });
+  useEffect(() => {
+    if (highlightedRoom?.id != null) {
+      triggerPulse();
+    } else {
+      pulseOpacity.value = 0;
+      pulseScale.value = 1;
+    }
+  }, [highlightedRoom?.id, triggerPulse, pulseOpacity, pulseScale]);
 
   // Build combined SVG with overlay injected
   const composedSvg = highlightedRoom
