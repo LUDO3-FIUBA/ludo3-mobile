@@ -18,7 +18,7 @@ export interface MyAttendance {
     qrid: string;
     attended: boolean;
     submittedAt: string | null;
-    mode: 'qr' | 'location';
+    mode: 'qr' | 'qr_location';
     campus: string | null;
     locationValid?: boolean | null;
 }
@@ -29,7 +29,7 @@ export interface MyAttendanceSnakeCase {
     qrid: string;
     attended: boolean;
     submitted_at: string | null;
-    mode: 'qr' | 'location';
+    mode: 'qr' | 'qr_location';
     campus: string | null;
     location_valid?: boolean | null;
 }

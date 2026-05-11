@@ -37,7 +37,7 @@ const SemesterAttendanceQR: React.FC = () => {
     if (loading) return;
     setLoading(true);
     try {
-      const selectedCampus = mode === 'location' ? campus : undefined;
+      const selectedCampus = mode === 'qr_location' ? campus : undefined;
       const qrAttendanceData: QRAttendance = await makeRequest(
         () => teacherQrAttendanceRepository.generateAttendanceQR(semesterId, mode, selectedCampus),
         navigation,
@@ -46,12 +46,8 @@ const SemesterAttendanceQR: React.FC = () => {
       setActiveMode(qrAttendanceData.mode);
       setActiveCampus(qrAttendanceData.campus);
       setSessionStarted(true);
-      if (qrAttendanceData.mode === 'qr') {
-        const qrAttendanceString = getQrAttendanceStringFromQrId(qrAttendanceData.qrid);
-        setQrValue(qrAttendanceString);
-      } else {
-        setQrValue('');
-      }
+      const qrAttendanceString = getQrAttendanceStringFromQrId(qrAttendanceData.qrid);
+      setQrValue(qrAttendanceString);
     } catch (error) {
       console.log("Error", error);
       Alert.alert(
@@ -97,20 +93,20 @@ const SemesterAttendanceQR: React.FC = () => {
         <>
           <Text style={localStyles.sectionTitle}>Modo de asistencia</Text>
           <View style={localStyles.modeRow}>
-            {(['qr', 'location'] as AttendanceMode[]).map((m) => (
+            {(['qr', 'qr_location'] as AttendanceMode[]).map((m) => (
               <TouchableOpacity
                 key={m}
                 style={[localStyles.modeButton, mode === m && localStyles.modeButtonActive]}
                 onPress={() => setMode(m)}
               >
                 <Text style={[localStyles.modeButtonText, mode === m && localStyles.modeButtonTextActive]}>
-                  {m === 'qr' ? 'QR' : 'Ubicación'}
+                  {m === 'qr' ? 'Solo QR' : 'QR + Ubicación'}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          {mode === 'location' && (
+          {mode === 'qr_location' && (
             <>
               <Text style={localStyles.sectionTitle}>Sede</Text>
               <View style={localStyles.modeRow}>
@@ -138,7 +134,7 @@ const SemesterAttendanceQR: React.FC = () => {
         </>
       ) : (
         <>
-          {activeMode === 'qr' && qrValue ? (
+          {qrValue ? (
             <>
               <QRCode
                 value={qrValue}
@@ -146,6 +142,11 @@ const SemesterAttendanceQR: React.FC = () => {
                 getRef={(c) => (svgRef.current = c)}
                 quietZone={20}
               />
+              {activeMode === 'qr_location' && activeCampus && (
+                <Text style={localStyles.locationNote}>
+                  📍 Los alumnos también deberán confirmar ubicación — Sede: {CAMPUS_NAMES[activeCampus]}
+                </Text>
+              )}
               <View style={style().containerView}>
                 <RoundedButton
                   text="Descargar QR"
@@ -155,18 +156,7 @@ const SemesterAttendanceQR: React.FC = () => {
                 />
               </View>
             </>
-          ) : (
-            <View style={localStyles.locationActiveContainer}>
-              <Text style={localStyles.locationActiveIcon}>📍</Text>
-              <Text style={localStyles.locationActiveTitle}>Sesión por ubicación activa</Text>
-              <Text style={localStyles.locationActiveSede}>
-                Sede: {activeCampus ? CAMPUS_NAMES[activeCampus] : ''}
-              </Text>
-              <Text style={localStyles.locationActiveInfo}>
-                Los alumnos pueden marcar presencia desde la sección "Mis asistencias" usando su ubicación GPS.
-              </Text>
-            </View>
-          )}
+          ) : null}
         </>
       )}
     </View>
@@ -206,33 +196,13 @@ const localStyles = StyleSheet.create({
     color: '#007AFF',
     fontWeight: 'bold',
   },
-  locationActiveContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  locationActiveIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  locationActiveTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#28a745',
-    marginBottom: 8,
+  locationNote: {
+    fontSize: 13,
+    color: '#555',
     textAlign: 'center',
-  },
-  locationActiveSede: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 16,
-  },
-  locationActiveInfo: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 22,
+    marginTop: 12,
+    marginBottom: 4,
+    paddingHorizontal: 8,
   },
 });
 

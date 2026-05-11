@@ -5,18 +5,18 @@ import { MyAttendance, MyAttendanceSnakeCase } from '../models/StudentAttendance
 
 const domainUrl = 'api/semesters/attendance';
 const MY_ATTENDANCES_URL = `${domainUrl}/my_attendances`;
-const LOCATION_URL = `${domainUrl}/location`;
 
-async function submitAttendance(qrid: string): Promise<Attendance> {
-    return await post(`${domainUrl}`, { qrid: qrid }) as Attendance;
-}
-
-async function submitLocationAttendance(
-    sessionId: string,
-    latitude: number,
-    longitude: number,
+async function submitAttendance(
+    qrid: string,
+    latitude?: number,
+    longitude?: number,
 ): Promise<Attendance> {
-    return await post(LOCATION_URL, { session_id: sessionId, latitude, longitude }) as Attendance;
+    const body: Record<string, unknown> = { qrid };
+    if (latitude !== undefined && longitude !== undefined) {
+        body.latitude = latitude;
+        body.longitude = longitude;
+    }
+    return await post(domainUrl, body) as Attendance;
 }
 
 async function getMyAttendances(semesterId: number): Promise<MyAttendance[]> {
@@ -26,6 +26,5 @@ async function getMyAttendances(semesterId: number): Promise<MyAttendance[]> {
 
 export default {
     submitAttendance,
-    submitLocationAttendance,
     getMyAttendances,
 };

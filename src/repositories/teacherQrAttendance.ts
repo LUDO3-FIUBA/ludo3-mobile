@@ -3,8 +3,7 @@ import { QRAttendance, QRAttendanceSnakeCase } from '../models/QRAttendance';
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
 import { post, deleteMethod } from './authenticatedRepository';
 
-const domainUrl = 'api/teacher/semesters/attendance/latest_qr';
-const deleteUrl = 'api/teacher/semesters/attendance/qr';
+const domainUrl = 'api/teacher/semesters/attendance/qr';
 
 export async function generateAttendanceQR(
   semesterId: number,
@@ -18,7 +17,7 @@ export async function generateAttendanceQR(
 }
 
 export async function deleteAttendanceSession(qrid: string): Promise<void> {
-  await deleteMethod(deleteUrl, { qrid });
+  await deleteMethod(domainUrl, { qrid });
 }
 
 export default { generateAttendanceQR, deleteAttendanceSession };

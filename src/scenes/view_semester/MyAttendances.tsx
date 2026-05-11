@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import { Loading, MaterialIcon } from '../../components';
@@ -7,9 +7,6 @@ import { lightModeColors } from '../../styles/colorPalette';
 import { attendanceRepository } from '../../repositories';
 import { makeRequest } from '../../networking/makeRequest';
 import { MyAttendance } from '../../models/StudentAttendance';
-import { CAMPUS_NAMES, Campus } from '../../models/ClassAttendance';
-
-const LOCATION_SUBMIT_WINDOW_MS = 10 * 60 * 1000;
 
 const MyAttendancesScreen: React.FC<any> = ({ route }) => {
   const navigation = useNavigation<any>();
@@ -63,30 +60,12 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
     }, [fetchData]),
   );
 
-  const isValidAttendance = (item: MyAttendance): boolean =>
-    item.attended && (item.mode !== 'location' || item.locationValid !== false);
-
-  const absentCount = attendances.filter((attendance) => !isValidAttendance(attendance)).length;
+  const absentCount = attendances.filter((a) => !a.attended).length;
   const remainingAbsences =
     typeof maxAbsences === 'number' ? Math.max(maxAbsences - absentCount, 0) : null;
 
-  const isWithinLocationSubmitWindow = (item: MyAttendance): boolean => {
-    const now = new Date();
-    const createdAt = new Date(item.createdAt);
-    return now >= createdAt && now.getTime() <= createdAt.getTime() + LOCATION_SUBMIT_WINDOW_MS;
-  };
-
-  const canSubmitLocation = (item: MyAttendance): boolean => {
-    if (item.mode !== 'location') return false;
-    if (item.locationValid === true) return false;
-    return isWithinLocationSubmitWindow(item);
-  };
-
   const getStatusIcon = (item: MyAttendance) => {
-    if (item.mode === 'location' && item.locationValid === false) {
-      return { name: 'map-marker-off', color: '#856404' };
-    }
-    if (isValidAttendance(item)) {
+    if (item.attended) {
       return { name: 'check-circle', color: '#28a745' };
     }
     return { name: 'close-circle', color: '#dc3545' };
@@ -95,11 +74,10 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
   const renderAttendance = ({ item }: { item: MyAttendance }) => (
     <View style={[
       styles.sessionContainer,
-      !isValidAttendance(item) && styles.absentSessionContainer,
-      item.mode === 'location' && item.locationValid === false && styles.locationInvalidContainer,
+      !item.attended && styles.absentSessionContainer,
     ]}>
       <View style={styles.headerRow}>
-        <MaterialIcon name="calendar" fontSize={24} color={isValidAttendance(item) ? lightModeColors.institutional : '#dc3545'} />
+        <MaterialIcon name="calendar" fontSize={24} color={item.attended ? lightModeColors.institutional : '#dc3545'} />
         <Text style={styles.sessionHeader}>
           {moment(new Date(item.createdAt)).format('DD/MM/YYYY')}
         </Text>
@@ -112,48 +90,11 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
         </View>
       </View>
       {item.attended && item.submittedAt ? (
-        <>
-          <Text style={styles.dateText}>
-            Hora de asistencia: {moment(new Date(item.submittedAt)).format('HH:mm')}
-          </Text>
-          {item.mode === 'location' && item.locationValid === false && (
-            <Text style={styles.locationInvalidText}>⚠️ Fuera de ubicación — podés reintentar si seguís dentro de los 10 minutos</Text>
-          )}
-          {canSubmitLocation(item) && (
-            <TouchableOpacity
-              style={styles.locationButton}
-              onPress={() => navigation.navigate('AttendanceLocationSubmit', {
-                sessionId: item.qrid,
-                campus: item.campus as Campus,
-                createdAt: item.createdAt,
-              })}
-            >
-              <MaterialIcon name="map-marker" fontSize={18} color="#fff" />
-              <Text style={styles.locationButtonText}>
-                Reintentar ubicación — {item.campus ? CAMPUS_NAMES[item.campus as Campus] : ''}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </>
+        <Text style={styles.dateText}>
+          Hora de asistencia: {moment(new Date(item.submittedAt)).format('HH:mm')}
+        </Text>
       ) : (
-        <>
-          <Text style={styles.absentText}>Ausente</Text>
-          {canSubmitLocation(item) && (
-            <TouchableOpacity
-              style={styles.locationButton}
-              onPress={() => navigation.navigate('AttendanceLocationSubmit', {
-                sessionId: item.qrid,
-                campus: item.campus as Campus,
-                createdAt: item.createdAt,
-              })}
-            >
-              <MaterialIcon name="map-marker" fontSize={18} color="#fff" />
-              <Text style={styles.locationButtonText}>
-                Marcar presencia — {item.campus ? CAMPUS_NAMES[item.campus as Campus] : ''}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </>
+        <Text style={styles.absentText}>Ausente</Text>
       )}
     </View>
   );
@@ -201,9 +142,6 @@ const styles = StyleSheet.create({
   absentSessionContainer: {
     borderColor: '#dc3545',
   },
-  locationInvalidContainer: {
-    borderColor: '#ffc107',
-  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -236,26 +174,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     color: '#666',
-  },
-  locationInvalidText: {
-    fontSize: 13,
-    color: '#856404',
-    marginTop: 4,
-  },
-  locationButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginTop: 8,
-    gap: 6,
-  },
-  locationButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
   },
 });
 

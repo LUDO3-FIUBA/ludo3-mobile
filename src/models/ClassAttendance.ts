@@ -1,6 +1,6 @@
 import { StudentAttendance, StudentAttendanceSnakeCase } from "./StudentAttendance";
 
-export type AttendanceMode = 'qr' | 'location';
+export type AttendanceMode = 'qr' | 'qr_location';
 export type Campus = 'las_heras' | 'paseo_colon';
 
 export const CAMPUS_NAMES: Record<Campus, string> = {

@@ -5,6 +5,7 @@ import Type from '../../image_recognition/takePictureStepConfigurationType';
 import { Attendance, Evaluation, QRCode, qrCodeUtils } from '../../../models';
 import { makeRequest } from '../../authenticatedComponent';
 import { attendanceRepository, evaluationsRepository } from '../../../repositories';
+import { StatusCodeError } from '../../../networking';
 
 
 class QRScannerConfiguration extends TakePictureStepConfiguration {
@@ -108,7 +109,7 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
       const attendance: Attendance = await makeRequest(
         () => attendanceRepository.submitAttendance(qrCode.parsedUuid),
         navigation,
-      )
+      );
       showNonCancelablealert(
         'Éxito',
         `Confirmaste asistencia en ${attendance.semester.commission.subject_name}.`,
@@ -116,7 +117,11 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
       );
     } catch (error) {
       console.log('Error', error);
-      // TODO: more verbose errors (i.e. QR ya escaneado, no estas inscripto en este semestre, etc.)
+      if (error instanceof StatusCodeError && error.code === 400) {
+        disableLoading();
+        navigation.navigate('AttendanceLocationSubmit', { qrid: qrCode.parsedUuid });
+        return;
+      }
       showNonCancelablealert(
         'Error',
         'Hubo un error, no pudimos confirmar tu asistencia. Por favor intentá nuevamente.',
