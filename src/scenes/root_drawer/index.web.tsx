@@ -74,7 +74,7 @@ type WebDrawerContentProps = DrawerContentComponentProps & {
 };
 
 function WebDrawerContent(props: WebDrawerContentProps) {
-  const { menuItems, canToggle, activeRole, expanded, onSetExpanded, navigation } = props;
+  const { menuItems, canToggle, activeRole, expanded, onSetExpanded, navigation, user, ...drawerProps } = props;
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
 
   const activeRoute = props.state.routes[props.state.index]?.name ?? '';
@@ -119,7 +119,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
 
   return (
     <View style={{ flex: 1 }}>
-      <DrawerContentScrollView {...props} scrollEnabled={false} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
+      <DrawerContentScrollView {...drawerProps} scrollEnabled={false} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
         {/* Toggle button */}
         <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
