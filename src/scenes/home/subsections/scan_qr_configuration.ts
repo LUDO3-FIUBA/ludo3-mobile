@@ -106,14 +106,16 @@ class QRScannerConfiguration extends TakePictureStepConfiguration {
 
   private async onScannedAttendance(navigation: any, qrCode: QRCode, disableLoading: () => void) {
     try {
-      const attendance: Attendance = await makeRequest(
+      const { attendance, isNew } = await makeRequest(
         () => attendanceRepository.submitAttendance(qrCode.parsedUuid),
         navigation,
-      );
+      ) as { attendance: Attendance; isNew: boolean };
       showNonCancelablealert(
-        'Éxito',
-        `Confirmaste asistencia en ${attendance.semester.commission.subject_name}.`,
-        disableLoading
+        isNew ? 'Asistencia confirmada' : 'Ya presente',
+        isNew
+          ? `Confirmaste asistencia en ${attendance.semester.commission.subject_name}.`
+          : `Ya registraste tu asistencia en ${attendance.semester.commission.subject_name}.`,
+        disableLoading,
       );
     } catch (error) {
       console.log('Error', error);

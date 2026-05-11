@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterAttendances, fetchSemesterDataAsync, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { ClassAttendance } from '../../models/ClassAttendance';
@@ -52,27 +52,26 @@ const SemesterAttendances: React.FC = () => {
   }, [dispatch, navigation, semesterData?.commission?.id]);
 
   const handleDeleteSession = (item: ClassAttendance) => {
-    Alert.alert(
-      'Eliminar sesión',
-      `¿Seguro que querés eliminar la sesión del ${moment(new Date(item.createdAt)).format('DD/MM/YYYY HH:mm')}? Se borrarán todas las asistencias registradas.`,
-      [
+    const message = `¿Seguro que querés eliminar la sesión del ${moment(new Date(item.createdAt)).format('DD/MM/YYYY HH:mm')}? Se borrarán todas las asistencias registradas.`;
+    const onConfirm = async () => {
+      try {
+        await teacherQrAttendanceRepository.deleteAttendanceSession(item.qrid);
+        if (semesterData?.id) {
+          dispatch(fetchSemesterAttendances(semesterData.id));
+        }
+      } catch {
+        Alert.alert('Error', 'No se pudo eliminar la sesión. Intentá de nuevo más tarde.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(message)) onConfirm();
+    } else {
+      Alert.alert('Eliminar sesión', message, [
         { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await teacherQrAttendanceRepository.deleteAttendanceSession(item.qrid);
-              if (semesterData?.id) {
-                dispatch(fetchSemesterAttendances(semesterData.id));
-              }
-            } catch {
-              Alert.alert('Error', 'No se pudo eliminar la sesión. Intentá de nuevo más tarde.');
-            }
-          },
-        },
-      ],
-    );
+        { text: 'Eliminar', style: 'destructive', onPress: onConfirm },
+      ]);
+    }
   };
 
   const renderClassAttendance = ({ item }: { item: ClassAttendance }) => (
@@ -89,7 +88,7 @@ const SemesterAttendances: React.FC = () => {
       <Text style={styles.dateText}>
         {item.mode === 'qr'
           ? `Horario de validez del QR: ${moment(new Date(item.createdAt)).format('HH:mm')} - ${moment(new Date(item.validUntil)).format('HH:mm')}`
-          : `Ventana de marcado por ubicación: hasta ${moment(new Date(item.validUntil)).format('HH:mm')}`
+          : `QR + Ubicación — válido hasta ${moment(new Date(item.validUntil)).format('HH:mm')}`
         }
       </Text>
       <Text style={styles.dateText}>

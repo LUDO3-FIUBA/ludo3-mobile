@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
 import moment from 'moment';
@@ -10,6 +10,8 @@ import { AttendanceDetailsHeaderRight } from './AttendanceDetailsHeaderRight';
 import { ClassAttendance } from '../../models/ClassAttendance';
 import { TeacherStudent } from '../../models/TeacherStudent';
 import { teacherSemestersRepository } from '../../repositories';
+import QRCode from 'react-native-qrcode-svg';
+import { getQrAttendanceStringFromQrId } from '../../utils/qrCodeStringFactory';
 
 interface RouteParams {
     classAttendance: ClassAttendance;
@@ -24,6 +26,7 @@ const AttendanceDetails: React.FC = () => {
 
     const [presentStudents, setPresentStudents] = useState<TeacherStudent[]>([]);
     const [absentStudents, setAbsentStudents] = useState<TeacherStudent[]>([]);
+    const [showQRModal, setShowQRModal] = useState(false);
 
     const setNavOptions = useCallback(() => {
         navigation.setOptions({
@@ -33,7 +36,7 @@ const AttendanceDetails: React.FC = () => {
                 const lowerLimit = new Date(classAttendance.createdAt);
                 const upperLimit = new Date(classAttendance.expiresAt);
                 if (now >= lowerLimit && now <= upperLimit) {
-                    return <AttendanceDetailsHeaderRight />;
+                    return <AttendanceDetailsHeaderRight onPress={() => setShowQRModal(true)} />;
                 }
                 return null;
             },
@@ -61,7 +64,7 @@ const AttendanceDetails: React.FC = () => {
     }, [semesterData, classAttendance]);
 
     const getLocationValid = (student: TeacherStudent): boolean | null => {
-        if (classAttendance.mode !== 'location') return null;
+        if (classAttendance.mode !== 'qr_location') return null;
         const studentAttendance = classAttendance.attendances.find(
             (a) => a.student.padron === student.padron
         );
@@ -106,14 +109,8 @@ const AttendanceDetails: React.FC = () => {
             'Confirmar asistencia',
             `¿Está seguro de que desea agregar asistencia para ${student.firstName} ${student.lastName}?`,
             [
-                {
-                    text: 'Cancelar',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Confirmar',
-                    onPress: () => handleAddManualAttendance(student),
-                },
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Confirmar', onPress: () => handleAddManualAttendance(student) },
             ]
         );
     };
@@ -134,14 +131,8 @@ const AttendanceDetails: React.FC = () => {
             'Confirmar remover asistencia',
             `¿Está seguro de que desea remover la asistencia para ${student.firstName} ${student.lastName}?`,
             [
-                {
-                    text: 'Cancelar',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Confirmar',
-                    onPress: () => handleRemoveAttendance(student),
-                },
+                { text: 'Cancelar', style: 'cancel' },
+                { text: 'Confirmar', onPress: () => handleRemoveAttendance(student) },
             ]
         );
     };
@@ -162,8 +153,30 @@ const AttendanceDetails: React.FC = () => {
         { key: 'absent', header: 'Estudiantes Ausentes', data: absentStudents }
     ];
 
+    const qrValue = getQrAttendanceStringFromQrId(classAttendance.qrid);
+
     return (
         <View style={styles.container}>
+            <Modal
+                visible={showQRModal}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowQRModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>QR de la sesión</Text>
+                        <Text style={styles.modalSubtitle}>
+                            {moment(new Date(classAttendance.createdAt)).format('DD/MM/YYYY HH:mm')}
+                        </Text>
+                        <QRCode value={qrValue} size={220} quietZone={16} />
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowQRModal(false)}>
+                            <Text style={styles.closeButtonText}>Cerrar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
             <Text style={styles.sessionHeader}>
                 Fecha: {moment(new Date(classAttendance.createdAt)).format('DD/MM/YYYY')}
             </Text>
@@ -267,6 +280,43 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#856404',
         marginTop: 2,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 28,
+        alignItems: 'center',
+        gap: 16,
+        maxWidth: 320,
+        width: '90%',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: -8,
+    },
+    closeButton: {
+        marginTop: 4,
+        paddingVertical: 10,
+        paddingHorizontal: 32,
+        backgroundColor: '#007AFF',
+        borderRadius: 8,
+    },
+    closeButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 
