@@ -15,6 +15,7 @@
  */
 
 const CARRERA_ID = 'informatica';
+const PASSING_GRADE = 4;
 
 // Mirrors the shape returned by finalExamsRepository.fetchApproved()
 interface MockExam {
@@ -23,10 +24,12 @@ interface MockExam {
 }
 
 function buildMateriasPayload(exams: MockExam[]) {
-  return exams.map((exam) => ({
-    id: exam.subject.code,
-    nota: exam.grade ?? 4,
-  }));
+  return exams
+    .filter((exam) => exam.grade !== null && exam.grade >= PASSING_GRADE)
+    .map((exam) => ({
+      id: exam.subject.code,
+      nota: exam.grade,
+    }));
 }
 
 describe('FIUBA-Map message protocol', () => {
@@ -86,13 +89,37 @@ describe('FIUBA-Map message protocol', () => {
       ]);
     });
 
-    it('uses fallback grade 4 when grade is null', () => {
-      const exams = [{ subject: { code: '75.40', name: 'Algo I' }, grade: null as any }];
+    it('excludes exams with null grade', () => {
+      const exams = [
+        { subject: { code: '75.40', name: 'Algo I' }, grade: null as any },
+        { subject: { code: '61.03', name: 'Análisis II' }, grade: 7 },
+      ];
       const payload = buildMateriasPayload(exams);
+      expect(payload).toHaveLength(1);
+      expect(payload[0].id).toBe('61.03');
+    });
+
+    it('excludes failed exams (grade < 4) — same contract as backend history endpoint', () => {
+      const exams: MockExam[] = [
+        { subject: { code: '62.01', name: 'Física I' }, grade: 2 },
+        { subject: { code: '61.03', name: 'Análisis II' }, grade: 7 },
+        { subject: { code: '75.40', name: 'Algo I' }, grade: 3 },
+      ];
+      const payload = buildMateriasPayload(exams);
+      expect(payload).toHaveLength(1);
+      expect(payload[0].id).toBe('61.03');
+    });
+
+    it('includes exams with exactly grade 4 (passing threshold)', () => {
+      const exams: MockExam[] = [
+        { subject: { code: '62.01', name: 'Física I' }, grade: 4 },
+      ];
+      const payload = buildMateriasPayload(exams);
+      expect(payload).toHaveLength(1);
       expect(payload[0].nota).toBe(4);
     });
 
-    it('sends all approved exams including repeated subjects', () => {
+    it('includes all approved attempts of the same subject', () => {
       const exams: MockExam[] = [
         { subject: { code: '61.03', name: 'Análisis II' }, grade: 4 },
         { subject: { code: '61.03', name: 'Análisis II' }, grade: 6 },
@@ -101,6 +128,15 @@ describe('FIUBA-Map message protocol', () => {
       const payload = buildMateriasPayload(exams);
       expect(payload).toHaveLength(3);
       expect(payload.every((m) => m.id === '61.03')).toBe(true);
+    });
+
+    it('returns empty payload when all exams failed', () => {
+      const exams: MockExam[] = [
+        { subject: { code: '62.01', name: 'Física I' }, grade: 1 },
+        { subject: { code: '61.03', name: 'Análisis II' }, grade: 2 },
+      ];
+      const payload = buildMateriasPayload(exams);
+      expect(payload).toHaveLength(0);
     });
   });
 

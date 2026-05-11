@@ -27,10 +27,9 @@ const FiubaMapScreen: React.FC = () => {
       finalExamsRepository.fetchApproved(),
     ]).then(([user, exams]) => {
       setPadron(user.studentId ?? null);
-      const materias = exams.map((exam) => ({
-        id: exam.subject.code,
-        nota: exam.grade ?? 4,
-      }));
+      const materias = exams
+        .filter((exam) => exam.grade !== null && exam.grade >= 4)
+        .map((exam) => ({ id: exam.subject.code, nota: exam.grade }));
       setMateriasPayload(JSON.stringify(materias));
     });
   }, []);
