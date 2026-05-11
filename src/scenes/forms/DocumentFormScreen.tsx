@@ -218,7 +218,7 @@ const DocumentFormScreen: React.FC = () => {
             onPress={handleSubmit}
           />
           {submitting ? (
-            <View style={[styles.buttonSpinnerOverlay, { pointerEvents: 'none' }]}>
+            <View pointerEvents="none" style={styles.buttonSpinnerOverlay}>
               <ActivityIndicator color="white" />
             </View>
           ) : null}
