@@ -4,7 +4,7 @@ import type { FloorEntry } from './floors/index';
 export type RoomResult = Room & { floorId: string; floorLabel: string };
 
 function normalize(s: string): string {
-  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
 function levenshtein(a: string, b: string): number {

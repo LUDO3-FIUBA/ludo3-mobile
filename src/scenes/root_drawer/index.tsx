@@ -168,7 +168,7 @@ const RootDrawer = () => {
     );
 
     if (item.kind === 'direct') {
-      const DirectComp = DIRECT_SCREEN_COMPONENTS[item.route!];
+      const DirectComp = item.route ? DIRECT_SCREEN_COMPONENTS[item.route] : undefined;
       if (!DirectComp) return null;
       return (
         <Tab.Screen

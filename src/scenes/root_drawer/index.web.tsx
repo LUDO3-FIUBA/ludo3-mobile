@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
   Image,
+  ViewStyle,
   useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -60,6 +61,8 @@ import {
 import NotificationsDropdown from './shared/NotificationsDropdown';
 import HeaderRight from './shared/HeaderRight';
 import ToastCard from './shared/ToastCard';
+
+type WebViewStyle = ViewStyle & { transition?: string };
 
 const LudoIcon = require('../../assets/ludo_icon.png');
 
@@ -226,7 +229,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
             return (
               <TouchableOpacity
                 key={item.key}
-                // @ts-ignore — title is a valid HTML attribute on web for native tooltips
+                // @ts-expect-error — title is a valid HTML attribute on web for native tooltips
                 title={expanded ? undefined : item.label}
                 onPress={() => handleDirectPress(item)}
                 accessibilityLabel={item.label}
@@ -436,7 +439,7 @@ const RootDrawer = () => {
             width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH, 
             borderRightWidth: 1, 
             borderRightColor: lightModeColors.lightGray,
-            ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } : {}) as any
+            ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } as WebViewStyle : {})
           },
           headerLeft: () => null,
           headerRight,

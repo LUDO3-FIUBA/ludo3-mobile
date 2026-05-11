@@ -337,7 +337,12 @@ function processFloor(svgSrc) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-fs.mkdirSync(OUT_DIR, { recursive: true });
+try {
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+} catch (err) {
+  console.error(`Failed to create output directory "${OUT_DIR}": ${err.message}`);
+  process.exit(1);
+}
 
 for (const config of FLOOR_CONFIGS) {
   const svgPath = path.resolve(ASSETS_DIR, config.svgFile);
@@ -346,10 +351,23 @@ for (const config of FLOOR_CONFIGS) {
     continue;
   }
 
-  const svgSrc = fs.readFileSync(svgPath, 'utf-8');
-  const { cleanedSvg, rooms } = processFloor(svgSrc);
-  const camelId = toCamelId(config.floorId);
+  let svgSrc;
+  try {
+    svgSrc = fs.readFileSync(svgPath, 'utf-8');
+  } catch (err) {
+    console.error(`Failed to read "${svgPath}": ${err.message}`);
+    continue;
+  }
 
+  let cleanedSvg, rooms;
+  try {
+    ({ cleanedSvg, rooms } = processFloor(svgSrc));
+  } catch (err) {
+    console.error(`Failed to process "${config.svgFile}": ${err.message}`);
+    continue;
+  }
+
+  const camelId = toCamelId(config.floorId);
   console.log(`${config.floorId}: extracted ${rooms.length} rooms`);
 
   const svgTs =
@@ -368,8 +386,13 @@ const ${camelId}Manifest: FloorManifest = ${JSON.stringify({ floorId: config.flo
 export default ${camelId}Manifest;
 `;
 
-  fs.writeFileSync(path.join(OUT_DIR, `${config.floorId}SvgXml.ts`), svgTs);
-  fs.writeFileSync(path.join(OUT_DIR, `${config.floorId}.manifest.ts`), manifestTs);
+  try {
+    fs.writeFileSync(path.join(OUT_DIR, `${config.floorId}SvgXml.ts`), svgTs);
+    fs.writeFileSync(path.join(OUT_DIR, `${config.floorId}.manifest.ts`), manifestTs);
+  } catch (err) {
+    console.error(`Failed to write output files for "${config.floorId}": ${err.message}`);
+    continue;
+  }
   console.log(`  Written: ${config.floorId}SvgXml.ts, ${config.floorId}.manifest.ts`);
 }
 
@@ -410,5 +433,10 @@ ${entries}
 export const FLOOR_ORDER: string[] = [${order}];
 `;
 
-fs.writeFileSync(path.join(OUT_DIR, 'index.ts'), indexTs);
+try {
+  fs.writeFileSync(path.join(OUT_DIR, 'index.ts'), indexTs);
+} catch (err) {
+  console.error(`Failed to write "index.ts": ${err.message}`);
+  process.exit(1);
+}
 console.log('  Written: index.ts');

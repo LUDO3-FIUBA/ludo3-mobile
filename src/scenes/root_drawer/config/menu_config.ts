@@ -45,7 +45,7 @@ export const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'student-credential', label: 'Mi credencial', icon: 'card-account-details', iconOutline: 'card-account-details-outline', route: 'StudentCredential', scope: 'student' },
       { kind: 'direct', key: 'scan-qr', label: 'Escanear QR', icon: 'qrcode-scan', iconOutline: 'qrcode-scan', route: 'ScanQR', scope: 'student', platform: 'mobile' },
       { kind: 'direct', key: 'verify-identity', label: 'Verificar identidad', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'VerifyIdentity', scope: 'student', platform: 'mobile' },
-      { kind: 'direct', key: 'face-registration', label: 'Completar registro facial', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'CompleteFaceRegistration', scope: 'shared', conditional: 'faceNotRegistered', platform: 'mobile' },
+      { kind: 'direct', key: 'face-registration', label: 'Completar registro facial', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'CompleteFaceRegistration', scope: 'student', conditional: 'faceNotRegistered', platform: 'mobile' },
       { kind: 'direct', key: 'my-account', label: 'Mi Cuenta', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
       { kind: 'direct', key: 'student-useful-links', label: 'Enlaces útiles', icon: 'link-variant', iconOutline: 'link-variant', route: 'StudentUsefulLinks', scope: 'student' },
       { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
