@@ -92,6 +92,7 @@ const RootDrawer = () => {
         const fetchedUser = await usersRepository.getInfo();
         setUser(fetchedUser);
         dispatch(fetchUserDataAsync(fetchedUser));
+        if (fetchedUser.isTeacher() && !fetchedUser.isStudent()) setActiveRole('teacher');
       } catch (e) {
         console.log('RootDrawer: Failed to fetch user', e);
         setUser(new User('', '', '', '', undefined, false, false, false));
@@ -248,10 +249,15 @@ const RootDrawer = () => {
     );
   }).filter(Boolean);
 
+  const homeRoute = menuItems.find(
+    i => i.kind === 'direct' && ((i as DirectItem).route === 'Home' || (i as DirectItem).route === 'TeacherHome'),
+  ) as DirectItem | undefined;
+
   return (
     <>
       <Tab.Navigator
         key={canToggle ? activeRole : undefined}
+        initialRouteName={homeRoute?.route}
         screenOptions={{
           tabBarActiveTintColor: canToggle && activeRole === 'teacher' ? colors.teacherAccent : colors.institutional,
           tabBarInactiveTintColor: colors.darkGray,
