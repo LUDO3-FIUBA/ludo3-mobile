@@ -368,7 +368,7 @@ const RootDrawer = () => {
         const fetchedUser = await usersRepository.getInfo();
         setUser(fetchedUser);
         dispatch(fetchUserDataAsync(fetchedUser));
-        if (fetchedUser.isTeacher() && !fetchedUser.isStudent()) setActiveRole('teacher');
+        setActiveRole(fetchedUser.isTeacher() && !fetchedUser.isStudent() ? 'teacher' : 'student');
       } catch (e) {
         console.log('RootDrawer (Web): Failed to fetch user', e);
         setUser(new User('', '', '', '', undefined, false, false, false));
