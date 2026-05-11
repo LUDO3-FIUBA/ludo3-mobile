@@ -250,6 +250,7 @@ const App = () => {
 
             {/* Screens that moved from the drawer to the root stack (mobile) */}
             <Stack.Screen name="ScanQR" component={ScanQR} options={{ headerShown: true, title: 'Escanear QR' }} />
+            <Stack.Screen name="ScanQRScreen" component={ScanQR} options={{ headerShown: true, title: 'Escanear QR' }} />
             <Stack.Screen name="VerifyIdentity" component={VerifyIdentity} options={{ headerShown: true, title: 'Verificar identidad' }} />
             <Stack.Screen name="StudentCredential" component={StudentCredentialScreen} options={{ headerShown: true, title: 'Mi credencial' }} />
             <Stack.Screen name="StudentStats" component={StatsScreen} options={{ headerShown: true, title: 'Estadísticas' }} />
