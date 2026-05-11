@@ -1,10 +1,9 @@
-import { useRef, useCallback } from 'react';
+import { useCallback } from 'react';
 import {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   Easing,
-  runOnJS,
 } from 'react-native-reanimated';
 import {
   Gesture,
