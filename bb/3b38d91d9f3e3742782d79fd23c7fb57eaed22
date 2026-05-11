@@ -1,0 +1,28 @@
+src/scenes/fiuba_map/index.tsx
+  s_4d9056a3efbb15::t_487be68a96314f 3,18,37,47,67,80-82,97,102,107,121-122
+  s_4d9056a3efbb15::t_2501a290a6e097 12
+  s_4d9056a3efbb15::t_a9301234cabd7b 58,76-77
+  s_4d9056a3efbb15::t_57fbd172988530 113-114
+  s_4d9056a3efbb15::t_5f7b8ea8cdc88b 13,19-20,36,38-46,48-57,75,78,83-96
+  s_4d9056a3efbb15::t_4cdd5c7ff0b660 59-66,68-74
+android/app/src/main/assets/fiuba-map/asset-manifest.json
+  ai_agent 3,5,8
+android/app/src/main/assets/fiuba-map/index.html
+  ai_agent 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.6",
+  "base_commit_sha": "bb3b38d91d9f3e3742782d79fd23c7fb57eaed22",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
