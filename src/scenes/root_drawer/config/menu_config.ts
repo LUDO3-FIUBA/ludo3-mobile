@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import User from '../../models/User';
+import User from '../../../models/User';
 
 export type Scope = 'student' | 'teacher' | 'shared';
 
@@ -36,7 +36,7 @@ export type MenuItem = DirectItem | SubmenuItem;
 
 // ─── Student ──────────────────────────────────────────────────────────────────
 
-const studentMenu: MenuItem[] = [
+export const studentMenu: MenuItem[] = [
   {
     kind: 'submenu', key: 'user', label: 'Usuario',
     icon: 'account', iconOutline: 'account-outline', scope: 'student',
@@ -82,7 +82,7 @@ const studentMenu: MenuItem[] = [
 
 // ─── Teacher ──────────────────────────────────────────────────────────────────
 
-const teacherMenu: MenuItem[] = [
+export const teacherMenu: MenuItem[] = [
   {
     kind: 'submenu', key: 'user', label: 'Usuario',
     icon: 'account', iconOutline: 'account-outline', scope: 'teacher',
@@ -115,7 +115,7 @@ const teacherMenu: MenuItem[] = [
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
-const adminMenu: MenuItem[] = [
+export const adminMenu: MenuItem[] = [
   {
     kind: 'submenu', key: 'user', label: 'Usuario',
     icon: 'account', iconOutline: 'account-outline', scope: 'shared',
@@ -142,6 +142,27 @@ const adminMenu: MenuItem[] = [
     route: 'AdminNotificationList', scope: 'shared',
     webOrder: 1, mobileOrder: 3,
   },
+];
+
+// ─── Hidden Web Routes ────────────────────────────────────────────────────────
+
+export type HiddenWebRoute = {
+  route: string;
+  title: string;
+  /** If set, only register for users with this role. Undefined = all authenticated users. */
+  roleFilter?: 'student' | 'teacher' | 'admin';
+};
+
+export const hiddenWebRoutes: HiddenWebRoute[] = [
+  { route: 'AdminDepartmentDetail', title: 'Departamento', roleFilter: 'admin' },
+  { route: 'AdminDepartmentCreate', title: 'Nuevo Departamento', roleFilter: 'admin' },
+  { route: 'AdminDepartmentEdit', title: 'Editar Departamento', roleFilter: 'admin' },
+  { route: 'AdminCommissionCreate', title: 'Nueva Comisión', roleFilter: 'admin' },
+  { route: 'AdminCommissionDetail', title: 'Comisión', roleFilter: 'admin' },
+  { route: 'AdminCommissionEdit', title: 'Editar Comisión', roleFilter: 'admin' },
+  { route: 'AdminUserDetail', title: 'Usuario', roleFilter: 'admin' },
+  { route: 'AdminNotificationCreate', title: 'Nuevo Aviso', roleFilter: 'admin' },
+  { route: 'Notifications', title: 'Notificaciones' },
 ];
 
 // ─── Public API ───────────────────────────────────────────────────────────────

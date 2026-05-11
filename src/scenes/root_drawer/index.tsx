@@ -1,19 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigation } from '@react-navigation/native';
-import ImageComponent from "../../components/ImageComponent";
 import {
   Appearance,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
   useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Loading, MaterialIcon } from '../../components';
+import { Loading } from '../../components';
+import HeaderRight from './shared/HeaderRight';
+import ToastCard from './shared/ToastCard';
+import FullScreenImageModal from './mobile/FullScreenImageModal';
+import NotificationsDropdown from './shared/NotificationsDropdown';
 import { usersRepository } from '../../repositories';
 import notificationsRepository, { UserNotification } from '../../repositories/notifications';
 import User from '../../models/User';
@@ -26,7 +23,7 @@ import TeacherHomeScreen from '../teacher_home';
 import NotificationList from '../admin_notifications/NotificationList';
 import MapScreen from '../map';
 import SubmenuScreen from '../submenu';
-import { resolveMenu, canToggleRole, SubmenuItem, DirectItem } from './menu_config';
+import { resolveMenu, canToggleRole, SubmenuItem, DirectItem } from './config/menu_config';
 
 const Tab = createBottomTabNavigator();
 
@@ -149,44 +146,15 @@ const RootDrawer = () => {
     setShowNotificationsDropdown(true);
   };
 
-  // Notification bell + optional role toggle shown in every tab header
   const headerRight = () => (
-    <View style={styles.headerRightRow}>
-      {canToggle && (
-        <View style={styles.roleToggle}>
-          <TouchableOpacity
-            style={[styles.roleToggleOpt, activeRole === 'student' && { backgroundColor: colors.institutional }]}
-            onPress={() => setActiveRole('student')}
-            accessibilityLabel="Ver vista de alumno"
-          >
-            <Text style={[styles.roleToggleOptText, activeRole === 'student' && styles.roleToggleOptTextActive]}>
-              Alumno
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.roleToggleOpt, activeRole === 'teacher' && { backgroundColor: colors.teacherAccent }]}
-            onPress={() => setActiveRole('teacher')}
-            accessibilityLabel="Ver vista de docente"
-          >
-            <Text style={[styles.roleToggleOptText, activeRole === 'teacher' && styles.roleToggleOptTextActive]}>
-              Docente
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      <TouchableOpacity
-        onPress={() => setShowNotificationsDropdown(true)}
-        style={styles.bellButton}
-        accessibilityLabel="Mostrar notificaciones"
-      >
-        <Icon name="bell-outline" size={24} color={colors.mainContrastColor} />
-        {unreadCount > 0 && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-    </View>
+    <HeaderRight
+      canToggle={canToggle}
+      activeRole={activeRole}
+      onSetActiveRole={setActiveRole}
+      unreadCount={unreadCount}
+      onBellPress={() => setShowNotificationsDropdown(true)}
+      colors={colors}
+    />
   );
 
   // Build tabs from menu config
@@ -269,143 +237,26 @@ const RootDrawer = () => {
         {tabs}
       </Tab.Navigator>
 
-      {/* Toast */}
-      {showToast && toastNotification && !showNotificationsDropdown && (
-        <View style={[styles.toastLayer, { pointerEvents: 'box-none' }]}>
-          <TouchableOpacity activeOpacity={0.92} style={styles.toastCard} onPress={openDropdownFromToast}>
-            <View style={styles.toastHeader}>
-              <Text style={styles.toastLabel}>Nueva notificación</Text>
-              {toastNotification.notification.is_urgent && (
-                <Text style={styles.toastUrgent}>URGENTE</Text>
-              )}
-            </View>
-            <Text numberOfLines={1} style={styles.toastTitle}>
-              {toastNotification.notification.title}
-            </Text>
-            <Text numberOfLines={2} style={styles.toastMessage}>
-              {toastNotification.notification.message}
-            </Text>
-            <ImageComponent
-              uri={toastNotification.notification.image}
-              imageStyle={styles.toastThumbnail}
-              resizeMode="cover"
-            />
-          </TouchableOpacity>
-        </View>
-      )}
+      <ToastCard
+        notification={toastNotification!}
+        visible={showToast && !!toastNotification && !showNotificationsDropdown}
+        onPress={openDropdownFromToast}
+      />
 
-      {/* Full-screen image */}
-      <Modal visible={fullScreenImage !== null} transparent={false} animationType="fade" onRequestClose={() => setFullScreenImage(null)}>
-        <View style={styles.fullScreenContainer}>
-          <TouchableOpacity style={styles.fullScreenCloseButton} onPress={() => setFullScreenImage(null)}>
-            <Text style={styles.fullScreenCloseText}>✕</Text>
-          </TouchableOpacity>
-          <ImageComponent
-            uri={fullScreenImage}
-            imageStyle={styles.fullScreenImage}
-            resizeMode="contain"
-            showFallbackWhenMissing
-            fallbackIconSize={40}
-            fallbackIconColor="#d1d5db"
-            fallbackContainerStyle={styles.fullScreenImageFallback}
-          />
-        </View>
-      </Modal>
+      <FullScreenImageModal uri={fullScreenImage} onClose={() => setFullScreenImage(null)} />
 
-      {/* Notifications dropdown */}
-      <Modal visible={showNotificationsDropdown} transparent animationType="fade" onRequestClose={() => setShowNotificationsDropdown(false)}>
-        <TouchableOpacity style={styles.notificationsBackdrop} activeOpacity={1} onPress={() => setShowNotificationsDropdown(false)} />
-        <View style={[styles.notificationsLayer, { pointerEvents: 'box-none' }]}>
-          <View style={[styles.notificationsDropdown, { width: dropdownWidth, maxHeight: dropdownMaxHeight }]}>
-            <View style={styles.notificationsHeader}>
-              <Text style={styles.notificationsTitle}>Notificaciones</Text>
-              <Text style={styles.notificationsSubtitle}>{unreadCount} sin leer</Text>
-            </View>
-            {notifications.length === 0 ? (
-            <View style={styles.notificationsEmptyContainer}>
-              <Text style={styles.notificationsEmptyText}>No tenés notificaciones</Text>
-            </View>
-            ) : (
-              <ScrollView style={styles.notificationsList} contentContainerStyle={styles.notificationsListContent} showsVerticalScrollIndicator>
-                {notifications.slice(0, 5).map(item => (
-                  <TouchableOpacity
-                    key={item.id}
-                    onPress={() => onNotificationPress(item)}
-                    style={[
-                      styles.notificationItem,
-                      !item.is_read ? styles.notificationItemUnread : undefined,
-                      item.notification.is_urgent ? styles.notificationItemUrgentAccent : undefined,
-                    ]}
-                  >
-                    <View style={styles.notificationItemHeader}>
-                      {item.notification.is_urgent && (
-                        <MaterialIcon name="alert-circle" fontSize={14} color="#b42318" />
-                      )}
-                      <Text
-                        numberOfLines={1}
-                        style={[
-                          styles.notificationItemTitle,
-                          !item.is_read && styles.notificationItemTitleUnread,
-                        ]}
-                      >
-                        {item.notification.title}
-                      </Text>
-                      <View style={styles.notificationItemActions}>
-                        {item.notification.is_urgent && (
-                          <View style={styles.notificationItemUrgentBadge}>
-                            <Text style={styles.notificationItemUrgentText}>URGENTE</Text>
-                          </View>
-                        )}
-                        {!item.is_read && <View style={styles.notificationItemDot} />}
-                        <TouchableOpacity onPress={e => { e.stopPropagation(); onDeleteNotification(item); }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                          <Icon name="trash-can-outline" size={16} color="#9ca3af" />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                    {item.notification.semester_info ? (
-                      <View style={styles.notificationItemContext}>
-                        <Icon name="school" size={11} color="#6b7280" />
-                        <Text numberOfLines={1} style={styles.notificationItemContextText}>
-                          {item.notification.semester_info.subject_name}
-                          {item.notification.semester_info.period_label ? ` · ${item.notification.semester_info.period_label}` : ''}
-                        </Text>
-                      </View>
-                    ) : (
-                      <View style={styles.notificationItemContext}>
-                        <Icon name="bullhorn" size={11} color="#6b7280" />
-                        <Text numberOfLines={1} style={styles.notificationItemContextText}>Aviso institucional</Text>
-                      </View>
-                    )}
-                    <Text numberOfLines={2} style={styles.notificationItemMessage}>
-                      {item.notification.message}
-                    </Text>
-                    <ImageComponent
-                      uri={item.notification.image}
-                      imageStyle={styles.notificationItemThumbnail}
-                      resizeMode="cover"
-                    />
-                    <Text numberOfLines={1} style={styles.notificationItemDate}>
-                      {item.notification.sender_name
-                        ? `${item.notification.sender_name} · ${formatDate(item.notification.created_at)}`
-                        : formatDate(item.notification.created_at)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
-            <TouchableOpacity
-              style={styles.notificationsSeeAll}
-              onPress={() => {
-                setShowNotificationsDropdown(false);
-                navigation.navigate('Notifications');
-              }}
-            >
-              <Text style={styles.notificationsSeeAllText}>Ver todas las notificaciones</Text>
-              <Icon name="chevron-right" size={18} color={lightModeColors.institutional} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <NotificationsDropdown
+        visible={showNotificationsDropdown}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        dropdownWidth={dropdownWidth}
+        dropdownMaxHeight={dropdownMaxHeight}
+        onClose={() => setShowNotificationsDropdown(false)}
+        onNotificationPress={onNotificationPress}
+        onDeleteNotification={onDeleteNotification}
+        onSeeAll={() => { setShowNotificationsDropdown(false); navigation.navigate('Notifications'); }}
+        formatDate={formatDate}
+      />
     </>
   );
 };
@@ -422,313 +273,5 @@ const DIRECT_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
 function isDarkTheme() {
   return Appearance.getColorScheme() === 'dark';
 }
-
-const styles = StyleSheet.create({
-  headerRightRow: { flexDirection: 'row', alignItems: 'center', marginRight: 8 },
-  roleToggle: { flexDirection: 'row', borderRadius: 8, borderWidth: 1, borderColor: '#cbd5e1', backgroundColor: '#f1f5f9', marginRight: 4, overflow: 'hidden' },
-  roleToggleOpt: { paddingHorizontal: 10, paddingVertical: 5 },
-  roleToggleOptText: { fontSize: 12, fontWeight: '600', color: '#64748b' },
-  roleToggleOptTextActive: { color: '#fff' },
-  bellButton: { paddingVertical: 4, paddingHorizontal: 6 },
-  badge: {
-    position: 'absolute', top: -3, right: -4, minWidth: 18, height: 18,
-    borderRadius: 9, paddingHorizontal: 4, backgroundColor: '#c1121f',
-    alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#fff',
-  },
-  roleSwitchContainer: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    overflow: 'hidden',
-  },
-  roleTab: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    gap: 6,
-  },
-  roleTabActive: {
-    backgroundColor: lightModeColors.institutional,
-    borderRadius: 8,
-  },
-  roleTabText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  roleTabTextActive: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  notificationBellButton: {
-    marginRight: 16,
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: -3,
-    right: -4,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    paddingHorizontal: 4,
-    backgroundColor: '#c1121f',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#ffffff',
-  },
-  notificationBadgeText: {
-    color: '#ffffff',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  notificationsBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  notificationsLayer: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'flex-end',
-    paddingTop: 70,
-    paddingHorizontal: 12,
-  },
-  notificationsDropdown: {
-    backgroundColor: '#ffffff',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#e6e8eb',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 12,
-    overflow: 'hidden',
-  },
-  notificationsHeader: {
-    paddingHorizontal: 14,
-    paddingTop: 14,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f1f3',
-    backgroundColor: '#fbfcfe',
-  },
-  notificationsTitle: {
-    color: '#1f2937',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  notificationsSubtitle: {
-    marginTop: 2,
-    color: '#6b7280',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  notificationsList: {
-    flexGrow: 0,
-  },
-  notificationsListContent: {
-    padding: 10,
-    gap: 8,
-  },
-  notificationsEmptyContainer: {
-    paddingHorizontal: 14,
-    paddingVertical: 20,
-  },
-  notificationsEmptyText: {
-    color: '#6b7280',
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  notificationItem: {
-    borderWidth: 1,
-    borderColor: '#eceef2',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    backgroundColor: '#ffffff',
-  },
-  notificationItemUnread: {
-    backgroundColor: '#eaf3ff',
-    borderLeftWidth: 4,
-    borderLeftColor: lightModeColors.institutional,
-  },
-  notificationItemTitleUnread: {
-    color: lightModeColors.institutional,
-    fontWeight: '800',
-  },
-  notificationItemUrgentAccent: {
-    borderRightWidth: 4,
-    borderRightColor: '#b42318',
-  },
-  notificationItemUrgentBadge: {
-    backgroundColor: '#fee2e2',
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-  },
-  notificationItemUrgentText: {
-    color: '#b42318',
-    fontSize: 9,
-    fontWeight: '800',
-  },
-  notificationItemHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 4,
-  },
-  notificationItemTitle: {
-    flex: 1,
-    color: '#111827',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  notificationItemMessage: {
-    color: '#374151',
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 6,
-  },
-  notificationItemDate: {
-    color: '#6b7280',
-    fontSize: 11,
-    fontWeight: '500',
-  },
-  notificationItemActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  notificationItemDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#2563eb',
-  },
-  notificationItemThumbnail: {
-    width: '100%',
-    height: 120,
-    borderRadius: 6,
-    marginTop: 6,
-    marginBottom: 6,
-  },
-  notificationItemContext: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 4,
-  },
-  notificationItemContextText: {
-    flex: 1,
-    fontSize: 11,
-    color: '#6b7280',
-    fontWeight: '600',
-  },
-  notificationsSeeAll: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    gap: 4,
-  },
-  notificationsSeeAllText: {
-    color: lightModeColors.institutional,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  fullScreenContainer: {
-    flex: 1,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fullScreenCloseButton: {
-    position: 'absolute',
-    top: 48,
-    right: 16,
-    zIndex: 1,
-    padding: 8,
-  },
-  fullScreenCloseText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  fullScreenImage: {
-    width: '100%',
-    height: '100%',
-  },
-  fullScreenImageFallback: {
-    backgroundColor: 'transparent',
-  },
-  toastLayer: {
-    position: 'absolute',
-    top: 72,
-    left: 12,
-    right: 12,
-    alignItems: 'center',
-    zIndex: 30,
-  },
-  toastCard: {
-    width: '100%',
-    maxWidth: 480,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#dce5f6',
-    backgroundColor: '#ffffff',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    shadowColor: '#0f172a',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    elevation: 8,
-  },
-  toastHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  toastLabel: {
-    color: '#334155',
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  toastUrgent: {
-    color: '#b42318',
-    fontSize: 10,
-    fontWeight: '800',
-  },
-  toastTitle: {
-    color: '#0f172a',
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  toastMessage: {
-    color: '#334155',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  toastThumbnail: {
-    width: '100%',
-    height: 100,
-    borderRadius: 6,
-    marginTop: 8,
-  },
-  badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-});
 
 export default RootDrawer;
