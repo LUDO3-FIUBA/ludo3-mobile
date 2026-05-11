@@ -606,7 +606,7 @@ const FormDesignerScreen: React.FC = () => {
             onPress={handleSave}
           />
           {saving ? (
-            <View style={[styles.buttonSpinnerOverlay, { pointerEvents: 'none' }]}>
+            <View pointerEvents="none" style={styles.buttonSpinnerOverlay}>
               <ActivityIndicator color="white" />
             </View>
           ) : null}
