@@ -1,0 +1,22 @@
+__tests__/fiuba_map_messages.test.ts
+  s_4d9056a3efbb15::t_c56257cca98b4b 18,27-32
+  s_4d9056a3efbb15::t_a1f7c319f1385f 92-116,118,122,132-139
+src/scenes/fiuba_map/index.tsx
+  s_4d9056a3efbb15::t_63595a56c29c27 30-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.6",
+  "base_commit_sha": "a57606331497c633ed72af3e6ef688c94a82b7d9",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
