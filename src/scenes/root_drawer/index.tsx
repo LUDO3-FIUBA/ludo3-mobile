@@ -26,7 +26,7 @@ import TeacherHomeScreen from '../teacher_home';
 import NotificationList from '../admin_notifications/NotificationList';
 import MapScreen from '../map';
 import SubmenuScreen from '../submenu';
-import { resolveMenu, canToggleRole, SubmenuItem } from './menu_config';
+import { resolveMenu, canToggleRole, SubmenuItem, DirectItem } from './menu_config';
 
 const Tab = createBottomTabNavigator();
 
