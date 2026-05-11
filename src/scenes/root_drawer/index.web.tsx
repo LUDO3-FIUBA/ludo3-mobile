@@ -76,7 +76,7 @@ type WebDrawerContentProps = DrawerContentComponentProps & {
 
 function WebDrawerContent(props: WebDrawerContentProps) {
   const { user, menuItems, canToggle, activeRole, expanded, onSetExpanded, navigation } = props;
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
 
   const activeRoute = props.state.routes[props.state.index]?.name ?? '';
 
@@ -86,7 +86,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       if (item.kind === 'submenu') {
         const hasActive = item.children.some(c => c.route === activeRoute);
         if (hasActive) {
-          setOpenSubmenu(item.key);
+          setOpenSubmenus(prev => new Set([...prev, item.key]));
           return;
         }
       }
@@ -104,7 +104,11 @@ function WebDrawerContent(props: WebDrawerContentProps) {
   };
 
   const handleSubmenuToggle = (key: string) => {
-    setOpenSubmenu(prev => (prev === key ? null : key));
+    setOpenSubmenus(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
   };
 
   const itemColor = (item: DirectItem) => {
@@ -177,7 +181,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
 
           // Submenu
           const submenuItem = item as SubmenuItem;
-          const isOpen = openSubmenu === item.key;
+          const isOpen = openSubmenus.has(item.key);
           const hasActiveChild = submenuItem.children.some(c => isActive(c.route));
           const headerColor = hasActiveChild ? accentColor : lightModeColors.darkGray;
 
@@ -186,7 +190,14 @@ function WebDrawerContent(props: WebDrawerContentProps) {
               <TouchableOpacity
                 // @ts-ignore
                 title={expanded ? undefined : item.label}
-                onPress={() => { handleSubmenuToggle(item.key); }}
+                onPress={() => {
+                if (!expanded) {
+                  onSetExpanded(true);
+                  setOpenSubmenus(prev => new Set([...prev, item.key]));
+                } else {
+                  handleSubmenuToggle(item.key);
+                }
+              }}
                 accessibilityLabel={item.label}
                 style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, hasActiveChild && !expanded && { backgroundColor: `${accentColor}18` }]}
               >
