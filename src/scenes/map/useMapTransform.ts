@@ -155,9 +155,10 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW 
     const ratio = newScale / scale.value;
     const newTx = focalX - ratio * (focalX - tx.value);
     const newTy = focalY - ratio * (focalY - ty.value);
+    const { tx: clampedTx, ty: clampedTy } = clampTranslation(newTx, newTy, newScale);
     scale.value = newScale;
-    tx.value = newTx;
-    ty.value = newTy;
+    tx.value = clampedTx;
+    ty.value = clampedTy;
   }
 
   return {
