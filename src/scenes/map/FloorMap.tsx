@@ -11,7 +11,7 @@ import Animated, {
 import { SvgXml } from 'react-native-svg';
 import type { Room } from './floors/types';
 import { lightModeColors } from '../../styles/colorPalette';
-import type { useMapTransform } from './useMapTransform';
+import { useMapTransform } from './useMapTransform';
 
 type MapTransformHandle = ReturnType<typeof useMapTransform>;
 
