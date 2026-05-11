@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { DOMParser } = require(path.resolve(__dirname, '../node_modules/@xmldom/xmldom'));
+const { DOMParser } = require('@xmldom/xmldom');
 
 const ASSETS_DIR = path.resolve(__dirname, '../src/assets');
 const OUT_DIR = path.resolve(__dirname, '../src/scenes/map/floors');
