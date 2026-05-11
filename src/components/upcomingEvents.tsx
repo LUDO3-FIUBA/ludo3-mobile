@@ -13,7 +13,7 @@ const UpcomingEventsCard: FC<Props> = ({ evaluations }: Props) => {
         <View>
             {!evaluations.length && (
                 <View style={style().textContainer}>
-                    <Text style={style().emptyMessageText}>No tenés eventos proximamente.</Text>
+                    <Text style={style().emptyMessageText}>No tenés eventos próximamente.</Text>
                 </View>
             )}    
             {evaluations.map(
