@@ -39,7 +39,7 @@ export default function MapSearchBar({ query, results, onChange, onSelect, onCle
   const showSuggestions = query.length > 0 && results.length > 0 && !dismissed;
 
   return (
-    <View style={[styles.wrapper, { pointerEvents: 'box-none' }]}>
+    <View pointerEvents="box-none" style={styles.wrapper}>
       <View style={styles.bar}>
         <MaterialCommunityIcons name="magnify" size={20} color={lightModeColors.darkGray} style={styles.searchIcon} />
         <TextInput
