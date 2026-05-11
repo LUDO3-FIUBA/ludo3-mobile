@@ -61,7 +61,6 @@ const Drawer = createDrawerNavigator();
 
 const RAIL_WIDTH = 80;
 const SIDEBAR_WIDTH = 260;
-const STORAGE_KEY = '@sidebar_expanded';
 
 // ─── Custom Drawer Content ────────────────────────────────────────────────────
 
@@ -75,7 +74,7 @@ type WebDrawerContentProps = DrawerContentComponentProps & {
 };
 
 function WebDrawerContent(props: WebDrawerContentProps) {
-  const { user, menuItems, canToggle, activeRole, expanded, onSetExpanded, navigation } = props;
+  const { menuItems, canToggle, activeRole, expanded, onSetExpanded, navigation } = props;
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
 
   const activeRoute = props.state.routes[props.state.index]?.name ?? '';
@@ -111,7 +110,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
     });
   };
 
-  const itemColor = (item: DirectItem) => {
+  const itemColor = () => {
     if (canToggle && activeRole === 'teacher') return lightModeColors.teacherAccent;
     return lightModeColors.institutional;
   };
@@ -156,7 +155,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       {/* Menu items */}
       <View style={styles.menuList}>
         {menuItems.map(item => {
-          const accentColor = canToggle && activeRole === 'teacher' ? lightModeColors.teacherAccent : lightModeColors.institutional;
+          const accentColor = itemColor();
 
           if (item.kind === 'direct') {
             const active = isActive(item.route);
@@ -215,7 +214,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
               {expanded && isOpen && (
                 <View style={styles.submenuList}>
                   {submenuItem.children.map(child => {
-                    const childAccent = canToggle && activeRole === 'teacher' ? lightModeColors.teacherAccent : lightModeColors.institutional;
+                    const childAccent = itemColor();
                     const childActive = isActive(child.route);
                     return (
                       <TouchableOpacity
@@ -414,38 +413,46 @@ const RootDrawer = () => {
         )}
       >
         {/* ── Student ── */}
-        <Drawer.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio' }} />
-        <Drawer.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Calendario' }} />
-        <Drawer.Screen name="CurrentCommissionInscriptions" component={CommissionInscriptionsScreen} options={{ title: 'Materias en curso' }} />
-        <Drawer.Screen name="ApprovedSubjects" component={ApprovedSubjectsScreen} options={{ title: 'Materias aprobadas' }} />
-        <Drawer.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ title: 'Materias pendientes' }} />
-        <Drawer.Screen name="StudentCredential" component={StudentCredentialScreen} options={{ title: 'Mi credencial' }} />
-        <Drawer.Screen name="StudentStats" component={StatsScreen} options={{ title: 'Estadísticas' }} />
-        <Drawer.Screen name="StudentDepartmentList" component={StudentDepartmentListScreen} options={{ title: 'Departamentos' }} />
-        <Drawer.Screen name="FormsList" component={FormsListScreen} options={{ title: 'Trámites' }} />
+        {user.isStudent() && <>
+          <Drawer.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio' }} />
+          <Drawer.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Calendario' }} />
+          <Drawer.Screen name="CurrentCommissionInscriptions" component={CommissionInscriptionsScreen} options={{ title: 'Materias en curso' }} />
+          <Drawer.Screen name="ApprovedSubjects" component={ApprovedSubjectsScreen} options={{ title: 'Materias aprobadas' }} />
+          <Drawer.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ title: 'Materias pendientes' }} />
+          <Drawer.Screen name="StudentCredential" component={StudentCredentialScreen} options={{ title: 'Mi credencial' }} />
+          <Drawer.Screen name="StudentStats" component={StatsScreen} options={{ title: 'Estadísticas' }} />
+          <Drawer.Screen name="FormsList" component={FormsListScreen} options={{ title: 'Trámites' }} />
+        </>}
+        {/* StudentDepartmentList appears in both student and teacher menus */}
+        {(user.isStudent() || user.isTeacher()) && (
+          <Drawer.Screen name="StudentDepartmentList" component={StudentDepartmentListScreen} options={{ title: 'Departamentos' }} />
+        )}
 
         {/* ── Teacher ── */}
-        <Drawer.Screen name="TeacherHome" component={TeacherHomeScreen} options={{ title: 'Mis Comisiones' }} />
-        <Drawer.Screen name="CreateSemester" component={CreateSemester} options={{ title: 'Crear cuatrimestre' }} />
-        <Drawer.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ title: 'Mi perfil profesional' }} />
-        <Drawer.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ title: 'Validación de trámites' }} />
+        {user.isTeacher() && <>
+          <Drawer.Screen name="TeacherHome" component={TeacherHomeScreen} options={{ title: 'Mis Comisiones' }} />
+          <Drawer.Screen name="CreateSemester" component={CreateSemester} options={{ title: 'Crear cuatrimestre' }} />
+          <Drawer.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ title: 'Mi perfil profesional' }} />
+          <Drawer.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ title: 'Validación de trámites' }} />
+        </>}
 
         {/* ── Admin ── */}
-        <Drawer.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ title: 'Departamentos' }} />
-        <Drawer.Screen name="AdminCommissionList" component={CommissionList} options={{ title: 'Comisiones' }} />
-        <Drawer.Screen name="AdminUserSearch" component={UserSearch} options={{ title: 'Buscar Usuarios' }} />
-        <Drawer.Screen name="AdminNotificationList" component={NotificationList} options={{ title: 'Avisos' }} />
-        <Drawer.Screen name="FormsManager" component={FormsManagerScreen} options={{ title: 'Gestor de Trámites' }} />
-
-        {/* ── Hidden detail routes ── */}
-        <Drawer.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ title: 'Departamento', ...hidden }} />
-        <Drawer.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ title: 'Nuevo Departamento', ...hidden }} />
-        <Drawer.Screen name="AdminDepartmentEdit" component={DepartmentForm} options={{ title: 'Editar Departamento', ...hidden }} />
-        <Drawer.Screen name="AdminCommissionCreate" component={CommissionForm} options={{ title: 'Nueva Comisión', ...hidden }} />
-        <Drawer.Screen name="AdminCommissionDetail" component={CommissionDetail} options={{ title: 'Comisión', ...hidden }} />
-        <Drawer.Screen name="AdminCommissionEdit" component={CommissionForm} options={{ title: 'Editar Comisión', ...hidden }} />
-        <Drawer.Screen name="AdminUserDetail" component={UserDetail} options={{ title: 'Usuario', ...hidden }} />
-        <Drawer.Screen name="AdminNotificationCreate" component={NotificationForm} options={{ title: 'Nuevo Aviso', ...hidden }} />
+        {user.isAdmin() && <>
+          <Drawer.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ title: 'Departamentos' }} />
+          <Drawer.Screen name="AdminCommissionList" component={CommissionList} options={{ title: 'Comisiones' }} />
+          <Drawer.Screen name="AdminUserSearch" component={UserSearch} options={{ title: 'Buscar Usuarios' }} />
+          <Drawer.Screen name="AdminNotificationList" component={NotificationList} options={{ title: 'Avisos' }} />
+          <Drawer.Screen name="FormsManager" component={FormsManagerScreen} options={{ title: 'Gestor de Trámites' }} />
+          {/* Hidden admin detail routes */}
+          <Drawer.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ title: 'Departamento', ...hidden }} />
+          <Drawer.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ title: 'Nuevo Departamento', ...hidden }} />
+          <Drawer.Screen name="AdminDepartmentEdit" component={DepartmentForm} options={{ title: 'Editar Departamento', ...hidden }} />
+          <Drawer.Screen name="AdminCommissionCreate" component={CommissionForm} options={{ title: 'Nueva Comisión', ...hidden }} />
+          <Drawer.Screen name="AdminCommissionDetail" component={CommissionDetail} options={{ title: 'Comisión', ...hidden }} />
+          <Drawer.Screen name="AdminCommissionEdit" component={CommissionForm} options={{ title: 'Editar Comisión', ...hidden }} />
+          <Drawer.Screen name="AdminUserDetail" component={UserDetail} options={{ title: 'Usuario', ...hidden }} />
+          <Drawer.Screen name="AdminNotificationCreate" component={NotificationForm} options={{ title: 'Nuevo Aviso', ...hidden }} />
+        </>}
 
         {/* ── Shared ── */}
         <Drawer.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notificaciones', ...hidden }} />
