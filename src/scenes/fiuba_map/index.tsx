@@ -9,6 +9,8 @@ const FIUBA_MAP_URI =
     ? 'file:///android_asset/fiuba-map/index.html'
     : 'https://fede.dm/FIUBA-Map/';
 
+// TODO: placeholder — replace with career fetched from student profile once the DB
+// has the career/plan field. See LUDO3-FIUBA/.github issue #32.
 const CARRERA_ID = 'informatica';
 
 const FiubaMapScreen: React.FC = () => {
