@@ -7,11 +7,12 @@ import {
   Alert,
   TouchableOpacity,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { Formik, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import { RoundedButton } from '../../components';
-import { teacherProfileRepository } from '../../repositories';
+import { teacherProfileRepository, usersRepository } from '../../repositories';
 import { TeacherProfile, WorkExperience } from '../../models/TeacherProfile';
 import FormField from './FormField';
 
@@ -31,6 +32,7 @@ const EMPTY_PROFILE: TeacherProfile = {
   yearsOfExperience: undefined,
   certifications: '',
   linkedinUrl: '',
+  githubUrl: '',
   workExperience: [],
 };
 
@@ -46,6 +48,7 @@ const profileSchema = Yup.object().shape({
     .transform((value, originalValue) => (originalValue === '' ? null : value)),
   certifications: Yup.string(),
   linkedinUrl: Yup.string().url('Debe ser una URL válida (ej: https://linkedin.com/in/...)'),
+  githubUrl: Yup.string().url('Debe ser una URL válida (ej: https://github.com/usuario)'),
   workExperience: Yup.array().of(
     Yup.object().shape({
       company: Yup.string().required('La empresa es requerida'),
@@ -69,6 +72,7 @@ const TeacherProfileScreen: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [initialGithubUrl, setInitialGithubUrl] = useState('');
 
   useEffect(() => {
     loadProfile();
@@ -76,11 +80,19 @@ const TeacherProfileScreen: React.FC = () => {
 
   const loadProfile = async () => {
     try {
-      const fetched = await teacherProfileRepository.fetchProfile();
+      const [fetched, user] = await Promise.all([
+        teacherProfileRepository.fetchProfile(),
+        usersRepository.getInfo(),
+      ]);
       setProfile(fetched);
+      setInitialGithubUrl(user.githubUrl ?? '');
       setIsEditing(false);
     } catch (error: any) {
       if (error?.status === 404 || error?.message?.includes('404') || (error?.statusCode === 404)) {
+        try {
+          const user = await usersRepository.getInfo();
+          setInitialGithubUrl(user.githubUrl ?? '');
+        } catch {}
         setIsEditing(true);
       } else {
         Alert.alert('Error', 'No se pudo cargar el perfil. Intente de nuevo.');
@@ -93,13 +105,16 @@ const TeacherProfileScreen: React.FC = () => {
   const handleSubmit = async (values: TeacherProfile) => {
     setSaving(true);
     try {
+      const { githubUrl, ...profileValues } = values;
       let saved: TeacherProfile;
       if (profile) {
-        saved = await teacherProfileRepository.updateProfile(values);
+        saved = await teacherProfileRepository.updateProfile(profileValues);
       } else {
-        saved = await teacherProfileRepository.createProfile(values);
+        saved = await teacherProfileRepository.createProfile(profileValues);
       }
+      await usersRepository.updateGithubUrl(githubUrl ?? '');
       setProfile(saved);
+      setInitialGithubUrl(githubUrl ?? '');
       setIsEditing(false);
       Alert.alert('Éxito', profile ? 'Perfil actualizado correctamente.' : 'Perfil creado correctamente.');
     } catch (error) {
@@ -143,7 +158,17 @@ const TeacherProfileScreen: React.FC = () => {
 
         {profile.linkedinUrl ? (
           <Section title="LinkedIn">
-            <Text style={styles.linkText}>{profile.linkedinUrl}</Text>
+            <TouchableOpacity onPress={() => Linking.openURL(profile.linkedinUrl!)}>
+              <Text style={styles.linkText}>{profile.linkedinUrl}</Text>
+            </TouchableOpacity>
+          </Section>
+        ) : null}
+
+        {initialGithubUrl ? (
+          <Section title="GitHub">
+            <TouchableOpacity onPress={() => Linking.openURL(initialGithubUrl)}>
+              <Text style={styles.linkText}>{initialGithubUrl}</Text>
+            </TouchableOpacity>
           </Section>
         ) : null}
 
@@ -168,7 +193,7 @@ const TeacherProfileScreen: React.FC = () => {
 
   return (
     <Formik
-      initialValues={profile ?? EMPTY_PROFILE}
+      initialValues={profile ? { ...profile, githubUrl: initialGithubUrl } : { ...EMPTY_PROFILE, githubUrl: initialGithubUrl }}
       validationSchema={profileSchema}
       enableReinitialize
       onSubmit={handleSubmit}
@@ -245,6 +270,17 @@ const TeacherProfileScreen: React.FC = () => {
             keyboardType="url"
             autoCapitalize="none"
             error={touched.linkedinUrl ? errors.linkedinUrl : undefined}
+          />
+
+          <FormField
+            label="GitHub"
+            value={values.githubUrl ?? ''}
+            onChangeText={handleChange('githubUrl')}
+            onBlur={handleBlur('githubUrl')}
+            placeholder="https://github.com/tu-usuario"
+            keyboardType="url"
+            autoCapitalize="none"
+            error={touched.githubUrl ? errors.githubUrl : undefined}
           />
 
           <Text style={styles.sectionTitle}>Experiencia laboral</Text>
