@@ -145,8 +145,8 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW 
     const newTy = cy - ratio * (cy - ty.value);
     const clamped = clampTranslation(newTx, newTy, newScale);
     scale.value = withTiming(newScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-    tx.value = withTiming(clamped.x, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-    ty.value = withTiming(clamped.y, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    tx.value = withTiming(clamped.tx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    ty.value = withTiming(clamped.ty, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
   }
 
   function handleWheel(deltaY: number, focalX: number, focalY: number) {
