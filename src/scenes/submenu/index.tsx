@@ -6,13 +6,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import {useNavigation} from '@react-navigation/native';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ProfileOverview } from '../../components';
-import { SessionManager } from '../../managers';
-import { lightModeColors } from '../../styles/colorPalette';
-import type { DirectItem } from '../root_drawer/menu_config';
+import {ProfileOverview} from '../../components';
+import {SessionManager} from '../../managers';
+import {lightModeColors} from '../../styles/colorPalette';
+import type {DirectItem} from '../root_drawer/config/menu_config';
 
 type SubmenuScreenParams = {
   submenuKey: string;
@@ -22,15 +22,15 @@ type SubmenuScreenParams = {
 };
 
 export default function SubmenuScreen(props: any) {
-  const route: { params: SubmenuScreenParams } = props.route;
-  const { submenuKey, items, isMerged } = route.params;
+  const route: {params: SubmenuScreenParams} = props.route;
+  const {submenuKey, items, isMerged} = route.params;
   const navigation = useNavigation<any>();
 
   const handlePress = async (item: DirectItem) => {
     if (item.action === 'logout') {
       await GoogleSignin.signOut();
       await SessionManager.getInstance()?.clearCredentials();
-      navigation.reset({ index: 0, routes: [{ name: 'Landing' }] });
+      navigation.reset({index: 0, routes: [{name: 'Landing'}]});
       return;
     }
     if (item.route) {
@@ -58,21 +58,26 @@ export default function SubmenuScreen(props: any) {
           style={[styles.row, index < items.length - 1 && styles.rowBorder]}
           onPress={() => handlePress(item)}
           accessibilityLabel={`${item.label}${isMerged && item.scope === 'teacher' ? ', sólo docente' : ''}`}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
           <Icon
             name={item.icon}
             size={22}
             color={itemColor(item)}
             style={styles.rowIcon}
           />
-          <Text style={[styles.rowLabel, { color: itemColor(item) }]}>{item.label}</Text>
+          <Text style={[styles.rowLabel, {color: itemColor(item)}]}>
+            {item.label}
+          </Text>
           {isMerged && item.scope === 'teacher' && (
             <View style={styles.teacherPill}>
               <Text style={styles.teacherPillText}>Docente</Text>
             </View>
           )}
-          <Icon name="chevron-right" size={20} color={lightModeColors.lightGray} />
+          <Icon
+            name="chevron-right"
+            size={20}
+            color={lightModeColors.lightGray}
+          />
         </TouchableOpacity>
       ))}
     </ScrollView>
