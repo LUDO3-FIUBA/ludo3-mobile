@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { useHeaderHeight } from '@react-navigation/elements';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FLOORS, FLOOR_ORDER } from './floors/index';
 import { searchAllFloors } from './searchRooms';
@@ -17,8 +17,8 @@ type MapRouteParams = { q?: string };
 
 export default function MapScreen() {
   const { width, height } = useWindowDimensions();
-  const headerHeight = useHeaderHeight();
-  const canvasH = height - headerHeight;
+  const { top, bottom } = useSafeAreaInsets();
+  const canvasH = height - top - bottom;
 
   const [query, setQuery] = useState('');
   const [highlightedRoom, setHighlightedRoom] = useState<Room | null>(null);
