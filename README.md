@@ -4,6 +4,27 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 >**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
 
+## Floor map assets
+
+The Mapa screen reads from generated files committed to the repo. For each floor registered in `scripts/build_floor_manifest.js` (`FLOOR_CONFIGS`), the script produces:
+
+- `src/scenes/map/floors/<floorId>SvgXml.ts` — the floor-plan SVG as a TypeScript string
+- `src/scenes/map/floors/<floorId>.manifest.ts` — room metadata (labels, bboxes, categories, search aliases)
+
+It also regenerates `src/scenes/map/floors/index.ts`, which re-exports all floors and the `FLOOR_ORDER` array.
+
+Source SVGs live in `src/assets/` (e.g. `Piso4.svg`, `Subsuelo1.svg`). Re-run this whenever any SVG changes or a floor is added/removed:
+
+```bash
+npm run build:floors
+```
+
+To add a new floor, append an entry to `FLOOR_CONFIGS` in `scripts/build_floor_manifest.js`, drop the corresponding SVG in `src/assets/`, then run the command above.
+
+Commit all regenerated files alongside any change to the source SVGs.
+
+---
+
 ## Step 0: Set up env vars
 
 Duplicate `.env.template` and rename it to `.env`. Inside follow the comment instructions to set values for each environment variable.

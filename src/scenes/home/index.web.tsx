@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
   RefreshControl,
   Appearance,
 } from 'react-native';
-import { FinalExamOverviewList, MaterialIcon, UpcomingEventsCard } from '../../components';
+import { FinalExamOverviewList, UpcomingEventsCard } from '../../components';
+import HomeSection from '../root_drawer/web/HomeSection';
 import { useNavigation } from '@react-navigation/native';
 import {
   commissionInscriptionsRepository,
@@ -75,78 +73,30 @@ const Home: React.FC<any> = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Eventos próximos */}
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
-          <MaterialIcon name="calendar-clock" fontSize={24} color={colors.black} />
-          <Text style={[styles.header1, { color: colors.black }]}>Eventos próximos</Text>
-        </View>
-        <UpcomingEventsCard evaluations={evaluations} />
-        <VerMasButton onPress={() => navigation.navigate('Calendar')} colors={colors} />
+        <HomeSection icon="calendar-clock" title="Eventos próximos" onVerMas={() => navigation.navigate('Calendar')} colors={colors}>
+          <UpcomingEventsCard evaluations={evaluations} />
+        </HomeSection>
 
-        {/* Materias en curso */}
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
-          <MaterialIcon name="text-box-multiple" fontSize={24} color={colors.black} />
-          <Text style={[styles.header1, { color: colors.black }]}>Materias en curso</Text>
-        </View>
-        <CommissionInscriptionOverviewList commissionInscriptions={commissionInscriptions} />
-        <VerMasButton onPress={() => navigation.navigate('CurrentCommissionInscriptions')} colors={colors} />
+        <HomeSection icon="text-box-multiple" title="Materias en curso" onVerMas={() => navigation.navigate('CurrentCommissionInscriptions')} colors={colors}>
+          <CommissionInscriptionOverviewList commissionInscriptions={commissionInscriptions} />
+        </HomeSection>
 
-        {/* Materias aprobadas */}
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
-          <MaterialIcon name="text-box-check" fontSize={24} color={colors.black} />
-          <Text style={[styles.header1, { color: colors.black }]}>Materias aprobadas</Text>
-        </View>
-        <FinalExamOverviewList
-          finalExams={finalExams}
-          emptyMessage={`No tenés materias aprobadas aún.\nNo te olvides de rendir los finales.`}
-        />
-        <VerMasButton onPress={() => navigation.navigate('ApprovedSubjects')} colors={colors} />
+        <HomeSection icon="text-box-check" title="Materias aprobadas" onVerMas={() => navigation.navigate('ApprovedSubjects')} colors={colors}>
+          <FinalExamOverviewList
+            finalExams={finalExams}
+            emptyMessage={`No tenés materias aprobadas aún.\nNo te olvides de rendir los finales.`}
+          />
+        </HomeSection>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-type VerMasProps = { onPress: () => void; colors: typeof lightModeColors };
-
-const VerMasButton = ({ onPress, colors }: VerMasProps) => (
-  <TouchableOpacity
-    style={styles.verMas}
-    onPress={onPress}
-  >
-    <Text style={[styles.verMasText, { color: colors.mainContrastColor }]}>Ver más</Text>
-    <MaterialIcon name="arrow-right" fontSize={24} color={colors.mainContrastColor} />
-  </TouchableOpacity>
-);
 
 const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 12,
     paddingHorizontal: 16,
     paddingBottom: 40,
-  },
-  grid: {
-    flexDirection: 'row',
-    gap: 24,
-    alignItems: 'flex-start',
-  },
-  colLeft: {
-    flex: 2,
-  },
-  colRight: {
-    flex: 1,
-  },
-  header1: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  verMas: {
-    flexDirection: 'row-reverse',
-    marginLeft: 10,
-    marginVertical: 4,
-    alignItems: 'center',
-  },
-  verMasText: {
-    fontSize: 18,
   },
 });
 

@@ -16,7 +16,7 @@ interface CommissionInscriptionOverviewListProps {
 
 const CommissionInscriptionOverviewList: FC<CommissionInscriptionOverviewListProps> = ({ commissionInscriptions }) => {
   return (
-    <View style={style().view}>
+    <View>
       {!commissionInscriptions.length && (
         <View style={style().textContainer}>
           <Text style={style().emptyMessageText}>No tenés inscripciones actualmente.</Text>
