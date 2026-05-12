@@ -10,6 +10,10 @@
     "build:web": "expo export --platform web",
     "lint": "eslint .",
     "test": "jest",
+    "test:e2e": "bash e2e/run-tests.sh",
+    "test:e2e:headed": "bash e2e/run-tests.sh --headed",
+    "test:e2e:menu": "bash e2e/run-tests.sh --grep menu",
+    "test:e2e:map": "bash e2e/run-tests.sh --grep map_floor",
     "postinstall": "patch-package",
     "build:floors": "node scripts/build_floor_manifest.js"
   },
