@@ -390,6 +390,7 @@ const RootDrawer = () => {
 
   const canToggle = canToggleRole(user);
   const menuItems = resolveMenu(user, activeRole);
+  const homeMenuItem = menuItems.find(i => i.kind === 'direct' && (i as DirectItem).route) as DirectItem | undefined;
 
   const onNotificationPress = async (item: UserNotification) => {
     if (item.is_read) return;
@@ -431,6 +432,7 @@ const RootDrawer = () => {
   return (
     <>
       <Drawer.Navigator
+        initialRouteName={homeMenuItem?.route}
         screenOptions={{
           drawerType: 'permanent',
           drawerStyle: { 
