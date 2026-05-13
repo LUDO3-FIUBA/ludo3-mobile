@@ -64,7 +64,9 @@ export function post(url: string, body: any, queryParams = [], headers = {}) {
   const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
   const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
   if (logRequests) {
-    if (body) {
+    if (body instanceof FormData) {
+      console.log(`POST ${baseUrl}/${url}/${queryParamsString} [FormData]`);
+    } else if (body) {
       console.log(
         `POST ${baseUrl}/${url}/${queryParamsString}\n${JSON.stringify(body)}`,
       );
@@ -72,14 +74,14 @@ export function post(url: string, body: any, queryParams = [], headers = {}) {
       console.log(`POST ${baseUrl}/${url}/${queryParamsString}`);
     }
   }
+  const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
   return fetch(`${baseUrl}/${url}/${queryParamsString}`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
-      ...headers,
+      ...(isForm ? { ...headers } : { 'Content-Type': 'application/json', ...headers }),
     },
-    body: JSON.stringify(body),
+    body: isForm ? (body as any) : JSON.stringify(body),
   }).then(res => validate(res));
 }
 

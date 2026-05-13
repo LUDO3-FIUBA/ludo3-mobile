@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Alert,
   ScrollView,
@@ -26,6 +26,8 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
   const [submissionText, setSubmissionText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submissionFile, setSubmissionFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const requiresIdentity = evaluation.requires_identity === true;
 
   const submitWithoutIdentity = async () => {
@@ -33,7 +35,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
     try {
       await makeRequest(
-        () => evaluationsRepository.submitEvaluation(`${evaluation.id}`, submissionText),
+        () => evaluationsRepository.submitEvaluation(`${evaluation.id}`, submissionText, submissionFile || undefined),
         navigation,
       );
 
@@ -48,6 +50,26 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
       );
       setSubmitting(false);
     }
+  };
+
+  const onPickFileClick = () => fileInputRef.current?.click();
+
+  const onFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!allowed.includes(f.type)) {
+      window.alert('Solo se permiten PDF, JPEG, PNG o WEBP.');
+      return;
+    }
+    const isPdf = f.type === 'application/pdf';
+    const maxPdf = 5 * 1024 * 1024;
+    const maxImage = 2 * 1024 * 1024;
+    if ((isPdf && f.size > maxPdf) || (!isPdf && f.size > maxImage)) {
+      window.alert(isPdf ? 'El PDF debe ser menor a 5 MB.' : 'La imagen debe ser menor a 2 MB.');
+      return;
+    }
+    setSubmissionFile(f);
   };
 
   const onSubmit = async () => {
@@ -88,6 +110,23 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
           editable={!submitting}
           maxLength={1500}
         />
+        <Text style={styles.label}>Archivo adjunto (opcional)</Text>
+        <Text style={styles.hint}>PDF máximo 5 MB — Imágenes máximo 2 MB</Text>
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: 'none' }}
+          onChange={onFileChange}
+          accept="application/pdf,image/jpeg,image/png,image/webp"
+        />
+        {submissionFile ? (
+          <div>
+            <span>{submissionFile.name}</span>
+            <button type="button" onClick={() => setSubmissionFile(null)}>Quitar archivo</button>
+          </div>
+        ) : (
+          <button type="button" onClick={onPickFileClick}>Seleccionar archivo (PDF/JPEG/PNG/WEBP)</button>
+        )}
         <RoundedButton
           text={submitting ? 'Enviando...' : 'Enviar entrega'}
           enabled={!submitting}
@@ -133,6 +172,11 @@ const styles = StyleSheet.create({
     minHeight: 140,
     color: '#111',
     backgroundColor: '#fafafa',
+  },
+  hint: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginBottom: 6,
   },
 });
 
