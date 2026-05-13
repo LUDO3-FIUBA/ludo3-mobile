@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { lightModeColors } from '../styles/colorPalette';
 
-type AlertDialogMode = 'confirm' | 'type-to-confirm';
+type AlertDialogMode = 'info' | 'confirm' | 'type-to-confirm';
 
 interface AlertDialogProps {
   visible: boolean;
@@ -23,7 +23,7 @@ interface AlertDialogProps {
   destructive?: boolean;
   loading?: boolean;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
 const AlertDialog: React.FC<AlertDialogProps> = ({
@@ -37,7 +37,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   destructive = false,
   loading = false,
   onConfirm,
-  onCancel,
+  onCancel = () => {},
 }) => {
   const [typed, setTyped] = useState('');
 
@@ -82,13 +82,15 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
           )}
 
           <View style={styles.buttonsRow}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
-              onPress={onCancel}
-              disabled={loading}
-            >
-              <Text style={styles.cancelText}>{cancelLabel}</Text>
-            </TouchableOpacity>
+            {mode !== 'info' && (
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={onCancel}
+                disabled={loading}
+              >
+                <Text style={styles.cancelText}>{cancelLabel}</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={[
                 styles.button,
