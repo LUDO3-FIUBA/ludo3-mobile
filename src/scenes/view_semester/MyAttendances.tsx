@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import { Loading, MaterialIcon } from '../../components';
 import { lightModeColors } from '../../styles/colorPalette';
@@ -22,48 +22,60 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
     });
   }, [navigation]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const fetchData = useCallback(async () => {
+    if (!semesterId) {
+      setAttendances([]);
+      setLoading(false);
+      return;
+    }
 
-    const fetchData = async () => {
-      if (!semesterId) {
-        if (isMounted) {
-          setAttendances([]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      try {
-        const data = await makeRequest(() => attendanceRepository.getMyAttendances(semesterId), navigation);
-        if (isMounted) {
-          const sortedAttendances = [...data].sort(
-            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-          );
-          setAttendances(sortedAttendances);
-        }
-      } catch (error) {
-        console.log('Error fetching my attendances', error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void fetchData();
-
-    return () => {
-      isMounted = false;
-    };
+    try {
+      const data = await makeRequest(() => attendanceRepository.getMyAttendances(semesterId), navigation);
+      const sortedAttendances = [...data].sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+      setAttendances(sortedAttendances);
+    } catch (error) {
+      console.log('Error fetching my attendances', error);
+    } finally {
+      setLoading(false);
+    }
   }, [navigation, semesterId]);
 
-  const absentCount = attendances.filter((attendance) => !attendance.attended).length;
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const refreshData = async () => {
+        setLoading(true);
+        await fetchData();
+        if (!isActive) return;
+      };
+
+      void refreshData();
+
+      return () => {
+        isActive = false;
+      };
+    }, [fetchData]),
+  );
+
+  const absentCount = attendances.filter((a) => !a.attended).length;
   const remainingAbsences =
     typeof maxAbsences === 'number' ? Math.max(maxAbsences - absentCount, 0) : null;
 
+  const getStatusIcon = (item: MyAttendance) => {
+    if (item.attended) {
+      return { name: 'check-circle', color: '#28a745' };
+    }
+    return { name: 'close-circle', color: '#dc3545' };
+  };
+
   const renderAttendance = ({ item }: { item: MyAttendance }) => (
-    <View style={[styles.sessionContainer, !item.attended && styles.absentSessionContainer]}>
+    <View style={[
+      styles.sessionContainer,
+      !item.attended && styles.absentSessionContainer,
+    ]}>
       <View style={styles.headerRow}>
         <MaterialIcon name="calendar" fontSize={24} color={item.attended ? lightModeColors.institutional : '#dc3545'} />
         <Text style={styles.sessionHeader}>
@@ -71,9 +83,9 @@ const MyAttendancesScreen: React.FC<any> = ({ route }) => {
         </Text>
         <View style={styles.statusIconContainer}>
           <MaterialIcon
-            name={item.attended ? 'check-circle' : 'close-circle'}
+            name={getStatusIcon(item).name}
             fontSize={24}
-            color={item.attended ? '#28a745' : '#dc3545'}
+            color={getStatusIcon(item).color}
           />
         </View>
       </View>

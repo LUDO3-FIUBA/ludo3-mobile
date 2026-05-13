@@ -6,7 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, AttendanceLocationSubmitScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   ChangePasswordScreen,
   ForgotPasswordRequestScreen,
@@ -220,6 +220,12 @@ const App = () => {
               name="MyAttendances"
               component={MyAttendancesScreen}
               options={{ headerShown: true, title: 'Mis asistencias' }}
+            />
+
+            <Stack.Screen
+              name="AttendanceLocationSubmit"
+              component={AttendanceLocationSubmitScreen}
+              options={{ headerShown: true, title: 'Marcar presencia' }}
             />
 
             <Stack.Screen
