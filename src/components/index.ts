@@ -17,6 +17,7 @@ export { default as CommissionInscriptionList } from './commission_inscriptions/
 export { default as MaterialIcon } from './materialIcon'
 export { default as CopyableEmailText } from './CopyableEmailText'
 export { default as EditableText } from './EditableText'
+export { default as MarkdownEditor } from './MarkdownEditor'
 export { default as PercentageInput } from './PercentageInput'
 export { default as SquaredButton } from './SquaredButton'
 export { default as TeacherConfigurationCard } from './TeacherConfigurationCard'
