@@ -9,4 +9,7 @@ if [ ! -f "$PLAYWRIGHT_CLI" ]; then
   PLAYWRIGHT_CLI=$(find ~/.npm/_npx -name "cli.js" -path "*/playwright/cli.js" 2>/dev/null | tail -1)
 fi
 
+# Setup test DB user (idempotent — safe to run every time)
+bash "$(dirname "$0")/setup-db.sh"
+
 node "$PLAYWRIGHT_CLI" test --config playwright.config.ts "$@"
