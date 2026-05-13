@@ -152,6 +152,8 @@ export default function MarkdownEditor({
       strong: styles.strong,
       em: styles.em,
       blockquote: styles.blockquote,
+      thematicBreak: styles.hr,
+      hr: styles.hr,
       code_inline: styles.codeInline,
       code_block: styles.codeBlock,
       fence: styles.codeBlock,
@@ -283,7 +285,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     color: '#111827',
     fontSize: 15,
-    lineHeight: 21,
+    lineHeight: 24,
   },
   helperText: {
     color: '#6b7280',
@@ -308,7 +310,7 @@ const styles = StyleSheet.create({
   previewBody: {
     color: '#111827',
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 26,
   },
   previewEmpty: {
     color: '#6b7280',
@@ -319,21 +321,29 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     marginBottom: 8,
+    lineHeight: 32,
   },
   heading2: {
     color: '#111827',
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 6,
+    lineHeight: 28,
   },
   heading3: {
     color: '#111827',
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 4,
+    lineHeight: 26,
   },
   paragraph: {
     marginBottom: 8,
+  },
+  hr: {
+    marginVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
   },
   strong: {
     fontWeight: '700',

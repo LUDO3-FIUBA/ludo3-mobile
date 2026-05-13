@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Linking } from 'react-native';
 import { Text, TouchableOpacity, View } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import { lightModeColors } from '../styles/colorPalette';
 import MaterialIcon from './materialIcon';
 import { evaluationDetailsSharedStyles as styles, evaluationDetailsTextStyles } from '../styles/evaluationDetails';
@@ -42,6 +43,41 @@ export function SubmissionDateRow({ dateText, isLate, lateByText }: { dateText: 
         <Text style={evaluationDetailsTextStyles.passingGradeLabel}>Fecha de entrega</Text>
         {isLate && <Text style={styles.lateWarning}>Entregado fuera de término</Text>}
         {isLate && lateByText && <Text style={styles.lateByText}>Se entregó con {lateByText} de retraso</Text>}
+      </View>
+    </View>
+  );
+}
+
+export function EvaluationDescriptionCard({ markdownText }: { markdownText?: string | null }) {
+  const [expanded, setExpanded] = useState(false);
+  const normalizedMarkdown = (markdownText || '').trim();
+  const toggle = () => setExpanded((v) => !v);
+
+  const markdownPreviewStyle = expanded ? {} : { maxHeight: 96, overflow: 'hidden' as const };
+
+  if (!normalizedMarkdown) return null;
+
+  return (
+    <View style={styles.card}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={styles.sectionTitle}>Descripción</Text>
+        <TouchableOpacity onPress={toggle}>
+          <Text style={styles.linkText}>{expanded ? 'Ocultar' : 'Mostrar'}</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={markdownPreviewStyle}>
+        <Markdown
+          style={{
+            body: styles.submissionText,
+            heading1: { fontSize: 22, fontWeight: '700', marginTop:12, marginBottom: 8, lineHeight: 28 },
+            heading2: { fontSize: 18, fontWeight: '700', marginTop: 10, marginBottom: 6, lineHeight: 20 },
+            paragraph: { marginBottom: 8 },
+            thematicBreak: styles.hr,
+            hr: styles.hr,
+          }}
+        >
+          {normalizedMarkdown}
+        </Markdown>
       </View>
     </View>
   );
