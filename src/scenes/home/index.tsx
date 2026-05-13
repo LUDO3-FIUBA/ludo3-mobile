@@ -59,7 +59,7 @@ const Home: React.FC<any> = () => {
       }
       >
         <View style={style().mainView}>
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginVertical: 8 }}>
             <MaterialIcon name='calendar-clock' fontSize={24} color='black' />
             <Text style={style().header1}>Eventos próximos</Text>
           </View>
@@ -68,7 +68,7 @@ const Home: React.FC<any> = () => {
             onPress={() => navigation.navigate("Calendar")}
           />
 
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginVertical: 8 }}>
             <MaterialIcon name='text-box-multiple' fontSize={24} color='black' />
             <Text style={style().header1}>Materias en curso</Text>
           </View>
@@ -80,7 +80,7 @@ const Home: React.FC<any> = () => {
             onPress={() => navigation.navigate("CurrentCommissionInscriptions")}
           />
 
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 8, marginVertical: 8 }}>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 4, marginVertical: 8 }}>
             <MaterialIcon name='text-box-check' fontSize={24} color='black' />
             <Text style={{ ...style().header1, marginTop: 12 }}>Materias aprobadas</Text>
           </View>
@@ -104,7 +104,7 @@ type onPressHandler = () => void
 const VerMasButton = ({ onPress }: { onPress: onPressHandler }) => {
   return (
     <TouchableOpacity
-      style={{ flex: 1, flexDirection: "row-reverse", marginLeft: 10, marginVertical: 4, alignItems: "center" }}
+      style={{ flexDirection: "row-reverse", marginLeft: 10, marginVertical: 4, alignItems: "center" }}
       onPress={onPress}
     >
       <Icon style={style().itemIcon} name='arrow-right' />

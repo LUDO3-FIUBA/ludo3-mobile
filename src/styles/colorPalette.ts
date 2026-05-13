@@ -2,6 +2,8 @@ const facultyColors = {
   darkGray: '#333333',
   lightGray: '#d9d9d9',
   institutional: '#0088cc',
+  teacherAccent: '#7c3aed',       // teacher-exclusive items in merged student+teacher menu
+  teacherAccentDark: '#a78bfa',   // same, dark mode
   careers: '#ff9900',
   postgraduate: '#99ff00',
   investigation: '#800000',
