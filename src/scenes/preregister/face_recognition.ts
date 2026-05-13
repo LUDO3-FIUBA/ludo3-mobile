@@ -13,7 +13,6 @@ interface NavigationType {
 export default class FacePictureConfiguration extends TakePictureStepConfiguration {
   descriptions: string[];
   dni: string;
-  mail: string;
   padron: string;
   password: string;
   images: any[];
@@ -21,7 +20,6 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
   constructor(
     descriptions: string[],
     dni: string,
-    mail: string,
     padron: string = '',
     password: string = '',
     images: any[] = []
@@ -29,7 +27,6 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
     super(descriptions.shift() || '', 'front', false);
     this.descriptions = descriptions;
     this.dni = dni;
-    this.mail = mail;
     this.padron = padron;
     this.password = password;
     this.images = images;
@@ -49,7 +46,6 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
         configuration: new FacePictureConfiguration(
           this.descriptions,
           this.dni,
-          this.mail,
           this.padron,
           this.password,
           this.images
@@ -69,7 +65,6 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
     try {
       await authenticationRepository.preregister(
         this.dni,
-        this.mail,
         this.padron,
         this.password,
         imageOverride
@@ -136,7 +131,6 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
     return super.toObject(Type.RegisterFace, {
       descriptions: JSON.stringify(this.descriptions),
       dni: this.dni,
-      mail: this.mail,
       padron: this.padron,
       password: this.password,
       images: this.images
@@ -149,7 +143,6 @@ export default class FacePictureConfiguration extends TakePictureStepConfigurati
     return new FacePictureConfiguration(
       descriptions,
       object.dni,
-      object.mail,
       object.padron,
       object.password,
       object.images

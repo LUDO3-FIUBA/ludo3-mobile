@@ -35,7 +35,6 @@ import PendingSubjectsScreen from '../pending_subjects';
 import StatsScreen from '../stats';
 import TeacherHomeScreen from '../teacher_home';
 import CreateSemester from '../teacher_semester/CreateSemester';
-import TeacherProfileScreen from '../teacher_profile';
 import DepartmentList from '../admin_departments/DepartmentList';
 import DepartmentDetail from '../admin_departments/DepartmentDetail';
 import DepartmentForm from '../admin_departments/DepartmentForm';
@@ -85,7 +84,6 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,
-  TeacherProfile: TeacherProfileScreen,
   TeacherForms: TeacherFormsScreen,
   AdminDepartmentList: AdminDepartmentListScreen,
   AdminCommissionList: CommissionList,

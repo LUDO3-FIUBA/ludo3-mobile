@@ -16,6 +16,10 @@ export type DirectItem = {
   conditional?: 'faceNotRegistered';
   /** Omit (or leave undefined) to show on both platforms. */
   platform?: 'mobile' | 'web';
+  /** Hide from department admins (only super admins see it). */
+  superAdminOnly?: boolean;
+  /** Hide from super admins (only department admins see it). */
+  departmentAdminOnly?: boolean;
   webOrder?: number;
   mobileOrder?: number;
 };
@@ -28,6 +32,10 @@ export type SubmenuItem = {
   iconOutline: string;
   children: DirectItem[];
   scope: Scope;
+  /** Hide from department admins (only super admins see it). */
+  superAdminOnly?: boolean;
+  /** Hide from super admins (only department admins see it). */
+  departmentAdminOnly?: boolean;
   webOrder?: number;
   mobileOrder?: number;
 };
@@ -46,7 +54,7 @@ export const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'scan-qr', label: 'Escanear QR', icon: 'qrcode-scan', iconOutline: 'qrcode-scan', route: 'ScanQR', scope: 'student', platform: 'mobile' },
       { kind: 'direct', key: 'verify-identity', label: 'Verificar identidad', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'VerifyIdentity', scope: 'student', platform: 'mobile' },
       { kind: 'direct', key: 'face-registration', label: 'Completar registro facial', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'CompleteFaceRegistration', scope: 'student', conditional: 'faceNotRegistered', platform: 'mobile' },
-      { kind: 'direct', key: 'my-account', label: 'Mi Cuenta', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
+      { kind: 'direct', key: 'my-account', label: 'Mi perfil', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
       { kind: 'direct', key: 'student-useful-links', label: 'Enlaces útiles', icon: 'link-variant', iconOutline: 'link-variant', route: 'StudentUsefulLinks', scope: 'student' },
       { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
       { kind: 'direct', key: 'logout', label: 'Cerrar sesión', icon: 'logout-variant', iconOutline: 'logout-variant', action: 'logout', scope: 'shared' },
@@ -62,6 +70,7 @@ export const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'approved-subjects', label: 'Materias aprobadas', icon: 'text-box-check', iconOutline: 'text-box-check-outline', route: 'ApprovedSubjects', scope: 'student' },
       { kind: 'direct', key: 'student-stats', label: 'Estadísticas', icon: 'chart-box', iconOutline: 'chart-box-outline', route: 'StudentStats', scope: 'student' },
       { kind: 'direct', key: 'departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'StudentDepartmentList', scope: 'shared' },
+      { kind: 'direct', key: 'student-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'StudentNewsList', scope: 'shared' },
       { kind: 'direct', key: 'student-procedures', label: 'Trámites', icon: 'file-document-edit', iconOutline: 'file-document-edit-outline', route: 'FormsList', scope: 'student' },
     ],
   },
@@ -88,8 +97,7 @@ export const teacherMenu: MenuItem[] = [
     icon: 'account', iconOutline: 'account-outline', scope: 'teacher',
     webOrder: 3, mobileOrder: 1,
     children: [
-      { kind: 'direct', key: 'teacher-profile', label: 'Mi perfil profesional', icon: 'account-details', iconOutline: 'account-details-outline', route: 'TeacherProfile', scope: 'teacher' },
-      { kind: 'direct', key: 'my-account', label: 'Mi Cuenta', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
+      { kind: 'direct', key: 'my-account', label: 'Mi perfil', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
       { kind: 'direct', key: 'teacher-useful-links', label: 'Enlaces útiles', icon: 'link-variant', iconOutline: 'link-variant', route: 'TeacherUsefulLinks', scope: 'teacher' },
       { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
       { kind: 'direct', key: 'logout', label: 'Cerrar sesión', icon: 'logout-variant', iconOutline: 'logout-variant', action: 'logout', scope: 'shared' },
@@ -108,6 +116,7 @@ export const teacherMenu: MenuItem[] = [
     children: [
       { kind: 'direct', key: 'create-semester', label: 'Crear cuatrimestre', icon: 'plus-circle', iconOutline: 'plus-circle-outline', route: 'CreateSemester', scope: 'teacher' },
       { kind: 'direct', key: 'departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'StudentDepartmentList', scope: 'shared' },
+      { kind: 'direct', key: 'teacher-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'StudentNewsList', scope: 'shared' },
       { kind: 'direct', key: 'teacher-procedures', label: 'Validación de trámites', icon: 'clipboard-check', iconOutline: 'clipboard-check-outline', route: 'TeacherForms', scope: 'teacher' },
     ],
   },
@@ -132,14 +141,17 @@ export const adminMenu: MenuItem[] = [
     children: [
       { kind: 'direct', key: 'admin-departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'AdminDepartmentList', scope: 'shared' },
       { kind: 'direct', key: 'admin-commissions', label: 'Comisiones', icon: 'account-group', iconOutline: 'account-group-outline', route: 'AdminCommissionList', scope: 'shared' },
-      { kind: 'direct', key: 'admin-user-search', label: 'Buscar Usuarios', icon: 'account-search', iconOutline: 'account-search-outline', route: 'AdminUserSearch', scope: 'shared' },
-      { kind: 'direct', key: 'admin-procedures', label: 'Gestor de Trámites', icon: 'clipboard-list', iconOutline: 'clipboard-list-outline', route: 'FormsManager', scope: 'shared' },
+      { kind: 'direct', key: 'admin-user-search', label: 'Buscar Usuarios', icon: 'account-search', iconOutline: 'account-search-outline', route: 'AdminUserSearch', scope: 'shared', superAdminOnly: true },
+      { kind: 'direct', key: 'admin-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'AdminNewsList', scope: 'shared', superAdminOnly: true },
+      { kind: 'direct', key: 'deptadmin-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'StudentNewsList', scope: 'shared', departmentAdminOnly: true },
+      { kind: 'direct', key: 'admin-procedures', label: 'Gestor de Trámites', icon: 'clipboard-list', iconOutline: 'clipboard-list-outline', route: 'FormsManager', scope: 'shared', superAdminOnly: true },
     ],
   },
   {
     kind: 'direct', key: 'admin-notifications', label: 'Avisos',
     icon: 'bell', iconOutline: 'bell-outline',
     route: 'AdminNotificationList', scope: 'shared',
+    superAdminOnly: true,
     webOrder: 1, mobileOrder: 3,
   },
 ];
@@ -162,6 +174,9 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
   { route: 'AdminCommissionEdit', title: 'Editar Comisión', roleFilter: 'admin' },
   { route: 'AdminUserDetail', title: 'Usuario', roleFilter: 'admin' },
   { route: 'AdminNotificationCreate', title: 'Nuevo Aviso', roleFilter: 'admin' },
+  { route: 'AdminNewsCreate', title: 'Nueva Novedad', roleFilter: 'admin' },
+  { route: 'AdminNewsEdit', title: 'Editar Novedad', roleFilter: 'admin' },
+  { route: 'NewsDetail', title: 'Novedad' },
   { route: 'Notifications', title: 'Notificaciones' },
 ];
 
@@ -218,14 +233,24 @@ export function resolveMenu(user: User, roleOverride?: 'student' | 'teacher'): M
     raw = studentMenu;
   }
 
+  const isSuper = user.isSuperAdmin?.() ?? false;
+  const isDeptAdmin = user.isDepartmentAdmin?.() ?? false;
+  const passesAdminTier = (item: { superAdminOnly?: boolean; departmentAdminOnly?: boolean }) => {
+    if (item.superAdminOnly && !isSuper) return false;
+    if (item.departmentAdminOnly && !isDeptAdmin) return false;
+    return true;
+  };
+
   const filtered = raw
-    .filter(item => item.kind !== 'direct' || visibleOnPlatform(item.platform))
+    .filter(item => (item.kind === 'direct' ? visibleOnPlatform(item.platform) : true))
+    .filter(passesAdminTier)
     .map(item => {
       if (item.kind === 'submenu') {
         return {
           ...item,
           children: item.children.filter(child => {
             if (!visibleOnPlatform(child.platform)) return false;
+            if (!passesAdminTier(child)) return false;
             if (child.conditional === 'faceNotRegistered') {
               return user.faceRegistered === false;
             }
