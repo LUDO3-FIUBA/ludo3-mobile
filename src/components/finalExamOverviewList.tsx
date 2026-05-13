@@ -12,14 +12,14 @@ interface FinalExamOverviewListProps {
 const FinalExamOverviewList: FC<FinalExamOverviewListProps> = ({ finalExams, emptyMessage }) => {
   if (!finalExams.length) {
     return (
-      <View style={style().view}>
+      <View>
         <Text style={style().emptyMessageText}>{emptyMessage}</Text>
       </View>
     )
   }
 
   return (
-    <View style={style().view}>
+    <View>
       {finalExams.map((item) =>
         <FinalExamCard key={`finalexamsoverview-${item.id}`} finalExam={item} />
       )}

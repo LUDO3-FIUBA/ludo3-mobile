@@ -46,6 +46,12 @@
           }
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "LUDO necesita acceso a tu ubicación para confirmar asistencias por sede."
+        }
+      ],
       "@react-native-community/datetimepicker"
     ]
   }

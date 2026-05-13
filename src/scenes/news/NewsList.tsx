@@ -1,0 +1,161 @@
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  Image,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { MaterialIcon } from '../../components';
+import { newsRepository } from '../../repositories';
+import News from '../../models/News';
+
+interface Props {
+  isAdmin: boolean;
+}
+
+const NewsList: React.FC<Props> = ({ isAdmin }) => {
+  const navigation = useNavigation<any>();
+  const [news, setNews] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadNews = async () => {
+    try {
+      const data = await newsRepository.fetchAll();
+      setNews(data);
+    } catch {
+      Alert.alert('Error', 'No se pudieron cargar las novedades.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNews();
+    const unsubscribe = navigation.addListener('focus', loadNews);
+    return unsubscribe;
+  }, [navigation]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AdminNewsCreate')}
+            style={{ marginRight: 16 }}
+          >
+            <MaterialIcon name="plus" fontSize={24} color="#333" />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [navigation, isAdmin]);
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (news.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.emptyText}>No hay novedades publicadas.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={news}
+      keyExtractor={item => String(item.id)}
+      contentContainerStyle={styles.list}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={styles.item}
+          onPress={() =>
+            navigation.navigate('NewsDetail', { newsId: item.id, isAdmin })
+          }
+        >
+          {item.pictureUrl ? (
+            <Image source={{ uri: item.pictureUrl }} style={styles.thumbnail} resizeMode="cover" />
+          ) : null}
+          <View style={styles.itemContent}>
+            <View style={[styles.tagChip, { backgroundColor: item.tagColor }]}>
+              <Text style={styles.tagChipText}>{item.tagLabel}</Text>
+            </View>
+            <Text style={styles.itemTitle}>{item.title}</Text>
+            {item.description ? (
+              <Text style={styles.itemDescription} numberOfLines={2}>
+                {item.description}
+              </Text>
+            ) : null}
+          </View>
+        </TouchableOpacity>
+      )}
+    />
+  );
+};
+
+const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  list: {
+    padding: 16,
+  },
+  item: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 12,
+    overflow: 'hidden',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  thumbnail: {
+    width: '100%',
+    height: 160,
+  },
+  itemContent: {
+    padding: 14,
+  },
+  tagChip: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 6,
+  },
+  tagChipText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111',
+  },
+  itemDescription: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 4,
+  },
+});
+
+export default NewsList;
