@@ -1,0 +1,1497 @@
+e2e/node_modules/playwright/lib/common/process.js
+  ai_agent 1-133
+e2e/node_modules/@playwright/test/lib/worker/fixtureRunner.js
+  ai_agent 1-262
+e2e/node_modules/playwright-core/lib/remote/playwrightWebSocketServer.js
+  ai_agent 1-73
+e2e/node_modules/playwright-core/lib/server/registry/browserFetcher.js
+  ai_agent 1-177
+e2e/node_modules/playwright-core/lib/server/progress.js
+  ai_agent 1-138
+e2e/node_modules/playwright-core/lib/server/page.js
+  ai_agent 1-890
+e2e/node_modules/playwright/lib/worker/testInfo.js
+  ai_agent 1-532
+e2e/node_modules/playwright-core/lib/server/helper.js
+  ai_agent 1-96
+e2e/node_modules/playwright-core/lib/utils/isomorphic/cssTokenizer.js
+  ai_agent 1-1051
+e2e/node_modules/@playwright/test/lib/agents/generateAgents.js
+  ai_agent 1-346
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/versions/traceV6.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/server/codegen/languages.js
+  ai_agent 1-68
+e2e/node_modules/@playwright/test/lib/errorContext.js
+  ai_agent 1-121
+e2e/node_modules/playwright/cli.js
+  ai_agent 1-19
+e2e/node_modules/playwright-core/lib/server/utils/hostPlatform.js
+  ai_agent 1-123
+e2e/node_modules/playwright/lib/reporters/dot.js
+  ai_agent 1-99
+public/fiuba-map/static/js/main.7a90e6f3.js.LICENSE.txt
+  ai_agent 1-121
+e2e/node_modules/playwright/lib/agents/playwright-test-healer.agent.md
+  ai_agent 1-55
+e2e/node_modules/playwright-core/bin/reinstall_chrome_stable_linux.sh
+  ai_agent 1-42
+e2e/node_modules/@playwright/test/lib/agents/copilot-setup-steps.yml
+  ai_agent 1-34
+e2e/node_modules/playwright-core/lib/server/dispatchers/browserContextDispatcher.js
+  ai_agent 1-381
+e2e/node_modules/playwright-core/lib/utils/isomorphic/jsonSchema.js
+  ai_agent 1-89
+e2e/node_modules/@playwright/test/lib/testActions.js
+  ai_agent 1-220
+e2e/node_modules/@playwright/test/types/testReporter.d.ts
+  ai_agent 1-822
+e2e/node_modules/playwright-core/lib/inProcessFactory.js
+  ai_agent 1-60
+e2e/node_modules/playwright-core/lib/utils/isomorphic/stackTrace.js
+  ai_agent 1-158
+e2e/node_modules/playwright-core/lib/tools/cli-client/minimist.js
+  ai_agent 1-128
+e2e/node_modules/playwright-core/lib/tools/backend/devtools.js
+  ai_agent 1-69
+e2e/node_modules/playwright-core/lib/utils/isomorphic/headers.js
+  ai_agent 1-53
+e2e/node_modules/playwright-core/lib/client/jsonPipe.js
+  ai_agent 1-39
+e2e/node_modules/playwright-core/lib/utils/isomorphic/lruCache.js
+  ai_agent 1-51
+e2e/node_modules/playwright/lib/transform/babelBundleImpl.js
+  ai_agent 1-461
+e2e/node_modules/playwright-core/lib/protocol/validator.js
+  ai_agent 1-3067
+e2e/node_modules/playwright-core/lib/client/android.js
+  ai_agent 1-361
+e2e/node_modules/playwright-core/lib/tools/cli-client/program.js
+  ai_agent 1-350
+e2e/node_modules/playwright-core/index.d.ts
+  ai_agent 1-17
+e2e/node_modules/playwright-core/lib/utils/isomorphic/multimap.js
+  ai_agent 1-80
+e2e/node_modules/playwright-core/lib/zipBundleImpl.js
+  ai_agent 1-5
+e2e/node_modules/@playwright/test/lib/reporters/internalReporter.js
+  ai_agent 1-138
+e2e/node_modules/@playwright/test/lib/transform/babelBundle.js
+  ai_agent 1-43
+e2e/node_modules/@playwright/test/lib/reporters/teleEmitter.js
+  ai_agent 1-319
+e2e/node_modules/playwright-core/README.md
+  ai_agent 1-3
+e2e/node_modules/playwright-core/lib/server/dispatchers/networkDispatchers.js
+  ai_agent 1-214
+e2e/node_modules/playwright/lib/reporters/merge.js
+  ai_agent 1-579
+e2e/node_modules/@playwright/test/lib/runner/processHost.js
+  ai_agent 1-180
+e2e/node_modules/playwright-core/index.js
+  ai_agent 1-32
+e2e/node_modules/playwright-core/lib/client/browserType.js
+  ai_agent 1-153
+e2e/node_modules/playwright-core/lib/client/clock.js
+  ai_agent 1-68
+e2e/node_modules/@playwright/test/lib/loader/loaderMain.js
+  ai_agent 1-59
+e2e/node_modules/playwright-core/bin/reinstall_msedge_dev_win.ps1
+  ai_agent 1-23
+e2e/node_modules/playwright-core/cli.js
+  ai_agent 1-18
+e2e/node_modules/playwright-core/lib/client/elementHandle.js
+  ai_agent 1-281
+e2e/node_modules/playwright-core/lib/server/debugger.js
+  ai_agent 1-112
+e2e/node_modules/playwright-core/lib/server/frames.js
+  ai_agent 1-1500
+e2e/node_modules/playwright-core/lib/client/clientHelper.js
+  ai_agent 1-64
+e2e/node_modules/playwright-core/lib/tools/backend/runCode.js
+  ai_agent 1-77
+e2e/node_modules/playwright-core/lib/tools/mcp/configIni.js
+  ai_agent 1-189
+e2e/node_modules/playwright-core/lib/utils.js
+  ai_agent 1-115
+e2e/node_modules/playwright-core/lib/utils/isomorphic/locatorGenerators.js
+  ai_agent 1-689
+e2e/node_modules/@playwright/test/lib/runner/dispatcher.js
+  ai_agent 1-522
+e2e/node_modules/playwright-core/lib/server/macEditingCommands.js
+  ai_agent 1-143
+e2e/node_modules/playwright-core/lib/utils/isomorphic/manualPromise.js
+  ai_agent 1-114
+e2e/node_modules/playwright-core/lib/utils/isomorphic/time.js
+  ai_agent 1-49
+e2e/node_modules/playwright/lib/reporters/base.js
+  ai_agent 1-633
+e2e/node_modules/playwright-core/lib/client/localUtils.js
+  ai_agent 1-60
+e2e/node_modules/playwright/lib/runner/sigIntWatcher.js
+  ai_agent 1-96
+e2e/node_modules/playwright/lib/transform/portTransport.js
+  ai_agent 1-67
+src/scenes/fiuba_map/index.web.tsx
+  ai_agent 1,5-7,11-15,22-26,30-61
+e2e/node_modules/playwright-core/lib/server/electron/loader.js
+  ai_agent 1-29
+e2e/node_modules/playwright-core/lib/zodBundleImpl.js
+  ai_agent 1-40
+e2e/node_modules/playwright/lib/matchers/toMatchSnapshot.js
+  ai_agent 1-349
+e2e/node_modules/playwright/test.js
+  ai_agent 1-24
+e2e/node_modules/playwright-core/lib/tools/backend/screenshot.js
+  ai_agent 1-88
+e2e/node_modules/playwright-core/lib/tools/mcp/protocol.js
+  ai_agent 1-28
+e2e/node_modules/playwright/lib/transform/transform.js
+  ai_agent 1-296
+e2e/node_modules/playwright-core/lib/client/page.js
+  ai_agent 1-731
+e2e/node_modules/playwright/lib/reporters/internalReporter.js
+  ai_agent 1-138
+e2e/node_modules/@playwright/test/lib/reporters/empty.js
+  ai_agent 1-32
+e2e/node_modules/playwright-core/lib/server/dispatchers/dialogDispatcher.js
+  ai_agent 1-47
+e2e/node_modules/@playwright/test/lib/reporters/merge.js
+  ai_agent 1-579
+e2e/node_modules/playwright/lib/runner/loaderHost.js
+  ai_agent 1-89
+e2e/node_modules/playwright-core/lib/server/harBackend.js
+  ai_agent 1-157
+e2e/node_modules/playwright-core/lib/server/codegen/types.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/server/dispatchers/cdpSessionDispatcher.js
+  ai_agent 1-47
+e2e/node_modules/@playwright/test/lib/common/test.js
+  ai_agent 1-330
+e2e/node_modules/@playwright/test/lib/reporters/list.js
+  ai_agent 1-252
+e2e/node_modules/playwright-core/lib/server/chromium/crExecutionContext.js
+  ai_agent 1-146
+e2e/node_modules/playwright-core/lib/tools/trace/traceOpen.js
+  ai_agent 1-69
+e2e/node_modules/playwright-core/lib/server/registry/dependencies.js
+  ai_agent 1-371
+e2e/node_modules/playwright-core/lib/server/dispatchers/pageDispatcher.js
+  ai_agent 1-456
+e2e/node_modules/playwright-core/types/protocol.d.ts
+  ai_agent 1-24720
+e2e/node_modules/playwright-core/lib/server/utils/wsServer.js
+  ai_agent 1-121
+e2e/node_modules/playwright-core/lib/utils/isomorphic/imageUtils.js
+  ai_agent 1-141
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/versions/traceV3.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/server/disposable.js
+  ai_agent 1-41
+e2e/node_modules/@playwright/test/lib/plugins/webServerPlugin.js
+  ai_agent 1-238
+e2e/node_modules/@playwright/test/lib/mcp/test/seed.js
+  ai_agent 1-82
+e2e/node_modules/playwright/lib/common/suiteUtils.js
+  ai_agent 1-140
+e2e/node_modules/playwright/lib/worker/util.js
+  ai_agent 1-31
+e2e/node_modules/@playwright/test/lib/isomorphic/folders.js
+  ai_agent 1-30
+e2e/node_modules/playwright-core/bin/reinstall_chrome_beta_mac.sh
+  ai_agent 1-13
+e2e/node_modules/playwright-core/lib/server/bidi/third_party/bidiProtocolCore.js
+  ai_agent 1-180
+e2e/node_modules/playwright-core/lib/server/dialog.js
+  ai_agent 1-116
+e2e/node_modules/playwright-core/lib/server/utils/debugLogger.js
+  ai_agent 1-122
+e2e/node_modules/playwright/lib/mcp/test/browserBackend.js
+  ai_agent 1-121
+e2e/node_modules/playwright/lib/mcp/test/testBackend.js
+  ai_agent 1-99
+e2e/node_modules/playwright-core/bin/reinstall_msedge_stable_linux.sh
+  ai_agent 1-48
+e2e/node_modules/playwright-core/bin/reinstall_chrome_beta_win.ps1
+  ai_agent 1-24
+e2e/node_modules/playwright/LICENSE
+  ai_agent 1-202
+e2e/node_modules/playwright-core/lib/androidServerImpl.js
+  ai_agent 1-65
+e2e/node_modules/playwright-core/bin/reinstall_msedge_stable_mac.sh
+  ai_agent 1-11
+e2e/node_modules/playwright-core/lib/client/eventEmitter.js
+  ai_agent 1-314
+e2e/node_modules/@playwright/test/lib/matchers/toMatchAriaSnapshot.js
+  ai_agent 1-163
+e2e/node_modules/playwright-core/lib/server/videoRecorder.js
+  ai_agent 1-194
+e2e/node_modules/playwright-core/lib/utilsBundleImpl/xdg-open
+  ai_agent 1-1066
+e2e/node_modules/@playwright/test/lib/fsWatcher.js
+  ai_agent 1-67
+e2e/node_modules/playwright-core/lib/vite/htmlReport/report.css
+  ai_agent 1
+e2e/node_modules/@playwright/test/lib/common/configLoader.js
+  ai_agent 1-344
+e2e/node_modules/@playwright/test/lib/common/testLoader.js
+  ai_agent 1-101
+e2e/node_modules/playwright/lib/utilsBundleImpl.js
+  ai_agent 1-100
+e2e/node_modules/playwright-core/lib/client/fileChooser.js
+  ai_agent 1-46
+e2e/node_modules/playwright-core/lib/client/playwright.js
+  ai_agent 1-71
+e2e/node_modules/@playwright/test/lib/internalsForTest.js
+  ai_agent 1-42
+e2e/node_modules/playwright-core/lib/generated/injectedScriptSource.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/bin/reinstall_chrome_stable_mac.sh
+  ai_agent 1-12
+e2e/node_modules/playwright-core/lib/utils/isomorphic/cssParser.js
+  ai_agent 1-245
+e2e/node_modules/@playwright/test/lib/isomorphic/teleSuiteUpdater.js
+  ai_agent 1-157
+e2e/node_modules/playwright-core/lib/server/selectors.js
+  ai_agent 1-112
+e2e/node_modules/playwright-core/types/types.d.ts
+  ai_agent 1-23623
+e2e/node_modules/playwright/lib/mcp/test/testTools.js
+  ai_agent 1-108
+e2e/node_modules/playwright-core/lib/server/bidi/bidiOverCdp.js
+  ai_agent 1-102
+e2e/node_modules/@playwright/test/lib/transform/portTransport.js
+  ai_agent 1-67
+e2e/node_modules/@playwright/test/lib/mcp/test/testContext.js
+  ai_agent 1-283
+e2e/node_modules/@playwright/test/lib/plugins/index.js
+  ai_agent 1-28
+e2e/node_modules/@playwright/test/lib/worker/util.js
+  ai_agent 1-31
+e2e/node_modules/playwright-core/lib/tools/backend/route.js
+  ai_agent 1-140
+e2e/node_modules/playwright-core/lib/cli/browserActions.js
+  ai_agent 1-308
+e2e/node_modules/playwright/ThirdPartyNotices.txt
+  ai_agent 1-3919
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/versions/traceV5.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/tools/trace/traceScreenshot.js
+  ai_agent 1-68
+e2e/node_modules/playwright-core/lib/tools/backend/network.js
+  ai_agent 1-135
+e2e/node_modules/playwright/lib/plugins/webServerPlugin.js
+  ai_agent 1-238
+e2e/node_modules/playwright-core/lib/server/registry/nativeDeps.js
+  ai_agent 1-1281
+e2e/node_modules/playwright-core/lib/utils/isomorphic/yaml.js
+  ai_agent 1-84
+e2e/node_modules/playwright/lib/reporters/github.js
+  ai_agent 1-127
+e2e/node_modules/playwright-core/lib/vite/recorder/index.html
+  ai_agent 1-29
+e2e/node_modules/playwright-core/lib/server/bidi/bidiConnection.js
+  ai_agent 1-213
+e2e/node_modules/playwright/lib/isomorphic/events.js
+  ai_agent 1-77
+e2e/node_modules/playwright-core/lib/client/frame.js
+  ai_agent 1-404
+e2e/node_modules/playwright-core/lib/vite/traceViewer/assets/xtermModule-CsJ4vdCR.js
+  ai_agent 1-9
+e2e/node_modules/playwright-core/lib/server/webkit/wkConnection.js
+  ai_agent 1-144
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/traceUtils.js
+  ai_agent 1-58
+e2e/node_modules/@playwright/test/lib/matchers/expect.js
+  ai_agent 1-311
+e2e/node_modules/playwright-core/bin/reinstall_msedge_dev_linux.sh
+  ai_agent 1-48
+e2e/node_modules/@playwright/test/lib/worker/workerMain.js
+  ai_agent 1-533
+e2e/node_modules/playwright-core/lib/server/trace/viewer/traceViewer.js
+  ai_agent 1-244
+e2e/node_modules/playwright-core/bin/reinstall_msedge_dev_mac.sh
+  ai_agent 1-11
+e2e/node_modules/@playwright/test/lib/matchers/toHaveURL.js
+  ai_agent 1-101
+e2e/node_modules/playwright-core/lib/server/webkit/wkBrowser.js
+  ai_agent 1-330
+e2e/node_modules/playwright-core/lib/utils/isomorphic/rtti.js
+  ai_agent 1-43
+e2e/node_modules/playwright-core/lib/server/browserType.js
+  ai_agent 1-338
+e2e/node_modules/playwright-core/lib/client/download.js
+  ai_agent 1-62
+e2e/node_modules/playwright-core/lib/server/dispatchers/dispatcher.js
+  ai_agent 1-364
+e2e/node_modules/playwright-core/lib/server/socksClientCertificatesInterceptor.js
+  ai_agent 1-383
+e2e/node_modules/playwright-core/lib/server/types.js
+  ai_agent 1-28
+e2e/node_modules/@playwright/test/lib/transform/babelBundleImpl.js
+  ai_agent 1-461
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/playwright-tests.md
+  ai_agent 1-39
+e2e/node_modules/@playwright/test/lib/third_party/pirates.js
+  ai_agent 1-62
+e2e/node_modules/@playwright/test/lib/mcp/test/plannerTools.js
+  ai_agent 1-145
+e2e/node_modules/playwright-core/lib/tools/trace/traceActions.js
+  ai_agent 1-142
+e2e/node_modules/playwright-core/types/structs.d.ts
+  ai_agent 1-45
+e2e/node_modules/playwright/lib/common/globals.js
+  ai_agent 1-58
+e2e/node_modules/playwright-core/lib/server/webkit/wkInterceptableRequest.js
+  ai_agent 1-197
+e2e/node_modules/playwright-core/lib/vite/recorder/assets/codeMirrorModule-DYBRYzYX.css
+  ai_agent 1
+e2e/node_modules/@playwright/test/lib/runner/vcs.js
+  ai_agent 1-72
+e2e/node_modules/playwright-core/lib/client/consoleMessage.js
+  ai_agent 1-61
+e2e/node_modules/playwright-core/lib/vite/dashboard/index.html
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/zodBundle.js
+  ai_agent 1-39
+e2e/node_modules/playwright-core/lib/tools/trace/SKILL.md
+  ai_agent 1-171
+e2e/node_modules/playwright-core/lib/server/socksInterceptor.js
+  ai_agent 1-95
+e2e/node_modules/playwright-core/lib/server/dispatchers/artifactDispatcher.js
+  ai_agent 1-118
+e2e/node_modules/@playwright/test/lib/reporters/html.js
+  ai_agent 1-666
+e2e/node_modules/playwright-core/lib/tools/backend/snapshot.js
+  ai_agent 1-208
+e2e/node_modules/playwright-core/lib/utils/isomorphic/urlMatch.js
+  ai_agent 1-243
+e2e/node_modules/playwright-core/lib/client/video.js
+  ai_agent 1-52
+e2e/node_modules/playwright-core/lib/tools/mcp/cli-stub.js
+  ai_agent 1-7
+e2e/node_modules/playwright-core/lib/server/bidi/bidiChromium.js
+  ai_agent 1-162
+e2e/node_modules/playwright/lib/reporters/blob.js
+  ai_agent 1-138
+e2e/node_modules/@playwright/test/lib/common/esmLoaderHost.js
+  ai_agent 1-104
+e2e/node_modules/playwright-core/lib/server/chromium/crProtocolHelper.js
+  ai_agent 1-145
+e2e/node_modules/playwright-core/lib/client/waiter.js
+  ai_agent 1-142
+e2e/node_modules/playwright-core/lib/vite/traceViewer/snapshot.html
+  ai_agent 1-21
+e2e/node_modules/playwright-core/lib/tools/backend/tools.js
+  ai_agent 1-102
+e2e/node_modules/playwright-core/lib/tools/mcp/log.js
+  ai_agent 1-35
+e2e/node_modules/playwright/lib/isomorphic/teleReceiver.js
+  ai_agent 1-538
+e2e/node_modules/playwright/lib/mcp/test/seed.js
+  ai_agent 1-82
+e2e/node_modules/playwright-core/lib/server/utils/fileUtils.js
+  ai_agent 1-205
+e2e/node_modules/@playwright/test/lib/matchers/toEqual.js
+  ai_agent 1-100
+e2e/node_modules/@playwright/test/index.mjs
+  ai_agent 1-18
+e2e/node_modules/playwright-core/browsers.json
+  ai_agent 1-81
+e2e/node_modules/@playwright/test/lib/transform/transform.js
+  ai_agent 1-296
+e2e/node_modules/@playwright/test/lib/matchers/toMatchText.js
+  ai_agent 1-99
+e2e/node_modules/@playwright/test/jsx-runtime.mjs
+  ai_agent 1-21
+e2e/node_modules/@playwright/test/lib/reporters/line.js
+  ai_agent 1-131
+e2e/node_modules/playwright-core/index.mjs
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/server/pipeTransport.js
+  ai_agent 1-89
+e2e/node_modules/playwright/lib/transform/compilationCache.js
+  ai_agent 1-272
+e2e/node_modules/playwright-core/lib/server/chromium/crServiceWorker.js
+  ai_agent 1-137
+e2e/node_modules/playwright-core/lib/utilsBundle.js
+  ai_agent 1-91
+e2e/node_modules/playwright-core/lib/server/network.js
+  ai_agent 1-668
+e2e/node_modules/playwright-core/lib/server/dispatchers/androidDispatcher.js
+  ai_agent 1-325
+e2e/node_modules/playwright-core/lib/tools/cli-daemon/commands.js
+  ai_agent 1-956
+e2e/node_modules/playwright-core/lib/vite/traceViewer/defaultSettingsView.B4dS75f0.css
+  ai_agent 1
+e2e/run-tests.sh
+  ai_agent 1-12
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/video-recording.md
+  ai_agent 1-143
+public/fiuba-map/static/js/main.8d1311e9.js.map
+  ai_agent 1
+e2e/node_modules/@playwright/test/lib/runner/loadUtils.js
+  ai_agent 1-340
+e2e/node_modules/@playwright/test/lib/agents/playwright-test-generate.prompt.md
+  ai_agent 1-8
+e2e/node_modules/@playwright/test/lib/transform/esmLoader.js
+  ai_agent 1-105
+e2e/node_modules/playwright-core/lib/client/worker.js
+  ai_agent 1-85
+e2e/node_modules/@playwright/test/lib/runner/sigIntWatcher.js
+  ai_agent 1-96
+e2e/node_modules/playwright-core/bin/reinstall_chrome_beta_linux.sh
+  ai_agent 1-42
+e2e/node_modules/playwright-core/lib/server/android/android.js
+  ai_agent 1-465
+e2e/node_modules/playwright-core/lib/server/codegen/javascript.js
+  ai_agent 1-247
+e2e/node_modules/playwright-core/lib/server/debugController.js
+  ai_agent 1-197
+e2e/node_modules/playwright-core/lib/tools/exports.js
+  ai_agent 1-60
+e2e/node_modules/playwright-core/lib/vite/traceViewer/assets/defaultSettingsView-GTWI-W_B.js
+  ai_agent 1-262
+e2e/node_modules/playwright/lib/runner/failureTracker.js
+  ai_agent 1-72
+e2e/node_modules/playwright/lib/transform/babelBundle.js
+  ai_agent 1-43
+e2e/node_modules/playwright/lib/runner/tasks.js
+  ai_agent 1-413
+e2e/node_modules/@playwright/test/lib/reporters/blob.js
+  ai_agent 1-138
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/traceLoader.js
+  ai_agent 1-132
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/request-mocking.md
+  ai_agent 1-87
+e2e/node_modules/playwright-core/lib/remote/playwrightConnection.js
+  ai_agent 1-131
+e2e/node_modules/playwright-core/lib/server/deviceDescriptors.js
+  ai_agent 1-39
+e2e/node_modules/playwright-core/lib/tools/utils/connect.js
+  ai_agent 1-32
+e2e/node_modules/playwright-core/lib/server/launchApp.js
+  ai_agent 1-127
+e2e/node_modules/playwright-core/lib/server/usKeyboardLayout.js
+  ai_agent 1-152
+e2e/node_modules/playwright-core/lib/tools/backend/context.js
+  ai_agent 1-296
+e2e/node_modules/playwright-core/lib/client/clientInstrumentation.js
+  ai_agent 1-55
+e2e/node_modules/playwright-core/lib/tools/backend/tool.js
+  ai_agent 1-47
+e2e/node_modules/playwright/lib/isomorphic/testServerConnection.js
+  ai_agent 1-223
+e2e/node_modules/playwright-core/lib/tools/cli-daemon/command.js
+  ai_agent 1-73
+e2e/tests/auth.spec.ts
+  ai_agent 1-34
+e2e/node_modules/playwright-core/lib/tools/mcp/config.d.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/tools/cli-client/help.json
+  ai_agent 1-399
+e2e/node_modules/playwright/lib/matchers/toMatchAriaSnapshot.js
+  ai_agent 1-163
+e2e/node_modules/@playwright/test/lib/common/fixtures.js
+  ai_agent 1-302
+e2e/node_modules/playwright-core/lib/vite/traceViewer/index.CzXZzn5A.css
+  ai_agent 1
+e2e/node_modules/playwright-core/lib/tools/trace/traceAttachments.js
+  ai_agent 1-69
+e2e/node_modules/playwright/lib/agents/playwright-test-heal.prompt.md
+  ai_agent 1-6
+e2e/node_modules/@playwright/test/lib/runner/testRunner.js
+  ai_agent 1-398
+e2e/node_modules/playwright-core/lib/server/utils/spawnAsync.js
+  ai_agent 1-41
+e2e/node_modules/playwright-core/lib/tools/backend/cookies.js
+  ai_agent 1-152
+e2e/node_modules/playwright-core/lib/tools/backend/logFile.js
+  ai_agent 1-95
+e2e/node_modules/@playwright/test/lib/isomorphic/teleReceiver.js
+  ai_agent 1-538
+e2e/node_modules/playwright-core/lib/client/input.js
+  ai_agent 1-84
+e2e/node_modules/playwright/index.mjs
+  ai_agent 1-18
+e2e/node_modules/playwright/lib/worker/testTracing.js
+  ai_agent 1-351
+e2e/node_modules/@playwright/test/package.json
+  ai_agent 1-8
+e2e/node_modules/playwright-core/lib/client/tracing.js
+  ai_agent 1-126
+e2e/node_modules/playwright-core/lib/protocol/serializers.js
+  ai_agent 1-197
+e2e/node_modules/playwright-core/lib/server/recorder/throttledFile.js
+  ai_agent 1-57
+e2e/node_modules/playwright/lib/reporters/reporterV2.js
+  ai_agent 1-102
+e2e/node_modules/playwright-core/lib/tools/backend/webstorage.js
+  ai_agent 1-223
+e2e/node_modules/@playwright/test/playwright
+  ai_agent 1
+e2e/node_modules/playwright-core/lib/server/browserContext.js
+  ai_agent 1-741
+e2e/node_modules/@playwright/test/README.md
+  ai_agent 1-170
+e2e/node_modules/playwright/lib/matchers/toMatchText.js
+  ai_agent 1-99
+e2e/node_modules/playwright-core/lib/tools/cli-client/registry.js
+  ai_agent 1-176
+e2e/node_modules/@playwright/test/lib/index.js
+  ai_agent 1-764
+e2e/node_modules/playwright-core/lib/server/chromium/chromiumSwitches.js
+  ai_agent 1-104
+e2e/node_modules/playwright-core/lib/vite/traceViewer/uiMode.html
+  ai_agent 1-17
+public/fiuba-map/asset-manifest.json
+  ai_agent 1-10
+e2e/node_modules/playwright-core/lib/server/dispatchers/elementHandlerDispatcher.js
+  ai_agent 1-181
+e2e/node_modules/playwright-core/lib/generated/utilityScriptSource.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/utils/isomorphic/protocolMetainfo.js
+  ai_agent 1-351
+e2e/node_modules/playwright-core/lib/server/dispatchers/browserTypeDispatcher.js
+  ai_agent 1-71
+e2e/node_modules/playwright-core/lib/server/utils/httpServer.js
+  ai_agent 1-205
+e2e/node_modules/playwright-core/lib/client/selectors.js
+  ai_agent 1-57
+e2e/node_modules/playwright-core/lib/protocol/validatorPrimitives.js
+  ai_agent 1-193
+e2e/node_modules/playwright-core/lib/server/webkit/webkit.js
+  ai_agent 1-108
+e2e/node_modules/playwright/lib/runner/watchMode.js
+  ai_agent 1-396
+e2e/node_modules/playwright-core/lib/generated/webSocketMockSource.js
+  ai_agent 1-336
+e2e/node_modules/playwright-core/bin/install_media_pack.ps1
+  ai_agent 1-5
+e2e/node_modules/playwright-core/lib/tools/mcp/watchdog.js
+  ai_agent 1-44
+e2e/node_modules/@playwright/test/lib/reporters/json.js
+  ai_agent 1-254
+e2e/node_modules/playwright-core/lib/vite/dashboard/assets/index-CZAYOG76.css
+  ai_agent 1
+e2e/node_modules/@playwright/test/lib/common/expectBundleImpl.js
+  ai_agent 1-407
+e2e/node_modules/playwright/lib/runner/processHost.js
+  ai_agent 1-180
+e2e/node_modules/@playwright/test/lib/agents/agentParser.js
+  ai_agent 1-89
+e2e/node_modules/playwright-core/lib/tools/backend/tabs.js
+  ai_agent 1-67
+e2e/node_modules/playwright-core/lib/tools/trace/traceParser.js
+  ai_agent 1-96
+e2e/node_modules/playwright-core/lib/server/codegen/language.js
+  ai_agent 1-132
+e2e/node_modules/playwright-core/lib/client/events.js
+  ai_agent 1-103
+e2e/node_modules/playwright-core/lib/client/types.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/server/chromium/crNetworkManager.js
+  ai_agent 1-707
+e2e/node_modules/playwright-core/lib/server/dom.js
+  ai_agent 1-833
+e2e/node_modules/playwright-core/lib/server/localUtils.js
+  ai_agent 1-214
+e2e/node_modules/playwright-core/lib/server/bidi/third_party/bidiProtocolPermissions.js
+  ai_agent 1-42
+e2e/node_modules/playwright-core/lib/server/dispatchers/electronDispatcher.js
+  ai_agent 1-90
+e2e/node_modules/playwright-core/lib/tools/backend/common.js
+  ai_agent 1-63
+e2e/node_modules/playwright-core/lib/vite/recorder/assets/index-CqAYX1I3.js
+  ai_agent 1-193
+e2e/node_modules/@playwright/test/test.d.ts
+  ai_agent 1-18
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/snapshotRenderer.js
+  ai_agent 1-492
+e2e/node_modules/playwright-core/lib/vite/traceViewer/playwright-logo.svg
+  ai_agent 1-9
+e2e/node_modules/playwright/lib/transform/esmLoader.js
+  ai_agent 1-105
+e2e/node_modules/playwright-core/lib/server/utils/profiler.js
+  ai_agent 1-65
+e2e/package.json
+  ai_agent 1-12
+e2e/node_modules/playwright/lib/agents/copilot-setup-steps.yml
+  ai_agent 1-34
+e2e/node_modules/playwright-core/lib/tools/trace/traceSnapshot.js
+  ai_agent 1-149
+e2e/node_modules/playwright-core/lib/client/writableStream.js
+  ai_agent 1-39
+e2e/node_modules/playwright-core/lib/server/recorder/chat.js
+  ai_agent 1-161
+e2e/node_modules/playwright-core/lib/server/utils/disposable.js
+  ai_agent 1-32
+e2e/node_modules/@playwright/test/lib/utilsBundleImpl.js
+  ai_agent 1-100
+e2e/node_modules/playwright-core/lib/server/utils/image_tools/compare.js
+  ai_agent 1-109
+e2e/node_modules/@playwright/test/lib/worker/testTracing.js
+  ai_agent 1-351
+e2e/node_modules/playwright-core/lib/server/dispatchers/jsHandleDispatcher.js
+  ai_agent 1-85
+e2e/node_modules/playwright-core/lib/tools/cli-daemon/daemon.js
+  ai_agent 1-157
+e2e/node_modules/playwright-core/lib/tools/trace/traceRequests.js
+  ai_agent 1-182
+e2e/node_modules/playwright-core/lib/server/bidi/third_party/bidiKeyboard.js
+  ai_agent 1-256
+e2e/node_modules/playwright-core/lib/utils/isomorphic/ariaSnapshot.js
+  ai_agent 1-455
+e2e/node_modules/@playwright/test/lib/common/process.js
+  ai_agent 1-133
+e2e/node_modules/playwright/lib/runner/dispatcher.js
+  ai_agent 1-522
+e2e/node_modules/playwright/lib/runner/loadUtils.js
+  ai_agent 1-340
+e2e/node_modules/playwright/lib/common/configLoader.js
+  ai_agent 1-344
+public/fiuba-map/static/js/main.7a90e6f3.js.map
+  ai_agent 1
+e2e/node_modules/playwright-core/lib/mcpBundleImpl.js
+  ai_agent 1-91
+e2e/node_modules/playwright-core/lib/tools/backend/navigate.js
+  ai_agent 1-106
+e2e/node_modules/@playwright/test/lib/isomorphic/testServerInterface.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/server/utils/zones.js
+  ai_agent 1-57
+e2e/node_modules/@playwright/test/lib/common/globals.js
+  ai_agent 1-58
+e2e/node_modules/playwright/lib/matchers/matchers.js
+  ai_agent 1-385
+e2e/node_modules/@playwright/test/lib/agents/playwright-test-plan.prompt.md
+  ai_agent 1-9
+e2e/node_modules/@playwright/test/lib/runner/taskRunner.js
+  ai_agent 1-127
+e2e/node_modules/playwright-core/lib/server/dispatchers/frameDispatcher.js
+  ai_agent 1-227
+e2e/node_modules/playwright-core/lib/tools/utils/mcp/tool.js
+  ai_agent 1-47
+e2e/node_modules/@playwright/test/lib/common/testType.js
+  ai_agent 1-301
+e2e/node_modules/playwright-core/lib/server/firefox/firefox.js
+  ai_agent 1-114
+e2e/node_modules/playwright-core/lib/server/errors.js
+  ai_agent 1-69
+e2e/node_modules/playwright-core/lib/client/browser.js
+  ai_agent 1-169
+e2e/node_modules/@playwright/test/lib/matchers/toMatchSnapshot.js
+  ai_agent 1-349
+e2e/node_modules/playwright/lib/agents/playwright-test-generate.prompt.md
+  ai_agent 1-8
+public/fiuba-map/static/js/main.7a90e6f3.js
+  ai_agent 1-282
+e2e/node_modules/playwright-core/lib/tools/dashboard/dashboardApp.js
+  ai_agent 1-284
+e2e/node_modules/playwright-core/lib/server/bidi/bidiPage.js
+  ai_agent 1-599
+e2e/node_modules/@playwright/test/index.js
+  ai_agent 1
+e2e/node_modules/playwright-core/lib/server/codegen/csharp.js
+  ai_agent 1-327
+e2e/node_modules/@playwright/test/LICENSE
+  ai_agent 1-202
+e2e/node_modules/playwright-core/lib/server/overlay.js
+  ai_agent 1-138
+e2e/node_modules/playwright-core/lib/tools/backend/response.js
+  ai_agent 1-305
+e2e/node_modules/playwright-core/lib/tools/backend/verify.js
+  ai_agent 1-151
+e2e/node_modules/playwright/lib/runner/taskRunner.js
+  ai_agent 1-127
+e2e/node_modules/@playwright/test/lib/common/suiteUtils.js
+  ai_agent 1-140
+e2e/node_modules/playwright-core/lib/utils/isomorphic/assert.js
+  ai_agent 1-31
+e2e/node_modules/playwright/README.md
+  ai_agent 1-170
+e2e/node_modules/playwright/lib/mcp/test/plannerTools.js
+  ai_agent 1-145
+e2e/node_modules/playwright-core/lib/tools/backend/config.js
+  ai_agent 1-41
+e2e/node_modules/playwright-core/lib/server/utils/happyEyeballs.js
+  ai_agent 1-210
+e2e/node_modules/playwright-core/lib/server/registry/oopDownloadBrowserMain.js
+  ai_agent 1-127
+e2e/node_modules/playwright-core/lib/tools/backend/browserBackend.js
+  ai_agent 1-79
+e2e/node_modules/playwright-core/lib/client/webError.js
+  ai_agent 1-39
+e2e/node_modules/playwright/lib/reporters/junit.js
+  ai_agent 1-321
+e2e/node_modules/playwright-core/lib/tools/mcp/index.js
+  ai_agent 1-62
+e2e/node_modules/@playwright/test/lib/mcp/test/browserBackend.js
+  ai_agent 1-121
+e2e/node_modules/playwright-core/lib/server/recorder.js
+  ai_agent 1-535
+e2e/node_modules/@playwright/test/test.mjs
+  ai_agent 1-34
+e2e/node_modules/playwright/lib/common/config.js
+  ai_agent 1-281
+e2e/node_modules/playwright-core/lib/server/playwright.js
+  ai_agent 1-69
+e2e/node_modules/playwright/lib/worker/workerMain.js
+  ai_agent 1-533
+e2e/node_modules/playwright-core/lib/server/dispatchers/debugControllerDispatcher.js
+  ai_agent 1-78
+e2e/node_modules/playwright/lib/common/expectBundle.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/server/utils/comparators.js
+  ai_agent 1-139
+e2e/node_modules/@playwright/test/lib/common/expectBundle.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/server/bidi/third_party/bidiProtocol.js
+  ai_agent 1-24
+e2e/node_modules/playwright-core/lib/tools/mcp/extensionContextFactory.js
+  ai_agent 1-55
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/tracing.md
+  ai_agent 1-139
+e2e/node_modules/playwright/lib/reporters/versions/blobV1.js
+  ai_agent 1-16
+e2e/node_modules/playwright/lib/runner/reporters.js
+  ai_agent 1-143
+e2e/node_modules/playwright-core/lib/server/utils/nodePlatform.js
+  ai_agent 1-148
+e2e/node_modules/playwright-core/lib/tools/mcp/program.js
+  ai_agent 1-107
+e2e/node_modules/playwright/lib/utilsBundle.js
+  ai_agent 1-43
+e2e/node_modules/playwright-core/lib/server/webkit/wkProvisionalPage.js
+  ai_agent 1-83
+e2e/node_modules/playwright-core/bin/reinstall_msedge_stable_win.ps1
+  ai_agent 1-24
+e2e/node_modules/playwright-core/lib/cli/programWithTestStub.js
+  ai_agent 1-74
+e2e/node_modules/playwright-core/lib/server/browser.js
+  ai_agent 1-212
+e2e/node_modules/playwright-core/lib/server/javascript.js
+  ai_agent 1-291
+e2e/node_modules/playwright/lib/isomorphic/folders.js
+  ai_agent 1-30
+e2e/node_modules/playwright/package.json
+  ai_agent 1-8
+e2e/node_modules/playwright-core/lib/server/utils/network.js
+  ai_agent 1-243
+e2e/node_modules/playwright/lib/third_party/pirates.js
+  ai_agent 1-62
+e2e/node_modules/playwright-core/lib/server/recorder/recorderApp.js
+  ai_agent 1-367
+e2e/node_modules/@playwright/test/lib/isomorphic/testServerConnection.js
+  ai_agent 1-223
+e2e/node_modules/@playwright/test/lib/common/ipc.js
+  ai_agent 1-60
+e2e/node_modules/playwright/lib/runner/projectUtils.js
+  ai_agent 1-241
+e2e/node_modules/playwright-core/lib/tools/trace/traceCli.js
+  ai_agent 1-87
+e2e/node_modules/playwright-core/lib/client/electron.js
+  ai_agent 1-139
+e2e/node_modules/playwright-core/lib/server/dispatchers/debuggerDispatcher.js
+  ai_agent 1-84
+e2e/node_modules/playwright-core/lib/server/index.js
+  ai_agent 1-58
+e2e/node_modules/playwright-core/lib/browserServerImpl.js
+  ai_agent 1-120
+e2e/node_modules/playwright-core/lib/server/chromium/crInput.js
+  ai_agent 1-187
+e2e/node_modules/playwright-core/lib/server/input.js
+  ai_agent 1-322
+e2e/node_modules/playwright/jsx-runtime.js
+  ai_agent 1-42
+e2e/node_modules/playwright-core/lib/tools/backend/tracing.js
+  ai_agent 1-78
+e2e/node_modules/playwright/lib/program.js
+  ai_agent 1-239
+e2e/node_modules/playwright/lib/agents/playwright-test-coverage.prompt.md
+  ai_agent 1-31
+e2e/node_modules/playwright/lib/runner/vcs.js
+  ai_agent 1-72
+e2e/node_modules/playwright-core/lib/server/dispatchers/webSocketRouteDispatcher.js
+  ai_agent 1-164
+e2e/node_modules/playwright-core/package.json
+  ai_agent 1-48
+e2e/node_modules/playwright-core/lib/client/timeoutSettings.js
+  ai_agent 1-79
+e2e/node_modules/playwright-core/lib/server/dispatchers/tracingDispatcher.js
+  ai_agent 1-68
+e2e/node_modules/playwright-core/lib/server/instrumentation.js
+  ai_agent 1-77
+e2e/node_modules/playwright-core/lib/tools/backend/dialogs.js
+  ai_agent 1-59
+e2e/node_modules/playwright-core/lib/vite/traceViewer/uiMode.Btcz36p_.css
+  ai_agent 1
+e2e/node_modules/@playwright/test/lib/transform/compilationCache.js
+  ai_agent 1-272
+e2e/node_modules/playwright/lib/agents/playwright-test-plan.prompt.md
+  ai_agent 1-9
+e2e/node_modules/@playwright/test/lib/isomorphic/stringInternPool.js
+  ai_agent 1-69
+e2e/node_modules/@playwright/test/lib/plugins/gitCommitInfoPlugin.js
+  ai_agent 1-198
+e2e/node_modules/@playwright/test/lib/reporters/reporterV2.js
+  ai_agent 1-102
+e2e/node_modules/playwright-core/lib/mcpBundle.js
+  ai_agent 1-78
+e2e/node_modules/playwright-core/lib/tools/backend/video.js
+  ai_agent 1-98
+e2e/node_modules/playwright-core/lib/server/screenshotter.js
+  ai_agent 1-333
+e2e/node_modules/@playwright/test/lib/runner/testGroups.js
+  ai_agent 1-125
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/traceModernizer.js
+  ai_agent 1-401
+e2e/node_modules/playwright-core/lib/client/coverage.js
+  ai_agent 1-44
+e2e/node_modules/playwright-core/lib/server/utils/linuxUtils.js
+  ai_agent 1-71
+e2e/node_modules/playwright/lib/isomorphic/teleSuiteUpdater.js
+  ai_agent 1-157
+e2e/node_modules/playwright-core/lib/vite/recorder/playwright-logo.svg
+  ai_agent 1-9
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/SKILL.md
+  ai_agent 1-328
+e2e/node_modules/playwright-core/lib/tools/cli-daemon/helpGenerator.js
+  ai_agent 1-177
+e2e/node_modules/playwright-core/lib/server/utils/socksProxy.js
+  ai_agent 1-511
+e2e/node_modules/playwright-core/lib/server/utils/image_tools/imageChannel.js
+  ai_agent 1-78
+e2e/node_modules/@playwright/test/jsx-runtime.js
+  ai_agent 1-42
+e2e/node_modules/playwright-core/lib/serverRegistry.js
+  ai_agent 1-156
+e2e/node_modules/playwright-core/lib/tools/backend/form.js
+  ai_agent 1-64
+e2e/node_modules/playwright-core/lib/bootstrap.js
+  ai_agent 1-77
+e2e/node_modules/playwright-core/lib/server/chromium/defaultFontFamilies.js
+  ai_agent 1-162
+e2e/node_modules/playwright/NOTICE
+  ai_agent 1-5
+e2e/node_modules/playwright/lib/matchers/expect.js
+  ai_agent 1-311
+e2e/node_modules/playwright-core/lib/server/artifact.js
+  ai_agent 1-127
+e2e/node_modules/playwright/lib/reporters/line.js
+  ai_agent 1-131
+e2e/node_modules/playwright-core/lib/client/debugger.js
+  ai_agent 1-57
+e2e/node_modules/playwright-core/lib/tools/cli-client/cli.js
+  ai_agent 1-6
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/snapshotStorage.js
+  ai_agent 1-89
+e2e/node_modules/playwright-core/lib/tools/backend/evaluate.js
+  ai_agent 1-64
+e2e/node_modules/@playwright/test/lib/mcp/test/streams.js
+  ai_agent 1-44
+e2e/node_modules/@playwright/test/lib/matchers/matchers.js
+  ai_agent 1-385
+e2e/node_modules/playwright/lib/common/fixtures.js
+  ai_agent 1-302
+e2e/node_modules/playwright-core/lib/client/errors.js
+  ai_agent 1-77
+e2e/node_modules/playwright-core/lib/outofprocess.js
+  ai_agent 1-76
+e2e/node_modules/playwright-core/lib/tools/utils/socketConnection.js
+  ai_agent 1-108
+e2e/node_modules/@playwright/test/lib/runner/tasks.js
+  ai_agent 1-413
+e2e/node_modules/playwright-core/lib/vite/dashboard/assets/index-BAOybkp8.js
+  ai_agent 1-50
+e2e/playwright.config.ts
+  ai_agent 1-15
+e2e/node_modules/playwright/playwright
+  ai_agent 1
+e2e/node_modules/playwright-core/lib/server/chromium/crDragDrop.js
+  ai_agent 1-131
+e2e/node_modules/playwright-core/lib/utils/isomorphic/mimeType.js
+  ai_agent 1-464
+e2e/node_modules/playwright-core/lib/client/artifact.js
+  ai_agent 1-79
+e2e/node_modules/@playwright/test/lib/matchers/matcherHint.js
+  ai_agent 1-44
+e2e/node_modules/playwright/lib/agents/playwright-test-planner.agent.md
+  ai_agent 1-73
+e2e/node_modules/playwright-core/lib/server/dispatchers/streamDispatcher.js
+  ai_agent 1-67
+e2e/node_modules/playwright-core/lib/client/clientStackTrace.js
+  ai_agent 1-69
+e2e/node_modules/playwright-core/lib/utils/isomorphic/utilityScriptSerializers.js
+  ai_agent 1-262
+e2e/node_modules/playwright/lib/mcp/test/testTool.js
+  ai_agent 1-30
+e2e/node_modules/playwright/lib/plugins/index.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/tools/backend/tab.js
+  ai_agent 1-445
+e2e/node_modules/playwright/lib/reporters/empty.js
+  ai_agent 1-32
+e2e/node_modules/playwright-core/lib/server/webkit/wkInput.js
+  ai_agent 1-181
+e2e/node_modules/playwright/lib/third_party/tsconfig-loader.js
+  ai_agent 1-103
+e2e/node_modules/playwright/lib/mcp/test/testContext.js
+  ai_agent 1-283
+e2e/node_modules/@playwright/test/test.js
+  ai_agent 1-24
+e2e/node_modules/playwright-core/lib/server/dispatchers/playwrightDispatcher.js
+  ai_agent 1-108
+e2e/node_modules/@playwright/test/lib/mcp/test/testTools.js
+  ai_agent 1-108
+e2e/node_modules/playwright/lib/internalsForTest.js
+  ai_agent 1-42
+e2e/node_modules/@playwright/test/lib/agents/playwright-test-heal.prompt.md
+  ai_agent 1-6
+e2e/node_modules/@playwright/test/lib/util.js
+  ai_agent 1-400
+e2e/node_modules/@playwright/test/lib/runner/reporters.js
+  ai_agent 1-143
+e2e/node_modules/playwright-core/lib/client/locator.js
+  ai_agent 1-367
+e2e/node_modules/playwright/lib/mcp/test/generatorTools.js
+  ai_agent 1-122
+e2e/node_modules/@playwright/test/NOTICE
+  ai_agent 1-5
+e2e/node_modules/playwright-core/lib/client/disposable.js
+  ai_agent 1-76
+e2e/node_modules/@playwright/test/lib/common/config.js
+  ai_agent 1-281
+e2e/node_modules/playwright-core/lib/server/firefox/ffPage.js
+  ai_agent 1-494
+e2e/node_modules/playwright/lib/runner/testRunner.js
+  ai_agent 1-398
+e2e/node_modules/playwright-core/lib/server/dispatchers/browserDispatcher.js
+  ai_agent 1-124
+e2e/node_modules/playwright-core/bin/reinstall_msedge_beta_mac.sh
+  ai_agent 1-11
+e2e/node_modules/playwright-core/lib/tools/backend/files.js
+  ai_agent 1-60
+e2e/node_modules/playwright-core/lib/vite/traceViewer/xtermModule.DYP7pi_n.css
+  ai_agent 1-32
+e2e/node_modules/playwright/lib/worker/timeoutManager.js
+  ai_agent 1-185
+e2e/node_modules/playwright/test.d.ts
+  ai_agent 1-18
+e2e/node_modules/playwright/lib/common/expectBundleImpl.js
+  ai_agent 1-407
+e2e/node_modules/playwright-core/lib/server/firefox/ffInput.js
+  ai_agent 1-175
+e2e/tests/fiuba_map_integration.spec.ts
+  ai_agent 1-123
+e2e/node_modules/playwright/lib/agents/agentParser.js
+  ai_agent 1-89
+e2e/node_modules/@playwright/test/lib/reporters/dot.js
+  ai_agent 1-99
+e2e/node_modules/@playwright/test/lib/runner/failureTracker.js
+  ai_agent 1-72
+e2e/node_modules/playwright-core/lib/server/bidi/bidiPdf.js
+  ai_agent 1-106
+e2e/node_modules/playwright-core/lib/server/chromium/crCoverage.js
+  ai_agent 1-235
+e2e/node_modules/playwright-core/lib/tools/mcp/browserFactory.js
+  ai_agent 1-233
+e2e/node_modules/@playwright/test/lib/runner/rebase.js
+  ai_agent 1-189
+e2e/node_modules/playwright-core/lib/server/bidi/third_party/bidiSerializer.js
+  ai_agent 1-148
+e2e/node_modules/playwright/lib/isomorphic/testTree.js
+  ai_agent 1-329
+e2e/node_modules/playwright/lib/runner/workerHost.js
+  ai_agent 1-101
+e2e/node_modules/playwright-core/LICENSE
+  ai_agent 1-202
+e2e/node_modules/playwright-core/lib/tools/trace/installSkill.js
+  ai_agent 1-48
+e2e/node_modules/playwright-core/lib/utils/isomorphic/semaphore.js
+  ai_agent 1-54
+e2e/node_modules/playwright-core/lib/utils/isomorphic/timeoutRunner.js
+  ai_agent 1-66
+e2e/node_modules/playwright/lib/mcp/test/streams.js
+  ai_agent 1-44
+e2e/node_modules/playwright-core/lib/remote/playwrightPipeServer.js
+  ai_agent 1-100
+e2e/node_modules/playwright/lib/agents/playwright-test-generator.agent.md
+  ai_agent 1-88
+e2e/node_modules/@playwright/test/lib/runner/uiModeReporter.js
+  ai_agent 1-30
+e2e/node_modules/playwright-core/lib/server/android/backendAdb.js
+  ai_agent 1-177
+e2e/node_modules/playwright-core/lib/server/bidi/third_party/firefoxPrefs.js
+  ai_agent 1-261
+e2e/node_modules/playwright-core/lib/server/firefox/ffConnection.js
+  ai_agent 1-142
+e2e/node_modules/playwright-core/lib/server/utils/processLauncher.js
+  ai_agent 1-242
+e2e/node_modules/playwright/lib/runner/testServer.js
+  ai_agent 1-269
+e2e/node_modules/@playwright/test/lib/runner/watchMode.js
+  ai_agent 1-396
+e2e/node_modules/playwright-core/lib/server/dispatchers/jsonPipeDispatcher.js
+  ai_agent 1-58
+e2e/node_modules/@playwright/test/lib/common/poolBuilder.js
+  ai_agent 1-85
+e2e/node_modules/playwright-core/lib/tools/backend/mouse.js
+  ai_agent 1-168
+e2e/node_modules/playwright-core/lib/server/chromium/crConnection.js
+  ai_agent 1-197
+e2e/node_modules/playwright-core/lib/cli/driver.js
+  ai_agent 1-98
+e2e/node_modules/playwright-core/lib/server/chromium/crBrowser.js
+  ai_agent 1-528
+e2e/node_modules/playwright-core/lib/tools/trace/traceConsole.js
+  ai_agent 1-97
+e2e/node_modules/playwright-core/lib/vite/traceViewer/index.C5466mMT.js
+  ai_agent 1-2
+e2e/node_modules/playwright-core/lib/client/connection.js
+  ai_agent 1-322
+e2e/node_modules/playwright-core/lib/client/jsHandle.js
+  ai_agent 1-105
+e2e/node_modules/playwright-core/lib/server/utils/ascii.js
+  ai_agent 1-44
+e2e/node_modules/playwright/lib/common/testLoader.js
+  ai_agent 1-101
+e2e/node_modules/playwright/lib/reporters/listModeReporter.js
+  ai_agent 1-69
+e2e/node_modules/playwright-core/lib/client/stream.js
+  ai_agent 1-39
+e2e/node_modules/playwright-core/lib/tools/trace/traceUtils.js
+  ai_agent 1-153
+e2e/node_modules/playwright/lib/reporters/multiplexer.js
+  ai_agent 1-116
+e2e/node_modules/playwright/lib/reportActions.js
+  ai_agent 1-80
+e2e/node_modules/playwright-core/lib/server/callLog.js
+  ai_agent 1-82
+e2e/node_modules/playwright-core/lib/server/firefox/ffBrowser.js
+  ai_agent 1-408
+e2e/node_modules/playwright/lib/runner/lastRun.js
+  ai_agent 1-77
+e2e/node_modules/@playwright/test/lib/isomorphic/events.js
+  ai_agent 1-77
+e2e/node_modules/@playwright/test/lib/reportActions.js
+  ai_agent 1-80
+e2e/node_modules/@playwright/test/lib/runner/lastRun.js
+  ai_agent 1-77
+e2e/node_modules/playwright-core/lib/client/connect.js
+  ai_agent 1-143
+e2e/node_modules/playwright-core/lib/client/dialog.js
+  ai_agent 1-63
+e2e/node_modules/playwright-core/lib/client/platform.js
+  ai_agent 1-74
+e2e/node_modules/playwright-core/lib/server/bidi/bidiExecutionContext.js
+  ai_agent 1-267
+e2e/node_modules/playwright-core/lib/server/bidi/bidiFirefox.js
+  ai_agent 1-128
+e2e/node_modules/playwright-core/lib/server/clock.js
+  ai_agent 1-149
+e2e/node_modules/playwright-core/lib/server/codegen/jsonl.js
+  ai_agent 1-52
+e2e/node_modules/playwright-core/bin/install_webkit_wsl.ps1
+  ai_agent 1-33
+e2e/node_modules/@playwright/test/lib/agents/playwright-test-generator.agent.md
+  ai_agent 1-88
+e2e/node_modules/playwright-core/lib/server/deviceDescriptorsSource.json
+  ai_agent 1-1779
+e2e/node_modules/playwright-core/lib/utils/isomorphic/formatUtils.js
+  ai_agent 1-64
+e2e/node_modules/playwright-core/lib/utils/isomorphic/protocolFormatter.js
+  ai_agent 1-81
+e2e/node_modules/playwright-core/bin/reinstall_msedge_beta_linux.sh
+  ai_agent 1-48
+e2e/node_modules/playwright/index.js
+  ai_agent 1
+e2e/node_modules/playwright/jsx-runtime.mjs
+  ai_agent 1-21
+e2e/node_modules/playwright/lib/reporters/teleEmitter.js
+  ai_agent 1-319
+e2e/node_modules/playwright-core/lib/server/bidi/bidiBrowser.js
+  ai_agent 1-571
+e2e/node_modules/@playwright/test/lib/runner/testServer.js
+  ai_agent 1-269
+e2e/node_modules/playwright-core/lib/tools/utils/mcp/http.js
+  ai_agent 1-152
+e2e/node_modules/@playwright/test/lib/third_party/tsconfig-loader.js
+  ai_agent 1-103
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/entries.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/versions/traceV4.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/vite/traceViewer/assets/codeMirrorModule-DS0FLvoc.js
+  ai_agent 1-32
+e2e/node_modules/@playwright/test/types/test.d.ts
+  ai_agent 1-10322
+e2e/node_modules/playwright/lib/isomorphic/types.d.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/server/webkit/wkPage.js
+  ai_agent 1-1161
+e2e/node_modules/playwright-core/lib/client/fetch.js
+  ai_agent 1-367
+e2e/node_modules/playwright/lib/common/test.js
+  ai_agent 1-330
+e2e/node_modules/playwright/lib/reporters/json.js
+  ai_agent 1-254
+e2e/node_modules/playwright/lib/reporters/html.js
+  ai_agent 1-666
+e2e/node_modules/@playwright/test/lib/agents/playwright-test-healer.agent.md
+  ai_agent 1-55
+e2e/node_modules/playwright-core/lib/server/codegen/java.js
+  ai_agent 1-274
+e2e/node_modules/playwright-core/lib/server/trace/recorder/tracing.js
+  ai_agent 1-655
+e2e/node_modules/playwright/lib/errorContext.js
+  ai_agent 1-121
+public/fiuba-map/index.html
+  ai_agent 1
+e2e/node_modules/@playwright/test/lib/utilsBundle.js
+  ai_agent 1-43
+e2e/node_modules/playwright-core/lib/utils/isomorphic/selectorParser.js
+  ai_agent 1-386
+e2e/node_modules/playwright-core/lib/tools/cli-client/session.js
+  ai_agent 1-289
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/versions/traceV8.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/server/formData.js
+  ai_agent 1-147
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/test-generation.md
+  ai_agent 1-88
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/session-management.md
+  ai_agent 1-169
+e2e/node_modules/playwright-core/lib/server/chromium/protocol.d.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/server/fileChooser.js
+  ai_agent 1-43
+e2e/node_modules/playwright/lib/matchers/toEqual.js
+  ai_agent 1-100
+e2e/node_modules/playwright/test.mjs
+  ai_agent 1-34
+e2e/node_modules/@playwright/test/lib/isomorphic/testTree.js
+  ai_agent 1-329
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/traceModel.js
+  ai_agent 1-366
+e2e/node_modules/@playwright/test/lib/reporters/base.js
+  ai_agent 1-633
+e2e/node_modules/@playwright/test/lib/reporters/versions/blobV1.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/third_party/pixelmatch.js
+  ai_agent 1-255
+e2e/node_modules/playwright-core/lib/server/utils/env.js
+  ai_agent 1-73
+e2e/node_modules/playwright/lib/common/esmLoaderHost.js
+  ai_agent 1-104
+e2e/node_modules/@playwright/test/lib/mcp/test/testBackend.js
+  ai_agent 1-99
+e2e/node_modules/playwright/types/test.d.ts
+  ai_agent 1-10322
+e2e/node_modules/@playwright/test/lib/worker/timeoutManager.js
+  ai_agent 1-185
+e2e/node_modules/@playwright/test/cli.js
+  ai_agent 1-19
+e2e/node_modules/playwright-core/lib/server/utils/userAgent.js
+  ai_agent 1-98
+e2e/node_modules/@playwright/test/ThirdPartyNotices.txt
+  ai_agent 1-3919
+e2e/node_modules/playwright-core/bin/reinstall_chrome_stable_win.ps1
+  ai_agent 1-24
+e2e/node_modules/playwright-core/lib/utils/isomorphic/colors.js
+  ai_agent 1-72
+e2e/node_modules/playwright/index.d.ts
+  ai_agent 1-17
+e2e/node_modules/playwright-core/lib/server/chromium/crDevTools.js
+  ai_agent 1-111
+e2e/node_modules/playwright/lib/runner/rebase.js
+  ai_agent 1-189
+e2e/node_modules/playwright-core/lib/server/chromium/crPage.js
+  ai_agent 1-963
+e2e/node_modules/@playwright/test/lib/reporters/listModeReporter.js
+  ai_agent 1-69
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/versions/traceV7.js
+  ai_agent 1-16
+e2e/node_modules/@playwright/test/lib/runner/projectUtils.js
+  ai_agent 1-241
+e2e/node_modules/playwright-core/lib/tools/backend/utils.js
+  ai_agent 1-83
+e2e/node_modules/@playwright/test/lib/program.js
+  ai_agent 1-239
+e2e/node_modules/playwright-core/lib/tools/cli-daemon/program.js
+  ai_agent 1-129
+e2e/node_modules/playwright-core/lib/server/utils/zipFile.js
+  ai_agent 1-74
+e2e/node_modules/playwright-core/lib/tools/utils/mcp/server.js
+  ai_agent 1-230
+e2e/node_modules/playwright/lib/common/testType.js
+  ai_agent 1-301
+e2e/node_modules/playwright/lib/plugins/gitCommitInfoPlugin.js
+  ai_agent 1-198
+e2e/node_modules/playwright-core/lib/server/console.js
+  ai_agent 1-61
+e2e/node_modules/playwright-core/lib/server/trace/recorder/snapshotterInjected.js
+  ai_agent 1-561
+e2e/node_modules/playwright-core/lib/server/transport.js
+  ai_agent 1-181
+e2e/node_modules/@playwright/test/lib/agents/playwright-test-coverage.prompt.md
+  ai_agent 1-31
+e2e/node_modules/@playwright/test/lib/matchers/toBeTruthy.js
+  ai_agent 1-75
+e2e/node_modules/playwright-core/lib/tools/backend/keyboard.js
+  ai_agent 1-155
+e2e/node_modules/playwright/lib/runner/testGroups.js
+  ai_agent 1-125
+e2e/node_modules/playwright-core/lib/server/bidi/third_party/bidiCommands.d.js
+  ai_agent 1-22
+e2e/node_modules/@playwright/test/lib/mcp/test/generatorTools.js
+  ai_agent 1-122
+e2e/node_modules/playwright/lib/testActions.js
+  ai_agent 1-220
+e2e/node_modules/playwright-core/lib/client/browserContext.js
+  ai_agent 1-563
+e2e/node_modules/playwright-core/lib/server/screencast.js
+  ai_agent 1-137
+e2e/node_modules/playwright-core/lib/server/cookieStore.js
+  ai_agent 1-206
+e2e/node_modules/playwright-core/lib/utils/isomorphic/locatorParser.js
+  ai_agent 1-176
+e2e/node_modules/playwright-core/lib/server/frameSelectors.js
+  ai_agent 1-160
+e2e/node_modules/playwright-core/lib/server/utils/expectUtils.js
+  ai_agent 1-123
+e2e/node_modules/playwright-core/lib/client/cdpSession.js
+  ai_agent 1-55
+e2e/node_modules/playwright-core/lib/server/bidi/bidiDeserializer.js
+  ai_agent 1-116
+e2e/node_modules/playwright-core/lib/tools/mcp/config.js
+  ai_agent 1-446
+e2e/node_modules/playwright-core/lib/server/dispatchers/writableStreamDispatcher.js
+  ai_agent 1-79
+e2e/node_modules/playwright-core/lib/server/electron/electron.js
+  ai_agent 1-278
+e2e/node_modules/playwright-core/lib/tools/backend/pdf.js
+  ai_agent 1-48
+e2e/node_modules/playwright-core/lib/vite/htmlReport/index.html
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/server/recorder/recorderSignalProcessor.js
+  ai_agent 1-83
+e2e/node_modules/playwright/lib/common/ipc.js
+  ai_agent 1-60
+e2e/node_modules/playwright-core/lib/utilsBundleImpl/index.js
+  ai_agent 1-217
+e2e/node_modules/@playwright/test/lib/runner/workerHost.js
+  ai_agent 1-101
+e2e/node_modules/playwright/lib/common/poolBuilder.js
+  ai_agent 1-85
+e2e/node_modules/playwright-core/lib/tools/trace/traceErrors.js
+  ai_agent 1-55
+e2e/node_modules/playwright-core/lib/client/channelOwner.js
+  ai_agent 1-194
+e2e/node_modules/playwright-core/lib/generated/clockSource.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/server/chromium/crPdf.js
+  ai_agent 1-121
+e2e/node_modules/playwright-core/lib/server/utils/eventsHelper.js
+  ai_agent 1-41
+e2e/node_modules/playwright-core/lib/generated/storageScriptSource.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/server/codegen/python.js
+  ai_agent 1-279
+e2e/node_modules/@playwright/test/lib/reporters/junit.js
+  ai_agent 1-321
+e2e/node_modules/playwright-core/lib/server/utils/task.js
+  ai_agent 1-51
+e2e/node_modules/playwright-core/lib/inprocess.js
+  ai_agent 1-3
+e2e/node_modules/playwright-core/lib/server/firefox/ffNetworkManager.js
+  ai_agent 1-256
+e2e/node_modules/playwright-core/lib/tools/backend/console.js
+  ai_agent 1-66
+e2e/node_modules/playwright-core/lib/tools/dashboard/dashboardController.js
+  ai_agent 1-296
+e2e/node_modules/playwright-core/lib/utils/isomorphic/types.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/vite/traceViewer/sw.bundle.js
+  ai_agent 1-5
+e2e/node_modules/playwright-core/lib/client/api.js
+  ai_agent 1-137
+e2e/node_modules/playwright-core/lib/server/webkit/protocol.d.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/vite/traceViewer/uiMode.Vipi55dB.js
+  ai_agent 1-6
+e2e/node_modules/playwright/lib/common/validators.js
+  ai_agent 1-68
+e2e/node_modules/playwright/lib/isomorphic/testServerInterface.js
+  ai_agent 1-16
+e2e/node_modules/playwright/types/testReporter.d.ts
+  ai_agent 1-822
+public/fiuba-map/static/js/main.8d1311e9.js
+  ai_agent 1-282
+public/fiuba-map/static/js/main.8d1311e9.js.LICENSE.txt
+  ai_agent 1-121
+e2e/node_modules/playwright-core/lib/server/fileUploadUtils.js
+  ai_agent 1-84
+e2e/node_modules/playwright-core/lib/client/network.js
+  ai_agent 1-750
+e2e/node_modules/playwright-core/lib/generated/pollingRecorderSource.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/vite/traceViewer/index.html
+  ai_agent 1-43
+e2e/node_modules/playwright-core/bin/reinstall_msedge_beta_win.ps1
+  ai_agent 1-23
+e2e/node_modules/@playwright/test/lib/worker/testInfo.js
+  ai_agent 1-532
+e2e/node_modules/playwright-core/lib/server/bidi/bidiNetworkManager.js
+  ai_agent 1-411
+e2e/node_modules/playwright-core/lib/server/utils/image_tools/colorUtils.js
+  ai_agent 1-89
+e2e/node_modules/@playwright/test/lib/reporters/multiplexer.js
+  ai_agent 1-116
+e2e/node_modules/playwright-core/lib/vite/recorder/assets/codeMirrorModule-C8KMvO9L.js
+  ai_agent 1-32
+e2e/node_modules/playwright/lib/matchers/toHaveURL.js
+  ai_agent 1-101
+e2e/node_modules/playwright/lib/util.js
+  ai_agent 1-400
+e2e/node_modules/playwright/lib/reporters/markdown.js
+  ai_agent 1-144
+e2e/node_modules/playwright-core/lib/server/utils/image_tools/stats.js
+  ai_agent 1-102
+e2e/node_modules/playwright-core/lib/server/download.js
+  ai_agent 1-71
+e2e/node_modules/playwright-core/lib/client/fileUtils.js
+  ai_agent 1-34
+e2e/node_modules/playwright/lib/reporters/list.js
+  ai_agent 1-252
+e2e/node_modules/@playwright/test/lib/isomorphic/types.d.js
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/client/screencast.js
+  ai_agent 1-88
+e2e/node_modules/playwright/lib/runner/uiModeReporter.js
+  ai_agent 1-30
+e2e/node_modules/playwright-core/lib/server/webkit/wkWorkers.js
+  ai_agent 1-106
+e2e/node_modules/playwright/lib/agents/generateAgents.js
+  ai_agent 1-346
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/running-code.md
+  ai_agent 1-231
+e2e/node_modules/playwright-core/lib/server/recorder/recorderRunner.js
+  ai_agent 1-138
+e2e/node_modules/playwright-core/lib/vite/recorder/assets/index-BSjZa4pk.css
+  ai_agent 1
+e2e/test-results/.last-run.json
+  ai_agent 1-4
+e2e/node_modules/playwright-core/lib/server/dispatchers/disposableDispatcher.js
+  ai_agent 1-39
+e2e/node_modules/playwright-core/lib/server/utils/pipeTransport.js
+  ai_agent 1-84
+e2e/node_modules/playwright-core/lib/server/webkit/wkExecutionContext.js
+  ai_agent 1-154
+e2e/node_modules/@playwright/test/lib/runner/loaderHost.js
+  ai_agent 1-89
+e2e/node_modules/playwright-core/lib/tools/backend/storage.js
+  ai_agent 1-68
+e2e/node_modules/playwright/lib/fsWatcher.js
+  ai_agent 1-67
+e2e/node_modules/playwright-core/lib/server/dispatchers/localUtilsDispatcher.js
+  ai_agent 1-185
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/element-attributes.md
+  ai_agent 1-23
+e2e/node_modules/@playwright/test/lib/common/validators.js
+  ai_agent 1-68
+e2e/node_modules/playwright-core/lib/server/utils/debug.js
+  ai_agent 1-42
+e2e/node_modules/playwright-core/lib/zipBundle.js
+  ai_agent 1-34
+e2e/node_modules/playwright-core/ThirdPartyNotices.txt
+  ai_agent 1-3552
+e2e/node_modules/playwright-core/lib/remote/serverTransport.js
+  ai_agent 1-96
+e2e/node_modules/playwright/lib/index.js
+  ai_agent 1-764
+e2e/node_modules/playwright/lib/isomorphic/stringInternPool.js
+  ai_agent 1-69
+e2e/node_modules/playwright/lib/matchers/toBeTruthy.js
+  ai_agent 1-75
+e2e/node_modules/@playwright/test/lib/agents/playwright-test-planner.agent.md
+  ai_agent 1-73
+e2e/node_modules/playwright-core/lib/server/chromium/chromium.js
+  ai_agent 1-399
+e2e/node_modules/playwright-core/lib/cli/program.js
+  ai_agent 1-225
+e2e/node_modules/playwright-core/lib/generated/bindingsControllerSource.js
+  ai_agent 1-28
+e2e/node_modules/playwright-core/lib/server/trace/recorder/snapshotter.js
+  ai_agent 1-147
+e2e/node_modules/playwright-core/lib/server/registry/index.js
+  ai_agent 1-1395
+e2e/node_modules/playwright-core/lib/vite/traceViewer/manifest.webmanifest
+  ai_agent 1-16
+e2e/node_modules/playwright-core/lib/utils/isomorphic/trace/snapshotServer.js
+  ai_agent 1-120
+e2e/node_modules/playwright/lib/worker/fixtureRunner.js
+  ai_agent 1-262
+e2e/node_modules/playwright-core/lib/remote/playwrightServer.js
+  ai_agent 1-339
+e2e/node_modules/playwright-core/lib/server/fetch.js
+  ai_agent 1-621
+e2e/node_modules/@playwright/test/lib/reporters/github.js
+  ai_agent 1-127
+e2e/node_modules/playwright-core/lib/client/harRouter.js
+  ai_agent 1-99
+e2e/node_modules/playwright-core/lib/server/recorder/recorderUtils.js
+  ai_agent 1-157
+e2e/node_modules/playwright-core/lib/tools/mcp/cdpRelay.js
+  ai_agent 1-352
+e2e/node_modules/playwright-core/lib/tools/backend/sessionLog.js
+  ai_agent 1-74
+e2e/node_modules/playwright-core/lib/vite/htmlReport/report.js
+  ai_agent 1-72
+e2e/node_modules/@playwright/test/lib/mcp/test/testTool.js
+  ai_agent 1-30
+e2e/node_modules/playwright-core/lib/server/firefox/ffExecutionContext.js
+  ai_agent 1-150
+e2e/node_modules/playwright-core/lib/server/protocolError.js
+  ai_agent 1-52
+e2e/node_modules/playwright/lib/loader/loaderMain.js
+  ai_agent 1-59
+e2e/node_modules/playwright-core/lib/server/utils/crypto.js
+  ai_agent 1-216
+e2e/node_modules/playwright-core/lib/server/bidi/bidiInput.js
+  ai_agent 1-146
+e2e/node_modules/playwright/lib/matchers/matcherHint.js
+  ai_agent 1-44
+e2e/node_modules/@playwright/test/index.d.ts
+  ai_agent 1-17
+e2e/node_modules/playwright-core/lib/tools/backend/wait.js
+  ai_agent 1-63
+e2e/node_modules/playwright-core/lib/server/har/harRecorder.js
+  ai_agent 1-147
+e2e/node_modules/playwright-core/lib/cli/installActions.js
+  ai_agent 1-171
+e2e/node_modules/playwright-core/lib/server/har/harTracer.js
+  ai_agent 1-608
+e2e/node_modules/playwright-core/lib/tools/cli-client/skill/references/storage-state.md
+  ai_agent 1-275
+e2e/node_modules/playwright-core/lib/utils/isomorphic/locatorUtils.js
+  ai_agent 1-81
+e2e/node_modules/@playwright/test/lib/reporters/markdown.js
+  ai_agent 1-144
+e2e/node_modules/playwright-core/NOTICE
+  ai_agent 1-5
+e2e/node_modules/playwright-core/lib/server/firefox/protocol.d.js
+  ai_agent 1-16
+e2e/tests/helpers.ts
+  ai_agent 1-38
+e2e/node_modules/playwright-core/lib/utils/isomorphic/stringUtils.js
+  ai_agent 1-204
+e2e/node_modules/playwright-core/lib/vite/traceViewer/codeMirrorModule.DYBRYzYX.css
+  ai_agent 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "4576759b1fca6fe52f3463fc223eaa0cbb779ba0",
+  "prompts": {}
+}
