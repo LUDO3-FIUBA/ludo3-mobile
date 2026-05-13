@@ -54,7 +54,7 @@ export const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'scan-qr', label: 'Escanear QR', icon: 'qrcode-scan', iconOutline: 'qrcode-scan', route: 'ScanQR', scope: 'student', platform: 'mobile' },
       { kind: 'direct', key: 'verify-identity', label: 'Verificar identidad', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'VerifyIdentity', scope: 'student', platform: 'mobile' },
       { kind: 'direct', key: 'face-registration', label: 'Completar registro facial', icon: 'face-recognition', iconOutline: 'face-recognition', route: 'CompleteFaceRegistration', scope: 'student', conditional: 'faceNotRegistered', platform: 'mobile' },
-      { kind: 'direct', key: 'my-account', label: 'Mi Cuenta', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
+      { kind: 'direct', key: 'my-account', label: 'Mi perfil', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
       { kind: 'direct', key: 'student-useful-links', label: 'Enlaces útiles', icon: 'link-variant', iconOutline: 'link-variant', route: 'StudentUsefulLinks', scope: 'student' },
       { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
       { kind: 'direct', key: 'logout', label: 'Cerrar sesión', icon: 'logout-variant', iconOutline: 'logout-variant', action: 'logout', scope: 'shared' },
@@ -97,8 +97,7 @@ export const teacherMenu: MenuItem[] = [
     icon: 'account', iconOutline: 'account-outline', scope: 'teacher',
     webOrder: 3, mobileOrder: 1,
     children: [
-      { kind: 'direct', key: 'teacher-profile', label: 'Mi perfil profesional', icon: 'account-details', iconOutline: 'account-details-outline', route: 'TeacherProfile', scope: 'teacher' },
-      { kind: 'direct', key: 'my-account', label: 'Mi Cuenta', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
+      { kind: 'direct', key: 'my-account', label: 'Mi perfil', icon: 'account-cog', iconOutline: 'account-cog-outline', route: 'MyAccount', scope: 'shared' },
       { kind: 'direct', key: 'teacher-useful-links', label: 'Enlaces útiles', icon: 'link-variant', iconOutline: 'link-variant', route: 'TeacherUsefulLinks', scope: 'teacher' },
       { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
       { kind: 'direct', key: 'logout', label: 'Cerrar sesión', icon: 'logout-variant', iconOutline: 'logout-variant', action: 'logout', scope: 'shared' },

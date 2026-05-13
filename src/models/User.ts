@@ -10,6 +10,7 @@ export default class User {
   readonly departmentId: number | null;
   readonly faceRegistered: boolean;
   readonly githubUrl: string;
+  readonly linkedinUrl: string;
 
   constructor(
     dni: string,
@@ -23,6 +24,7 @@ export default class User {
     githubUrl: string = '',
     isSuperuserFlag: boolean = false,
     departmentId: number | null = null,
+    linkedinUrl: string = '',
   ) {
     this.dni = dni;
     this.firstName = firstName;
@@ -35,6 +37,7 @@ export default class User {
     this.departmentId = departmentId;
     this.faceRegistered = faceRegistered;
     this.githubUrl = githubUrl;
+    this.linkedinUrl = linkedinUrl;
   }
 
   fullName(): string {
@@ -81,6 +84,7 @@ export default class User {
       departmentId: this.departmentId,
       faceRegistered: this.faceRegistered,
       githubUrl: this.githubUrl,
+      linkedinUrl: this.linkedinUrl,
     };
   }
 }

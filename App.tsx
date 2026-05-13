@@ -36,7 +36,6 @@ import {
 import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import VerifyIdentity from './src/scenes/home/subsections/HomeOptions/VerifyIdentity';
-import TeacherProfileScreen from './src/scenes/teacher_profile';
 import CreateSemester from './src/scenes/teacher_semester/CreateSemester';
 import DepartmentList from './src/scenes/admin_departments/DepartmentList';
 import DepartmentDetail from './src/scenes/admin_departments/DepartmentDetail';
@@ -95,7 +94,6 @@ const webLinking = {
           // Teacher
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
-          TeacherProfile: 'mi-perfil',
           TeacherForms: 'validacion-tramites',
           TeacherDepartmentList: 'docente/departamentos',
           TeacherUsefulLinks: 'docente/enlaces-utiles',
@@ -262,7 +260,6 @@ const App = () => {
             <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
             <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
             <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />
-            <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ headerShown: true, title: 'Mi perfil profesional' }} />
             <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
             <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
             <Stack.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />
@@ -326,7 +323,7 @@ const App = () => {
             <Stack.Screen
               name="MyAccount"
               component={MyAccountScreen}
-              options={{ headerShown: true, title: 'Mi Cuenta' }}
+              options={{ headerShown: true, title: 'Mi perfil' }}
             />
 
             <Stack.Screen
