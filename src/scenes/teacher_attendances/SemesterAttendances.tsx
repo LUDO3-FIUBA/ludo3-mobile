@@ -1,17 +1,20 @@
-import React, { useLayoutEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAppSelector } from '../../redux/hooks';
-import { selectSemesterAttendances } from '../../redux/reducers/teacherSemesterSlice';
+import React, { useEffect, useLayoutEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { fetchSemesterAttendances, fetchSemesterDataAsync, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { ClassAttendance } from '../../models/ClassAttendance';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
 import { lightModeColors } from '../../styles/colorPalette';
+import { teacherQrAttendanceRepository } from '../../repositories';
 
 import moment from 'moment';
 
 const SemesterAttendances: React.FC = () => {
+  const dispatch = useAppDispatch();
   const attendances = useAppSelector(selectSemesterAttendances);
-  const navigation = useNavigation();
+  const semesterData = useAppSelector(selectSemesterData);
+  const navigation = useNavigation<any>();
 
   const onPressAddNewClass = () => {
     navigation.navigate('SemesterAttendanceQR', {});
@@ -28,6 +31,49 @@ const SemesterAttendances: React.FC = () => {
     });
   }, [navigation]);
 
+  useEffect(() => {
+    const focusUnsubscribe = navigation.addListener('focus', () => {
+      if (semesterData?.id) {
+        dispatch(fetchSemesterAttendances(semesterData.id));
+      }
+    });
+
+    return focusUnsubscribe;
+  }, [dispatch, navigation, semesterData?.id]);
+
+  useEffect(() => {
+    const beforeRemoveUnsubscribe = navigation.addListener('beforeRemove', () => {
+      if (semesterData?.commission?.id) {
+        dispatch(fetchSemesterDataAsync(semesterData.commission.id));
+      }
+    });
+
+    return beforeRemoveUnsubscribe;
+  }, [dispatch, navigation, semesterData?.commission?.id]);
+
+  const handleDeleteSession = (item: ClassAttendance) => {
+    const message = `¿Seguro que querés eliminar la sesión del ${moment(new Date(item.createdAt)).format('DD/MM/YYYY HH:mm')}? Se borrarán todas las asistencias registradas.`;
+    const onConfirm = async () => {
+      try {
+        await teacherQrAttendanceRepository.deleteAttendanceSession(item.qrid);
+        if (semesterData?.id) {
+          dispatch(fetchSemesterAttendances(semesterData.id));
+        }
+      } catch {
+        Alert.alert('Error', 'No se pudo eliminar la sesión. Intentá de nuevo más tarde.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(message)) onConfirm();
+    } else {
+      Alert.alert('Eliminar sesión', message, [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Eliminar', style: 'destructive', onPress: onConfirm },
+      ]);
+    }
+  };
+
   const renderClassAttendance = ({ item }: { item: ClassAttendance }) => (
     <TouchableOpacity onPress={() => navigation.navigate('AttendanceDetails', { classAttendance: item })} style={styles.sessionContainer}>
       <View style={styles.headerRow}>
@@ -35,9 +81,15 @@ const SemesterAttendances: React.FC = () => {
         <Text style={styles.sessionHeader}>
           {moment(new Date(item.createdAt)).format('DD/MM/YYYY')}
         </Text>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteSession(item)}>
+          <MaterialIcon name="delete" fontSize={22} color="#c0392b" />
+        </TouchableOpacity>
       </View>
       <Text style={styles.dateText}>
-        Horario de validez del QR: {moment(new Date(item.createdAt)).format('HH:mm')} - {moment(new Date(item.expiresAt)).format('HH:mm')}
+        {item.mode === 'qr'
+          ? `Horario de validez del QR: ${moment(new Date(item.createdAt)).format('HH:mm')} - ${moment(new Date(item.validUntil)).format('HH:mm')}`
+          : `QR + Ubicación — válido hasta ${moment(new Date(item.validUntil)).format('HH:mm')}`
+        }
       </Text>
       <Text style={styles.dateText}>
         Cantidad de asistencias: {item.attendances.length}
@@ -74,6 +126,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+  },
+  deleteButton: {
+    marginLeft: 'auto',
+    padding: 4,
   },
   sessionHeader: {
     fontSize: 18,

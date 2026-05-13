@@ -1,4 +1,4 @@
-import {get, post} from './authenticatedRepository';
+import {get, post, patch} from './authenticatedRepository';
 import {StatusCodeError} from '../networking';
 import User from '../models/User';
 import {Platform} from 'react-native';
@@ -84,9 +84,21 @@ export function getInfo(): Promise<User> {
         json.is_teacher || false,
         json.is_staff || false,
         json.face_registered === true,
+        json.github_url ?? '',
+        json.is_superuser === true,
+        json.department_id ?? null,
+        json.linkedin_url ?? '',
       ),
     ),
   );
+}
+
+export function updateGithubUrl(url: string): Promise<void> {
+  return patch(`${domainUrl}/me`, { github_url: url }).then(() => Promise.resolve());
+}
+
+export function updateLinkedinUrl(url: string): Promise<void> {
+  return patch(`${domainUrl}/me`, { linkedin_url: url }).then(() => Promise.resolve());
 }
 
 export function sendPushToken(token: string) {
@@ -99,6 +111,8 @@ export function sendPushToken(token: string) {
 export default {
   validate,
   getInfo,
+  updateGithubUrl,
+  updateLinkedinUrl,
   IdentityFail,
   FaceRegistrationPending,
   InvalidImage,

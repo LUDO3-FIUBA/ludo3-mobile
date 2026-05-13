@@ -1,0 +1,660 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  StyleSheet,
+  Platform,
+  Share,
+  Linking,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import RNFS from 'react-native-fs';
+import * as XLSX from 'xlsx';
+import { AlertDialog, MaterialIcon, ProcedureTypesAccordionList, PROCEDURE_CONFIG } from '../../components';
+import { formsRepository } from '../../repositories';
+import Form from '../../models/Form';
+import FormSubmission, { FormSubmissionStatusValue } from '../../models/FormSubmission';
+import FormDetail from '../../models/FormDetail';
+import { FormAnswer } from '../../models/FormSubmission';
+import { lightModeColors } from '../../styles/colorPalette';
+import ManagerFormItem from './components/ManagerFormItem';
+
+function showMessage(title: string, message: string) {
+  if (Platform.OS === 'web') {
+    window.alert(`${title}\n\n${message}`);
+    return;
+  }
+  Alert.alert(title, message);
+}
+
+const FormsManagerScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
+  const [forms, setForms] = useState<Form[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedFormId, setExpandedFormId] = useState<number | null>(null);
+  const [submissionsCache, setSubmissionsCache] = useState<Record<number, FormSubmission[]>>({});
+  const [formDetailsCache, setFormDetailsCache] = useState<Record<number, FormDetail>>({});
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
+  const [refreshingProcedureId, setRefreshingProcedureId] = useState<number | null>(null);
+  const [exportingFormId, setExportingFormId] = useState<number | null>(null);
+  const [downloadingSubmissionId, setDownloadingSubmissionId] = useState<number | null>(null);
+  const [downloadingFieldId, setDownloadingFieldId] = useState<number | null>(null);
+  const [answersModal, setAnswersModal] = useState<{ submission: FormSubmission; formId: number } | null>(null);
+  const [submissionToDelete, setSubmissionToDelete] = useState<{ submission: FormSubmission; formId: number } | null>(null);
+  const [formToDelete, setFormToDelete] = useState<Form | null>(null);
+  const [updatingStatusSubmissionId, setUpdatingStatusSubmissionId] = useState<number | null>(null);
+
+  // Ref to track which form IDs we've already kicked off a background prefetch for.
+  const prefetchedIdsRef = useRef<Set<number>>(new Set());
+
+  const loadForms = useCallback(async () => {
+    try {
+      const data = await formsRepository.fetchForms();
+      setForms(data);
+    } catch {
+      showMessage('Error', 'No se pudieron cargar los formularios.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadForms();
+    const unsub = navigation.addListener('focus', loadForms);
+    return unsub;
+  }, [navigation, loadForms]);
+
+  // Pre-fetch submissions for every form in background so the count badge
+  // is visible before the admin expands any individual form.
+  useEffect(() => {
+    if (forms.length === 0) return;
+    forms.forEach(form => {
+      if (prefetchedIdsRef.current.has(form.form_id)) return;
+      prefetchedIdsRef.current.add(form.form_id);
+      Promise.all([
+        formsRepository.fetchFormSubmissions(form.form_id),
+        formsRepository.fetchFormDetail(form.form_id),
+      ])
+        .then(([subs, detail]) => {
+          setSubmissionsCache(prev => ({ ...prev, [form.form_id]: subs }));
+          setFormDetailsCache(prev => ({ ...prev, [form.form_id]: detail }));
+        })
+        .catch(() => {
+          // Allow retry on toggle if prefetch fails.
+          prefetchedIdsRef.current.delete(form.form_id);
+        });
+    });
+  }, [forms]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          style={{ marginRight: 16 }}
+          onPress={() => navigation.navigate('FormDesigner')}
+        >
+          <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
+  const sections = useMemo(() => {
+    const configuredOrder = Object.keys(PROCEDURE_CONFIG);
+    const map = new Map<number, { procedure: Form['form_procedure']; forms: Form[] }>();
+    forms.forEach(form => {
+      const proc = form.form_procedure;
+      if (!map.has(proc.id)) map.set(proc.id, { procedure: proc, forms: [] });
+      map.get(proc.id)!.forms.push(form);
+    });
+    return Array.from(map.values()).sort((a, b) => {
+      const aIndex = configuredOrder.indexOf(a.procedure.value);
+      const bIndex = configuredOrder.indexOf(b.procedure.value);
+
+      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+
+      return a.procedure.value.localeCompare(b.procedure.value);
+    });
+  }, [forms]);
+
+  const toggleForm = async (form: Form) => {
+    if (expandedFormId === form.form_id) {
+      setExpandedFormId(null);
+      return;
+    }
+    setExpandedFormId(form.form_id);
+    if (submissionsCache[form.form_id]) return;
+    setSubmissionsLoading(true);
+    try {
+      const [subs, detail] = await Promise.all([
+        formsRepository.fetchFormSubmissions(form.form_id),
+        formDetailsCache[form.form_id]
+          ? Promise.resolve(formDetailsCache[form.form_id])
+          : formsRepository.fetchFormDetail(form.form_id),
+      ]);
+      setSubmissionsCache(prev => ({ ...prev, [form.form_id]: subs }));
+      setFormDetailsCache(prev => ({ ...prev, [form.form_id]: detail }));
+    } catch {
+      showMessage('Error', 'No se pudieron cargar las respuestas.');
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  };
+
+  const getModalAnswerValue = (answer: FormAnswer, formId: number): string => {
+    const detail = formDetailsCache[formId];
+    if (!detail || answer.answer_value == null || answer.answer_value === '') {
+      return answer.answer_value ?? '—';
+    }
+
+    const field = detail.fields.find(f => f.form_field_id === answer.field_id);
+    if (!field) return answer.answer_value;
+
+    const fieldType = field.form_field_type.value;
+
+    if (fieldType === 'checkbox') {
+      return String(answer.answer_value).toLowerCase() === 'true' ? 'Sí' : 'No';
+    }
+
+    if (fieldType === 'options' && field.options) {
+      const option = field.options.find(
+        opt => String(opt.form_option_id) === String(answer.answer_value),
+      );
+      return option?.form_option_label ?? answer.answer_value;
+    }
+
+    if (fieldType === 'catalog' && field.catalog) {
+      const item = field.catalog.items.find(
+        catalogItem => String(catalogItem.catalog_item_id) === String(answer.answer_value),
+      );
+      if (item) {
+        return item.catalog_item_label;
+      }
+    }
+
+    return answer.answer_value;
+  };
+
+  const handleDeleteSubmission = (submission: FormSubmission, formId: number) => {
+    setSubmissionToDelete({ submission, formId });
+  };
+
+  const confirmDeleteSubmission = async () => {
+    if (!submissionToDelete) return;
+    const { submission, formId } = submissionToDelete;
+    try {
+      await formsRepository.deleteSubmission(submission.submission_id);
+      const [formsData, subs] = await Promise.all([
+        formsRepository.fetchForms(),
+        formsRepository.fetchFormSubmissions(formId),
+      ]);
+      setForms(formsData);
+      setSubmissionsCache(prev => ({ ...prev, [formId]: subs }));
+    } catch {
+      showMessage('Error', 'No se pudo eliminar la respuesta.');
+    } finally {
+      setSubmissionToDelete(null);
+    }
+  };
+
+  const handleDeleteForm = (form: Form) => {
+    setFormToDelete(form);
+  };
+
+  const confirmDeleteForm = async () => {
+    if (!formToDelete) return;
+    const form = formToDelete;
+    setDeletingFormId(form.form_id);
+    try {
+      await formsRepository.deleteForm(form.form_id);
+      const formsData = await formsRepository.fetchForms();
+      setForms(formsData);
+      setSubmissionsCache(prev => {
+        const next = { ...prev };
+        delete next[form.form_id];
+        return next;
+      });
+      if (expandedFormId === form.form_id) {
+        setExpandedFormId(null);
+      }
+    } catch {
+      showMessage('Error', 'No se pudo eliminar el formulario.');
+    } finally {
+      setDeletingFormId(null);
+      setFormToDelete(null);
+    }
+  };
+
+  const handleChangeSubmissionStatus = async (
+    submission: FormSubmission,
+    formId: number,
+    statusValue: FormSubmissionStatusValue,
+  ) => {
+    if (updatingStatusSubmissionId === submission.submission_id) return;
+    setUpdatingStatusSubmissionId(submission.submission_id);
+    try {
+      const updated = await formsRepository.updateSubmissionStatus(
+        submission.submission_id,
+        statusValue,
+      );
+      setSubmissionsCache(prev => {
+        const cached = prev[formId];
+        if (!cached) return prev;
+        return {
+          ...prev,
+          [formId]: cached.map(s =>
+            s.submission_id === submission.submission_id ? updated : s,
+          ),
+        };
+      });
+    } catch (err: any) {
+      const detail = err?.info?.detail ?? err?.info;
+      if (typeof detail === 'string') {
+        showMessage('No se pudo actualizar', detail);
+      } else {
+        showMessage('Error', 'No se pudo actualizar el estado de la respuesta.');
+      }
+    } finally {
+      setUpdatingStatusSubmissionId(null);
+    }
+  };
+
+  const handleRefreshProcedure = async (procedureId: number, procedureForms: Form[]) => {
+    if (refreshingProcedureId === procedureId || procedureForms.length === 0) return;
+    setRefreshingProcedureId(procedureId);
+    try {
+      const results = await Promise.all(
+        procedureForms.map(async form => {
+          const [subs, detail] = await Promise.all([
+            formsRepository.fetchFormSubmissions(form.form_id),
+            formsRepository.fetchFormDetail(form.form_id),
+          ]);
+          return { formId: form.form_id, subs, detail };
+        }),
+      );
+      setSubmissionsCache(prev => {
+        const next = { ...prev };
+        results.forEach(r => { next[r.formId] = r.subs; });
+        return next;
+      });
+      setFormDetailsCache(prev => {
+        const next = { ...prev };
+        results.forEach(r => { next[r.formId] = r.detail; });
+        return next;
+      });
+    } catch {
+      showMessage('Error', 'No se pudieron refrescar las respuestas.');
+    } finally {
+      setRefreshingProcedureId(null);
+    }
+  };
+
+  const normalizeAnswerValue = (
+    answerValue: string | null,
+    field: FormDetail['fields'][number],
+  ): string => {
+    if (answerValue === null || answerValue === '') return '';
+
+    const fieldType = field.form_field_type.value;
+
+    if (fieldType === 'checkbox') {
+      return String(answerValue).toLowerCase() === 'true' ? 'Sí' : 'No';
+    }
+
+    if (fieldType === 'options' && field.options) {
+      const option = field.options.find(opt => String(opt.form_option_id) === String(answerValue));
+      return option?.form_option_label ?? String(answerValue);
+    }
+
+    if (fieldType === 'catalog' && field.catalog) {
+      const item = field.catalog.items.find(item => String(item.catalog_item_id) === String(answerValue));
+      return item?.catalog_item_label ?? String(answerValue);
+    }
+
+    return String(answerValue);
+  };
+
+  const handleExportExcel = async (form: Form, submissions: FormSubmission[]) => {
+    if (submissions.length === 0 || exportingFormId === form.form_id) {
+      return;
+    }
+
+    setExportingFormId(form.form_id);
+    try {
+      const detail = await formsRepository.fetchFormDetail(form.form_id);
+      setFormDetailsCache(prev => ({ ...prev, [form.form_id]: detail }));
+      const fieldById = new Map(detail.fields.map(field => [field.form_field_id, field]));
+
+      const rows = submissions.map(submission => {
+        const row: Record<string, string | number> = {
+          submitted_at: submission.submitted_at,
+          user_id: submission.user_id,
+          email: submission.email,
+          first_name: submission.first_name,
+          last_name: submission.last_name,
+          role: submission.role,
+        };
+
+        detail.fields.forEach(field => {
+          row[field.form_field_label] = '';
+        });
+
+        submission.answers.forEach(answer => {
+          const field = fieldById.get(answer.field_id);
+          if (!field) return;
+          row[field.form_field_label] = normalizeAnswerValue(answer.answer_value, field);
+        });
+
+        return row;
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Respuestas');
+
+      const safeName = form.form_name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 50) || 'formulario';
+      const now = new Date();
+      const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
+      const fileName = `${safeName}_respuestas_${timestamp}.xlsx`;
+
+      if (Platform.OS === 'web') {
+        const wbArray = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([wbArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else {
+        const base64 = XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
+        const path = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+        await RNFS.writeFile(path, base64, 'base64');
+        await Share.share({
+          title: 'Exportar respuestas',
+          message: `Archivo exportado: ${fileName}`,
+          url: `file://${path}`,
+        });
+      }
+    } catch {
+      showMessage('Error', 'No se pudo exportar el Excel.');
+    } finally {
+      setExportingFormId(null);
+    }
+  };
+
+  const findAdjuntoUrl = (submission: FormSubmission, formId: number): string | null => {
+    const detail = formDetailsCache[formId];
+    if (!detail) return null;
+    const adjuntoField = detail.fields.find(f => f.form_field_type.value === 'adjunto');
+    if (!adjuntoField) return null;
+    const answer = submission.answers.find(a => a.field_id === adjuntoField.form_field_id);
+    return answer?.answer_value || null;
+  };
+
+  const isAdjuntoField = (fieldId: number, formId: number): boolean => {
+    const detail = formDetailsCache[formId];
+    if (!detail) return false;
+    const field = detail.fields.find(f => f.form_field_id === fieldId);
+    return field?.form_field_type.value === 'adjunto';
+  };
+
+  const handleDownloadAdjuntoFromUrl = async (url: string, fieldId: number) => {
+    if (downloadingFieldId === fieldId) return;
+    setDownloadingFieldId(fieldId);
+    try {
+      const presignedUrl = await formsRepository.getPresignedDocumentUrl(url);
+      await Linking.openURL(presignedUrl);
+    } catch {
+      showMessage('Error', 'No se pudo descargar el archivo adjunto.');
+    } finally {
+      setDownloadingFieldId(null);
+    }
+  };
+
+  const handleDownloadAdjunto = async (submission: FormSubmission, formId: number) => {
+    if (downloadingSubmissionId === submission.submission_id) return;
+    const url = findAdjuntoUrl(submission, formId);
+    if (!url) {
+      showMessage('Sin archivo', 'Esta respuesta no tiene un archivo adjunto.');
+      return;
+    }
+
+    setDownloadingSubmissionId(submission.submission_id);
+    try {
+      const presignedUrl = await formsRepository.getPresignedDocumentUrl(url);
+      await Linking.openURL(presignedUrl);
+    } catch {
+      showMessage('Error', 'No se pudo descargar el archivo adjunto.');
+    } finally {
+      setDownloadingSubmissionId(null);
+    }
+  };
+
+  const daysSince = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days === 0) return 'hoy';
+    if (days === 1) return 'hace 1 día';
+    return `hace ${days} días`;
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <ProcedureTypesAccordionList
+        sections={sections.map(section => ({
+          procedure: section.procedure,
+          items: section.forms,
+        }))}
+        emptyText="Sin formularios."
+        renderSectionAction={(section, config) => (
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              handleRefreshProcedure(section.procedure.id, section.items);
+            }}
+            disabled={refreshingProcedureId === section.procedure.id}
+            style={{ marginRight: 6 }}
+          >
+            {refreshingProcedureId === section.procedure.id ? (
+              <ActivityIndicator size="small" color={config.color} />
+            ) : (
+              <MaterialIcon name="refresh" fontSize={22} color={config.color} />
+            )}
+          </TouchableOpacity>
+        )}
+        renderItems={(items, section, config) =>
+          items.map(item => {
+            const isFormExpanded = expandedFormId === item.form_id;
+            const submissions = submissionsCache[item.form_id] ?? [];
+            const isDigital = item.form_type.value === 'Digital';
+
+            return (
+              <ManagerFormItem
+                key={item.form_id}
+                form={item}
+                color={config.color}
+                isExpanded={isFormExpanded}
+                submissions={submissions}
+                submissionsLoading={submissionsLoading}
+                hasSubmissionsCache={!!submissionsCache[item.form_id]}
+                isDigital={isDigital}
+                isDeleting={deletingFormId === item.form_id}
+                isExporting={exportingFormId === item.form_id}
+                downloadingSubmissionId={downloadingSubmissionId}
+                onToggle={() => toggleForm(item)}
+                onEdit={() => navigation.navigate('FormDesigner', { formId: item.form_id })}
+                onDelete={() => handleDeleteForm(item)}
+                onExport={() => handleExportExcel(item, submissions)}
+                onOpenAnswers={submission =>
+                  setAnswersModal({ submission, formId: item.form_id })
+                }
+                onDownloadAdjunto={submission => handleDownloadAdjunto(submission, item.form_id)}
+                onDeleteSubmission={submission => handleDeleteSubmission(submission, item.form_id)}
+                onChangeSubmissionStatus={(submission, statusValue) =>
+                  handleChangeSubmissionStatus(submission, item.form_id, statusValue)
+                }
+                updatingStatusSubmissionId={updatingStatusSubmissionId}
+                daysSince={daysSince}
+              />
+            );
+          })
+        }
+      />
+
+      <AlertDialog
+        visible={!!submissionToDelete}
+        title="Eliminar respuesta"
+        message={
+          submissionToDelete
+            ? `¿Estás seguro de eliminar la respuesta de ${submissionToDelete.submission.student_first_name} ${submissionToDelete.submission.student_last_name}?`
+            : ''
+        }
+        destructive
+        confirmLabel="Eliminar"
+        onConfirm={confirmDeleteSubmission}
+        onCancel={() => setSubmissionToDelete(null)}
+      />
+
+      <AlertDialog
+        visible={!!formToDelete}
+        title="Eliminar formulario"
+        message={
+          formToDelete
+            ? `Vas a eliminar el formulario "${formToDelete.form_name}" y todas sus respuestas. Esta acción no se puede deshacer.`
+            : ''
+        }
+        mode="type-to-confirm"
+        confirmationText={formToDelete?.form_name}
+        destructive
+        loading={deletingFormId === formToDelete?.form_id}
+        confirmLabel="Eliminar formulario"
+        onConfirm={confirmDeleteForm}
+        onCancel={() => setFormToDelete(null)}
+      />
+
+      <Modal
+        visible={!!answersModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setAnswersModal(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {answersModal?.submission.student_first_name} {answersModal?.submission.student_last_name}
+              </Text>
+              <TouchableOpacity onPress={() => setAnswersModal(null)}>
+                <MaterialIcon name="close" fontSize={22} color="#333" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              {(answersModal?.submission.answers ?? []).map((ans, i) => {
+                const isAdjunto = answersModal
+                  ? isAdjuntoField(ans.field_id, answersModal.formId)
+                  : false;
+                const hasValue = ans.answer_value != null && ans.answer_value !== '';
+                const isDownloading = downloadingFieldId === ans.field_id;
+                return (
+                  <View key={i} style={styles.answerRow}>
+                    <Text style={styles.answerLabel}>{ans.field_label}</Text>
+                    {isAdjunto && hasValue ? (
+                      <TouchableOpacity
+                        style={styles.adjuntoButton}
+                        onPress={() =>
+                          handleDownloadAdjuntoFromUrl(ans.answer_value as string, ans.field_id)
+                        }
+                        disabled={isDownloading}
+                      >
+                        {isDownloading ? (
+                          <ActivityIndicator size="small" color="#1976D2" />
+                        ) : (
+                          <>
+                            <MaterialIcon name="download" fontSize={18} color="#1976D2" />
+                            <Text style={styles.adjuntoButtonText}>Descargar archivo</Text>
+                          </>
+                        )}
+                      </TouchableOpacity>
+                    ) : (
+                      <Text style={styles.answerValue}>
+                        {answersModal ? getModalAnswerValue(ans, answersModal.formId) : '—'}
+                      </Text>
+                    )}
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </>
+  );
+};
+
+const styles = StyleSheet.create({
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 20,
+    maxHeight: '70%',
+    gap: 12,
+  },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  modalTitle: { fontSize: 17, fontWeight: '700', color: '#222' },
+  answerRow: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    gap: 3,
+  },
+  answerLabel: { fontSize: 12, color: '#888', fontWeight: '600' },
+  answerValue: { fontSize: 15, color: '#333' },
+  adjuntoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#1976D2',
+    marginTop: 2,
+  },
+  adjuntoButtonText: { color: '#1976D2', fontWeight: '600', fontSize: 13 },
+});
+
+export default FormsManagerScreen;

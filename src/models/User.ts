@@ -6,7 +6,11 @@ export default class User {
   readonly studentId?: string;
   readonly isTeacherFlag: boolean;
   readonly isStaffFlag: boolean;
+  readonly isSuperuserFlag: boolean;
+  readonly departmentId: number | null;
   readonly faceRegistered: boolean;
+  readonly githubUrl: string;
+  readonly linkedinUrl: string;
 
   constructor(
     dni: string,
@@ -17,6 +21,10 @@ export default class User {
     isTeacherFlag: boolean = false,
     isStaffFlag: boolean = false,
     faceRegistered: boolean = false,
+    githubUrl: string = '',
+    isSuperuserFlag: boolean = false,
+    departmentId: number | null = null,
+    linkedinUrl: string = '',
   ) {
     this.dni = dni;
     this.firstName = firstName;
@@ -25,7 +33,11 @@ export default class User {
     this.studentId = studentId === undefined ? null : studentId;
     this.isTeacherFlag = isTeacherFlag;
     this.isStaffFlag = isStaffFlag;
+    this.isSuperuserFlag = isSuperuserFlag;
+    this.departmentId = departmentId;
     this.faceRegistered = faceRegistered;
+    this.githubUrl = githubUrl;
+    this.linkedinUrl = linkedinUrl;
   }
 
   fullName(): string {
@@ -44,6 +56,14 @@ export default class User {
     return this.isStaffFlag;
   }
 
+  isSuperAdmin(): boolean {
+    return this.isStaffFlag && this.isSuperuserFlag;
+  }
+
+  isDepartmentAdmin(): boolean {
+    return this.isStaffFlag && !this.isSuperuserFlag && this.departmentId !== null;
+  }
+
   id(): string {
     if (this.studentId !== null) {
       return this.studentId;
@@ -60,7 +80,11 @@ export default class User {
       studentId: this.studentId,
       isTeacherFlag: this.isTeacherFlag,
       isStaffFlag: this.isStaffFlag,
+      isSuperuserFlag: this.isSuperuserFlag,
+      departmentId: this.departmentId,
       faceRegistered: this.faceRegistered,
+      githubUrl: this.githubUrl,
+      linkedinUrl: this.linkedinUrl,
     };
   }
 }

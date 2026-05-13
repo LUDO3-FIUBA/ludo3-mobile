@@ -3,7 +3,6 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
-    Image,
     Modal,
     RefreshControl,
     StyleSheet,
@@ -12,6 +11,7 @@ import {
     View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import ImageComponent from '../../components/ImageComponent';
 import { MaterialIcon } from '../../components';
 import { notificationsRepository } from '../../repositories';
 import { UserNotification } from '../../repositories/notifications';
@@ -139,10 +139,20 @@ const NotificationsScreen: React.FC = () => {
                             style={[
                                 styles.item,
                                 !item.is_read && styles.itemUnread,
+                                item.notification.is_urgent && styles.itemUrgentAccent,
                             ]}
                         >
                             <View style={styles.itemHeader}>
-                                <Text numberOfLines={1} style={[styles.itemTitle, !item.is_read && styles.itemTitleUnread]}>
+                                {item.notification.is_urgent && (
+                                    <MaterialIcon name="alert-circle" fontSize={18} color="#b42318" />
+                                )}
+                                <Text
+                                    numberOfLines={1}
+                                    style={[
+                                        styles.itemTitle,
+                                        !item.is_read && styles.itemTitleUnread,
+                                    ]}
+                                >
                                     {item.notification.title}
                                 </Text>
                                 <View style={styles.itemActions}>
@@ -186,13 +196,11 @@ const NotificationsScreen: React.FC = () => {
                             <Text style={styles.itemMessage}>
                                 {item.notification.message}
                             </Text>
-                            {item.notification.image && (
-                                <Image
-                                    source={{ uri: item.notification.image }}
-                                    style={styles.itemImage}
-                                    resizeMode="cover"
-                                />
-                            )}
+                            <ImageComponent
+                                uri={item.notification.image}
+                                imageStyle={styles.itemImage}
+                                resizeMode="cover"
+                            />
                             <Text style={styles.itemDate} numberOfLines={1}>
                                 {item.notification.sender_name
                                     ? `${item.notification.sender_name} · ${formatNotificationDate(item.notification.created_at)}`
@@ -216,13 +224,15 @@ const NotificationsScreen: React.FC = () => {
                     >
                         <MaterialIcon name="close" fontSize={28} color="white" />
                     </TouchableOpacity>
-                    {fullScreenImage && (
-                        <Image
-                            source={{ uri: fullScreenImage }}
-                            style={styles.fullScreenImage}
-                            resizeMode="contain"
-                        />
-                    )}
+                    <ImageComponent
+                        uri={fullScreenImage}
+                        imageStyle={styles.fullScreenImage}
+                        resizeMode="contain"
+                        showFallbackWhenMissing
+                        fallbackIconSize={40}
+                        fallbackIconColor="#d1d5db"
+                        fallbackContainerStyle={styles.fullScreenImageFallback}
+                    />
                 </View>
             </Modal>
         </View>
@@ -275,6 +285,10 @@ const styles = StyleSheet.create({
     itemTitleUnread: {
         color: lightModeColors.institutional,
         fontWeight: '800',
+    },
+    itemUrgentAccent: {
+        borderRightWidth: 4,
+        borderRightColor: '#b42318',
     },
     itemHeader: {
         flexDirection: 'row',
@@ -371,6 +385,9 @@ const styles = StyleSheet.create({
     fullScreenImage: {
         width: '100%',
         height: '100%',
+    },
+    fullScreenImageFallback: {
+        backgroundColor: 'transparent',
     },
 });
 

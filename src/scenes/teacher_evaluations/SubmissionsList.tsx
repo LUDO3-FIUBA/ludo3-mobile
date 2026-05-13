@@ -57,9 +57,11 @@ export default function SubmissionsList({ route }: Props) {
     try {
       const semesterForValidation = semester || semesterFromParams;
       if (semesterForValidation?.commission?.id) {
-        const currentEvaluations = await teacherEvaluationsRepository.fetchPresentSemesterEvaluations(
-          semesterForValidation.commission.id,
-        );
+        const currentEvaluations = semesterForValidation.evaluations?.length
+          ? semesterForValidation.evaluations
+          : await teacherEvaluationsRepository.fetchPresentSemesterEvaluations(
+              semesterForValidation.commission.id,
+            );
         const evaluationExists = currentEvaluations.some((currentEvaluation) => currentEvaluation.id === evaluation.id);
 
         if (!evaluationExists) {

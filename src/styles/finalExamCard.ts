@@ -10,11 +10,10 @@ export default function getStyleSheet() {
 const sharedStyle = StyleSheet.create({
   ...basic(),
   view: {
-    ...basic().view,
+    flexDirection: 'column',
     padding: 15,
     elevation: 3,
     alignItems: 'stretch',
-    flex: 1,
     justifyContent: 'space-between',
     marginVertical: 4,
     marginHorizontal: 10,
@@ -48,7 +47,6 @@ const sharedStyle = StyleSheet.create({
     color: 'white'
   },
   container: {
-    ...basic().view,
     flexDirection: 'row',
     backgroundColor: 'transparent',
     justifyContent: 'space-between',

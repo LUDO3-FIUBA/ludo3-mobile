@@ -2,12 +2,14 @@ import { TeacherStudent } from "./TeacherStudent";
 
 export interface StudentAttendance {
     student: TeacherStudent,
-    submittedAt: Date
+    submittedAt: Date;
+    locationValid?: boolean | null;
 }
 
 export interface StudentAttendanceSnakeCase {
     student:      TeacherStudent;
     submitted_at: Date;
+    location_valid?: boolean | null;
 }
 
 export interface MyAttendance {
@@ -16,6 +18,9 @@ export interface MyAttendance {
     qrid: string;
     attended: boolean;
     submittedAt: string | null;
+    mode: 'qr' | 'qr_location';
+    campus: string | null;
+    locationValid?: boolean | null;
 }
 
 export interface MyAttendanceSnakeCase {
@@ -24,4 +29,7 @@ export interface MyAttendanceSnakeCase {
     qrid: string;
     attended: boolean;
     submitted_at: string | null;
+    mode: 'qr' | 'qr_location';
+    campus: string | null;
+    location_valid?: boolean | null;
 }

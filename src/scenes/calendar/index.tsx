@@ -100,7 +100,7 @@ const CalendarScreen = () => {
       navigation.navigate('ViewFinalDetails', {
         finalExam: { ...event.data, date: d instanceof Date ? d.toISOString() : d },
       });
-    } else {
+    } else if (event.type === 'class') {
       navigation.navigate('ViewClassDetails', {
         classOccurrence: { ...event.data, date: event.data.date.toISOString() },
       });
@@ -156,6 +156,7 @@ const CalendarScreen = () => {
           selectedDate={selectedDate}
           onDateChange={onDayPressStr}
           onEventPress={onEventPress}
+          institutionalEvents={showInstitutional ? institutionalEvents : []}
         />
       )}
     </View>
@@ -267,18 +268,13 @@ function getMarkedDates(sections: AgendaSection[], institutionalEvents: Academic
     marked[s.title] = { dots };
   });
 
-  // Mark every day in each institutional event's range
+  // Mark only start_date of each institutional event
   institutionalEvents.forEach(ev => {
-    const current = new Date(ev.start_date);
-    const end = new Date(ev.end_date);
-    while (current <= end) {
-      const dateStr = current.toISOString().split('T')[0];
-      const existing = marked[dateStr] ?? { dots: [] };
-      const dots = existing.dots as any[] ?? [];
-      if (!dots.some((d: any) => d.key === 'institutional')) {
-        marked[dateStr] = { ...existing, dots: [...dots, INSTITUTIONAL_DOT] };
-      }
-      current.setDate(current.getDate() + 1);
+    const dateStr = ev.start_date;
+    const existing = marked[dateStr] ?? { dots: [] };
+    const dots = existing.dots as any[] ?? [];
+    if (!dots.some((d: any) => d.key === 'institutional')) {
+      marked[dateStr] = { ...existing, dots: [...dots, INSTITUTIONAL_DOT] };
     }
   });
 

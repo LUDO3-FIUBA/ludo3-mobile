@@ -83,6 +83,32 @@ export function post(url: string, body: any, queryParams = [], headers = {}) {
   }).then(res => validate(res));
 }
 
+export function postWithStatus(url: string, body: any, queryParams = [], headers = {}): Promise<{ data: unknown; status: number }> {
+  const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
+  const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
+  if (logRequests) {
+    if (body) {
+      console.log(
+        `POST ${baseUrl}/${url}/${queryParamsString}\n${JSON.stringify(body)}`,
+      );
+    } else {
+      console.log(`POST ${baseUrl}/${url}/${queryParamsString}`);
+    }
+  }
+  return fetch(`${baseUrl}/${url}/${queryParamsString}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...headers,
+    },
+    body: JSON.stringify(body),
+  }).then(res => {
+    const status = res.status;
+    return validate(res).then(data => ({ data, status }));
+  });
+}
+
 export function get(url: string, queryParams: any[] = [], headers = {}) {
   const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
   const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
@@ -142,6 +168,34 @@ export function patch(url: string, body: any, queryParams = [], headers = {}) {
       ...headers,
     },
     body: JSON.stringify(body),
+  }).then(res => validate(res));
+}
+
+export function postMultipart(url: string, formData: FormData, headers = {}) {
+  if (logRequests) {
+    console.log(`POST (multipart) ${baseUrl}/${url}/`);
+  }
+  return fetch(`${baseUrl}/${url}/`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      ...headers,
+    },
+    body: formData,
+  }).then(res => validate(res));
+}
+
+export function putMultipart(url: string, formData: FormData, headers = {}) {
+  if (logRequests) {
+    console.log(`PUT (multipart) ${baseUrl}/${url}/`);
+  }
+  return fetch(`${baseUrl}/${url}/`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      ...headers,
+    },
+    body: formData,
   }).then(res => validate(res));
 }
 

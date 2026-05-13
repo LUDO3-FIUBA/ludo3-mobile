@@ -16,6 +16,7 @@ export { default as PreRegisterPasswordScreen } from './preregister/password';
 export { default as ApprovedSubjectsScreen } from './approved_subjects';
 export { default as ViewSemesterScreen } from './view_semester';
 export { default as MyAttendancesScreen } from './view_semester/MyAttendances';
+export { default as AttendanceLocationSubmitScreen } from './view_semester/AttendanceLocationSubmit';
 export { default as MySubmissionsScreen } from './view_semester/MySubmissions';
 export { default as RootDrawer } from './root_drawer';
 export { default as NotificationsScreen } from './notifications';
@@ -62,6 +63,24 @@ export { default as TeacherEditEvaluationScreen } from './teacher_evaluations/Ed
 export { default as TeacherSendCommissionNotificationScreen } from './teacher_notifications/SendCommissionNotification';
 export { default as TeacherSemesterNotificationHistoryScreen } from './teacher_notifications/SemesterNotificationHistory';
 
+// Forms — Student screens
+export { default as FormsListScreen } from './forms/FormsListScreen';
+export { default as DocumentFormScreen } from './forms/DocumentFormScreen';
+export { default as DigitalFormScreen } from './forms/DigitalFormScreen';
+
+// Forms — Teacher screens
+export { default as TeacherFormsScreen } from './teacher_forms/TeacherFormsScreen';
+
+// Forms — Admin screens
+export { default as FormsManagerScreen } from './admin_forms/FormsManagerScreen';
+export { default as FormDesignerScreen } from './admin_forms/FormDesignerScreen';
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
 export { default as StudentIdentityViewerScreen } from './student_identity_viewer';
+
+// New screens
+export { default as StudentProceduresScreen } from './student_procedures';
+export { default as TeacherProceduresValidationScreen } from './teacher_procedures_validation';
+export { default as AdminProceduresManagerScreen } from './admin_procedures';
+export { default as MyAccountScreen } from './my_account';
+export { default as UsefulLinksScreen } from './useful_links';
