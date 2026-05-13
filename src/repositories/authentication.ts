@@ -74,14 +74,12 @@ export class InvalidCredentials extends Error {
 
 export function preregister(
   dni: string,
-  email: string,
   padron: string,
   password: string,
   image?: string,
 ): Promise<object> {
   const body: any = {
     dni,
-    email,
     padron,
     password,
     is_student: true,
