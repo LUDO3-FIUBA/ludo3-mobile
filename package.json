@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
+    "sync:fiuba-map": "cd ../FIUBA-Map && npm run build && rm -rf ../ludo3-mobile/android/app/src/main/assets/fiuba-map && cp -r build/. ../ludo3-mobile/android/app/src/main/assets/fiuba-map/",
+    "android": "npm run sync:fiuba-map && expo run:android",
+    "android:nosync": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web",
@@ -61,6 +63,7 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-vision-camera": "^4.6.1",
     "react-native-web": "~0.19.13",
+    "react-native-webview": "13.12.5",
     "react-redux": "^9.2.0",
     "validate.js": "^0.13.1",
     "xlsx": "^0.18.5",

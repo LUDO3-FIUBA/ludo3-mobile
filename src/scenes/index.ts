@@ -84,3 +84,4 @@ export { default as TeacherProceduresValidationScreen } from './teacher_procedur
 export { default as AdminProceduresManagerScreen } from './admin_procedures';
 export { default as MyAccountScreen } from './my_account';
 export { default as UsefulLinksScreen } from './useful_links';
+export { default as FiubaMapScreen } from './fiuba_map';
