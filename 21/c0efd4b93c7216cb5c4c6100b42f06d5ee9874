@@ -1,0 +1,29 @@
+e2e/tests/map_floor.spec.ts
+  s_4d9056a3efbb15::t_5e0af6932a1d3c 21,66-67,71
+  s_4d9056a3efbb15::t_01b92ac9553245 4,12,14-20,22-23,25-27,30-34,42-43,46,49,52,56-57,59,62,68-70,74-77,79,82,85,88-89,91-92,94
+package.json
+  s_4d9056a3efbb15::t_eacd4107bf8d5d 13-16
+e2e/tests/user.spec.ts
+  s_4d9056a3efbb15::t_cbba6adbfaf838 41-42,51-52,54
+  s_4d9056a3efbb15::t_59ce419011ec7c 39,49,61,68
+  s_4d9056a3efbb15::t_165eae4ae5fd3b 47
+  s_4d9056a3efbb15::t_d46ab0a9cf3747 63,66,69-74
+  s_4d9056a3efbb15::t_5dc053614b249b 53
+  s_4d9056a3efbb15::t_bbb3321cc5e4d7 1-36,38,43-46,48,55-60,64-65,67,75-84
+  s_4d9056a3efbb15::t_c28fe97cce7949 37,40,50,62
+e2e/tests/home.spec.ts
+  s_4d9056a3efbb15::t_4ca56a9cad63cb 1-40
+e2e/tests/academic.spec.ts
+  s_4d9056a3efbb15::t_4c704faabb1aae 1-92
+e2e/tests/calendar.spec.ts
+  s_4d9056a3efbb15::t_56786671c5e35d 1-33,35,38-43
+  s_4d9056a3efbb15::t_c28fe97cce7949 34,36-37
+e2e/run-tests.sh
+  s_4d9056a3efbb15::t_6e446aa26f2d49 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "21c0efd4b93c7216cb5c4c6100b42f06d5ee9874",
+  "prompts": {}
+}
