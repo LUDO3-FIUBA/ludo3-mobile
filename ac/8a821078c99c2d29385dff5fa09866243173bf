@@ -1,0 +1,32 @@
+e2e/tests/academic.spec.ts
+  s_4d9056a3efbb15::t_4c704faabb1aae 1-92
+e2e/tests/home.spec.ts
+  s_4d9056a3efbb15::t_4ca56a9cad63cb 1-40
+e2e/tests/user.spec.ts
+  s_4d9056a3efbb15::t_cbba6adbfaf838 41-42,51-52,54
+  s_4d9056a3efbb15::t_5dc053614b249b 53
+  s_4d9056a3efbb15::t_d46ab0a9cf3747 63,66,69-74
+  s_4d9056a3efbb15::t_bbb3321cc5e4d7 1-36,38,43-46,48,55-60,64-65,67,75-84
+  s_4d9056a3efbb15::t_165eae4ae5fd3b 47
+  s_4d9056a3efbb15::t_c28fe97cce7949 37,40,50,62
+  s_4d9056a3efbb15::t_59ce419011ec7c 39,49,61,68
+e2e/tests/calendar.spec.ts
+  s_4d9056a3efbb15::t_c28fe97cce7949 34,36-37
+  s_4d9056a3efbb15::t_56786671c5e35d 1-33,35,38-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "ac8a821078c99c2d29385dff5fa09866243173bf",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
