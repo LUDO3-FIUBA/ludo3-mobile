@@ -55,6 +55,9 @@ export function createPasswordScreenStyles() {
       backgroundColor: Appearance.getColorScheme() === 'dark' ? '#1b1b1b' : '#fff',
       marginBottom: 14,
     },
+    passwordInput: {
+      marginBottom: 14,
+    },
     hint: {
       fontSize: 13,
       color: palette.darkGray,

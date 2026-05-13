@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Image, StyleSheet, Text, TextInput, TouchableOpacity, Platform } from 'react-native';
-import { RoundedButton } from '../../components';
+import { RoundedButton, PasswordInput } from '../../components';
 import { landing as style } from '../../styles';
 import { authenticationRepository, usersRepository } from '../../repositories';
 import SessionManager from '../../managers/sessionManager';
@@ -21,18 +21,6 @@ const GoogleLogo = ({ size = 20 }: { size?: number }) => (
     <Path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
     <Path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
     <Path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
-  </Svg>
-);
-
-const EyeIcon = ({ size = 22, color = '#888' }: { size?: number; color?: string }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Path fill={color} d="M12,4.5C7,4.5,2.73,7.61,1,12c1.73,4.39,6,7.5,11,7.5s9.27-3.11,11-7.5C21.27,7.61,17,4.5,12,4.5z M12,17c-2.76,0-5-2.24-5-5s2.24-5,5-5s5,2.24,5,5S14.76,17,12,17z M12,9c-1.66,0-3,1.34-3,3s1.34,3,3,3s3-1.34,3-3S13.66,9,12,9z"/>
-  </Svg>
-);
-
-const EyeOffIcon = ({ size = 22, color = '#888' }: { size?: number; color?: string }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Path fill={color} d="M12,7c2.76,0,5,2.24,5,5c0,0.65-0.13,1.26-0.36,1.83l2.92,2.92c1.51-1.26,2.7-2.89,3.43-4.75C21.27,7.61,17,4.5,12,4.5c-1.4,0-2.74,0.25-3.98,0.7l2.16,2.16C10.74,7.13,11.35,7,12,7z M2,4.27l2.28,2.28l0.46,0.46C3.08,8.3,1.78,10.02,1,12c1.73,4.39,6,7.5,11,7.5c1.55,0,3.03-0.3,4.38-0.84l0.42,0.42L19.73,22L21,20.73L3.27,3L2,4.27z M7.53,9.8l1.55,1.55C9.03,11.56,9,11.77,9,12c0,1.66,1.34,3,3,3c0.22,0,0.44-0.03,0.65-0.08l1.55,1.55C13.53,16.8,12.79,17,12,17c-2.76,0-5-2.24-5-5C7,11.21,7.2,10.47,7.53,9.8z M11.84,9.02L15,12.18l0.02-0.16C15.02,10.35,13.68,9,12,9L11.84,9.02z"/>
   </Svg>
 );
 
@@ -91,7 +79,6 @@ const Landing = ({ navigation }: Props) => {
   const [loginInProgress, setLoginInProgress] = useState(false);
   const [dni, setDni] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordVisible, setPasswordVisible] = useState(false);
   const [dniError, setDniError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [formError, setFormError] = useState<FormError | null>(null);
@@ -300,24 +287,13 @@ const Landing = ({ navigation }: Props) => {
         />
         {!!dniError && <Text style={styles.fieldErrorText}>{dniError}</Text>}
 
-        <View style={[styles.passwordRow, passwordError !== null && styles.inputError]}>
-          <TextInput
-            style={styles.passwordTextInput}
-            placeholder="Contraseña"
-            secureTextEntry={!passwordVisible}
-            value={password}
-            onChangeText={(t) => { setPassword(t); clearAllErrors(); }}
-            editable={!loginInProgress}
-          />
-          <TouchableOpacity
-            style={styles.eyeButton}
-            onPress={() => setPasswordVisible(v => !v)}
-            disabled={loginInProgress}
-          >
-            {passwordVisible ? <EyeOffIcon /> : <EyeIcon />}
-          </TouchableOpacity>
-        </View>
-        {!!passwordError && <Text style={styles.fieldErrorText}>{passwordError}</Text>}
+        <PasswordInput
+          value={password}
+          onChangeText={(t) => { setPassword(t); clearAllErrors(); }}
+          editable={!loginInProgress}
+          error={passwordError !== null ? passwordError : undefined}
+          style={styles.passwordInputContainer}
+        />
 
         {formError && (
           <FormErrorBanner
@@ -485,22 +461,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginLeft: 2,
   },
-  passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: 'white',
+  passwordInputContainer: {
     marginBottom: 16,
-  },
-  passwordTextInput: {
-    flex: 1,
-    padding: 14,
-    fontSize: 16,
-  },
-  eyeButton: {
-    padding: 14,
   },
   preregisterSection: {
     marginTop: 24,
