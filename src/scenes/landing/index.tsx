@@ -73,7 +73,11 @@ const FormErrorBanner: React.FC<FormErrorBannerProps> = ({ formError, onRetry, o
   </View>
 );
 
-const isNetworkError = (e: any) => !!e?.isAxiosError && !e.response;
+const isNetworkError = (e: any) =>
+  (!!e?.isAxiosError && !e.response) ||
+  e?.code === 'ERR_NETWORK' ||
+  e?.code === 'ECONNREFUSED' ||
+  /ERR_CONNECTION_REFUSED|network error|failed to fetch/i.test(e?.message ?? '');
 const isServerError = (e: any) =>
   (!!e?.response && e.response.status >= 500) ||
   /status code 5\d\d/i.test(e?.message ?? '');
