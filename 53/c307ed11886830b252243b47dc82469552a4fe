@@ -1,0 +1,21 @@
+e2e/run-tests.sh
+  s_4d9056a3efbb15::t_3d673ab6e79317 12-14
+e2e/setup-db.sh
+  s_4d9056a3efbb15::t_01310e3e81ab69 1-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "53c307ed11886830b252243b47dc82469552a4fe",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
