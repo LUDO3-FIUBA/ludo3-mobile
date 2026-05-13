@@ -1,0 +1,32 @@
+e2e/tests/academic.spec.ts
+  s_4d9056a3efbb15::t_4c704faabb1aae 1-92
+e2e/tests/calendar.spec.ts
+  s_4d9056a3efbb15::t_56786671c5e35d 1-33,35,38-43
+  s_4d9056a3efbb15::t_c28fe97cce7949 34,36-37
+e2e/tests/map_floor.spec.ts
+  s_4d9056a3efbb15::t_01b92ac9553245 4-14,22-32,40,42-44,47-49,52-54,57,59-62,65-88,90-91,95,101-106,112-117,121-125,127,131,134-147,154,156-175,178-190,198-209,212,215,218,222-223,226,235-238,240,243,248-252,254,260-262,264-281
+  s_4d9056a3efbb15::t_1af60f615a237f 108-109,118,120,245,247
+  s_4d9056a3efbb15::t_5f9831315335d4 16-19
+  s_4d9056a3efbb15::t_5e0af6932a1d3c 89,92-94,96-100,107,111,126,128,130,132-133,148-153,155,230-232,255-257
+  s_4d9056a3efbb15::t_d599b89e479297 15,20-21,110,119,129,246
+e2e/tests/home.spec.ts
+  s_4d9056a3efbb15::t_4ca56a9cad63cb 1-40
+package.json
+  s_4d9056a3efbb15::t_eacd4107bf8d5d 13-16
+e2e/tests/user.spec.ts
+  s_4d9056a3efbb15::t_c28fe97cce7949 37,40,50,62
+  s_4d9056a3efbb15::t_5dc053614b249b 53
+  s_4d9056a3efbb15::t_59ce419011ec7c 39,49,61,68
+  s_4d9056a3efbb15::t_cbba6adbfaf838 41-42,51-52,54
+  s_4d9056a3efbb15::t_bbb3321cc5e4d7 1-36,38,43-46,48,55-60,64-65,67,75-84
+  s_4d9056a3efbb15::t_d46ab0a9cf3747 63,66,69-74
+  s_4d9056a3efbb15::t_165eae4ae5fd3b 47
+e2e/run-tests.sh
+  s_4d9056a3efbb15::t_6e446aa26f2d49 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "b156ffcbfc21f6bce9ecbefc1e2babf4ce225b00",
+  "prompts": {}
+}
