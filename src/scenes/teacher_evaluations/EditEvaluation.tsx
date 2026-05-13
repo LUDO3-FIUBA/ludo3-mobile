@@ -40,6 +40,7 @@ export default function EditEvaluation() {
       await teacherEvaluationsRepository.update(
         evaluation.id,
         values.evaluationName,
+        values.description,
         new Date(values.startDate!.getFullYear(), values.startDate!.getMonth(), values.startDate!.getDate(), values.startTime!.getHours(), values.startTime!.getMinutes()),
         new Date(values.finishDate!.getFullYear(), values.finishDate!.getMonth(), values.finishDate!.getDate(), values.finishTime!.getHours(), values.finishTime!.getMinutes()),
         values.minimumPassingGrade,
@@ -112,6 +113,7 @@ export default function EditEvaluation() {
       submitting={saving || deleting}
       initialValues={{
         evaluationName: evaluation.evaluationName,
+        description: evaluation.description ?? '',
         minimumPassingGrade: String(evaluation.passingGrade) ?? '',
         startDate: start,
         startTime: start,
