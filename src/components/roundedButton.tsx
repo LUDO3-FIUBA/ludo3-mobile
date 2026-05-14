@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { View, Text, TouchableOpacity, Alert, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { roundedButton as style } from '../styles';
 
 interface RoundedButtonProps {
@@ -19,7 +19,7 @@ interface RoundedButtonProps {
 const RoundedButton: FC<RoundedButtonProps> = ({
   text = 'Button',
   enabled = true,
-  onPress = () => Alert.alert('Pre-registro'),
+  onPress = () => {},
   style: customStyle,
 }) => {
   return (
