@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { RoundedButton } from '../../components';
 import { evaluationGradesList as style } from '../../styles';
 import { makeRequest } from '../../networking/makeRequest';
@@ -41,6 +42,7 @@ const ListFooter: React.FC<ListFooterProps> = ({
   gradeChanges
 }) => {
   const navigation = useNavigation();
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   if (!isEditable) return null;
 
   // const studentAdded = async (padron: string) => {
@@ -72,6 +74,16 @@ const ListFooter: React.FC<ListFooterProps> = ({
 
   return (
     <View style={style().listHeaderFooter}>
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Confirmar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
       <RoundedButton
         text="Agregar alumno"
         style={style().button}
@@ -115,53 +127,24 @@ const ListFooter: React.FC<ListFooterProps> = ({
         }
         onPress={async () => {
           if (gradeChanges.size > 0) {
-            Alert.alert(
-              '¡Esperá!',
-              'Todavía tenés cambios sin guardar. ¿Qué querés hacer con ellos antes de cerrar el acta?',
-              [
-                {
-                  text: 'Cancelar',
-                  style: 'cancel',
-                },
-                {
-                  text: 'Descartar',
-                  onPress: () => closeAct(navigation),
-                  style: 'destructive',
-                },
-                {
-                  text: 'Guardar',
-                  onPress: async () => {
-                    await saveChanges(async () => {
-                      await closeAct(navigation);
-                    });
-                  },
-                },
-              ],
-              {
-                cancelable: true,
+            setConfirmDialog({
+              title: '¡Esperá!',
+              message: 'Todavía tenés cambios sin guardar. ¿Querés guardarlos antes de cerrar el acta?',
+              onConfirm: async () => {
+                await saveChanges(async () => {
+                  await closeAct(navigation);
+                });
               },
-            );
+            });
             return;
           } else if (hasWarnings()) {
-            Alert.alert(
-              '¡Esperá!',
-              'Tenés algunos alumnos que no tienen todas las correlativas. ¿Estás seguro que querés cerrar el acta con sus notas?',
-              [
-                {
-                  text: 'Cancelar',
-                  style: 'cancel',
-                },
-                {
-                  text: 'Sí',
-                  onPress: async () => {
-                    await closeAct(navigation);
-                  },
-                },
-              ],
-              {
-                cancelable: true,
+            setConfirmDialog({
+              title: '¡Esperá!',
+              message: 'Tenés algunos alumnos que no tienen todas las correlativas. ¿Estás seguro que querés cerrar el acta con sus notas?',
+              onConfirm: async () => {
+                await closeAct(navigation);
               },
-            );
+            });
             return;
           } else {
             await closeAct(navigation);

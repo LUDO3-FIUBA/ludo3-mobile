@@ -5,26 +5,17 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   Modal,
   StyleSheet,
-  Platform,
   TextInput,
   Linking,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { formsRepository } from '../../repositories';
 import FormSubmission, { TeacherValidationStatusValue } from '../../models/FormSubmission';
 import { lightModeColors } from '../../styles/colorPalette';
-
-function showMessage(title: string, message: string) {
-  if (Platform.OS === 'web') {
-    window.alert(`${title}\n\n${message}`);
-    return;
-  }
-  Alert.alert(title, message);
-}
 
 const STATUS_LABELS: Record<NonNullable<TeacherValidationStatusValue>, string> = {
   pending: 'Pendiente',
@@ -162,6 +153,11 @@ const TeacherFormsScreen: React.FC = () => {
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
+
+  const showMessage = (title: string, message: string) => {
+    setAlertDialog({ title, message });
+  };
 
   // Answers modal
   const [answersModal, setAnswersModal] = useState<FormSubmission | null>(null);
@@ -307,6 +303,15 @@ const TeacherFormsScreen: React.FC = () => {
           </>
         )}
       </ScrollView>
+
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
 
       {/* Answers modal */}
       <Modal

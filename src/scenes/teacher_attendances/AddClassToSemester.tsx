@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   Text,
   View,
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Loading, RoundedButton } from '../../components';
 import { getStyleSheet as style } from '../../styles';
@@ -85,6 +85,7 @@ const AddClassToSemester: React.FC = () => {
   };
 
   const [evaluationName, setEvaluationName] = useState('')
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
   return (
     <View style={style().containerView}>
       <View style={style().dateButtonInputs}>
@@ -253,14 +254,10 @@ const AddClassToSemester: React.FC = () => {
                 })
                 .catch((error: any) => {
                   setCreating(false);
-                  Alert.alert(
-                    'Te fallamos',
-                    'No pudimos crear este final. ' +
-                    'Volvé a intentar en unos minutos.',
-                  );
+                  setAlertDialog({ title: 'Te fallamos', message: 'No pudimos crear este final. Volvé a intentar en unos minutos.' });
                 });
             } else {
-              Alert.alert('Error', 'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.');
+              setAlertDialog({ title: 'Error', message: 'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.' });
             }
           } else {
             throw ('Date or Time is null');
@@ -268,6 +265,14 @@ const AddClassToSemester: React.FC = () => {
         }}
       />
       {creating && <Loading />}
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
     </View>
   );
 };

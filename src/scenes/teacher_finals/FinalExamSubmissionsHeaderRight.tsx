@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, Text } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Modal, TextInput, Text } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { MaterialIcon } from '../../components';
 import SquaredButton from '../../components/SquaredButton';
 import { lightModeColors } from '../../styles/colorPalette';
@@ -21,6 +22,8 @@ export function FinalExamSubmissionsHeaderRight({ final, fetchData }: Props) {
 
   const [modalPadronInputVisible, setModalPadronInputVisible] = useState(false)
   const [confirmationModalVisible, setConfirmationModalVisible] = useState(false)
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
 
   const fetchStudent = async () => {
     try {
@@ -32,9 +35,7 @@ export function FinalExamSubmissionsHeaderRight({ final, fetchData }: Props) {
       setConfirmationModalVisible(true);
     } catch (error) {
       console.error("Failed to fetch student", error);
-      Alert.alert('Error',
-        'No pudimos buscar la información del alumno. ' +
-        'Asegurate de que el padrón esté escrito correctamente')
+      setAlertDialog({ title: 'Error', message: 'No pudimos buscar la información del alumno. Asegurate de que el padrón esté escrito correctamente.' });
     }
   }
 
@@ -57,24 +58,33 @@ export function FinalExamSubmissionsHeaderRight({ final, fetchData }: Props) {
   }
 
   const showConfirmNotifyStudents = () => {
-    Alert.alert(
-      'Notificar estudiantes',
-      `¿Está seguro de que desea notificar a los estudiantes de sus notas? Se enviará una notificación a todos los estudiantes que hayan recibido una nota`,
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Confirmar',
-          onPress: async () => teacherFinalsRepository.notifyGrades(final.id)
-        },
-      ]
-    );
+    setConfirmDialog({
+      title: 'Notificar estudiantes',
+      message: '¿Está seguro de que desea notificar a los estudiantes de sus notas? Se enviará una notificación a todos los estudiantes que hayan recibido una nota',
+      onConfirm: () => teacherFinalsRepository.notifyGrades(final.id),
+    });
   };
 
   return (
     <View style={styles.navButtonsContainer}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Confirmar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
       <TouchableOpacity style={{...styles.navButton, marginRight: 15 }} onPress={showConfirmNotifyStudents}>
         <MaterialIcon name="bell-ring" fontSize={24} color="gray" />
       </TouchableOpacity>

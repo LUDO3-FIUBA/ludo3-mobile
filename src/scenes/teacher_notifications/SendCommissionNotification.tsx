@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-    Alert,
     Image,
     KeyboardAvoidingView,
     Platform,
@@ -16,6 +15,7 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcon, RoundedButton } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { notificationsRepository } from '../../repositories';
 import { lightModeColors } from '../../styles/colorPalette';
 
@@ -50,11 +50,12 @@ const SendCommissionNotification: React.FC = () => {
     const [isUrgent, setIsUrgent] = useState(false);
     const [image, setImage] = useState<{ uri: string; type: string; name: string } | null>(null);
     const [saving, setSaving] = useState(false);
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Permiso denegado', 'Necesitamos acceso a tu galería para adjuntar imágenes.');
+            setAlertDialog({ title: 'Permiso denegado', message: 'Necesitamos acceso a tu galería para adjuntar imágenes.' });
             return;
         }
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -75,11 +76,11 @@ const SendCommissionNotification: React.FC = () => {
 
     const handleSubmit = async () => {
         if (!title.trim()) {
-            Alert.alert('Falta el título', 'Ingresá un título para el aviso.');
+            setAlertDialog({ title: 'Falta el título', message: 'Ingresá un título para el aviso.' });
             return;
         }
         if (!message.trim()) {
-            Alert.alert('Falta el mensaje', 'Ingresá el contenido del aviso.');
+            setAlertDialog({ title: 'Falta el mensaje', message: 'Ingresá el contenido del aviso.' });
             return;
         }
 
@@ -92,10 +93,10 @@ const SendCommissionNotification: React.FC = () => {
                 isUrgent,
                 image,
             });
-            Alert.alert('Aviso enviado', 'Los alumnos del cuatrimestre lo van a recibir.');
+            setAlertDialog({ title: 'Aviso enviado', message: 'Los alumnos del cuatrimestre lo van a recibir.' });
             navigation.goBack();
         } catch {
-            Alert.alert('Error', 'No se pudo enviar el aviso. Intentá de nuevo.');
+            setAlertDialog({ title: 'Error', message: 'No se pudo enviar el aviso. Intentá de nuevo.' });
         } finally {
             setSaving(false);
         }
@@ -187,6 +188,14 @@ const SendCommissionNotification: React.FC = () => {
                     style={{}}
                 />
             </ScrollView>
+            <AlertDialog
+                visible={alertDialog !== null}
+                title={alertDialog?.title ?? ''}
+                message={alertDialog?.message ?? ''}
+                mode="info"
+                confirmLabel="Aceptar"
+                onConfirm={() => setAlertDialog(null)}
+            />
         </KeyboardAvoidingView>
     );
 };

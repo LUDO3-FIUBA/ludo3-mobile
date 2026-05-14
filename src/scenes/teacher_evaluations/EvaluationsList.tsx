@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, Button } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Button } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { Loading, RoundedButton } from '../../components';
 import { evaluations as style } from '../../styles';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -34,6 +35,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const hasFocusedOnce = useRef(false);
 
   const [loading, setLoading] = useState(!evaluationsFromParams);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const setNavOptions = useCallback(() => {
     navigation.setOptions({
@@ -57,11 +59,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
     } catch (error) {
       setLoading(false);
       console.log('Error', error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No sabemos pero no pudimos buscar tus evaluaciones. ' +
-        'Volvé a intentar en unos minutos.',
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No sabemos pero no pudimos buscar tus evaluaciones. Volvé a intentar en unos minutos.' });
     }
   };
 
@@ -77,6 +75,14 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
 
   return (
     <View style={{ flex: 1, height: '100%' }}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {loading && <Loading />}
       {!loading && (
         <FlatList
