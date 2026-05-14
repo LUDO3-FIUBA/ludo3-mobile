@@ -50,6 +50,7 @@ import StudentCredentialScreen from '../student_credential';
 import FormsListScreen from '../forms/FormsListScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
+import NewsList from '../news/NewsList';
 
 import {
   resolveMenu, canToggleRole,
@@ -71,6 +72,8 @@ const Drawer = createDrawerNavigator();
 
 const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
 const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+const StudentNewsListScreen = () => <NewsList isAdmin={false} />;
+const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
 
 const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   Home: HomeScreen,
@@ -99,6 +102,8 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserDetail: UserDetail,
   AdminNotificationCreate: NotificationForm,
   Notifications: NotificationsScreen,
+  StudentNewsList: StudentNewsListScreen,
+  AdminNewsList: AdminNewsListScreen
 };
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
@@ -211,94 +216,94 @@ function WebDrawerContent(props: WebDrawerContentProps) {
         )}
 
         {/* Profile overview — only when expanded */}
-      {expanded && (
-        <View style={styles.profileSection}>
-          <ProfileOverview />
-        </View>
-      )}
+        {expanded && (
+          <View style={styles.profileSection}>
+            <ProfileOverview />
+          </View>
+        )}
 
-      {/* Menu items */}
-      <View style={styles.menuList}>
-        {menuItems.map(item => {
-          const accentColor = itemColor();
+        {/* Menu items */}
+        <View style={styles.menuList}>
+          {menuItems.map(item => {
+            const accentColor = itemColor();
 
-          if (item.kind === 'direct') {
-            const active = isActive(item.route);
+            if (item.kind === 'direct') {
+              const active = isActive(item.route);
+              return (
+                <TouchableOpacity
+                  key={item.key}
+                  // @ts-expect-error — title is a valid HTML attribute on web for native tooltips
+                  title={expanded ? undefined : item.label}
+                  onPress={() => handleDirectPress(item)}
+                  accessibilityLabel={item.label}
+                  style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, active && { backgroundColor: `${accentColor}18` }]}
+                >
+                  <View style={styles.iconBox}>
+                    <Icon name={active ? item.icon : item.iconOutline} size={20} color={active ? accentColor : lightModeColors.darkGray} />
+                  </View>
+                  {expanded && (
+                    <Text style={[styles.menuLabel, { color: active ? accentColor : lightModeColors.darkGray }]}>{item.label}</Text>
+                  )}
+                </TouchableOpacity>
+              );
+            }
+
+            // Submenu
+            const submenuItem = item as SubmenuItem;
+            const isOpen = openSubmenus.has(item.key);
+            const hasActiveChild = submenuItem.children.some(c => isActive(c.route));
+            const headerColor = hasActiveChild ? accentColor : lightModeColors.darkGray;
+
             return (
-              <TouchableOpacity
-                key={item.key}
-                // @ts-expect-error — title is a valid HTML attribute on web for native tooltips
-                title={expanded ? undefined : item.label}
-                onPress={() => handleDirectPress(item)}
-                accessibilityLabel={item.label}
-                style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, active && { backgroundColor: `${accentColor}18` }]}
-              >
-                <View style={styles.iconBox}>
-                  <Icon name={active ? item.icon : item.iconOutline} size={20} color={active ? accentColor : lightModeColors.darkGray} />
-                </View>
-                {expanded && (
-                  <Text style={[styles.menuLabel, { color: active ? accentColor : lightModeColors.darkGray }]}>{item.label}</Text>
+              <View key={item.key} style={expanded && { alignSelf: 'stretch' }}>
+                <TouchableOpacity
+                  // @ts-ignore
+                  title={expanded ? undefined : item.label}
+                  onPress={() => {
+                    if (!expanded) {
+                      onSetExpanded(true);
+                      setOpenSubmenus(prev => new Set([...prev, item.key]));
+                    } else {
+                      handleSubmenuToggle(item.key);
+                    }
+                  }}
+                  accessibilityLabel={item.label}
+                  style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, hasActiveChild && !expanded && { backgroundColor: `${accentColor}18` }]}
+                >
+                  <View style={styles.iconBox}>
+                    <Icon name={hasActiveChild ? item.icon : item.iconOutline} size={20} color={headerColor} />
+                  </View>
+                  {expanded && (
+                    <>
+                      <Text style={[styles.menuLabel, { color: headerColor, flex: 1 }]}>{item.label}</Text>
+                      <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={lightModeColors.darkGray} />
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                {expanded && isOpen && (
+                  <View style={styles.submenuList}>
+                    {submenuItem.children.map(child => {
+                      const childAccent = itemColor();
+                      const childActive = isActive(child.route);
+                      return (
+                        <TouchableOpacity
+                          key={child.key}
+                          onPress={() => handleDirectPress(child)}
+                          accessibilityLabel={child.label}
+                          style={[styles.submenuRow, childActive && { backgroundColor: `${childAccent}18` }]}
+                        >
+                          <Icon name={childActive ? child.icon : child.iconOutline} size={18} color={childActive ? childAccent : lightModeColors.darkGray} style={styles.submenuIcon} />
+                          <Text style={[styles.submenuLabel, { color: childActive ? childAccent : lightModeColors.darkGray }]}>{child.label}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 )}
-              </TouchableOpacity>
+              </View>
             );
-          }
-
-          // Submenu
-          const submenuItem = item as SubmenuItem;
-          const isOpen = openSubmenus.has(item.key);
-          const hasActiveChild = submenuItem.children.some(c => isActive(c.route));
-          const headerColor = hasActiveChild ? accentColor : lightModeColors.darkGray;
-
-          return (
-            <View key={item.key} style={expanded && { alignSelf: 'stretch' }}>
-              <TouchableOpacity
-                // @ts-ignore
-                title={expanded ? undefined : item.label}
-                onPress={() => {
-                if (!expanded) {
-                  onSetExpanded(true);
-                  setOpenSubmenus(prev => new Set([...prev, item.key]));
-                } else {
-                  handleSubmenuToggle(item.key);
-                }
-              }}
-                accessibilityLabel={item.label}
-                style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, hasActiveChild && !expanded && { backgroundColor: `${accentColor}18` }]}
-              >
-                <View style={styles.iconBox}>
-                  <Icon name={hasActiveChild ? item.icon : item.iconOutline} size={20} color={headerColor} />
-                </View>
-                {expanded && (
-                  <>
-                    <Text style={[styles.menuLabel, { color: headerColor, flex: 1 }]}>{item.label}</Text>
-                    <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={lightModeColors.darkGray} />
-                  </>
-                )}
-              </TouchableOpacity>
-
-              {expanded && isOpen && (
-                <View style={styles.submenuList}>
-                  {submenuItem.children.map(child => {
-                    const childAccent = itemColor();
-                    const childActive = isActive(child.route);
-                    return (
-                      <TouchableOpacity
-                        key={child.key}
-                        onPress={() => handleDirectPress(child)}
-                        accessibilityLabel={child.label}
-                        style={[styles.submenuRow, childActive && { backgroundColor: `${childAccent}18` }]}
-                      >
-                        <Icon name={childActive ? child.icon : child.iconOutline} size={18} color={childActive ? childAccent : lightModeColors.darkGray} style={styles.submenuIcon} />
-                        <Text style={[styles.submenuLabel, { color: childActive ? childAccent : lightModeColors.darkGray }]}>{child.label}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              )}
-            </View>
-          );
-        })}
-      </View>
+          })}
+        </View>
       </DrawerContentScrollView>
     </View>
   );
@@ -435,9 +440,9 @@ const RootDrawer = () => {
         initialRouteName={homeMenuItem?.route}
         screenOptions={{
           drawerType: 'permanent',
-          drawerStyle: { 
-            width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH, 
-            borderRightWidth: 1, 
+          drawerStyle: {
+            width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH,
+            borderRightWidth: 1,
             borderRightColor: lightModeColors.lightGray,
             ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } as WebViewStyle : {})
           },

@@ -47,6 +47,7 @@ import UserSearch from './src/scenes/admin_users/UserSearch';
 import UserDetail from './src/scenes/admin_users/UserDetail';
 import NotificationList from './src/scenes/admin_notifications/NotificationList';
 import NotificationForm from './src/scenes/admin_notifications/NotificationForm';
+import NewsList from './src/scenes/news/NewsList';
 import MapScreen from './src/scenes/map';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -58,6 +59,8 @@ const Stack = createStackNavigator();
 
 const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
 const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+const StudentNewsListScreen = () => <NewsList isAdmin={false} />;
+const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
 
 const webLinking = {
   prefixes: ['http://localhost:8081'],
@@ -91,6 +94,7 @@ const webLinking = {
           VerifyIdentity: 'verificar-identidad',
           StudentCredential: 'mi-credencial',
           StudentUsefulLinks: 'enlaces-utiles',
+          StudentNewsList: 'novedades',
           // Teacher
           TeacherHome: 'mis-comisiones',
           CreateSemester: 'crear-cuatrimestre',
@@ -103,6 +107,7 @@ const webLinking = {
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
           FormsManager: 'admin/tramites',
+          AdminNewsList: 'admin/novedades',
           Map: 'mapa',
           Notifications: 'notificaciones',
         },
@@ -149,337 +154,338 @@ const App = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <Provider store={store}>
-      <ActionSheetProvider>
-        <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme} linking={Platform.OS === 'web' ? webLinking : undefined}>
-          <Stack.Navigator
-            initialRouteName="Splash"
-            screenOptions={{ gestureEnabled: false }}
-          >
-            <Stack.Screen
-              name="RootDrawer"
-              component={RootDrawer}
-              options={{ headerShown: false }}
-            />
+      <Provider store={store}>
+        <ActionSheetProvider>
+          <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme} linking={Platform.OS === 'web' ? webLinking : undefined}>
+            <Stack.Navigator
+              initialRouteName="Splash"
+              screenOptions={{ gestureEnabled: false }}
+            >
+              <Stack.Screen
+                name="RootDrawer"
+                component={RootDrawer}
+                options={{ headerShown: false }}
+              />
 
-            <Stack.Screen
-              name="Splash"
-              component={SplashScreen}
-              options={{ headerShown: false }}
-            />
+              <Stack.Screen
+                name="Splash"
+                component={SplashScreen}
+                options={{ headerShown: false }}
+              />
 
-            <Stack.Screen
-              name="Landing"
-              component={LandingScreen}
-              options={{ headerShown: false, title: 'Inicio' }}
-            />
+              <Stack.Screen
+                name="Landing"
+                component={LandingScreen}
+                options={{ headerShown: false, title: 'Inicio' }}
+              />
 
-            <Stack.Screen
-              name="ForgotPasswordRequest"
-              component={ForgotPasswordRequestScreen}
-              options={{ headerShown: true, title: 'Recuperar contraseña' }}
-            />
+              <Stack.Screen
+                name="ForgotPasswordRequest"
+                component={ForgotPasswordRequestScreen}
+                options={{ headerShown: true, title: 'Recuperar contraseña' }}
+              />
 
-            <Stack.Screen
-              name="ForgotPasswordConfirm"
-              component={ForgotPasswordConfirmScreen}
-              options={{ headerShown: true, title: 'Confirmar recuperación' }}
-            />
+              <Stack.Screen
+                name="ForgotPasswordConfirm"
+                component={ForgotPasswordConfirmScreen}
+                options={{ headerShown: true, title: 'Confirmar recuperación' }}
+              />
 
-            <Stack.Screen
-              name="PreRegister"
-              component={PreRegisterScreen}
-              options={{ headerShown: true, title: 'Pre-registro' }}
-            />
+              <Stack.Screen
+                name="PreRegister"
+                component={PreRegisterScreen}
+                options={{ headerShown: true, title: 'Pre-registro' }}
+              />
 
-            <Stack.Screen
-              name="PreRegisterPassword"
-              component={PreRegisterPasswordScreen}
-              options={{ headerShown: true, title: 'Pre-registro' }}
-            />
+              <Stack.Screen
+                name="PreRegisterPassword"
+                component={PreRegisterPasswordScreen}
+                options={{ headerShown: true, title: 'Pre-registro' }}
+              />
 
-            <Stack.Screen
-              name="PreRegisterDone"
-              component={PreRegisterLastInstructionsScreen}
-              options={{ headerShown: false }}
-            />
+              <Stack.Screen
+                name="PreRegisterDone"
+                component={PreRegisterLastInstructionsScreen}
+                options={{ headerShown: false }}
+              />
 
-            <Stack.Screen
-              name="TakePicture"
-              component={TakePictureStepScreen}
-              options={({ route }) => ({ title: 'Tomar foto' })}
-            />
+              <Stack.Screen
+                name="TakePicture"
+                component={TakePictureStepScreen}
+                options={({ route }) => ({ title: 'Tomar foto' })}
+              />
 
-            <Stack.Screen
-              name="ViewSemester"
-              component={ViewSemesterScreen}
-              options={{ headerShown: true, title: "Comisión" }}
-            />
+              <Stack.Screen
+                name="ViewSemester"
+                component={ViewSemesterScreen}
+                options={{ headerShown: true, title: "Comisión" }}
+              />
 
-            <Stack.Screen
-              name="MyAttendances"
-              component={MyAttendancesScreen}
-              options={{ headerShown: true, title: 'Mis asistencias' }}
-            />
+              <Stack.Screen
+                name="MyAttendances"
+                component={MyAttendancesScreen}
+                options={{ headerShown: true, title: 'Mis asistencias' }}
+              />
 
-            <Stack.Screen
-              name="AttendanceLocationSubmit"
-              component={AttendanceLocationSubmitScreen}
-              options={{ headerShown: true, title: 'Marcar presencia' }}
-            />
+              <Stack.Screen
+                name="AttendanceLocationSubmit"
+                component={AttendanceLocationSubmitScreen}
+                options={{ headerShown: true, title: 'Marcar presencia' }}
+              />
 
-            <Stack.Screen
-              name="MySubmissions"
-              component={MySubmissionsScreen}
-              options={{ headerShown: true, title: 'Mis entregas' }}
-            />
+              <Stack.Screen
+                name="MySubmissions"
+                component={MySubmissionsScreen}
+                options={{ headerShown: true, title: 'Mis entregas' }}
+              />
 
-            <Stack.Screen
-              name="CorrelativeSubjects"
-              component={CorrelativeSubjects}
-              options={{ headerShown: true, title: "Correlativas" }}
-            />
+              <Stack.Screen
+                name="CorrelativeSubjects"
+                component={CorrelativeSubjects}
+                options={{ headerShown: true, title: "Correlativas" }}
+              />
 
-            <Stack.Screen
-              name="ViewEvaluations"
-              component={ViewEvaluationsScreen}
-              options={{ headerShown: true, title: "Evaluaciones" }}
-            />
+              <Stack.Screen
+                name="ViewEvaluations"
+                component={ViewEvaluationsScreen}
+                options={{ headerShown: true, title: "Evaluaciones" }}
+              />
 
-            <Stack.Screen
-              name="ViewEvaluationDetails"
-              component={ViewEvaluationDetailsScreen}
-              options={{ headerShown: true, title: "Evaluación" }}
-            />
+              <Stack.Screen
+                name="ViewEvaluationDetails"
+                component={ViewEvaluationDetailsScreen}
+                options={{ headerShown: true, title: "Evaluación" }}
+              />
 
-            {/* Screens that moved from the drawer to the root stack (mobile) */}
-            <Stack.Screen name="ScanQR" component={ScanQR} options={{ headerShown: true, title: 'Escanear QR' }} />
-            <Stack.Screen name="ScanQRScreen" component={ScanQR} options={{ headerShown: true, title: 'Escanear QR' }} />
-            <Stack.Screen name="VerifyIdentity" component={VerifyIdentity} options={{ headerShown: true, title: 'Verificar identidad' }} />
-            <Stack.Screen name="StudentCredential" component={StudentCredentialScreen} options={{ headerShown: true, title: 'Mi credencial' }} />
-            <Stack.Screen name="StudentStats" component={StatsScreen} options={{ headerShown: true, title: 'Estadísticas' }} />
-            <Stack.Screen name="CurrentCommissionInscriptions" component={CommissionInscriptionsScreen} options={{ headerShown: true, title: 'Materias en curso' }} />
-            <Stack.Screen name="ApprovedSubjects" component={ApprovedSubjectsScreen} options={{ headerShown: true, title: 'Materias aprobadas' }} />
-            <Stack.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ headerShown: true, title: 'Materias pendientes' }} />
-            <Stack.Screen name="StudentDepartmentList" component={StudentDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />
-            <Stack.Screen name="FormsList" component={FormsListScreen} options={{ headerShown: true, title: 'Trámites' }} />
-            <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
-            <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
-            <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />
-            <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
-            <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
-            <Stack.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />
-            <Stack.Screen name="AdminCommissionList" component={CommissionList} options={{ headerShown: true, title: 'Comisiones' }} />
-            <Stack.Screen name="AdminUserSearch" component={UserSearch} options={{ headerShown: true, title: 'Buscar Usuarios' }} />
-            <Stack.Screen name="AdminNotificationList" component={NotificationList} options={{ headerShown: true, title: 'Avisos' }} />
-            <Stack.Screen name="FormsManager" component={FormsManagerScreen} options={{ headerShown: true, title: 'Gestor de Trámites' }} />
-            {/* Detail routes (formerly hidden drawer screens) */}
-            <Stack.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />
-            <Stack.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ headerShown: true, title: 'Nuevo Departamento' }} />
-            <Stack.Screen name="AdminDepartmentEdit" component={DepartmentForm} options={{ headerShown: true, title: 'Editar Departamento' }} />
-            <Stack.Screen name="AdminCommissionCreate" component={CommissionForm} options={{ headerShown: true, title: 'Nueva Comisión' }} />
-            <Stack.Screen name="AdminCommissionDetail" component={CommissionDetail} options={{ headerShown: true, title: 'Comisión' }} />
-            <Stack.Screen name="AdminCommissionEdit" component={CommissionForm} options={{ headerShown: true, title: 'Editar Comisión' }} />
-            <Stack.Screen name="AdminUserDetail" component={UserDetail} options={{ headerShown: true, title: 'Usuario' }} />
-            <Stack.Screen name="AdminNotificationCreate" component={NotificationForm} options={{ headerShown: true, title: 'Nuevo Aviso' }} />
-            <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: true, title: 'Notificaciones' }} />
+              {/* Screens that moved from the drawer to the root stack (mobile) */}
+              <Stack.Screen name="ScanQR" component={ScanQR} options={{ headerShown: true, title: 'Escanear QR' }} />
+              <Stack.Screen name="ScanQRScreen" component={ScanQR} options={{ headerShown: true, title: 'Escanear QR' }} />
+              <Stack.Screen name="VerifyIdentity" component={VerifyIdentity} options={{ headerShown: true, title: 'Verificar identidad' }} />
+              <Stack.Screen name="StudentCredential" component={StudentCredentialScreen} options={{ headerShown: true, title: 'Mi credencial' }} />
+              <Stack.Screen name="StudentStats" component={StatsScreen} options={{ headerShown: true, title: 'Estadísticas' }} />
+              <Stack.Screen name="CurrentCommissionInscriptions" component={CommissionInscriptionsScreen} options={{ headerShown: true, title: 'Materias en curso' }} />
+              <Stack.Screen name="ApprovedSubjects" component={ApprovedSubjectsScreen} options={{ headerShown: true, title: 'Materias aprobadas' }} />
+              <Stack.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ headerShown: true, title: 'Materias pendientes' }} />
+              <Stack.Screen name="StudentDepartmentList" component={StudentDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />
+              <Stack.Screen name="FormsList" component={FormsListScreen} options={{ headerShown: true, title: 'Trámites' }} />
+              <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
+              <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
+              <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />
+              <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
+              <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
+              <Stack.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />
+              <Stack.Screen name="AdminCommissionList" component={CommissionList} options={{ headerShown: true, title: 'Comisiones' }} />
+              <Stack.Screen name="AdminUserSearch" component={UserSearch} options={{ headerShown: true, title: 'Buscar Usuarios' }} />
+              <Stack.Screen name="AdminNotificationList" component={NotificationList} options={{ headerShown: true, title: 'Avisos' }} />
+              <Stack.Screen name="FormsManager" component={FormsManagerScreen} options={{ headerShown: true, title: 'Gestor de Trámites' }} />
+              {/* Detail routes (formerly hidden drawer screens) */}
+              <Stack.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />
+              <Stack.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ headerShown: true, title: 'Nuevo Departamento' }} />
+              <Stack.Screen name="AdminDepartmentEdit" component={DepartmentForm} options={{ headerShown: true, title: 'Editar Departamento' }} />
+              <Stack.Screen name="AdminCommissionCreate" component={CommissionForm} options={{ headerShown: true, title: 'Nueva Comisión' }} />
+              <Stack.Screen name="AdminCommissionDetail" component={CommissionDetail} options={{ headerShown: true, title: 'Comisión' }} />
+              <Stack.Screen name="AdminCommissionEdit" component={CommissionForm} options={{ headerShown: true, title: 'Editar Comisión' }} />
+              <Stack.Screen name="AdminUserDetail" component={UserDetail} options={{ headerShown: true, title: 'Usuario' }} />
+              <Stack.Screen name="AdminNotificationCreate" component={NotificationForm} options={{ headerShown: true, title: 'Nuevo Aviso' }} />
+              <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: true, title: 'Notificaciones' }} />
+              <Stack.Screen name="StudentNewsList" component={StudentNewsListScreen} options={{ headerShown: true, title: 'Novedades' }} />
+              <Stack.Screen name="AdminNewsList" component={AdminNewsListScreen} options={{ headerShown: true, title: 'Novedades' }} />
+              <Stack.Screen
+                name="AddEvaluationSubmission"
+                component={AddEvaluationSubmissionScreen}
+                options={{ headerShown: true, title: 'Agregar entrega' }}
+              />
 
-            <Stack.Screen
-              name="AddEvaluationSubmission"
-              component={AddEvaluationSubmissionScreen}
-              options={{ headerShown: true, title: 'Agregar entrega' }}
-            />
+              <Stack.Screen
+                name="ViewFinalDetails"
+                component={ViewFinalDetailsScreen}
+                options={{ headerShown: true, title: "Final" }}
+              />
 
-            <Stack.Screen
-              name="ViewFinalDetails"
-              component={ViewFinalDetailsScreen}
-              options={{ headerShown: true, title: "Final" }}
-            />
+              <Stack.Screen
+                name="ViewClassDetails"
+                component={ViewClassDetailsScreen}
+                options={{ headerShown: true, title: "Cursada" }}
+              />
 
-            <Stack.Screen
-              name="ViewClassDetails"
-              component={ViewClassDetailsScreen}
-              options={{ headerShown: true, title: "Cursada" }}
-            />
+              <Stack.Screen
+                name="Teachers"
+                component={TeachersScreen}
+                options={{ headerShown: true, title: "Cuerpo Docente" }}
+              />
 
-            <Stack.Screen
-              name="Teachers"
-              component={TeachersScreen}
-              options={{ headerShown: true, title: "Cuerpo Docente" }}
-            />
+              <Stack.Screen
+                name="Stats"
+                component={StatsScreen}
+                options={{ headerShown: true, title: "Estadisticas" }}
+              />
 
-            <Stack.Screen
-              name="Stats"
-              component={StatsScreen}
-              options={{ headerShown: true, title: "Estadisticas" }}
-            />
-            
-            <Stack.Screen
-              name="GoogleRegister"
-              component={GoogleRegisterScreen}
-              options={{ headerShown: true, title: 'Completar registro' }}
-            />
+              <Stack.Screen
+                name="GoogleRegister"
+                component={GoogleRegisterScreen}
+                options={{ headerShown: true, title: 'Completar registro' }}
+              />
 
-            <Stack.Screen
-              name="ChangePassword"
-              component={ChangePasswordScreen}
-              options={{ headerShown: true, title: 'Cambiar contraseña' }}
-            />
+              <Stack.Screen
+                name="ChangePassword"
+                component={ChangePasswordScreen}
+                options={{ headerShown: true, title: 'Cambiar contraseña' }}
+              />
 
-            <Stack.Screen
-              name="MyAccount"
-              component={MyAccountScreen}
-              options={{ headerShown: true, title: 'Mi perfil' }}
-            />
+              <Stack.Screen
+                name="MyAccount"
+                component={MyAccountScreen}
+                options={{ headerShown: true, title: 'Mi perfil' }}
+              />
 
-            <Stack.Screen
-              name="CompleteFaceRegistration"
-              component={CompleteFaceRegistrationScreen}
-              options={{ headerShown: true, title: 'Completar registro facial' }}
-            />
+              <Stack.Screen
+                name="CompleteFaceRegistration"
+                component={CompleteFaceRegistrationScreen}
+                options={{ headerShown: true, title: 'Completar registro facial' }}
+              />
 
-            {/* Teacher Stack screens */}
-            <Stack.Screen
-              name="SemesterStudents"
-              component={TeacherSemesterStudentsScreen}
-              options={{ headerShown: true, title: 'Alumnos del cuatrimestre' }}
-            />
-            <Stack.Screen
-              name="SemesterEditScreen"
-              component={TeacherSemesterEditScreen}
-              options={{ headerShown: true, title: 'Editar cuatrimestre' }}
-            />
-            <Stack.Screen
-              name="EvaluationsList"
-              component={TeacherEvaluationsListScreen}
-              options={{ headerShown: true, title: 'Evaluaciones' }}
-            />
-            <Stack.Screen
-              name="AddEvaluation"
-              component={TeacherAddEvaluationScreen}
-              options={{ headerShown: true, title: 'Agregar evaluación' }}
-            />
-            <Stack.Screen
-              name="SubmissionsList"
-              component={TeacherSubmissionsListScreen}
-              options={{ headerShown: true, title: 'Entregas' }}
-            />
-            <Stack.Screen
-              name="TeacherSubmissionDetails"
-              component={TeacherSubmissionDetailsScreen}
-              options={{ headerShown: true, title: 'Detalle de entrega' }}
-            />
-            <Stack.Screen
-              name="FinalsList"
-              component={TeacherFinalsListScreen}
-              options={{ headerShown: true, title: 'Finales' }}
-            />
-            <Stack.Screen
-              name="AddFinal"
-              component={TeacherAddFinalScreen}
-              options={{ headerShown: true, title: 'Agregar final' }}
-            />
-            <Stack.Screen
-              name="TeacherStaff"
-              component={TeacherStaffScreen}
-              options={{ headerShown: true, title: 'Cuerpo Docente' }}
-            />
-            <Stack.Screen
-              name="TeachersConfiguration"
-              component={TeacherStaffConfigurationScreen}
-              options={{ headerShown: true, title: 'Configurar docentes' }}
-            />
-            <Stack.Screen
-              name="AddTeachersConfigurationList"
-              component={TeacherAddStaffScreen}
-              options={{ headerShown: true, title: 'Agregar docente' }}
-            />
-            <Stack.Screen
-              name="SemesterAttendances"
-              component={TeacherSemesterAttendancesScreen}
-              options={{ headerShown: true, title: 'Asistencias' }}
-            />
-            <Stack.Screen
-              name="AttendanceDetails"
-              component={TeacherAttendanceDetailsScreen}
-              options={{ headerShown: true, title: 'Detalles de asistencia' }}
-            />
-            <Stack.Screen
-              name="SemesterAttendanceQR"
-              component={TeacherSemesterAttendanceQRScreen}
-              options={{ headerShown: true, title: 'QR de Asistencia' }}
-            />
-            <Stack.Screen
-              name="EvaluationQR"
-              component={TeacherEvaluationQRScreen}
-              options={{ headerShown: true, title: 'QR de Evaluación' }}
-            />
-            <Stack.Screen
-              name="FinalExamQR"
-              component={TeacherFinalExamQRScreen}
-              options={{ headerShown: true, title: 'QR de Final' }}
-            />
-            <Stack.Screen
-              name="TeacherStats"
-              component={TeacherStatsScreen}
-              options={{ headerShown: true, title: 'Estadísticas' }}
-            />
-            <Stack.Screen
-              name="FinalExamSubmissions"
-              component={TeacherFinalExamSubmissionsScreen}
-              options={{ headerShown: true, title: 'Inscriptos al final' }}
-            />
-            <Stack.Screen
-              name="AddClassToSemester"
-              component={TeacherAddClassToSemesterScreen}
-              options={{ headerShown: true, title: 'Agregar clase' }}
-            />
-            <Stack.Screen
-              name="SemesterCard"
-              component={TeacherSemesterCardScreen}
-              options={{ headerShown: true, title: 'Cuatrimestre' }}
-            />
-            <Stack.Screen
-              name="EditEvaluation"
-              component={TeacherEditEvaluationScreen}
-              options={{ headerShown: true, title: 'Editar evaluación' }}
-            />
+              {/* Teacher Stack screens */}
+              <Stack.Screen
+                name="SemesterStudents"
+                component={TeacherSemesterStudentsScreen}
+                options={{ headerShown: true, title: 'Alumnos del cuatrimestre' }}
+              />
+              <Stack.Screen
+                name="SemesterEditScreen"
+                component={TeacherSemesterEditScreen}
+                options={{ headerShown: true, title: 'Editar cuatrimestre' }}
+              />
+              <Stack.Screen
+                name="EvaluationsList"
+                component={TeacherEvaluationsListScreen}
+                options={{ headerShown: true, title: 'Evaluaciones' }}
+              />
+              <Stack.Screen
+                name="AddEvaluation"
+                component={TeacherAddEvaluationScreen}
+                options={{ headerShown: true, title: 'Agregar evaluación' }}
+              />
+              <Stack.Screen
+                name="SubmissionsList"
+                component={TeacherSubmissionsListScreen}
+                options={{ headerShown: true, title: 'Entregas' }}
+              />
+              <Stack.Screen
+                name="TeacherSubmissionDetails"
+                component={TeacherSubmissionDetailsScreen}
+                options={{ headerShown: true, title: 'Detalle de entrega' }}
+              />
+              <Stack.Screen
+                name="FinalsList"
+                component={TeacherFinalsListScreen}
+                options={{ headerShown: true, title: 'Finales' }}
+              />
+              <Stack.Screen
+                name="AddFinal"
+                component={TeacherAddFinalScreen}
+                options={{ headerShown: true, title: 'Agregar final' }}
+              />
+              <Stack.Screen
+                name="TeacherStaff"
+                component={TeacherStaffScreen}
+                options={{ headerShown: true, title: 'Cuerpo Docente' }}
+              />
+              <Stack.Screen
+                name="TeachersConfiguration"
+                component={TeacherStaffConfigurationScreen}
+                options={{ headerShown: true, title: 'Configurar docentes' }}
+              />
+              <Stack.Screen
+                name="AddTeachersConfigurationList"
+                component={TeacherAddStaffScreen}
+                options={{ headerShown: true, title: 'Agregar docente' }}
+              />
+              <Stack.Screen
+                name="SemesterAttendances"
+                component={TeacherSemesterAttendancesScreen}
+                options={{ headerShown: true, title: 'Asistencias' }}
+              />
+              <Stack.Screen
+                name="AttendanceDetails"
+                component={TeacherAttendanceDetailsScreen}
+                options={{ headerShown: true, title: 'Detalles de asistencia' }}
+              />
+              <Stack.Screen
+                name="SemesterAttendanceQR"
+                component={TeacherSemesterAttendanceQRScreen}
+                options={{ headerShown: true, title: 'QR de Asistencia' }}
+              />
+              <Stack.Screen
+                name="EvaluationQR"
+                component={TeacherEvaluationQRScreen}
+                options={{ headerShown: true, title: 'QR de Evaluación' }}
+              />
+              <Stack.Screen
+                name="FinalExamQR"
+                component={TeacherFinalExamQRScreen}
+                options={{ headerShown: true, title: 'QR de Final' }}
+              />
+              <Stack.Screen
+                name="TeacherStats"
+                component={TeacherStatsScreen}
+                options={{ headerShown: true, title: 'Estadísticas' }}
+              />
+              <Stack.Screen
+                name="FinalExamSubmissions"
+                component={TeacherFinalExamSubmissionsScreen}
+                options={{ headerShown: true, title: 'Inscriptos al final' }}
+              />
+              <Stack.Screen
+                name="AddClassToSemester"
+                component={TeacherAddClassToSemesterScreen}
+                options={{ headerShown: true, title: 'Agregar clase' }}
+              />
+              <Stack.Screen
+                name="SemesterCard"
+                component={TeacherSemesterCardScreen}
+                options={{ headerShown: true, title: 'Cuatrimestre' }}
+              />
+              <Stack.Screen
+                name="EditEvaluation"
+                component={TeacherEditEvaluationScreen}
+                options={{ headerShown: true, title: 'Editar evaluación' }}
+              />
 
-            {/* Forms stack screens */}
-            <Stack.Screen
-              name="DocumentForm"
-              component={DocumentFormScreen}
-              options={{ headerShown: true, title: 'Formulario' }}
-            />
-            <Stack.Screen
-              name="DigitalForm"
-              component={DigitalFormScreen}
-              options={{ headerShown: true, title: 'Completar formulario' }}
-            />
-            <Stack.Screen
-              name="FormDesigner"
-              component={FormDesignerScreen}
-              options={{ headerShown: true, title: 'Nuevo formulario' }}
-            />
-            <Stack.Screen
-              name="SendCommissionNotification"
-              component={TeacherSendCommissionNotificationScreen}
-              options={{ headerShown: true, title: 'Enviar aviso' }}
-            />
-            <Stack.Screen
-              name="SemesterNotificationHistory"
-              component={TeacherSemesterNotificationHistoryScreen}
-              options={{ headerShown: true, title: 'Avisos enviados' }}
-            />
-            <Stack.Screen
-              name="StudentIdentityViewer"
-              component={StudentIdentityViewerScreen}
-              options={{ headerShown: true, title: 'Credencial estudiantil' }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ActionSheetProvider>
-    </Provider>
+              {/* Forms stack screens */}
+              <Stack.Screen
+                name="DocumentForm"
+                component={DocumentFormScreen}
+                options={{ headerShown: true, title: 'Formulario' }}
+              />
+              <Stack.Screen
+                name="DigitalForm"
+                component={DigitalFormScreen}
+                options={{ headerShown: true, title: 'Completar formulario' }}
+              />
+              <Stack.Screen
+                name="FormDesigner"
+                component={FormDesignerScreen}
+                options={{ headerShown: true, title: 'Nuevo formulario' }}
+              />
+              <Stack.Screen
+                name="SendCommissionNotification"
+                component={TeacherSendCommissionNotificationScreen}
+                options={{ headerShown: true, title: 'Enviar aviso' }}
+              />
+              <Stack.Screen
+                name="SemesterNotificationHistory"
+                component={TeacherSemesterNotificationHistoryScreen}
+                options={{ headerShown: true, title: 'Avisos enviados' }}
+              />
+              <Stack.Screen
+                name="StudentIdentityViewer"
+                component={StudentIdentityViewerScreen}
+                options={{ headerShown: true, title: 'Credencial estudiantil' }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ActionSheetProvider>
+      </Provider>
     </GestureHandlerRootView>
   );
 };
