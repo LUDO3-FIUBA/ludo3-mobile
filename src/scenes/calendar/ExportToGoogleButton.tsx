@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useActionSheet } from '@expo/react-native-action-sheet';
 import { statusCodes } from '@react-native-google-signin/google-signin';
@@ -9,6 +9,7 @@ import { lightModeColors } from '../../styles/colorPalette';
 import Evaluation from '../../models/Evaluation';
 import FinalExam from '../../models/FinalExam';
 import { CommissionInscription } from '../../models';
+import AlertDialog from '../../components/AlertDialog';
 
 interface Props {
   evaluations: Evaluation[];
@@ -19,6 +20,7 @@ interface Props {
 const ExportToGoogleButton = ({ evaluations, finals, inscriptions }: Props) => {
   const [loading, setLoading] = useState(false);
   const { showActionSheetWithOptions } = useActionSheet();
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
 
   const handleExport = async () => {
     setLoading(true);
@@ -46,9 +48,9 @@ const ExportToGoogleButton = ({ evaluations, finals, inscriptions }: Props) => {
               exported === total
                 ? `Se exportaron ${exported} eventos a "${calendars[selectedIndex].summary}".`
                 : `Se exportaron ${exported} de ${total} eventos. Algunos fallaron.`;
-            Alert.alert('Google Calendar', msg);
+            setAlertDialog({ title: 'Google Calendar', message: msg });
           } catch (err: any) {
-            Alert.alert('Error', 'No se pudo exportar. Intentá de nuevo.');
+            setAlertDialog({ title: 'Error', message: 'No se pudo exportar. Intentá de nuevo.' });
           } finally {
             setLoading(false);
           }
@@ -57,24 +59,36 @@ const ExportToGoogleButton = ({ evaluations, finals, inscriptions }: Props) => {
     } catch (err: any) {
       setLoading(false);
       if (err?.code === statusCodes.SIGN_IN_CANCELLED) return;
-      Alert.alert('Error', 'No se pudo conectar con Google Calendar. Intentá de nuevo.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo conectar con Google Calendar. Intentá de nuevo.' });
     }
   };
 
   return (
-    <TouchableOpacity
-      style={styles.button}
-      onPress={handleExport}
-      activeOpacity={0.7}
-      disabled={loading}
-    >
-      {loading ? (
-        <ActivityIndicator size="small" color={lightModeColors.institutional} />
-      ) : (
-        <Icon name="calendar-export" size={15} color={lightModeColors.institutional} />
-      )}
-      <Text style={styles.label}>Exportar a Google Calendar</Text>
-    </TouchableOpacity>
+    <View>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleExport}
+        activeOpacity={0.7}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color={lightModeColors.institutional} />
+        ) : (
+          <Icon name="calendar-export" size={15} color={lightModeColors.institutional} />
+        )}
+        <Text style={styles.label}>Exportar a Google Calendar</Text>
+      </TouchableOpacity>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Aceptar"
+        cancelLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+        onCancel={() => setAlertDialog(null)}
+      />
+    </View>
   );
 };
 
