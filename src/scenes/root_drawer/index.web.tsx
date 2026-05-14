@@ -53,6 +53,10 @@ import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
 import NewsList from '../news/NewsList';
 import NewsDetail from '../news/NewsDetail';
 import NewsForm from '../news/NewsForm';
+import MapScreen from '../map';
+import UsefulLinksScreen from '../useful_links';
+import ProfileScreen from '../my_account';
+import ChangePasswordScreen from '../password/change';
 
 import {
   resolveMenu, canToggleRole,
@@ -109,6 +113,11 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   NewsDetail: NewsDetail,
   AdminNewsCreate: NewsForm,
   AdminNewsEdit: NewsForm,
+  Map: MapScreen,
+  StudentUsefulLinks: UsefulLinksScreen,
+  TeacherUsefulLinks: UsefulLinksScreen,
+  MyAccount: ProfileScreen,
+  ChangePassword: ChangePasswordScreen,
 };
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
@@ -194,22 +203,22 @@ function WebDrawerContent(props: WebDrawerContentProps) {
 
   return (
     <View style={{ flex: 1 }}>
-      <DrawerContentScrollView {...drawerProps} scrollEnabled={false} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
-        {/* Toggle button */}
-        <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image source={LudoIcon} style={styles.logoImage} />
-            {expanded && (
-              <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 10, color: lightModeColors.institutional, letterSpacing: 1 }}>LUDO</Text>
-            )}
-          </View>
+      {/* Header — outside the scroll view so it stays visible when the menu is tall */}
+      <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image source={LudoIcon} style={styles.logoImage} />
           {expanded && (
-            <TouchableOpacity onPress={() => onSetExpanded(false)} style={styles.iconBox} accessibilityLabel="Colapsar menú">
-              <Icon name="close" size={24} color={lightModeColors.darkGray} />
-            </TouchableOpacity>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 10, color: lightModeColors.institutional, letterSpacing: 1 }}>LUDO</Text>
           )}
         </View>
+        {expanded && (
+          <TouchableOpacity onPress={() => onSetExpanded(false)} style={styles.iconBox} accessibilityLabel="Colapsar menú">
+            <Icon name="close" size={24} color={lightModeColors.darkGray} />
+          </TouchableOpacity>
+        )}
+      </View>
 
+      <DrawerContentScrollView {...drawerProps} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
         {/* Expand arrow — only when collapsed */}
         {!expanded && (
           <>

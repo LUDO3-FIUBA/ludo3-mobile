@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialIcon } from '../../components';
 import { getUsefulLinksStyles } from '../../styles/usefulLinks';
 
@@ -64,12 +64,16 @@ const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+const webContentStyle = Platform.OS === 'web'
+  ? { maxWidth: 720, width: '100%' as any, alignSelf: 'center' as const }
+  : {};
+
 const UsefulLinksScreen = () => {
   const styles = getUsefulLinksStyles();
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, webContentStyle]} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <MaterialIcon name="link-variant" fontSize={24} color="#111827" />
           <Text style={styles.headerTitle}>Enlaces Útiles</Text>
