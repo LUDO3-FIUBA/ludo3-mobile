@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   Image,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
 import { newsRepository } from '../../repositories';
@@ -22,13 +22,14 @@ const NewsList: React.FC<Props> = ({ isAdmin }) => {
   const navigation = useNavigation<any>();
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const loadNews = async () => {
     try {
       const data = await newsRepository.fetchAll();
       setNews(data);
     } catch {
-      Alert.alert('Error', 'No se pudieron cargar las novedades.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar las novedades.' });
     } finally {
       setLoading(false);
     }
@@ -55,23 +56,21 @@ const NewsList: React.FC<Props> = ({ isAdmin }) => {
     }
   }, [navigation, isAdmin]);
 
+  let content: React.ReactNode;
   if (loading) {
-    return (
+    content = (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
       </View>
     );
-  }
-
-  if (news.length === 0) {
-    return (
+  } else if (news.length === 0) {
+    content = (
       <View style={styles.centered}>
         <Text style={styles.emptyText}>No hay novedades publicadas.</Text>
       </View>
     );
-  }
-
-  return (
+  } else {
+    content = (
     <FlatList
       data={news}
       keyExtractor={item => String(item.id)}
@@ -100,6 +99,21 @@ const NewsList: React.FC<Props> = ({ isAdmin }) => {
         </TouchableOpacity>
       )}
     />
+    );
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      {content}
+    </View>
   );
 };
 
