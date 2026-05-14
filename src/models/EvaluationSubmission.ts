@@ -9,6 +9,8 @@ export default interface EvaluationSubmission {
     submission_status?: string;
     grader?: Teacher;
     submission_text?: string;
+    submission_file?: string | null;
+    original_filename?: string | null;
     created_at: string;
     updated_at: string;
 }

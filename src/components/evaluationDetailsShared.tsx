@@ -187,7 +187,7 @@ export function GraderUpdatedCard({
   );
 }
 
-export function SubmissionFileCard({ submissionFile }: { submissionFile?: string | null }) {
+export function SubmissionFileCard({ submissionFile, originalFilename }: { submissionFile?: string | null; originalFilename?: string | null }) {
   const openFile = async (url?: string) => {
     if (!url) return;
     try {
@@ -197,17 +197,7 @@ export function SubmissionFileCard({ submissionFile }: { submissionFile?: string
     }
   };
 
-  const extractFileName = (url: string) => {
-    try {
-      const withoutQuery = url.split('?')[0];
-      const fileName = withoutQuery.split('/').pop() || 'Archivo';
-      return fileName;
-    } catch {
-      return 'Archivo';
-    }
-  };
-
-  const fileName = submissionFile ? extractFileName(submissionFile) : null;
+  const fileName = originalFilename || (submissionFile ? 'Archivo' : null);
 
   return (
     <View style={[styles.card]}>
