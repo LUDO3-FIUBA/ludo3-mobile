@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import { FinalExamList, FilterDescriptor } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { getStyleSheet as style } from '../../styles';
 import { finalExamsRepository } from '../../repositories';
 import { FinalExam } from '../../models';
@@ -16,6 +17,7 @@ interface ApprovedSubjectsProps {
 const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ navigation }) => {
   const filter = useAppSelector(selectActualFilter)
   const dispatch = useAppDispatch()
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
 
   const fetchExams = async (): Promise<FinalExam[]> => {
     try {
@@ -45,10 +47,10 @@ const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ navigation }) => {
       }
     } catch (error) {
       if (error instanceof finalExamsRepository.NotASubject) {
-        Alert.alert(
-          'No existe esa materia',
-          'Chequeá bien el código y asegurate de escribirlo tal cual (con el punto inclusive).'
-        );
+        setAlertDialog({
+          title: 'No existe esa materia',
+          message: 'Chequeá bien el código y asegurate de escribirlo tal cual (con el punto inclusive).',
+        });
         return [];
       } else {
         console.log('Error', error);
@@ -72,6 +74,16 @@ const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ navigation }) => {
         navigation={navigation}
         fetch={fetchExams}
         emptyMessage={`No tenés materias aprobadas aún.${'\n'}No te olvides de rendir los finales.`}
+      />
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Aceptar"
+        cancelLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+        onCancel={() => setAlertDialog(null)}
       />
     </SafeAreaView>
   );
