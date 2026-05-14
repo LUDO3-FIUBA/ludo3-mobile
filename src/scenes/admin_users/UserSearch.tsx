@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { adminUsersRepository } from '../../repositories';
 import AdminUser from '../../models/AdminUser';
 
@@ -20,11 +20,12 @@ const UserSearch: React.FC = () => {
   const [results, setResults] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const handleSearch = async () => {
     const dni = query.trim();
     if (!dni) {
-      Alert.alert('Error', 'Ingresá un DNI para buscar.');
+      setAlertDialog({ title: 'Error', message: 'Ingresá un DNI para buscar.' });
       return;
     }
     setLoading(true);
@@ -33,7 +34,7 @@ const UserSearch: React.FC = () => {
       const data = await adminUsersRepository.searchByDni(dni);
       setResults(data);
     } catch (error) {
-      Alert.alert('Error', 'No se pudo realizar la búsqueda.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo realizar la búsqueda.' });
     } finally {
       setLoading(false);
     }
@@ -49,6 +50,14 @@ const UserSearch: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       <View style={styles.searchBar}>
         <TextInput
           style={styles.searchInput}

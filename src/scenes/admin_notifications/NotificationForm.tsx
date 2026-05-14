@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-    Alert,
     Image,
     KeyboardAvoidingView,
     Platform,
@@ -14,6 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcon, RoundedButton } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { adminNotificationsRepository } from '../../repositories';
 
 const GROUPS = [
@@ -41,6 +41,7 @@ const NotificationForm: React.FC = () => {
     const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
     const [image, setImage] = useState<{ uri: string; type: string; name: string } | null>(null);
     const [saving, setSaving] = useState(false);
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
     const toggleGroup = (key: string) => {
         if (key === 'all') {
@@ -58,7 +59,7 @@ const NotificationForm: React.FC = () => {
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Permiso denegado', 'Necesitamos acceso a tu galería para adjuntar imágenes.');
+            setAlertDialog({ title: 'Permiso denegado', message: 'Necesitamos acceso a tu galería para adjuntar imágenes.' });
             return;
         }
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -79,15 +80,15 @@ const NotificationForm: React.FC = () => {
 
     const handleSubmit = async () => {
         if (!title.trim()) {
-            Alert.alert('Error', 'El título es obligatorio.');
+            setAlertDialog({ title: 'Error', message: 'El título es obligatorio.' });
             return;
         }
         if (!message.trim()) {
-            Alert.alert('Error', 'El mensaje es obligatorio.');
+            setAlertDialog({ title: 'Error', message: 'El mensaje es obligatorio.' });
             return;
         }
         if (selectedGroups.length === 0) {
-            Alert.alert('Error', 'Seleccioná al menos un grupo destinatario.');
+            setAlertDialog({ title: 'Error', message: 'Seleccioná al menos un grupo destinatario.' });
             return;
         }
 
@@ -102,10 +103,10 @@ const NotificationForm: React.FC = () => {
                 recipientGroups: selectedGroups,
                 image,
             });
-            Alert.alert('Enviada', 'La notificación fue enviada correctamente.');
+            setAlertDialog({ title: 'Enviada', message: 'La notificación fue enviada correctamente.' });
             navigation.goBack();
         } catch {
-            Alert.alert('Error', 'No se pudo enviar la notificación. Intentá de nuevo.');
+            setAlertDialog({ title: 'Error', message: 'No se pudo enviar la notificación. Intentá de nuevo.' });
         } finally {
             setSaving(false);
         }
@@ -181,6 +182,14 @@ const NotificationForm: React.FC = () => {
                     style={{}}
                 />
             </ScrollView>
+            <AlertDialog
+                visible={alertDialog !== null}
+                title={alertDialog?.title ?? ''}
+                message={alertDialog?.message ?? ''}
+                mode="info"
+                confirmLabel="Aceptar"
+                onConfirm={() => setAlertDialog(null)}
+            />
         </KeyboardAvoidingView>
     );
 };
