@@ -51,6 +51,8 @@ import FormsListScreen from '../forms/FormsListScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
 import NewsList from '../news/NewsList';
+import NewsDetail from '../news/NewsDetail';
+import NewsForm from '../news/NewsForm';
 
 import {
   resolveMenu, canToggleRole,
@@ -103,7 +105,10 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminNotificationCreate: NotificationForm,
   Notifications: NotificationsScreen,
   StudentNewsList: StudentNewsListScreen,
-  AdminNewsList: AdminNewsListScreen
+  AdminNewsList: AdminNewsListScreen,
+  NewsDetail: NewsDetail,
+  AdminNewsCreate: NewsForm,
+  AdminNewsEdit: NewsForm,
 };
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };

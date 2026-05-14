@@ -48,6 +48,8 @@ import UserDetail from './src/scenes/admin_users/UserDetail';
 import NotificationList from './src/scenes/admin_notifications/NotificationList';
 import NotificationForm from './src/scenes/admin_notifications/NotificationForm';
 import NewsList from './src/scenes/news/NewsList';
+import NewsDetail from './src/scenes/news/NewsDetail';
+import NewsForm from './src/scenes/news/NewsForm';
 import MapScreen from './src/scenes/map';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
@@ -290,6 +292,9 @@ const App = () => {
               <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: true, title: 'Notificaciones' }} />
               <Stack.Screen name="StudentNewsList" component={StudentNewsListScreen} options={{ headerShown: true, title: 'Novedades' }} />
               <Stack.Screen name="AdminNewsList" component={AdminNewsListScreen} options={{ headerShown: true, title: 'Novedades' }} />
+              <Stack.Screen name="NewsDetail" component={NewsDetail} options={{ headerShown: true, title: 'Novedad' }} />
+              <Stack.Screen name="AdminNewsCreate" component={NewsForm} options={{ headerShown: true, title: 'Nueva Novedad' }} />
+              <Stack.Screen name="AdminNewsEdit" component={NewsForm} options={{ headerShown: true, title: 'Editar Novedad' }} />
               <Stack.Screen
                 name="AddEvaluationSubmission"
                 component={AddEvaluationSubmissionScreen}
