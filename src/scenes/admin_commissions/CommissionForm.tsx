@@ -5,7 +5,6 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RoundedButton, MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { adminCommissionsRepository } from '../../repositories';
 import { get } from '../../repositories/authenticatedRepository';
 import { convertSnakeToCamelCase } from '../../utils/convertSnakeToCamelCase';
@@ -51,6 +51,7 @@ const CommissionForm: React.FC = () => {
       : null,
   );
   const [saving, setSaving] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
 
   // Teacher picker state
   const [showTeacherPicker, setShowTeacherPicker] = useState(false);
@@ -64,7 +65,7 @@ const CommissionForm: React.FC = () => {
       const data: TeacherModelSnakeCase[] = await get('api/teachers') as TeacherModelSnakeCase[];
       setTeachers(convertSnakeToCamelCase(data) as TeacherModel[]);
     } catch {
-      Alert.alert('Error', 'No se pudieron cargar los docentes.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los docentes.' });
     } finally {
       setLoadingTeachers(false);
     }
@@ -82,19 +83,19 @@ const CommissionForm: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!subjectName.trim()) {
-      Alert.alert('Error', 'El nombre de la materia es obligatorio.');
+      setAlertDialog({ title: 'Error', message: 'El nombre de la materia es obligatorio.' });
       return;
     }
     if (!subjectSiuId.trim() || isNaN(Number(subjectSiuId))) {
-      Alert.alert('Error', 'El ID SIU de la materia debe ser un número válido.');
+      setAlertDialog({ title: 'Error', message: 'El ID SIU de la materia debe ser un número válido.' });
       return;
     }
     if (!siuId.trim() || isNaN(Number(siuId))) {
-      Alert.alert('Error', 'El ID SIU de la comisión debe ser un número válido.');
+      setAlertDialog({ title: 'Error', message: 'El ID SIU de la comisión debe ser un número válido.' });
       return;
     }
     if (!selectedTeacher) {
-      Alert.alert('Error', 'Debés seleccionar un docente a cargo.');
+      setAlertDialog({ title: 'Error', message: 'Debés seleccionar un docente a cargo.' });
       return;
     }
 
@@ -117,14 +118,14 @@ const CommissionForm: React.FC = () => {
 
       if (existing) {
         await adminCommissionsRepository.updateCommission(existing.id, data);
-        Alert.alert('Éxito', 'Comisión actualizada correctamente.');
+        setAlertDialog({ title: 'Éxito', message: 'Comisión actualizada correctamente.' });
       } else {
         await adminCommissionsRepository.createCommission(data);
-        Alert.alert('Éxito', 'Comisión creada correctamente.');
+        setAlertDialog({ title: 'Éxito', message: 'Comisión creada correctamente.' });
       }
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', 'No se pudo guardar la comisión. Intente de nuevo.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo guardar la comisión. Intente de nuevo.' });
     } finally {
       setSaving(false);
     }
@@ -242,6 +243,14 @@ const CommissionForm: React.FC = () => {
           )}
         </View>
       </Modal>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
     </KeyboardAvoidingView>
   );
 };
