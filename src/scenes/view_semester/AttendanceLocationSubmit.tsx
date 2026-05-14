@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import * as Location from 'expo-location';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RoundedButton } from '../../components';
@@ -90,6 +91,7 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
     const { qrid } = route.params;
 
     const [screenState, setScreenState] = useState<ScreenState>('verifying');
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string; onConfirm?: () => void } | null>(null);
 
     useEffect(() => {
         navigation.setOptions({ title: 'Verificando ubicación' });
@@ -107,16 +109,14 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
         } catch (error) {
             console.log('Error submitting location attendance', error);
             if (error instanceof LocationAccessError) {
-                Alert.alert(error.title, error.message);
-                navigation.goBack();
+                setAlertDialog({ title: error.title, message: error.message, onConfirm: () => navigation.goBack() });
                 return;
             }
             if (isOutsideCampusError(error)) {
                 setScreenState('outside_campus');
                 return;
             }
-            Alert.alert('Error', 'No pudimos registrar tu asistencia. Intentá nuevamente.');
-            navigation.goBack();
+            setAlertDialog({ title: 'Error', message: 'No pudimos registrar tu asistencia. Intentá nuevamente.', onConfirm: () => navigation.goBack() });
         }
     };
 
@@ -124,8 +124,9 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
         attemptSubmit();
     }, []);
 
+    let content: React.ReactNode;
     if (screenState === 'verifying') {
-        return (
+        content = (
             <View style={styles.container}>
                 <Text style={styles.icon}>📍</Text>
                 <Text style={styles.title}>Verificando ubicación...</Text>
@@ -134,10 +135,8 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
                 </Text>
             </View>
         );
-    }
-
-    if (screenState === 'outside_campus') {
-        return (
+    } else if (screenState === 'outside_campus') {
+        content = (
             <View style={styles.container}>
                 <View style={[styles.resultContainer, styles.resultInvalid]}>
                     <Text style={styles.resultIcon}>⚠️</Text>
@@ -154,18 +153,32 @@ const AttendanceLocationSubmitScreen: React.FC = () => {
                 </View>
             </View>
         );
+    } else {
+        content = (
+            <View style={styles.container}>
+                <View style={[styles.resultContainer, styles.resultValid]}>
+                    <Text style={styles.resultIcon}>✅</Text>
+                    <Text style={styles.resultTitle}>Presencia confirmada</Text>
+                    <Text style={styles.resultDescription}>
+                        Tu asistencia fue registrada correctamente.
+                    </Text>
+                </View>
+            </View>
+        );
     }
 
     return (
-        <View style={styles.container}>
-            <View style={[styles.resultContainer, styles.resultValid]}>
-                <Text style={styles.resultIcon}>✅</Text>
-                <Text style={styles.resultTitle}>Presencia confirmada</Text>
-                <Text style={styles.resultDescription}>
-                    Tu asistencia fue registrada correctamente.
-                </Text>
-            </View>
-        </View>
+        <>
+            <AlertDialog
+                visible={alertDialog !== null}
+                title={alertDialog?.title ?? ''}
+                message={alertDialog?.message ?? ''}
+                mode="info"
+                confirmLabel="Aceptar"
+                onConfirm={() => { alertDialog?.onConfirm?.(); setAlertDialog(null); }}
+            />
+            {content}
+        </>
     );
 };
 
