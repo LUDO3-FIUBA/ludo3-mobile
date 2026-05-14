@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, useWindowDimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { BasicList, Loading, MaterialIcon } from '../../components';
 import * as Progress from 'react-native-progress';
 import { lightModeColors } from '../../styles/colorPalette';
@@ -18,6 +19,7 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
 
   const [loading, setLoading] = useState(true);
   const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -33,11 +35,10 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
     } catch (error) {
       setLoading(false);
       console.log('Error', error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No sabemos pero no pudimos buscar tu información. ' +
-        'Volvé a intentar en unos minutos.'
-      );
+      setAlertDialog({
+        title: '¿Qué pasó?',
+        message: 'No sabemos pero no pudimos buscar tu información. Volvé a intentar en unos minutos.',
+      });
     }
   };
 
@@ -57,14 +58,26 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
     name: item.subject,
     materialIcon: <MaterialIcon name="trophy-award" fontSize={24} />,
     rightItem: <Text style={[styles.percentText, styles.itemText]}>{percentToDisplayString(item)}</Text>,
-    onPress: buildTopSubjectOnPressAlert(item)
+    onPress: () => setAlertDialog({
+      title: item.subject,
+      message: `Tu promedio en esta materia fue de ${item.grade} mientras que el promedio global esta en ${item.subject_average}.\n\nSignifica que te fue un ${percentToDisplayString(item)} mejor que al resto!`,
+    }),
   })) || [];
 
   const screenWidth = width - 41;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Progreso Academico</Text>
+    <>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <ScrollView style={styles.container}>
+        <Text style={styles.header}>Progreso Academico</Text>
       <Text style={styles.header2}>Estadisticas basadas en tus notas</Text>
 
       {loading && <Loading />}
@@ -147,6 +160,7 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
       )}
 
     </ScrollView>
+    </>
   );
 };
 
@@ -155,15 +169,6 @@ export default Stats;
 function floatToFixedDecimal(averageFloat: number | null | undefined): string {
   if (averageFloat == null) return '—';
   return averageFloat.toFixed(2);
-}
-
-function buildTopSubjectOnPressAlert(bestSubjectInfo: BestSubject): () => void {
-  return () => Alert.alert(
-    bestSubjectInfo.subject,
-    `Tu promedio en esta materia fue de ${bestSubjectInfo.grade} mientras que ` +
-    `el promedio global esta en ${bestSubjectInfo.subject_average}.\n\n` +
-    `Significa que te fue un ${percentToDisplayString(bestSubjectInfo)} mejor que al resto!`
-  );
 }
 
 function percentToDisplayString(bestSubjectInfo: BestSubject): string {
