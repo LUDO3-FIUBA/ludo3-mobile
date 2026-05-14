@@ -72,8 +72,6 @@ export function EvaluationDescriptionCard({ markdownText }: { markdownText?: str
             heading1: { fontSize: 22, fontWeight: '700', marginTop:12, marginBottom: 8, lineHeight: 28 },
             heading2: { fontSize: 18, fontWeight: '700', marginTop: 10, marginBottom: 6, lineHeight: 20 },
             paragraph: { marginBottom: 8 },
-            thematicBreak: styles.hr,
-            hr: styles.hr,
           }}
         >
           {normalizedMarkdown}
@@ -138,7 +136,7 @@ export function SubmissionTextCard({ submissionText }: { submissionText?: string
 
   return (
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>Comentarios</Text>
+      <Text style={styles.sectionTitle}>Comentarios del alumno</Text>
       {!normalizedText ? (
         <Text style={styles.emptyText}>Esta entrega no incluye texto adicional.</Text>
       ) : (
@@ -185,6 +183,48 @@ export function GraderUpdatedCard({
           <Text style={evaluationDetailsTextStyles.passingGradeLabel}>Última fecha de actualización</Text>
         </View>
       </View>
+    </View>
+  );
+}
+
+export function SubmissionFileCard({ submissionFile }: { submissionFile?: string | null }) {
+  const openFile = async (url?: string) => {
+    if (!url) return;
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      console.error('No se pudo descargar el archivo.', error);
+    }
+  };
+
+  const extractFileName = (url: string) => {
+    try {
+      const withoutQuery = url.split('?')[0];
+      const fileName = withoutQuery.split('/').pop() || 'Archivo';
+      return fileName;
+    } catch {
+      return 'Archivo';
+    }
+  };
+
+  const fileName = submissionFile ? extractFileName(submissionFile) : null;
+
+  return (
+    <View style={[styles.card]}>
+      <Text style={styles.sectionTitle}>Archivo de entrega</Text>
+      {!fileName || !submissionFile ? (
+        <Text style={styles.emptyText}>No se ha entregado ningún archivo.</Text>
+      ) : (
+        <View style={styles.cardItem}>
+          <MaterialIcon name="file-document" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
+          <View style={{ flexGrow: 1 }}>
+            <Text style={styles.submissionText}>{fileName}</Text>
+          </View>
+          <TouchableOpacity onPress={() => openFile(submissionFile)}>
+            <MaterialIcon name="download" fontSize={24} color={lightModeColors.institutional} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

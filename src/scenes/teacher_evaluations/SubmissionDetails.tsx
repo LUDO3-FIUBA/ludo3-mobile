@@ -10,6 +10,7 @@ import {
 		SubmissionDateRow,
 		SubmissionTextCard,
 		EvaluationDescriptionCard,
+		SubmissionFileCard,
 } from '../../components';
 import { Submission } from '../../models/Submission';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
@@ -230,6 +231,7 @@ export default function SubmissionDetails({ route }: any) {
 
 			<EvaluationDescriptionCard markdownText={(evaluation as any)?.description} />
 			<SubmissionTextCard submissionText={submissionTextRaw} />
+			<SubmissionFileCard submissionFile={(submission as any)?.submission_file || (submission as any)?.submissionFile} bottomMargin={10} />
 
 			<EvaluationResultCard
 				progress={circleProgress}

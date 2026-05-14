@@ -11,6 +11,7 @@ import {
   SubmissionDateRow,
   SubmissionTextCard,
   EvaluationDescriptionCard,
+  SubmissionFileCard,
 } from '../../components';
 import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
@@ -114,6 +115,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
 
       <EvaluationDescriptionCard markdownText={(detailedEvaluation as any)?.description} />
       <SubmissionTextCard submissionText={evaluationSubmission?.submission_text} />
+      <SubmissionFileCard submissionFile={evaluationSubmission?.submission_file} bottomMargin={0} />
 
       <EvaluationResultCard
         progress={circleProgress}
