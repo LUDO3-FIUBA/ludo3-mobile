@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
+import downloadFile from '../utils/downloadFile';
 import { lightModeColors } from '../styles/colorPalette';
 import MaterialIcon from './materialIcon';
 import { evaluationDetailsSharedStyles as styles, evaluationDetailsTextStyles } from '../styles/evaluationDetails';
@@ -188,16 +189,15 @@ export function GraderUpdatedCard({
 }
 
 export function SubmissionFileCard({ submissionFile, originalFilename }: { submissionFile?: string | null; originalFilename?: string | null }) {
-  const openFile = async (url?: string) => {
-    if (!url) return;
+  const fileName = originalFilename || (submissionFile ? 'Archivo' : null);
+
+  const handleDownload = async (url?: string, downloadName?: string | null) => {
     try {
-      await Linking.openURL(url);
+      await downloadFile(url, downloadName);
     } catch (error) {
       console.error('No se pudo descargar el archivo.', error);
     }
   };
-
-  const fileName = originalFilename || (submissionFile ? 'Archivo' : null);
 
   return (
     <View style={[styles.card]}>
@@ -210,7 +210,7 @@ export function SubmissionFileCard({ submissionFile, originalFilename }: { submi
           <View style={{ flexGrow: 1 }}>
             <Text style={styles.submissionText}>{fileName}</Text>
           </View>
-          <TouchableOpacity onPress={() => openFile(submissionFile)}>
+          <TouchableOpacity onPress={() => handleDownload(submissionFile, fileName)}>
             <MaterialIcon name="download" fontSize={24} color={lightModeColors.institutional} />
           </TouchableOpacity>
         </View>
