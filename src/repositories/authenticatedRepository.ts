@@ -1,7 +1,10 @@
 import {
   get as basicGet,
   post as basicPost,
+  postMultipart as basicPostMultipart,
+  postWithStatus as basicPostWithStatus,
   put as basicPut,
+  putMultipart as basicPutMultipart,
   patch as basicPatch,
   deleteMethod as basicDelete,
   StatusCodeError,
@@ -33,6 +36,30 @@ export function post(
   }).catch(error => {
     return reLogInIfNecessary(error).then(newToken => {
       return basicPost(url, body, queryParams, {
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      });
+    });
+  });
+}
+
+export function postWithStatus(
+  url: string,
+  body: any,
+  queryParams = [],
+  headers = {},
+): Promise<{ data: unknown; status: number }> {
+  const sessionManager: SessionManager | null = SessionManager.getInstance();
+  const token = sessionManager?.getAuthToken();
+  if (!token) {
+    return Promise.reject(new MustLoginAgain());
+  }
+  return basicPostWithStatus(url, body, queryParams, {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  }).catch(error => {
+    return reLogInIfNecessary(error).then(newToken => {
+      return basicPostWithStatus(url, body, queryParams, {
         ...headers,
         Authorization: `Bearer ${newToken}`,
       });
@@ -135,6 +162,44 @@ function reLogInIfNecessary(error: unknown): Promise<string> {
   return Promise.reject(error);
 }
 
+export function postMultipart(url: string, formData: FormData, headers = {}): Promise<Object> {
+  const sessionManager: SessionManager | null = SessionManager.getInstance();
+  const token = sessionManager?.getAuthToken();
+  if (!token) {
+    return Promise.reject(new MustLoginAgain());
+  }
+  return basicPostMultipart(url, formData, {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  }).catch(error => {
+    return reLogInIfNecessary(error).then(newToken => {
+      return basicPostMultipart(url, formData, {
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      });
+    });
+  });
+}
+
+export function putMultipart(url: string, formData: FormData, headers = {}): Promise<Object> {
+  const sessionManager: SessionManager | null = SessionManager.getInstance();
+  const token = sessionManager?.getAuthToken();
+  if (!token) {
+    return Promise.reject(new MustLoginAgain());
+  }
+  return basicPutMultipart(url, formData, {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  }).catch(error => {
+    return reLogInIfNecessary(error).then(newToken => {
+      return basicPutMultipart(url, formData, {
+        ...headers,
+        Authorization: `Bearer ${newToken}`,
+      });
+    });
+  });
+}
+
 export function deleteMethod(
   url: string,
   body: any,
@@ -159,4 +224,4 @@ export function deleteMethod(
   });
 }
 
-export default {post, get, put, patch, deleteMethod, MustLoginAgain};
+export default {post, postMultipart, putMultipart, get, put, patch, deleteMethod, MustLoginAgain};

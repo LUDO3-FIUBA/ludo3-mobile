@@ -1,4 +1,4 @@
-import { StyleSheet, Appearance } from 'react-native';
+import { StyleSheet, Appearance, Platform } from 'react-native';
 
 export default function getStyleSheet() {
     return Appearance.getColorScheme() === 'dark' ? darkMode : lightMode;
@@ -14,11 +14,18 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingVertical: 14,
         paddingHorizontal: 14,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-        elevation: 2,
+        ...Platform.select({
+            web: {
+                boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.06)',
+            },
+            default: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.06,
+                shadowRadius: 4,
+                elevation: 2,
+            },
+        }),
         overflow: 'hidden',
     },
     itemHourText: {

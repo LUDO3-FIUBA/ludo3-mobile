@@ -1,18 +1,15 @@
-import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcon } from '../../components';
 
-export function AttendanceDetailsHeaderRight() {
-	const navigation = useNavigation()
+interface Props {
+  onPress: () => void;
+}
 
-	const navigateToQrScreen = () => {
-		navigation.navigate('SemesterAttendanceQR', {});
-	}
-
+export function AttendanceDetailsHeaderRight({ onPress }: Props) {
   return (
     <View style={styles.navButtonsContainer}>
-      <TouchableOpacity style={styles.navButton} onPress={navigateToQrScreen}>
+      <TouchableOpacity style={styles.navButton} onPress={onPress}>
         <MaterialIcon name="qrcode" fontSize={24} color='gray' />
       </TouchableOpacity>
     </View>

@@ -85,6 +85,9 @@ export function getInfo(): Promise<User> {
         json.is_staff || false,
         json.face_registered === true,
         json.github_url ?? '',
+        json.is_superuser === true,
+        json.department_id ?? null,
+        json.linkedin_url ?? '',
       ),
     ),
   );
@@ -92,6 +95,10 @@ export function getInfo(): Promise<User> {
 
 export function updateGithubUrl(url: string): Promise<void> {
   return patch(`${domainUrl}/me`, { github_url: url }).then(() => Promise.resolve());
+}
+
+export function updateLinkedinUrl(url: string): Promise<void> {
+  return patch(`${domainUrl}/me`, { linkedin_url: url }).then(() => Promise.resolve());
 }
 
 export function sendPushToken(token: string) {
@@ -105,6 +112,7 @@ export default {
   validate,
   getInfo,
   updateGithubUrl,
+  updateLinkedinUrl,
   IdentityFail,
   FaceRegistrationPending,
   InvalidImage,

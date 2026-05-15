@@ -1,12 +1,23 @@
+import { AttendanceMode, Campus } from '../models/ClassAttendance';
 import { QRAttendance, QRAttendanceSnakeCase } from '../models/QRAttendance';
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
-import { post } from './authenticatedRepository';
+import { post, deleteMethod } from './authenticatedRepository';
 
-const domainUrl = 'api/teacher/semesters/attendance/latest_qr';
+const domainUrl = 'api/teacher/semesters/attendance/qr';
 
-export async function generateAttendanceQR(semesterId: number): Promise<QRAttendance> {
-  const qrAttendanceSnakeCase: QRAttendanceSnakeCase = await post(`${domainUrl}`, {'semester': semesterId}) as QRAttendanceSnakeCase;
-  return convertSnakeToCamelCase(qrAttendanceSnakeCase)
+export async function generateAttendanceQR(
+  semesterId: number,
+  mode: AttendanceMode = 'qr',
+  campus?: Campus,
+): Promise<QRAttendance> {
+  const payload: Record<string, unknown> = { semester: semesterId, mode };
+  if (campus) payload.campus = campus;
+  const qrAttendanceSnakeCase: QRAttendanceSnakeCase = await post(domainUrl, payload) as QRAttendanceSnakeCase;
+  return convertSnakeToCamelCase(qrAttendanceSnakeCase);
 }
 
-export default {generateAttendanceQR};
+export async function deleteAttendanceSession(qrid: string): Promise<void> {
+  await deleteMethod(domainUrl, { qrid });
+}
+
+export default { generateAttendanceQR, deleteAttendanceSession };
