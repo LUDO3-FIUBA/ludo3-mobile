@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Text, View, TouchableOpacity, TextInput, ScrollView, Switch, Platform } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import moment from 'moment';
-import { Loading, RoundedButton } from '../../components';
+import { Loading, MarkdownEditor, RoundedButton } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { TeacherSemester } from '../../models/TeacherSemester';
@@ -12,6 +12,7 @@ import { teacherEvaluationsRepository } from '../../repositories';
 
 export type EvaluationFormValues = {
   evaluationName: string;
+  description: string;
   minimumPassingGrade: string | null;
   startDate: Date | null;
   startTime: Date | null;
@@ -69,6 +70,7 @@ export default function EvaluationForm({
   const pickerPlaceholderTextStyle = { color: placeholderColor };
 
   const [evaluationName, setEvaluationName] = useState(initialValues.evaluationName);
+  const [description, setDescription] = useState(initialValues.description);
   const [minimumPassingGrade, setMinimumPassingGrade] = useState(initialValues.minimumPassingGrade);
 
   const [startDate, setStartDate] = useState<Date | null>(initialValues.startDate);
@@ -232,6 +234,7 @@ export default function EvaluationForm({
 
     await onSubmit({
       evaluationName,
+      description,
       minimumPassingGrade,
       startDate,
       startTime,
@@ -246,7 +249,7 @@ export default function EvaluationForm({
   };
 
   return (
-    <ScrollView style={style().containerView} nestedScrollEnabled>
+    <ScrollView style={style().containerView} nestedScrollEnabled keyboardShouldPersistTaps="always" keyboardDismissMode="on-drag">
       <View style={{ marginBottom: 100 }}>
         <View style={style().dateButtonInputs}>
           <Text style={{ ...style().text, color: 'black' }}>
@@ -266,6 +269,13 @@ export default function EvaluationForm({
           value={evaluationName}
           placeholder="Por ejemplo: Primer Parcial"
           placeholderTextColor={placeholderColor}
+        />
+
+        <MarkdownEditor
+          label="Enunciado"
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Escriba un enunciado aquí (opcional)."
         />
 
         <View

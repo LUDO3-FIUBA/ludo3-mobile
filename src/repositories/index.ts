@@ -14,6 +14,7 @@ export { default as teacherCommissionsRepository } from './teacherCommissions';
 export { default as teacherEvaluationsRepository } from './teacherEvaluations';
 export { default as teacherSemestersRepository } from './teacherSemesters';
 export { default as teacherSubmissionsRepository } from './teacherSubmissions';
+export { default as submissionFilesRepository } from './submissionFiles';
 export { default as teacherFinalsRepository } from './teacherFinals';
 export { default as teacherStaffRepository } from './teacherStaff';
 export { default as teacherQrAttendanceRepository } from './teacherQrAttendance';
