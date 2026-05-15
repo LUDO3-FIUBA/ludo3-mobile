@@ -207,10 +207,12 @@ export function SubmissionFileCard({ submissionFile, originalFilename, downloadU
       ) : (
         <View style={styles.cardItem}>
           <MaterialIcon name="file-document" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
-          <View style={{ flexGrow: 1 }}>
-            <Text style={styles.submissionText}>{fileName}</Text>
+          <View style={styles.filenameContainer}>
+            <Text style={styles.submissionTextSingleLine} numberOfLines={1} ellipsizeMode="tail">
+              {fileName}
+            </Text>
           </View>
-          <TouchableOpacity onPress={() => handleDownload(submissionFile, fileName, downloadUrl)}>
+          <TouchableOpacity style={styles.downloadButton} onPress={() => handleDownload(submissionFile, fileName, downloadUrl)}>
             <MaterialIcon name="download" fontSize={24} color={lightModeColors.institutional} />
           </TouchableOpacity>
         </View>

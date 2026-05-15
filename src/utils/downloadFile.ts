@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { baseUrl } from '../networking';
 import { downloadSubmissionFile } from '../repositories/submissionFiles';
@@ -53,6 +53,15 @@ export async function downloadFile(url?: string, downloadName?: string | null, s
     const filePath = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/${safeFileName}`;
     await ReactNativeBlobUtil.config({ fileCache: true, path: filePath }).fetch('GET', downloadUrl);
   } catch (err) {
+    try {
+      if (Platform.OS === 'web') {
+        window.alert('No se pudo descargar el archivo.');
+      } else {
+        Alert.alert('No se pudo descargar el archivo.');
+      }
+    } catch (e) {
+      //ignore
+    }
     throw err;
   }
 }
