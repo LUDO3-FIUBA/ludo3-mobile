@@ -45,7 +45,7 @@ const FiubaPlanScreen: React.FC = () => {
       <iframe
         ref={iframeRef}
         src={FIUBA_PLAN_URL}
-        style={styles.iframe as any}
+        style={{ flex: 1, width: '100%', height: '100%', border: 'none' } as any}
         title="FIUBA-Plan"
       />
     </View>
@@ -54,7 +54,6 @@ const FiubaPlanScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  iframe: { flex: 1, width: '100%', height: '100%', border: 'none' },
 });
 
 export default FiubaPlanScreen;
