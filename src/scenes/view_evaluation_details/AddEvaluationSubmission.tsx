@@ -72,6 +72,10 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
         Alert.alert('Archivo no permitido', 'Solo se permiten PDF, JPEG, JPG, PNG o WEBP.');
         return;
       }
+      if (name && name.length > 100) {
+        Alert.alert('Nombre de archivo muy largo', 'El nombre del archivo no puede exceder 100 caracteres.');
+        return;
+      }
       const bytes = typeof size === 'number' ? size : 0;
       const isPdf = ext === 'pdf';
       const maxPdf = 5 * 1024 * 1024;
