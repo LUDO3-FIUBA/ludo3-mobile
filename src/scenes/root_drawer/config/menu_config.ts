@@ -72,7 +72,7 @@ export const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'StudentDepartmentList', scope: 'shared' },
       { kind: 'direct', key: 'student-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'StudentNewsList', scope: 'shared' },
       { kind: 'direct', key: 'student-procedures', label: 'Trámites', icon: 'file-document-edit', iconOutline: 'file-document-edit-outline', route: 'FormsList', scope: 'student' },
-      { kind: 'direct', key: 'fiuba-plan', label: 'FIUBA-Plan', icon: 'calendar-clock', iconOutline: 'calendar-clock-outline', route: 'FiubaPlan', scope: 'student' },
+      { kind: 'direct', key: 'fiuba-plan', label: 'FIUBA Plan', icon: 'calendar-clock', iconOutline: 'calendar-clock-outline', route: 'FiubaPlan', scope: 'student' },
     ],
   },
   {

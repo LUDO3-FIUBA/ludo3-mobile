@@ -46,7 +46,7 @@ const FiubaPlanScreen: React.FC = () => {
         ref={iframeRef}
         src={FIUBA_PLAN_URL}
         style={{ flex: 1, width: '100%', height: '100%', border: 'none' } as any}
-        title="FIUBA-Plan"
+        title="FIUBA Plan"
       />
     </View>
   );
