@@ -1,15 +1,24 @@
 import { Platform } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import { baseUrl } from '../networking';
+
+function resolveDownloadUrl(url: string): string {
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  if (url.startsWith('//')) return `${Platform.OS === 'web' ? window.location.protocol : 'https:'}${url}`;
+  if (url.startsWith('/')) return `${baseUrl}${url}`;
+  return `${baseUrl}/${url}`;
+}
 
 export async function downloadFile(url?: string, downloadName?: string | null): Promise<void> {
   if (!url || !downloadName) return;
 
   const safeFileName = downloadName.replace(/[\\/]/g, '_');
+  const downloadUrl = resolveDownloadUrl(url);
 
   try {
     if (Platform.OS === 'web') {
         const anchor = document.createElement('a');
-        anchor.href = url;
+        anchor.href = downloadUrl;
         anchor.download = safeFileName;
         anchor.style.display = 'none';
         document.body.appendChild(anchor);
@@ -29,13 +38,13 @@ export async function downloadFile(url?: string, downloadName?: string | null): 
             mediaScannable: true,
             path,
             },
-        }).fetch('GET', url);
+        }).fetch('GET', downloadUrl);
         return;
     }
 
     // iOS
     const filePath = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/${safeFileName}`;
-    await ReactNativeBlobUtil.config({ fileCache: true, path: filePath }).fetch('GET', url);
+    await ReactNativeBlobUtil.config({ fileCache: true, path: filePath }).fetch('GET', downloadUrl);
   } catch (err) {
     throw err;
   }
