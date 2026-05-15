@@ -231,7 +231,11 @@ export default function SubmissionDetails({ route }: any) {
 
 			<EvaluationDescriptionCard markdownText={(evaluation as any)?.description} />
 			<SubmissionTextCard submissionText={submissionTextRaw} />
-			<SubmissionFileCard submissionFile={(submission as any)?.submission_file || (submission as any)?.submissionFile} originalFilename={(submission as any)?.original_filename || (submission as any)?.originalFilename} />
+			<SubmissionFileCard
+				submissionFile={(submission as any)?.submission_file || (submission as any)?.submissionFile}
+				originalFilename={(submission as any)?.original_filename || (submission as any)?.originalFilename}
+				downloadUrl={(submission as any)?.download_url || (submission as any)?.downloadUrl}
+			/>
 
 			<EvaluationResultCard
 				progress={circleProgress}

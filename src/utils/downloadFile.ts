@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { baseUrl } from '../networking';
+import { downloadSubmissionFile } from '../repositories/submissionFiles';
 
 function resolveDownloadUrl(url: string): string {
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
@@ -9,14 +10,20 @@ function resolveDownloadUrl(url: string): string {
   return `${baseUrl}/${url}`;
 }
 
-export async function downloadFile(url?: string, downloadName?: string | null): Promise<void> {
+export async function downloadFile(url?: string, downloadName?: string | null, submissionDownloadUrl?: string | null): Promise<void> {
   if (!url || !downloadName) return;
 
   const safeFileName = downloadName.replace(/[\\/]/g, '_');
   const downloadUrl = resolveDownloadUrl(url);
+  const resolvedSubmissionDownloadUrl = submissionDownloadUrl ? resolveDownloadUrl(submissionDownloadUrl) : null;
 
   try {
     if (Platform.OS === 'web') {
+        if (resolvedSubmissionDownloadUrl) {
+          await downloadSubmissionFile(resolvedSubmissionDownloadUrl, safeFileName);
+          return;
+        }
+
         const anchor = document.createElement('a');
         anchor.href = downloadUrl;
         anchor.download = safeFileName;

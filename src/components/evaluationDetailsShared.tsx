@@ -188,12 +188,12 @@ export function GraderUpdatedCard({
   );
 }
 
-export function SubmissionFileCard({ submissionFile, originalFilename }: { submissionFile?: string | null; originalFilename?: string | null }) {
+export function SubmissionFileCard({ submissionFile, originalFilename, downloadUrl }: { submissionFile?: string | null; originalFilename?: string | null; downloadUrl?: string | null }) {
   const fileName = originalFilename || (submissionFile ? 'Archivo' : null);
 
-  const handleDownload = async (url?: string, downloadName?: string | null) => {
+  const handleDownload = async (url?: string, downloadName?: string | null, submissionDownloadUrl?: string | null) => {
     try {
-      await downloadFile(url, downloadName);
+      await downloadFile(url, downloadName, submissionDownloadUrl);
     } catch (error) {
       console.error('No se pudo descargar el archivo.', error);
     }
@@ -210,7 +210,7 @@ export function SubmissionFileCard({ submissionFile, originalFilename }: { submi
           <View style={{ flexGrow: 1 }}>
             <Text style={styles.submissionText}>{fileName}</Text>
           </View>
-          <TouchableOpacity onPress={() => handleDownload(submissionFile, fileName)}>
+          <TouchableOpacity onPress={() => handleDownload(submissionFile, fileName, downloadUrl)}>
             <MaterialIcon name="download" fontSize={24} color={lightModeColors.institutional} />
           </TouchableOpacity>
         </View>

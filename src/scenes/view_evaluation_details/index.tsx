@@ -115,7 +115,11 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
 
       <EvaluationDescriptionCard markdownText={(detailedEvaluation as any)?.description} />
       <SubmissionTextCard submissionText={evaluationSubmission?.submission_text} />
-      <SubmissionFileCard submissionFile={evaluationSubmission?.submission_file} originalFilename={evaluationSubmission?.original_filename} />
+      <SubmissionFileCard
+        submissionFile={evaluationSubmission?.submission_file}
+        originalFilename={evaluationSubmission?.original_filename}
+        downloadUrl={evaluationSubmission?.download_url ?? evaluationSubmission?.downloadUrl}
+      />
 
       <EvaluationResultCard
         progress={circleProgress}
