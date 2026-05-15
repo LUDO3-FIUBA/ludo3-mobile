@@ -6,11 +6,10 @@ import {
   Text,
   TextInput,
   View,
-  TouchableOpacity,
 } from 'react-native';
-import DocumentPicker from 'react-native-document-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { RoundedButton } from '../../components';
+import { FilePicker, RoundedButton } from '../../components';
+import type { SubmissionFileValue } from '../../components';
 import { Evaluation } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 import { makeRequest } from '../authenticatedComponent';
@@ -28,7 +27,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
   const [submissionText, setSubmissionText] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [submissionFile, setSubmissionFile] = useState<{ uri: string; name: string; type?: string } | null>(null);
+  const [submissionFile, setSubmissionFile] = useState<SubmissionFileValue | null>(null);
   const requiresIdentity = evaluation.requires_identity === true;
 
   const submitWithoutIdentity = async () => {
@@ -57,40 +56,6 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
         'Hubo un error, no pudimos registrar la entrega del examen. Por favor intenta nuevamente.',
       );
       setSubmitting(false);
-    }
-  };
-
-  const pickFile = async () => {
-    try {
-      const res = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.pdf, DocumentPicker.types.images],
-      });
-      const { uri, name, type, size } = res as any;
-      const ext = name?.split('.').pop()?.toLowerCase() || '';
-      const allowed = ['pdf', 'jpeg', 'jpg', 'png', 'webp'];
-      if (!allowed.includes(ext)) {
-        Alert.alert('Archivo no permitido', 'Solo se permiten PDF, JPEG, JPG, PNG o WEBP.');
-        return;
-      }
-      if (name && name.length > 100) {
-        Alert.alert('Nombre de archivo muy largo', 'El nombre del archivo no puede exceder 100 caracteres.');
-        return;
-      }
-      const bytes = typeof size === 'number' ? size : 0;
-      const isPdf = ext === 'pdf';
-      const maxPdf = 5 * 1024 * 1024;
-      const maxImage = 2 * 1024 * 1024;
-      if ((isPdf && bytes > maxPdf) || (!isPdf && bytes > maxImage)) {
-        Alert.alert('Archivo muy grande', isPdf ? 'El PDF debe ser menor a 5 MB.' : 'La imagen debe ser menor a 2 MB.');
-        return;
-      }
-      setSubmissionFile({ uri, name, type });
-    } catch (err: any) {
-      if (DocumentPicker.isCancel && DocumentPicker.isCancel(err)) {
-        return;
-      }
-      console.error('Error picking file', err);
-      Alert.alert('Error', 'No se pudo seleccionar el archivo.');
     }
   };
 
@@ -134,18 +99,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
         />
         <Text style={styles.label}>Archivo adjunto (opcional)</Text>
         <Text style={styles.hint}>PDF máximo 5 MB — Imágenes máximo 2 MB</Text>
-        {submissionFile ? (
-          <View>
-            <Text>{submissionFile.name}</Text>
-            <TouchableOpacity onPress={() => setSubmissionFile(null)}>
-              <Text style={{ color: '#ef4444' }}>Quitar archivo</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.fileButton} onPress={pickFile}>
-            <Text style={{ color: '#1f2937' }}>Seleccionar archivo</Text>
-          </TouchableOpacity>
-        )}
+        <FilePicker value={submissionFile} onChange={setSubmissionFile} />
         <RoundedButton
           text={submitting ? 'Enviando...' : 'Enviar entrega'}
           enabled={!submitting}
@@ -191,14 +145,6 @@ const styles = StyleSheet.create({
     minHeight: 140,
     color: '#111',
     backgroundColor: '#fafafa',
-  },
-  fileButton: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#f3f4f6',
-    alignItems: 'center',
   },
   hint: {
     fontSize: 12,

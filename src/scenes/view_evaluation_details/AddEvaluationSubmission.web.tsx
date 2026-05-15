@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -8,7 +8,8 @@ import {
   View,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { RoundedButton } from '../../components';
+import { FilePicker, RoundedButton } from '../../components';
+import type { SubmissionFileValue } from '../../components';
 import { Evaluation } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 import { makeRequest } from '../authenticatedComponent';
@@ -26,8 +27,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
   const [submissionText, setSubmissionText] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [submissionFile, setSubmissionFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [submissionFile, setSubmissionFile] = useState<SubmissionFileValue | null>(null);
   const requiresIdentity = evaluation.requires_identity === true;
 
   const submitWithoutIdentity = async () => {
@@ -50,30 +50,6 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
       );
       setSubmitting(false);
     }
-  };
-
-  const onPickFileClick = () => fileInputRef.current?.click();
-
-  const onFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
-    if (!allowed.includes(f.type)) {
-      window.alert('Solo se permiten PDF, JPEG, PNG o WEBP.');
-      return;
-    }
-    if (f.name && f.name.length > 100) {
-      window.alert('El nombre del archivo no puede exceder 100 caracteres.');
-      return;
-    }
-    const isPdf = f.type === 'application/pdf';
-    const maxPdf = 5 * 1024 * 1024;
-    const maxImage = 2 * 1024 * 1024;
-    if ((isPdf && f.size > maxPdf) || (!isPdf && f.size > maxImage)) {
-      window.alert(isPdf ? 'El PDF debe ser menor a 5 MB.' : 'La imagen debe ser menor a 2 MB.');
-      return;
-    }
-    setSubmissionFile(f);
   };
 
   const onSubmit = async () => {
@@ -116,21 +92,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
         />
         <Text style={styles.label}>Archivo adjunto (opcional)</Text>
         <Text style={styles.hint}>PDF máximo 5 MB — Imágenes máximo 2 MB</Text>
-        <input
-          ref={fileInputRef}
-          type="file"
-          style={{ display: 'none' }}
-          onChange={onFileChange}
-          accept="application/pdf,image/jpeg,image/png,image/webp"
-        />
-        {submissionFile ? (
-          <div>
-            <span>{submissionFile.name}</span>
-            <button type="button" onClick={() => setSubmissionFile(null)}>Quitar archivo</button>
-          </div>
-        ) : (
-          <button type="button" onClick={onPickFileClick}>Seleccionar archivo (PDF/JPEG/PNG/WEBP)</button>
-        )}
+        <FilePicker value={submissionFile} onChange={setSubmissionFile} />
         <RoundedButton
           text={submitting ? 'Enviando...' : 'Enviar entrega'}
           enabled={!submitting}

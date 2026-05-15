@@ -49,7 +49,7 @@ async function fetchMySubmissions(semester_id: string): Promise<EvaluationSubmis
 async function submitEvaluation(
     evaluationId: string,
     submissionText: string = '',
-    submissionFile?: { uri: string; name: string; type?: string } | File,
+    submissionFile?: { uri?: string; name: string; type?: string; size?: number },
 ): Promise<EvaluationSubmission> {
     if (submissionFile) {
         const form = new FormData();
