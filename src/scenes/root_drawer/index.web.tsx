@@ -60,6 +60,7 @@ import {
 import NotificationsDropdown from './shared/NotificationsDropdown';
 import HeaderRight from './shared/HeaderRight';
 import ToastCard from './shared/ToastCard';
+import FiubaPlanScreen from '../fiuba_plan';
 
 type WebViewStyle = ViewStyle & { transition?: string };
 
@@ -99,6 +100,7 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserDetail: UserDetail,
   AdminNotificationCreate: NotificationForm,
   Notifications: NotificationsScreen,
+  FiubaPlan: FiubaPlanScreen,
 };
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
