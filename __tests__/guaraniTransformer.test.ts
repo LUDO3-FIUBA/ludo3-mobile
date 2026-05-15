@@ -35,9 +35,19 @@ describe('guaraniToHorariosSIU', () => {
   it('devuelve periodo, materias y cursos para una comisión válida', () => {
     const result = guaraniToHorariosSIU([makeComision()]);
     expect(result).not.toBeNull();
-    expect(result!.periodo).toBe('Oferta actual');
     expect(result!.materias).toHaveLength(1);
     expect(result!.cursos).toHaveLength(1);
+  });
+
+  it('usa periodo_lectivo.nombre de la primera comisión que lo tenga', () => {
+    const com = makeComision({ periodo_lectivo: { periodo_lectivo: 71, nombre: '1er Cuatrimestre 2026' } });
+    const result = guaraniToHorariosSIU([com]);
+    expect(result!.periodo).toBe('1er Cuatrimestre 2026');
+  });
+
+  it('cae a "Oferta actual" si ninguna comisión tiene periodo_lectivo', () => {
+    const result = guaraniToHorariosSIU([makeComision()]);
+    expect(result!.periodo).toBe('Oferta actual');
   });
 
   it('mapea correctamente el código y nombre de la materia', () => {

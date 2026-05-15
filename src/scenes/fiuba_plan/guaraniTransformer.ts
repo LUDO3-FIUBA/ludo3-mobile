@@ -59,8 +59,10 @@ export function guaraniToHorariosSIU(comisiones: any[]): any | null {
 
   if (!materiasMap.size) return null;
 
+  const periodo = comisiones.find(c => c.periodo_lectivo?.nombre)?.periodo_lectivo?.nombre ?? 'Oferta actual';
+
   return {
-    periodo: 'Oferta actual',
+    periodo,
     materias: Array.from(materiasMap.values()),
     cursos: cursosList,
     timestamp: Date.now(),
