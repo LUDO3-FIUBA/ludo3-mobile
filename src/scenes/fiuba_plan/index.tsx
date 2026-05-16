@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Platform, SafeAreaView, StyleSheet } from 'react-native';
+import { Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import WebView from 'react-native-webview';
 import { Loading } from '../../components';
 import { guaraniRepository } from '../../repositories';
@@ -10,48 +10,14 @@ const FIUBA_PLAN_URI =
     ? 'file:///android_asset/fiuba-plan/index.html'
     : 'https://fede.dm/FIUBA-Plan/';
 
-// Fixes touch drag on react-big-calendar inside a WebView.
-// Android WebView captures touch-drag as scroll at the native level before JS sees it.
-// touch-action:none tells the browser not to handle any default touch gesture on the calendar grid.
-const TOUCH_TO_MOUSE_BRIDGE = `
-(function() {
-  function applyBridge(grid) {
-    grid.style.touchAction = 'none';
-    ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function(type) {
-      grid.addEventListener(type, function(e) {
-        e.preventDefault();
-        var touch = e.changedTouches[0];
-        var mouseType = { touchstart: 'mousedown', touchmove: 'mousemove', touchend: 'mouseup', touchcancel: 'mouseup' }[type];
-        var evt = new MouseEvent(mouseType, {
-          bubbles: true, cancelable: true,
-          clientX: touch.clientX, clientY: touch.clientY,
-          screenX: touch.screenX, screenY: touch.screenY,
-        });
-        touch.target.dispatchEvent(evt);
-      }, { passive: false });
-    });
-  }
-
-  var observer = new MutationObserver(function() {
-    var grid = document.querySelector('.rbc-time-content');
-    if (grid) {
-      observer.disconnect();
-      applyBridge(grid);
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  var grid = document.querySelector('.rbc-time-content');
-  if (grid) { observer.disconnect(); applyBridge(grid); }
-})();
-true;
-`;
+const TOUCH_TO_MOUSE_BRIDGE = ``;
 
 
 const FiubaPlanScreen: React.FC = () => {
   const webViewRef = useRef<WebView>(null);
   const [ready, setReady] = useState(false);
   const [horariosSIU, setHorariosSIU] = useState<any>(null);
+  const [fetchError, setFetchError] = useState(false);
   const webViewReady = useRef(false);
 
   useEffect(() => {
@@ -60,7 +26,10 @@ const FiubaPlanScreen: React.FC = () => {
         console.log('[FiubaPlan] comisiones recibidas:', comisiones.length);
         setHorariosSIU(guaraniToHorariosSIU(comisiones));
       })
-      .catch((e) => console.warn('[FiubaPlan] fetch falló:', e));
+      .catch((e) => {
+        console.warn('[FiubaPlan] fetch falló:', e);
+        setFetchError(true);
+      });
   }, []);
 
   const inject = useCallback(() => {
@@ -92,11 +61,19 @@ const FiubaPlanScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       {!ready && <Loading />}
+      {fetchError && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>
+            No se pudieron cargar automáticamente los horarios del SIU. Verificá tu conexión a la VPN o cargalos manualmente.
+          </Text>
+        </View>
+      )}
       <WebView
         ref={webViewRef}
         source={{ uri: FIUBA_PLAN_URI }}
         style={styles.webview}
         onLoad={onLoad}
+        injectedJavaScriptBeforeContentLoaded="window.__LUDO_EMBEDDED__ = true; true;"
         scalesPageToFit
         allowFileAccess
         allowFileAccessFromFileURLs
@@ -109,11 +86,19 @@ const FiubaPlanScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1 },
+  webview: { flex: 1 },
+  errorBanner: {
+    backgroundColor: '#fff3cd',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffc107',
   },
-  webview: {
-    flex: 1,
+  errorText: {
+    color: '#856404',
+    fontSize: 13,
+    textAlign: 'center',
   },
 });
 

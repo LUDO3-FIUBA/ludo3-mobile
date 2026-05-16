@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { guaraniRepository } from '../../repositories';
 import { guaraniToHorariosSIU } from './guaraniTransformer';
 
@@ -8,6 +8,7 @@ const FIUBA_PLAN_URL = '/fiuba-plan/index.html';
 const FiubaPlanScreen: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [horariosSIU, setHorariosSIU] = useState<any>(null);
+  const [fetchError, setFetchError] = useState(false);
   const [planReady, setPlanReady] = useState(false);
   const injectedRef = useRef(false);
 
@@ -17,7 +18,10 @@ const FiubaPlanScreen: React.FC = () => {
         console.log('[FiubaPlan] comisiones recibidas:', comisiones.length);
         setHorariosSIU(guaraniToHorariosSIU(comisiones));
       })
-      .catch((e) => console.warn('[FiubaPlan] fetch falló:', e));
+      .catch((e) => {
+        console.warn('[FiubaPlan] fetch falló:', e);
+        setFetchError(true);
+      });
   }, []);
 
   // Escuchar señal de FIUBA-Plan indicando que React montó y está listo
@@ -42,6 +46,13 @@ const FiubaPlanScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {fetchError && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>
+            No se pudieron cargar automáticamente los horarios del SIU. Verificá tu conexión a la VPN o cargalos manualmente.
+          </Text>
+        </View>
+      )}
       <iframe
         ref={iframeRef}
         src={FIUBA_PLAN_URL}
@@ -54,6 +65,18 @@ const FiubaPlanScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  errorBanner: {
+    backgroundColor: '#fff3cd',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffc107',
+  },
+  errorText: {
+    color: '#856404',
+    fontSize: 13,
+    textAlign: 'center',
+  },
 });
 
 export default FiubaPlanScreen;
