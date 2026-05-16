@@ -1,0 +1,12 @@
+{
+  "name": "ludo-e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "bash run-tests.sh",
+    "test:headed": "bash run-tests.sh --headed",
+    "test:ui": "bash run-tests.sh --ui",
+    "test:menu": "bash run-tests.sh --grep menu",
+    "test:map": "bash run-tests.sh --grep map_floor",
+    "test:auth": "bash run-tests.sh --grep auth"
+  }
+}

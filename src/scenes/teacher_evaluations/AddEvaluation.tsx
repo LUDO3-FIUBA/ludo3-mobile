@@ -27,6 +27,7 @@ export default function AddEvaluation() {
       await teacherEvaluationsRepository.create(
         semester,
         values.evaluationName,
+        values.description,
         new Date(values.startDate!.getFullYear(), values.startDate!.getMonth(), values.startDate!.getDate(), values.startTime!.getHours(), values.startTime!.getMinutes()),
         new Date(values.finishDate!.getFullYear(), values.finishDate!.getMonth(), values.finishDate!.getDate(), values.finishTime!.getHours(), values.finishTime!.getMinutes()),
         values.minimumPassingGrade,
@@ -49,6 +50,7 @@ export default function AddEvaluation() {
       submitting={creating}
       initialValues={{
         evaluationName: '',
+        description: '',
         minimumPassingGrade: '',
         startDate: null,
         startTime: null,
