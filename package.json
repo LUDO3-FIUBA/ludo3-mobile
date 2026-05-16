@@ -5,7 +5,8 @@
   "scripts": {
     "start": "expo start",
     "sync:fiuba-map": "cd ../FIUBA-Map && npm run build && rm -rf ../ludo3-mobile/android/app/src/main/assets/fiuba-map && cp -r build/. ../ludo3-mobile/android/app/src/main/assets/fiuba-map/",
-    "android": "npm run sync:fiuba-map && expo run:android",
+    "sync:fiuba-plan": "cd ../FIUBA-Plan && npm run build && rm -rf ../ludo3-mobile/android/app/src/main/assets/fiuba-plan && cp -r build/. ../ludo3-mobile/android/app/src/main/assets/fiuba-plan/ && rm -rf ../ludo3-mobile/public/fiuba-plan && cp -r build/. ../ludo3-mobile/public/fiuba-plan/",
+    "android": "npm run sync:fiuba-map && npm run sync:fiuba-plan && expo run:android",
     "android:nosync": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
