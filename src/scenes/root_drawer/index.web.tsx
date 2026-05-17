@@ -57,6 +57,7 @@ import MapScreen from '../map';
 import UsefulLinksScreen from '../useful_links';
 import ProfileScreen from '../my_account';
 import ChangePasswordScreen from '../password/change';
+import FiubaMapScreen from '../fiuba_map';
 
 import {
   resolveMenu, canToggleRole,
@@ -90,6 +91,7 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentCredential: StudentCredentialScreen,
   StudentStats: StatsScreen,
   FormsList: FormsListScreen,
+  Map: FiubaMapScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,
@@ -113,7 +115,7 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   NewsDetail: NewsDetail,
   AdminNewsCreate: NewsForm,
   AdminNewsEdit: NewsForm,
-  Map: MapScreen,
+  BuildingMap: MapScreen,
   StudentUsefulLinks: UsefulLinksScreen,
   TeacherUsefulLinks: UsefulLinksScreen,
   MyAccount: ProfileScreen,

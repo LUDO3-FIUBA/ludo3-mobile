@@ -22,6 +22,7 @@ import CalendarScreen from '../calendar';
 import TeacherHomeScreen from '../teacher_home';
 import NotificationList from '../admin_notifications/NotificationList';
 import MapScreen from '../map';
+import FiubaMapScreen from '../fiuba_map';
 import SubmenuScreen from '../submenu';
 import DepartmentList from '../admin_departments/DepartmentList';
 import CommissionList from '../admin_commissions/CommissionList';
@@ -277,6 +278,7 @@ const DIRECT_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   TeacherHome: TeacherHomeScreen,
   AdminNotificationList: NotificationList,
   Map: MapScreen,
+  FiubaMap: FiubaMapScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   AdminDepartmentList: AdminDepartmentListScreen,
   AdminCommissionList: CommissionList,

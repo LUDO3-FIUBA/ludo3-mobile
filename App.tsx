@@ -32,6 +32,7 @@ import {
   FormsListScreen, DocumentFormScreen, DigitalFormScreen,
   TeacherFormsScreen, FormsManagerScreen, FormDesignerScreen,
   TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
+  FiubaMapScreen,
 } from './src/scenes';
 import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
@@ -92,6 +93,7 @@ const webLinking = {
           StudentStats: 'estadisticas',
           StudentDepartmentList: 'departamentos',
           FormsList: 'tramites',
+          FiubaMap: 'plan-de-carrera',
           ScanQR: 'escanear-qr',
           VerifyIdentity: 'verificar-identidad',
           StudentCredential: 'mi-credencial',
@@ -273,6 +275,7 @@ const App = () => {
               <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
               <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
               <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />
+              <Stack.Screen name="FiubaMap" component={FiubaMapScreen} options={{ headerShown: true, title: 'Plan de Carrera' }} />
               <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
               <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
               <Stack.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />

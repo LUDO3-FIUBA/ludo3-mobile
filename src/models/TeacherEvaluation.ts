@@ -1,6 +1,7 @@
 export interface TeacherEvaluation {
   id:             number;
   evaluationName: string;
+  description?:   string;
   subjectName:    string;
   passingGrade:   number | null;
   isGraded:       boolean;
@@ -15,6 +16,7 @@ export interface TeacherEvaluation {
 export interface TeacherEvaluationSnakeCase {
   id:               number,
   evaluation_name:  string;
+  description?:     string;
   subject_name:     string;
   is_graded:        boolean;
   passing_grade:    number | null;
