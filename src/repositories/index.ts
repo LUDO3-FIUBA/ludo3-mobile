@@ -30,3 +30,4 @@ export { default as formsRepository } from './forms';
 export { default as adminNotificationsRepository } from './adminNotifications';
 export { default as newsRepository } from './news';
 export { default as guaraniRepository } from './guarani';
+export { default as bedeliaRepository } from './bedelia';

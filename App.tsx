@@ -38,6 +38,7 @@ import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
 import VerifyIdentity from './src/scenes/home/subsections/HomeOptions/VerifyIdentity';
 import CreateSemester from './src/scenes/teacher_semester/CreateSemester';
+import BedeliaClassroomChangeForm from './src/scenes/bedelia/ClassroomChangeForm';
 import DepartmentList from './src/scenes/admin_departments/DepartmentList';
 import DepartmentDetail from './src/scenes/admin_departments/DepartmentDetail';
 import DepartmentForm from './src/scenes/admin_departments/DepartmentForm';
@@ -106,6 +107,7 @@ const webLinking = {
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
           FormsManager: 'admin/tramites',
+          BedeliaClassroomChange: 'bedelia/cambio-aula',
           Map: 'mapa',
           Notifications: 'notificaciones',
         },
@@ -278,6 +280,7 @@ const App = () => {
             <Stack.Screen name="AdminUserSearch" component={UserSearch} options={{ headerShown: true, title: 'Buscar Usuarios' }} />
             <Stack.Screen name="AdminNotificationList" component={NotificationList} options={{ headerShown: true, title: 'Avisos' }} />
             <Stack.Screen name="FormsManager" component={FormsManagerScreen} options={{ headerShown: true, title: 'Gestor de Trámites' }} />
+            <Stack.Screen name="BedeliaClassroomChange" component={BedeliaClassroomChangeForm} options={{ headerShown: true, title: 'Cambio de aula' }} />
             {/* Detail routes (formerly hidden drawer screens) */}
             <Stack.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />
             <Stack.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ headerShown: true, title: 'Nuevo Departamento' }} />
