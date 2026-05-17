@@ -382,6 +382,18 @@ const RootDrawer = () => {
   useEffect(() => {
     async function fetchUser() {
       try {
+        // On a browser reload, deep linking bypasses Splash, so the in-memory
+        // access token is gone. Hydrate from the httpOnly cookie before making
+        // any authenticated request; if it fails, the session is expired and we
+        // send the user to Landing.
+        const sessionManager = SessionManager.getInstance();
+        if (!sessionManager.getAuthToken()) {
+          const ok = await sessionManager.getCredentials();
+          if (!ok) {
+            navigation.replace('Landing');
+            return;
+          }
+        }
         const fetchedUser = await usersRepository.getInfo();
         setUser(fetchedUser);
         dispatch(fetchUserDataAsync(fetchedUser));

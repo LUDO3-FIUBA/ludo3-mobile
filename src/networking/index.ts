@@ -3,6 +3,10 @@ import { Platform } from "react-native";
 
 export const baseUrl = Platform.OS === 'web' ? 'http://localhost:8007' : (API_URL || 'http://example.com:8007');
 
+const isWeb = Platform.OS === 'web';
+const webExtraHeaders: Record<string, string> = isWeb ? { 'X-Client': 'web' } : {};
+const webCredentials: RequestInit['credentials'] = isWeb ? 'include' : 'same-origin';
+
 const logRequests = true;
 
 export class StatusCodeError extends Error {
@@ -77,8 +81,10 @@ export function post(url: string, body: any, queryParams = [], headers = {}) {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...webExtraHeaders,
       ...headers,
     },
+    credentials: webCredentials,
     body: JSON.stringify(body),
   }).then(res => validate(res));
 }
@@ -100,8 +106,10 @@ export function postWithStatus(url: string, body: any, queryParams = [], headers
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...webExtraHeaders,
       ...headers,
     },
+    credentials: webCredentials,
     body: JSON.stringify(body),
   }).then(res => {
     const status = res.status;
@@ -120,8 +128,10 @@ export function get(url: string, queryParams: any[] = [], headers = {}) {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...webExtraHeaders,
       ...headers,
     },
+    credentials: webCredentials,
   }).then(res => validate(res));
 }
 
@@ -142,8 +152,10 @@ export function put(url: string, body: any, queryParams = [], headers = {}) {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...webExtraHeaders,
       ...headers,
     },
+    credentials: webCredentials,
     body: JSON.stringify(body),
   }).then(res => validate(res));
 }
@@ -165,8 +177,10 @@ export function patch(url: string, body: any, queryParams = [], headers = {}) {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...webExtraHeaders,
       ...headers,
     },
+    credentials: webCredentials,
     body: JSON.stringify(body),
   }).then(res => validate(res));
 }
@@ -179,8 +193,10 @@ export function postMultipart(url: string, formData: FormData, headers = {}) {
     method: 'POST',
     headers: {
       Accept: 'application/json',
+      ...webExtraHeaders,
       ...headers,
     },
+    credentials: webCredentials,
     body: formData,
   }).then(res => validate(res));
 }
@@ -193,8 +209,10 @@ export function putMultipart(url: string, formData: FormData, headers = {}) {
     method: 'PUT',
     headers: {
       Accept: 'application/json',
+      ...webExtraHeaders,
       ...headers,
     },
+    credentials: webCredentials,
     body: formData,
   }).then(res => validate(res));
 }
@@ -218,8 +236,10 @@ export function deleteMethod(url: string, body: any, queryParams = [], headers =
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      ...webExtraHeaders,
       ...headers,
     },
+    credentials: webCredentials,
     body: JSON.stringify(body),
   }).then(res => validate(res));
 }

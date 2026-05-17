@@ -1,34 +1,52 @@
+import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { post as publicPost } from '../networking';
+
+const REFRESH_KEY = '@refresh_secure';
 
 export default class SessionManager {
   static myInstance: SessionManager | null = null;
+  private _access: string | null = null;
 
-  _access = null;
-  _refresh = null;
-
-  static getInstance() {
+  static getInstance(): SessionManager {
     if (SessionManager.myInstance == null) {
       SessionManager.myInstance = new SessionManager();
     }
-    return this.myInstance;
+    return SessionManager.myInstance;
   }
 
   async saveCredentials(credentials: any) {
     try {
       this._access = credentials.access;
-      this._refresh = credentials.refresh;
-      await AsyncStorage.setItem('@access', credentials.access);
-      await AsyncStorage.setItem('@refresh', credentials.refresh);
+      if (credentials.refresh) {
+        await SecureStore.setItemAsync(REFRESH_KEY, credentials.refresh);
+      }
       return true;
     } catch (e) {
       return false;
     }
   }
 
-  async getCredentials() {
+  async getCredentials(): Promise<boolean> {
+    // One-time migration: move legacy AsyncStorage refresh token to SecureStore.
     try {
-      this._access = await AsyncStorage.getItem('@access') as any;
-      this._refresh = await AsyncStorage.getItem('@refresh') as any;
+      const legacyRefresh = await AsyncStorage.getItem('@refresh');
+      if (legacyRefresh) {
+        await SecureStore.setItemAsync(REFRESH_KEY, legacyRefresh);
+        await AsyncStorage.removeItem('@access');
+        await AsyncStorage.removeItem('@refresh');
+      }
+    } catch {}
+
+    try {
+      const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
+      if (!refreshToken) return false;
+
+      const result: any = await publicPost('auth/jwt/refresh', { refresh: refreshToken });
+      this._access = result.access;
+      if (result.refresh) {
+        await SecureStore.setItemAsync(REFRESH_KEY, result.refresh);
+      }
       return true;
     } catch (e) {
       return false;
@@ -37,14 +55,13 @@ export default class SessionManager {
 
   async clearCredentials() {
     this._access = null;
-    this._refresh = null;
-    await AsyncStorage.removeItem('@access');
-    await AsyncStorage.removeItem('@refresh');
+    try {
+      await SecureStore.deleteItemAsync(REFRESH_KEY);
+    } catch {}
   }
 
   async invalidateSession() {
     this._access = null;
-    await AsyncStorage.removeItem('@access');
   }
 
   isLoggedIn() {
@@ -55,7 +72,7 @@ export default class SessionManager {
     return this._access;
   }
 
-  getRefreshToken() {
-    return this._refresh;
+  getRefreshToken(): string | null {
+    return null;
   }
 }
