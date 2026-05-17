@@ -28,6 +28,7 @@ import DepartmentList from '../admin_departments/DepartmentList';
 import CommissionList from '../admin_commissions/CommissionList';
 import UserSearch from '../admin_users/UserSearch';
 import NewsList from '../news/NewsList';
+import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
 import { resolveMenu, canToggleRole, SubmenuItem, DirectItem } from './config/menu_config';
 
 const Tab = createBottomTabNavigator();
@@ -285,6 +286,7 @@ const DIRECT_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserSearch: UserSearch,
   StudentNewsList: StudentNewsListScreen,
   AdminNewsList: AdminNewsListScreen,
+  BedeliaClassroomChange: BedeliaClassroomChangeForm,
 };
 
 function isDarkTheme() {

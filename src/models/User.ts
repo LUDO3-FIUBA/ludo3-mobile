@@ -11,6 +11,7 @@ export default class User {
   readonly faceRegistered: boolean;
   readonly githubUrl: string;
   readonly linkedinUrl: string;
+  readonly isBedeliaFlag: boolean;
 
   constructor(
     dni: string,
@@ -25,6 +26,7 @@ export default class User {
     isSuperuserFlag: boolean = false,
     departmentId: number | null = null,
     linkedinUrl: string = '',
+    isBedeliaFlag: boolean = false,
   ) {
     this.dni = dni;
     this.firstName = firstName;
@@ -38,6 +40,7 @@ export default class User {
     this.faceRegistered = faceRegistered;
     this.githubUrl = githubUrl;
     this.linkedinUrl = linkedinUrl;
+    this.isBedeliaFlag = isBedeliaFlag;
   }
 
   fullName(): string {
@@ -64,6 +67,10 @@ export default class User {
     return this.isStaffFlag && !this.isSuperuserFlag && this.departmentId !== null;
   }
 
+  isBedelia(): boolean {
+    return this.isStaffFlag && !this.isSuperuserFlag && this.isBedeliaFlag;
+  }
+
   id(): string {
     if (this.studentId !== null) {
       return this.studentId;
@@ -85,6 +92,7 @@ export default class User {
       faceRegistered: this.faceRegistered,
       githubUrl: this.githubUrl,
       linkedinUrl: this.linkedinUrl,
+      isBedeliaFlag: this.isBedeliaFlag,
     };
   }
 }
