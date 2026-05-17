@@ -16,7 +16,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Loading, ProfileOverview } from '../../components';
+import { Loading } from '../../components';
 import { SessionManager } from '../../managers';
 import { lightModeColors } from '../../styles/colorPalette';
 import { usersRepository } from '../../repositories';
@@ -91,7 +91,8 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentCredential: StudentCredentialScreen,
   StudentStats: StatsScreen,
   FormsList: FormsListScreen,
-  Map: FiubaMapScreen,
+  Map: MapScreen,
+  FiubaMap: FiubaMapScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,
@@ -115,7 +116,6 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   NewsDetail: NewsDetail,
   AdminNewsCreate: NewsForm,
   AdminNewsEdit: NewsForm,
-  BuildingMap: MapScreen,
   StudentUsefulLinks: UsefulLinksScreen,
   TeacherUsefulLinks: UsefulLinksScreen,
   MyAccount: ProfileScreen,
@@ -225,13 +225,6 @@ function WebDrawerContent(props: WebDrawerContentProps) {
             </TouchableOpacity>
             <View style={styles.menuSeparator} />
           </>
-        )}
-
-        {/* Profile overview — only when expanded */}
-        {expanded && (
-          <View style={styles.profileSection}>
-            <ProfileOverview />
-          </View>
         )}
 
         {/* Menu items */}
@@ -453,6 +446,8 @@ const RootDrawer = () => {
       unreadCount={unreadCount}
       onBellPress={() => setShowNotificationsDropdown(true)}
       colors={lightModeColors}
+      user={user}
+      onUserPress={() => navigation.navigate('MyAccount')}
     />
   );
 
@@ -544,7 +539,6 @@ const styles = StyleSheet.create({
   toggleButton: { padding: 12, margin: 4 },
   logoImage: { width: 40, height: 40 },
   iconBox: { width: 45, height: 45, padding: 12, margin: 2, alignItems: 'center', justifyContent: 'center' },
-  profileSection: { borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray, marginBottom: 8 },
   expandArrowButton: { alignSelf: 'center', width: 45, height: 45, alignItems: 'center', justifyContent: 'center', borderRadius: 8, marginVertical: 4 },
   menuSeparator: { height: 1, backgroundColor: lightModeColors.lightGray, marginHorizontal: 8, marginBottom: 8 },
   menuList: { paddingHorizontal: 4, minWidth: 50, alignItems: 'center' },
