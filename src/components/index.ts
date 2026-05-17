@@ -1,4 +1,5 @@
 export { default as RoundedButton } from './roundedButton'
+export { default as PasswordInput } from './PasswordInput'
 export { default as FormInput } from './formInput'
 export { default as RadialMenu } from './radialMenu'
 export { default as FinalExamCard } from './finalExamCard'

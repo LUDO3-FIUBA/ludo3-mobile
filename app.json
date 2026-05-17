@@ -52,7 +52,8 @@
           "locationWhenInUsePermission": "LUDO necesita acceso a tu ubicación para confirmar asistencias por sede."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-secure-store"
     ]
   }
 }

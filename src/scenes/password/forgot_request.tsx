@@ -1,6 +1,7 @@
 import React, {useMemo, useState} from 'react';
 import {
   ActivityIndicator,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -77,12 +78,16 @@ export default function ForgotPasswordRequestScreen({navigation, route}: Props) 
     }
   }
 
+  const webWidthStyle = Platform.OS === 'web'
+    ? { width: '60%' as any, maxWidth: 480, alignSelf: 'center' as const }
+    : {};
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled">
-      <View style={styles.card}>
+      <View style={[styles.card, webWidthStyle]}>
         <Text style={styles.title}>Recuperar contraseña</Text>
         <Text style={styles.description}>
           Elegí si querés recuperar tu cuenta con DNI o email.

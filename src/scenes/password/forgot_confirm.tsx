@@ -1,13 +1,14 @@
 import React, {useMemo, useState} from 'react';
 import {
   ActivityIndicator,
+  Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import {RoundedButton} from '../../components';
+import {RoundedButton, PasswordInput} from '../../components';
 import {authenticationRepository} from '../../repositories';
 import {createPasswordScreenStyles} from './shared';
 
@@ -85,12 +86,16 @@ export default function ForgotPasswordConfirmScreen({
     }
   }
 
+  const webWidthStyle = Platform.OS === 'web'
+    ? { width: '60%' as any, maxWidth: 480, alignSelf: 'center' as const }
+    : {};
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled">
-      <View style={styles.card}>
+      <View style={[styles.card, webWidthStyle]}>
         <Text style={styles.title}>Confirmar recuperación</Text>
         <Text style={styles.description}>
           Ingresá el código OTP recibido por correo y definí tu nueva
@@ -117,14 +122,12 @@ export default function ForgotPasswordConfirmScreen({
 
         <View>
           <Text style={styles.label}>Nueva contraseña</Text>
-          <TextInput
-            style={styles.input}
+          <PasswordInput
             value={newPassword}
             onChangeText={setNewPassword}
             editable={!submitting}
-            secureTextEntry
-            autoCapitalize="none"
             placeholder="Nueva contraseña"
+            style={styles.passwordInput}
           />
           <Text style={styles.hint}>
             Usá al menos {MIN_PASSWORD_LENGTH} caracteres.
@@ -133,14 +136,12 @@ export default function ForgotPasswordConfirmScreen({
 
         <View>
           <Text style={styles.label}>Confirmar nueva contraseña</Text>
-          <TextInput
-            style={styles.input}
+          <PasswordInput
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             editable={!submitting}
-            secureTextEntry
-            autoCapitalize="none"
             placeholder="Confirmá la nueva contraseña"
+            style={styles.passwordInput}
           />
         </View>
 
