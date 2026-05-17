@@ -169,7 +169,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       if (item.kind === 'submenu') {
         const hasActive = item.children.some(c => c.route === activeRoute);
         if (hasActive) {
-          setOpenSubmenus(prev => new Set([...prev, item.key]));
+          setOpenSubmenus(new Set([item.key]));
           return;
         }
       }
@@ -187,11 +187,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
   };
 
   const handleSubmenuToggle = (key: string) => {
-    setOpenSubmenus(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
+    setOpenSubmenus(prev => prev.has(key) ? new Set() : new Set([key]));
   };
 
   const itemColor = () => {
@@ -276,7 +272,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
                   onPress={() => {
                     if (!expanded) {
                       onSetExpanded(true);
-                      setOpenSubmenus(prev => new Set([...prev, item.key]));
+                      setOpenSubmenus(new Set([item.key]));
                     } else {
                       handleSubmenuToggle(item.key);
                     }
