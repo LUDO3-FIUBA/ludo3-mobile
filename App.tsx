@@ -52,6 +52,7 @@ import NewsList from './src/scenes/news/NewsList';
 import NewsDetail from './src/scenes/news/NewsDetail';
 import NewsForm from './src/scenes/news/NewsForm';
 import MapScreen from './src/scenes/map';
+import FiubaPlanScreen from './src/scenes/fiuba_plan';
 import { Provider } from 'react-redux';
 import store from './src/redux/store';
 import { Appearance, Platform } from 'react-native';
@@ -275,6 +276,7 @@ const App = () => {
               <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
               <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />
               <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />
+              <Stack.Screen name="FiubaPlan" component={FiubaPlanScreen} options={{ headerShown: true, title: 'FIUBA Plan' }} />
               <Stack.Screen name="FiubaMap" component={FiubaMapScreen} options={{ headerShown: true, title: 'Plan de Carrera' }} />
               <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
               <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
