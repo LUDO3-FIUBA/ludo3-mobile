@@ -64,6 +64,31 @@ export function post(url: string, body: any, queryParams = [], headers = {}) {
   const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
   const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
   if (logRequests) {
+    if (body instanceof FormData) {
+      console.log(`POST ${baseUrl}/${url}/${queryParamsString} [FormData]`);
+    } else if (body) {
+      console.log(
+        `POST ${baseUrl}/${url}/${queryParamsString}\n${JSON.stringify(body)}`,
+      );
+    } else {
+      console.log(`POST ${baseUrl}/${url}/${queryParamsString}`);
+    }
+  }
+  const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
+  return fetch(`${baseUrl}/${url}/${queryParamsString}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      ...(isForm ? { ...headers } : { 'Content-Type': 'application/json', ...headers }),
+    },
+    body: isForm ? (body as any) : JSON.stringify(body),
+  }).then(res => validate(res));
+}
+
+export function postWithStatus(url: string, body: any, queryParams = [], headers = {}): Promise<{ data: unknown; status: number }> {
+  const reducer = (acc: any, param: any) => `${acc}&${param.key}=${param.value}`;
+  const queryParamsString = `?${queryParams.reduce(reducer, '')}`;
+  if (logRequests) {
     if (body) {
       console.log(
         `POST ${baseUrl}/${url}/${queryParamsString}\n${JSON.stringify(body)}`,
@@ -80,7 +105,10 @@ export function post(url: string, body: any, queryParams = [], headers = {}) {
       ...headers,
     },
     body: JSON.stringify(body),
-  }).then(res => validate(res));
+  }).then(res => {
+    const status = res.status;
+    return validate(res).then(data => ({ data, status }));
+  });
 }
 
 export function get(url: string, queryParams: any[] = [], headers = {}) {

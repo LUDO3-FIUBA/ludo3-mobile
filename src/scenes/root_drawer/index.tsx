@@ -22,7 +22,12 @@ import CalendarScreen from '../calendar';
 import TeacherHomeScreen from '../teacher_home';
 import NotificationList from '../admin_notifications/NotificationList';
 import MapScreen from '../map';
+import FiubaMapScreen from '../fiuba_map';
 import SubmenuScreen from '../submenu';
+import DepartmentList from '../admin_departments/DepartmentList';
+import CommissionList from '../admin_commissions/CommissionList';
+import UserSearch from '../admin_users/UserSearch';
+import NewsList from '../news/NewsList';
 import { resolveMenu, canToggleRole, SubmenuItem, DirectItem } from './config/menu_config';
 
 const Tab = createBottomTabNavigator();
@@ -262,12 +267,24 @@ const RootDrawer = () => {
 };
 
 // Screens that can appear as top-level direct tabs
+const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
+const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+const StudentNewsListScreen = () => <NewsList isAdmin={false} />;
+const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
+
 const DIRECT_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   Home: HomeScreen,
   Calendar: CalendarScreen,
   TeacherHome: TeacherHomeScreen,
   AdminNotificationList: NotificationList,
   Map: MapScreen,
+  FiubaMap: FiubaMapScreen,
+  StudentDepartmentList: StudentDepartmentListScreen,
+  AdminDepartmentList: AdminDepartmentListScreen,
+  AdminCommissionList: CommissionList,
+  AdminUserSearch: UserSearch,
+  StudentNewsList: StudentNewsListScreen,
+  AdminNewsList: AdminNewsListScreen,
 };
 
 function isDarkTheme() {

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FLOORS, FLOOR_ORDER } from './floors/index';
 import { searchAllFloors } from './searchRooms';
@@ -16,7 +17,8 @@ type MapRouteParams = { q?: string };
 
 export default function MapScreen() {
   const { width, height } = useWindowDimensions();
-  const canvasH = height - 56;
+  const { top, bottom } = useSafeAreaInsets();
+  const canvasH = height - top - bottom;
 
   const [query, setQuery] = useState('');
   const [highlightedRoom, setHighlightedRoom] = useState<Room | null>(null);
@@ -24,9 +26,10 @@ export default function MapScreen() {
 
   const allFloors = useMemo(() => FLOOR_ORDER.map(id => FLOORS[id]), []);
   const currentFloor = FLOORS[currentFloorId];
+  const [, , svgW, svgH] = currentFloor.manifest.viewBox;
 
   const suggestions = useMemo(() => searchAllFloors(allFloors, query), [allFloors, query]);
-  const transformHandle = useMapTransform(width, canvasH);
+  const transformHandle = useMapTransform(width, canvasH, svgW, svgH);
 
   const route = useRoute<RouteProp<{ Map: MapRouteParams }, 'Map'>>();
   const q = (route.params as MapRouteParams | undefined)?.q;
@@ -70,6 +73,8 @@ export default function MapScreen() {
     <View style={styles.screen}>
       <FloorMap
         svgXml={currentFloor.svgXml}
+        svgW={svgW}
+        svgH={svgH}
         highlightedRoom={highlightedRoom}
         transformHandle={transformHandle}
         canvasStyle={styles.canvas}

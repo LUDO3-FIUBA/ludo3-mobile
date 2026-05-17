@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -11,23 +11,18 @@ import {
 
 export type Transform = { scale: number; tx: number; ty: number };
 
-const SCALE_MIN = 0.5;
 const SCALE_MAX = 8;
 const ANIM_DURATION = 300;
 
-function clampScale(s: number) {
-  'worklet';
-  return Math.min(Math.max(s, SCALE_MIN), SCALE_MAX);
-}
-
-export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW = 1920, svgH = 1080) {
+export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW: number, svgH: number) {
   const fitScale = Math.min(
-    (canvasWidth - 48) / svgW,
-    (canvasHeight - 48) / svgH
+    canvasWidth / svgW,
+    canvasHeight / svgH
   );
   const fitTx = (canvasWidth - svgW * fitScale) / 2;
   const fitTy = (canvasHeight - svgH * fitScale) / 2;
 
+  const scaleMin = useSharedValue(fitScale);
   const scale = useSharedValue(fitScale);
   const tx = useSharedValue(fitTx);
   const ty = useSharedValue(fitTy);
@@ -36,6 +31,8 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW 
   const savedScale = useSharedValue(fitScale);
   const savedTx = useSharedValue(fitTx);
   const savedTy = useSharedValue(fitTy);
+  const savedFocalX = useSharedValue(0);
+  const savedFocalY = useSharedValue(0);
 
   const clampTranslation = useCallback((nextTx: number, nextTy: number, s: number): { tx: number; ty: number } => {
     'worklet';
@@ -53,21 +50,22 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW 
   }, [canvasWidth, canvasHeight, svgW, svgH]);
 
   const pinchGesture = Gesture.Pinch()
-    .onBegin(() => {
+    .onBegin((e) => {
       'worklet';
       savedScale.value = scale.value;
       savedTx.value = tx.value;
       savedTy.value = ty.value;
+      savedFocalX.value = e.focalX;
+      savedFocalY.value = e.focalY;
     })
     .onUpdate((e) => {
       'worklet';
-      const newScale = clampScale(savedScale.value * e.scale);
-      // anchor at focal point
-      const fx = e.focalX;
-      const fy = e.focalY;
+      const newScale = Math.min(Math.max(savedScale.value * e.scale, scaleMin.value), SCALE_MAX);
       const ratio = newScale / savedScale.value;
-      const newTx = fx - ratio * (fx - savedTx.value);
-      const newTy = fy - ratio * (fy - savedTy.value);
+      // Use initial focal to find the anchored map coordinate, current focal to place it.
+      // Using e.focalX for both would drift the map when fingers translate while pinching.
+      const newTx = e.focalX - ratio * (savedFocalX.value - savedTx.value);
+      const newTy = e.focalY - ratio * (savedFocalY.value - savedTy.value);
       const clamped = clampTranslation(newTx, newTy, newScale);
       scale.value = newScale;
       tx.value = clamped.tx;
@@ -97,7 +95,7 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW 
     .numberOfTaps(2)
     .onEnd((e) => {
       'worklet';
-      const newScale = clampScale(scale.value * 2);
+      const newScale = Math.min(Math.max(scale.value * 2, scaleMin.value), SCALE_MAX);
       const ratio = newScale / scale.value;
       const newTx = e.x - ratio * (e.x - tx.value);
       const newTy = e.y - ratio * (e.y - ty.value);
@@ -118,26 +116,35 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW 
     ],
   }));
 
-  function focusOnBbox(bbox: { x: number; y: number; width: number; height: number }) {
+  useEffect(() => {
+    scaleMin.value = fitScale;
+    scale.value = withTiming(fitScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    tx.value = withTiming(fitTx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    ty.value = withTiming(fitTy, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasWidth, canvasHeight, svgW, svgH]);
+
+  const focusOnBbox = useCallback((bbox: { x: number; y: number; width: number; height: number }) => {
     const minSide = Math.min(canvasWidth, canvasHeight);
-    const bboxScale = clampScale((minSide * 0.6) / Math.max(bbox.width, bbox.height));
+    const bboxScale = Math.min(Math.max((minSide * 0.6) / Math.max(bbox.width, bbox.height), scaleMin.value), SCALE_MAX);
     const centerX = bbox.x + bbox.width / 2;
     const centerY = bbox.y + bbox.height / 2;
     const newTx = canvasWidth / 2 - centerX * bboxScale;
     const newTy = canvasHeight / 2 - centerY * bboxScale;
+    const clamped = clampTranslation(newTx, newTy, bboxScale);
     scale.value = withTiming(bboxScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-    tx.value = withTiming(newTx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-    ty.value = withTiming(newTy, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-  }
+    tx.value = withTiming(clamped.tx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    ty.value = withTiming(clamped.ty, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+  }, [canvasWidth, canvasHeight, clampTranslation, scale, scaleMin, tx, ty]);
 
-  function reset() {
+  const reset = useCallback(() => {
     scale.value = withTiming(fitScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
     tx.value = withTiming(fitTx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
     ty.value = withTiming(fitTy, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-  }
+  }, [fitScale, fitTx, fitTy, scale, tx, ty]);
 
   function stepZoom(factor: number) {
-    const newScale = clampScale(scale.value * factor);
+    const newScale = Math.min(Math.max(scale.value * factor, scaleMin.value), SCALE_MAX);
     const ratio = newScale / scale.value;
     const cx = canvasWidth / 2;
     const cy = canvasHeight / 2;
@@ -151,7 +158,7 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW 
 
   function handleWheel(deltaY: number, focalX: number, focalY: number) {
     const factor = deltaY > 0 ? 0.9 : 1.1;
-    const newScale = clampScale(scale.value * factor);
+    const newScale = Math.min(Math.max(scale.value * factor, scaleMin.value), SCALE_MAX);
     const ratio = newScale / scale.value;
     const newTx = focalX - ratio * (focalX - tx.value);
     const newTy = focalY - ratio * (focalY - ty.value);

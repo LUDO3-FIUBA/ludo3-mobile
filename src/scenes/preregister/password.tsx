@@ -1,8 +1,9 @@
 import React, { useState, useRef, FunctionComponent } from 'react';
-import { View, SafeAreaView, Text } from 'react-native';
+import { Alert, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { preregister as style } from '../../styles';
 import { RoundedButton, FormInput } from '../../components';
+import { authenticationRepository } from '../../repositories';
 import FacePictureConfiguration from './face_recognition';
 
 interface Props {
@@ -11,9 +12,10 @@ interface Props {
 }
 
 const PreRegisterPasswordScreen: FunctionComponent<Props> = ({ navigation, route }) => {
-  const { dni, email, padron } = route.params;
+  const { dni, padron } = route.params;
   const [password, setPassword] = useState("");
   const [passwordValid, setPasswordValid] = useState<boolean>(false);
+  const [registering, setRegistering] = useState<boolean>(false);
 
   let passwordInput = useRef<any>(null);
 
@@ -27,12 +29,52 @@ const PreRegisterPasswordScreen: FunctionComponent<Props> = ({ navigation, route
       configuration: new FacePictureConfiguration(
         ['Tomate una foto de frente'],
         dni,
-        email,
         padron,
         password
       ).toObject(),
       title: 'Pre-registro',
     });
+  };
+
+  const registerWithoutFace = async () => {
+    setRegistering(true);
+    try {
+      await authenticationRepository.preregister(dni, padron, password);
+      navigation.navigate('PreRegisterDone');
+    } catch (error: any) {
+      if (error instanceof authenticationRepository.InvalidDNI) {
+        Alert.alert(
+          'DNI ya registrado',
+          'Chequeá haberlo ingresado correctamente. De ser correcto, ' +
+          'contactate con Admisión para resetear la cuenta asociada a este DNI.',
+          [{ text: 'OK', onPress: () => navigation.navigate('PreRegister') }],
+          { cancelable: false }
+        );
+      } else {
+        const errorMsg = error?.message || error?.toString() || 'Error desconocido';
+        Alert.alert(
+          'Error',
+          `Hubo un error inesperado. Intenta nuevamente en unos minutos.\n\nDetalles: ${errorMsg}`,
+          [{ text: 'OK', onPress: () => navigation.navigate('PreRegister') }],
+          { cancelable: false }
+        );
+      }
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const promptSkipFace = () => {
+    Alert.alert(
+      '¿Continuar sin foto?',
+      'Vas a poder registrarte, pero tendrás que completar el registro facial ' +
+      'desde tu perfil antes de poder dar presente en clases o finales.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Continuar sin foto', onPress: registerWithoutFace },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
@@ -73,11 +115,27 @@ const PreRegisterPasswordScreen: FunctionComponent<Props> = ({ navigation, route
             />
           </View>
           <RoundedButton
-            text="Siguiente"
-            enabled={passwordValid}
+            text={registering ? 'Registrando...' : 'Siguiente'}
+            enabled={passwordValid && !registering}
             style={style().button}
             onPress={goToFaceCapture}
           />
+          <TouchableOpacity
+            disabled={!passwordValid || registering}
+            onPress={promptSkipFace}
+            style={{ alignItems: 'center', marginTop: 12, padding: 10 }}
+          >
+            <Text
+              style={{
+                color: passwordValid && !registering ? '#4a90e2' : '#9aa0a6',
+                fontSize: 15,
+                fontWeight: '600',
+                textDecorationLine: 'underline',
+              }}
+            >
+              Continuar sin foto
+            </Text>
+          </TouchableOpacity>
         </KeyboardAwareScrollView>
       </SafeAreaView>
     </View>

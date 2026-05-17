@@ -2,13 +2,15 @@ import React, { useMemo, useState } from 'react';
 import { Alert, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import moment from 'moment';
 import {
-	EvaluationDateRangeCard,
-	EvaluationDetailsHeader,
-	EvaluationResultCard,
-	GraderUpdatedCard,
-	MaterialIcon,
-	SubmissionDateRow,
-	SubmissionTextCard,
+		EvaluationDateRangeCard,
+		EvaluationDetailsHeader,
+		EvaluationResultCard,
+		GraderUpdatedCard,
+		MaterialIcon,
+		SubmissionDateRow,
+		SubmissionTextCard,
+		EvaluationDescriptionCard,
+		SubmissionFileCard,
 } from '../../components';
 import { Submission } from '../../models/Submission';
 import { TeacherEvaluation } from '../../models/TeacherEvaluation';
@@ -227,7 +229,13 @@ export default function SubmissionDetails({ route }: any) {
 				<SubmissionDateRow dateText={formatDate(submissionCreatedAtRaw)} isLate={isLate} lateByText={lateByText} />
 			</View>
 
+			<EvaluationDescriptionCard markdownText={(evaluation as any)?.description} />
 			<SubmissionTextCard submissionText={submissionTextRaw} />
+			<SubmissionFileCard
+				submissionFile={(submission as any)?.submission_file || (submission as any)?.submissionFile}
+				originalFilename={(submission as any)?.original_filename || (submission as any)?.originalFilename}
+				downloadUrl={(submission as any)?.download_url || (submission as any)?.downloadUrl}
+			/>
 
 			<EvaluationResultCard
 				progress={circleProgress}

@@ -14,15 +14,19 @@ import { RoundedButton } from '../../components';
 import { usersRepository } from '../../repositories';
 import FormField from '../teacher_profile/FormField';
 
-const githubSchema = Yup.object().shape({
+const profileSchema = Yup.object().shape({
+  linkedinUrl: Yup.string()
+    .url('Debe ser una URL válida (ej: https://linkedin.com/in/tu-perfil)')
+    .nullable()
+    .transform(v => (v === '' ? null : v)),
   githubUrl: Yup.string()
     .url('Debe ser una URL válida (ej: https://github.com/tu-usuario)')
     .nullable()
     .transform(v => (v === '' ? null : v)),
 });
 
-const MyAccountScreen: React.FC = () => {
-  const [initialGithubUrl, setInitialGithubUrl] = useState('');
+const ProfileScreen: React.FC = () => {
+  const [initialValues, setInitialValues] = useState({ linkedinUrl: '', githubUrl: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -31,21 +35,38 @@ const MyAccountScreen: React.FC = () => {
   useEffect(() => {
     usersRepository
       .getInfo()
-      .then(user => setInitialGithubUrl(user.githubUrl ?? ''))
+      .then(user =>
+        setInitialValues({
+          linkedinUrl: user.linkedinUrl ?? '',
+          githubUrl: user.githubUrl ?? '',
+        }),
+      )
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSubmit = async (values: { githubUrl: string }) => {
+  const handleSubmit = async (values: { linkedinUrl: string; githubUrl: string }) => {
     setSaving(true);
     setSuccessMessage('');
     setErrorMessage('');
     try {
-      await usersRepository.updateGithubUrl(values.githubUrl ?? '');
-      setInitialGithubUrl(values.githubUrl ?? '');
-      setSuccessMessage('GitHub actualizado correctamente.');
+      const linkedinUrl = values.linkedinUrl ?? '';
+      const githubUrl = values.githubUrl ?? '';
+
+      const ops: Promise<void>[] = [];
+      if (linkedinUrl !== initialValues.linkedinUrl) {
+        ops.push(usersRepository.updateLinkedinUrl(linkedinUrl));
+      }
+      if (githubUrl !== initialValues.githubUrl) {
+        ops.push(usersRepository.updateGithubUrl(githubUrl));
+      }
+      await Promise.all(ops);
+
+      setInitialValues({ linkedinUrl, githubUrl });
+      setSuccessMessage('Perfil actualizado correctamente.');
     } catch (error: any) {
-      const backendError = error?.info?.github_url?.[0] ?? error?.message;
+      const backendError =
+        error?.info?.linkedin_url?.[0] ?? error?.info?.github_url?.[0] ?? error?.message;
       setErrorMessage(backendError ?? 'No se pudo guardar. Intente de nuevo.');
     } finally {
       setSaving(false);
@@ -62,18 +83,39 @@ const MyAccountScreen: React.FC = () => {
 
   return (
     <Formik
-      initialValues={{ githubUrl: initialGithubUrl }}
-      validationSchema={githubSchema}
+      initialValues={initialValues}
+      validationSchema={profileSchema}
       enableReinitialize
       onSubmit={handleSubmit}
     >
       {({ values, errors, touched, handleChange, handleBlur, handleSubmit: formikSubmit }) => (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-          <Text style={styles.sectionTitle}>Vínculo de GitHub</Text>
           <Text style={styles.description}>
-            Asociá tu perfil de GitHub. Este dato es visible para docentes y otros miembros de la plataforma.
+            Asociá tus perfiles profesionales (opcional). Otros miembros de la plataforma podrán verlos.
           </Text>
 
+          <Text style={styles.sectionTitle}>LinkedIn</Text>
+          <FormField
+            label="URL de LinkedIn"
+            value={values.linkedinUrl}
+            onChangeText={handleChange('linkedinUrl')}
+            onBlur={handleBlur('linkedinUrl')}
+            placeholder="https://linkedin.com/in/tu-perfil"
+            keyboardType="url"
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={touched.linkedinUrl ? errors.linkedinUrl : undefined}
+          />
+          {values.linkedinUrl && !errors.linkedinUrl ? (
+            <TouchableOpacity
+              style={styles.previewLink}
+              onPress={() => Linking.openURL(values.linkedinUrl)}
+            >
+              <Text style={[styles.previewLinkText, { color: '#0a66c2' }]}>Abrir en LinkedIn</Text>
+            </TouchableOpacity>
+          ) : null}
+
+          <Text style={styles.sectionTitle}>GitHub</Text>
           <FormField
             label="URL de GitHub"
             value={values.githubUrl}
@@ -85,13 +127,12 @@ const MyAccountScreen: React.FC = () => {
             autoCorrect={false}
             error={touched.githubUrl ? errors.githubUrl : undefined}
           />
-
           {values.githubUrl && !errors.githubUrl ? (
             <TouchableOpacity
               style={styles.previewLink}
               onPress={() => Linking.openURL(values.githubUrl)}
             >
-              <Text style={styles.previewLinkText}>Abrir en GitHub</Text>
+              <Text style={[styles.previewLinkText, { color: '#0d1117' }]}>Abrir en GitHub</Text>
             </TouchableOpacity>
           ) : null}
 
@@ -138,18 +179,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#222',
     marginBottom: 8,
+    marginTop: 12,
   },
   description: {
     fontSize: 14,
     color: '#555',
-    marginBottom: 20,
+    marginBottom: 12,
     lineHeight: 20,
   },
   previewLink: {
     marginBottom: 16,
   },
   previewLinkText: {
-    color: '#0d1117',
     fontSize: 14,
     fontWeight: '600',
     textDecorationLine: 'underline',
@@ -159,6 +200,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
+    marginTop: 12,
   },
   successText: {
     color: '#155724',
@@ -170,6 +212,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
+    marginTop: 12,
   },
   errorText: {
     color: '#721c24',
@@ -178,4 +221,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyAccountScreen;
+export default ProfileScreen;

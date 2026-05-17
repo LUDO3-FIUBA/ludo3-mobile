@@ -1,6 +1,8 @@
-import React from 'react';
-import { Linking } from 'react-native';
+import React, { useState } from 'react';
+import { Linking, Platform } from 'react-native';
 import { Text, TouchableOpacity, View } from 'react-native';
+import Markdown from 'react-native-markdown-display';
+import downloadFile from '../utils/downloadFile';
 import { lightModeColors } from '../styles/colorPalette';
 import MaterialIcon from './materialIcon';
 import { evaluationDetailsSharedStyles as styles, evaluationDetailsTextStyles } from '../styles/evaluationDetails';
@@ -42,6 +44,39 @@ export function SubmissionDateRow({ dateText, isLate, lateByText }: { dateText: 
         <Text style={evaluationDetailsTextStyles.passingGradeLabel}>Fecha de entrega</Text>
         {isLate && <Text style={styles.lateWarning}>Entregado fuera de término</Text>}
         {isLate && lateByText && <Text style={styles.lateByText}>Se entregó con {lateByText} de retraso</Text>}
+      </View>
+    </View>
+  );
+}
+
+export function EvaluationDescriptionCard({ markdownText }: { markdownText?: string | null }) {
+  const [expanded, setExpanded] = useState(false);
+  const normalizedMarkdown = (markdownText || '').trim();
+  const toggle = () => setExpanded((v) => !v);
+
+  const markdownPreviewStyle = expanded ? {} : { maxHeight: 96, overflow: 'hidden' as const };
+
+  if (!normalizedMarkdown) return null;
+
+  return (
+    <View style={styles.card}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Text style={styles.sectionTitle}>Descripción</Text>
+        <TouchableOpacity onPress={toggle}>
+          <Text style={styles.linkText}>{expanded ? 'Ocultar' : 'Mostrar'}</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={markdownPreviewStyle}>
+        <Markdown
+          style={{
+            body: styles.submissionText,
+            heading1: { fontSize: 22, fontWeight: '700', marginTop:12, marginBottom: 8, lineHeight: 28 },
+            heading2: { fontSize: 18, fontWeight: '700', marginTop: 10, marginBottom: 6, lineHeight: 20 },
+            paragraph: { marginBottom: 8 },
+          }}
+        >
+          {normalizedMarkdown}
+        </Markdown>
       </View>
     </View>
   );
@@ -102,7 +137,7 @@ export function SubmissionTextCard({ submissionText }: { submissionText?: string
 
   return (
     <View style={styles.card}>
-      <Text style={styles.sectionTitle}>Comentarios</Text>
+      <Text style={styles.sectionTitle}>Comentarios del alumno</Text>
       {!normalizedText ? (
         <Text style={styles.emptyText}>Esta entrega no incluye texto adicional.</Text>
       ) : (
@@ -149,6 +184,39 @@ export function GraderUpdatedCard({
           <Text style={evaluationDetailsTextStyles.passingGradeLabel}>Última fecha de actualización</Text>
         </View>
       </View>
+    </View>
+  );
+}
+
+export function SubmissionFileCard({ submissionFile, originalFilename, downloadUrl }: { submissionFile?: string | null; originalFilename?: string | null; downloadUrl?: string | null }) {
+  const fileName = originalFilename || (submissionFile ? 'Archivo' : null);
+
+  const handleDownload = async (url?: string, downloadName?: string | null, submissionDownloadUrl?: string | null) => {
+    try {
+      await downloadFile(url, downloadName, submissionDownloadUrl);
+    } catch (error) {
+      console.error('No se pudo descargar el archivo.', error);
+    }
+  };
+
+  return (
+    <View style={[styles.card]}>
+      <Text style={styles.sectionTitle}>Archivo de entrega</Text>
+      {!fileName || !submissionFile ? (
+        <Text style={styles.emptyText}>No se ha entregado ningún archivo.</Text>
+      ) : (
+        <View style={styles.cardItem}>
+          <MaterialIcon name="file-document" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
+          <View style={styles.filenameContainer}>
+            <Text style={styles.submissionTextSingleLine} numberOfLines={1} ellipsizeMode="tail">
+              {fileName}
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.downloadButton} onPress={() => handleDownload(submissionFile, fileName, downloadUrl)}>
+            <MaterialIcon name="download" fontSize={24} color={lightModeColors.institutional} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

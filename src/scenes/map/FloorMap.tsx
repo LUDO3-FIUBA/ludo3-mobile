@@ -17,17 +17,18 @@ type MapTransformHandle = ReturnType<typeof useMapTransform>;
 
 type Props = {
   svgXml: string;
+  svgW: number;
+  svgH: number;
   highlightedRoom: Room | null;
   transformHandle: MapTransformHandle;
   onRoomPress?: (roomId: string) => void;
   canvasStyle?: StyleProp<ViewStyle>;
 };
 
-const SVG_W = 1920;
-const SVG_H = 1080;
-
 export default function FloorMap({
   svgXml,
+  svgW,
+  svgH,
   highlightedRoom,
   transformHandle,
   onRoomPress,
@@ -94,7 +95,7 @@ export default function FloorMap({
       <GestureDetector gesture={gesture}>
         <View style={StyleSheet.absoluteFillObject}>
           <Animated.View style={[styles.svgContainer, animatedStyle]}>
-            <SvgXml xml={composedSvg} width={SVG_W} height={SVG_H} />
+            <SvgXml xml={composedSvg} width={svgW} height={svgH} />
           </Animated.View>
         </View>
       </GestureDetector>

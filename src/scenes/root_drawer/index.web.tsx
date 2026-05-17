@@ -35,7 +35,6 @@ import PendingSubjectsScreen from '../pending_subjects';
 import StatsScreen from '../stats';
 import TeacherHomeScreen from '../teacher_home';
 import CreateSemester from '../teacher_semester/CreateSemester';
-import TeacherProfileScreen from '../teacher_profile';
 import DepartmentList from '../admin_departments/DepartmentList';
 import DepartmentDetail from '../admin_departments/DepartmentDetail';
 import DepartmentForm from '../admin_departments/DepartmentForm';
@@ -51,6 +50,7 @@ import StudentCredentialScreen from '../student_credential';
 import FormsListScreen from '../forms/FormsListScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
+import FiubaMapScreen from '../fiuba_map';
 
 import {
   resolveMenu, canToggleRole,
@@ -82,10 +82,10 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentCredential: StudentCredentialScreen,
   StudentStats: StatsScreen,
   FormsList: FormsListScreen,
+  Map: FiubaMapScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,
-  TeacherProfile: TeacherProfileScreen,
   TeacherForms: TeacherFormsScreen,
   AdminDepartmentList: AdminDepartmentListScreen,
   AdminCommissionList: CommissionList,
@@ -368,7 +368,7 @@ const RootDrawer = () => {
         const fetchedUser = await usersRepository.getInfo();
         setUser(fetchedUser);
         dispatch(fetchUserDataAsync(fetchedUser));
-        if (fetchedUser.isTeacher() && !fetchedUser.isStudent()) setActiveRole('teacher');
+        setActiveRole(fetchedUser.isTeacher() && !fetchedUser.isStudent() ? 'teacher' : 'student');
       } catch (e) {
         console.log('RootDrawer (Web): Failed to fetch user', e);
         setUser(new User('', '', '', '', undefined, false, false, false));

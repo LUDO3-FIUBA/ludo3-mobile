@@ -8,7 +8,8 @@ import {
   View,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { RoundedButton } from '../../components';
+import { FilePicker, RoundedButton } from '../../components';
+import type { SubmissionFileValue } from '../../components';
 import { Evaluation } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 import { makeRequest } from '../authenticatedComponent';
@@ -26,6 +27,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
   const [submissionText, setSubmissionText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submissionFile, setSubmissionFile] = useState<SubmissionFileValue | null>(null);
   const requiresIdentity = evaluation.requires_identity === true;
 
   const submitWithoutIdentity = async () => {
@@ -33,7 +35,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
     try {
       await makeRequest(
-        () => evaluationsRepository.submitEvaluation(`${evaluation.id}`, submissionText),
+        () => evaluationsRepository.submitEvaluation(`${evaluation.id}`, submissionText, submissionFile || undefined),
         navigation,
       );
 
@@ -88,6 +90,9 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
           editable={!submitting}
           maxLength={1500}
         />
+        <Text style={styles.label}>Archivo adjunto (opcional)</Text>
+        <Text style={styles.hint}>PDF máximo 5 MB — Imágenes máximo 2 MB</Text>
+        <FilePicker value={submissionFile} onChange={setSubmissionFile} />
         <RoundedButton
           text={submitting ? 'Enviando...' : 'Enviar entrega'}
           enabled={!submitting}
@@ -133,6 +138,11 @@ const styles = StyleSheet.create({
     minHeight: 140,
     color: '#111',
     backgroundColor: '#fafafa',
+  },
+  hint: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginBottom: 6,
   },
 });
 
