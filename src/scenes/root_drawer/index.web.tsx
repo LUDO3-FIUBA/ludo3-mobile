@@ -58,11 +58,12 @@ import UsefulLinksScreen from '../useful_links';
 import ProfileScreen from '../my_account';
 import ChangePasswordScreen from '../password/change';
 import FiubaMapScreen from '../fiuba_map';
+import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
 
 import {
   resolveMenu, canToggleRole,
   MenuItem, SubmenuItem, DirectItem,
-  studentMenu, teacherMenu, adminMenu,
+  studentMenu, teacherMenu, adminMenu, bedeliaMenu,
   hiddenWebRoutes,
 } from './config/menu_config';
 import NotificationsDropdown from './shared/NotificationsDropdown';
@@ -103,6 +104,7 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserSearch: UserSearch,
   AdminNotificationList: NotificationList,
   FormsManager: FormsManagerScreen,
+  BedeliaClassroomChange: BedeliaClassroomChangeForm,
   AdminDepartmentDetail: DepartmentDetail,
   AdminDepartmentCreate: DepartmentForm,
   AdminDepartmentEdit: DepartmentForm,
@@ -142,7 +144,8 @@ function buildMenuScreens(user: User): Map<string, { title: string; condition: b
 
   add(studentMenu, user.isStudent());
   add(teacherMenu, user.isTeacher());
-  add(adminMenu, user.isAdmin());
+  add(adminMenu, user.isAdmin() && !(user.isBedelia?.() ?? false));
+  add(bedeliaMenu, user.isBedelia?.() ?? false);
 
   return result;
 }
