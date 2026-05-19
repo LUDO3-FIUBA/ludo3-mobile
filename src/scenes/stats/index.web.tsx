@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useWindowDimensions } from "react-native";
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import AlertDialog from '../../components/AlertDialog';
 import { BasicList, Loading, MaterialIcon } from '../../components';
@@ -15,7 +14,7 @@ interface StatsProps {
 }
 
 const Stats: React.FC<StatsProps> = ({ route }) => {
-  const { width } = useWindowDimensions();
+  const [chartContainerWidth, setChartContainerWidth] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [studentStats, setStudentStats] = useState<StudentStats | null>(null);
@@ -64,8 +63,6 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
     }),
   })) || [];
 
-  const screenWidth = width - 41;
-
   return (
     <>
       <AlertDialog
@@ -84,10 +81,13 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
       {!loading && studentStats && (
         <>
           {data.datasets[0].data.length > 0 && (
-            <View style={styles.card}>
-              <LineChart
+            <View
+              style={styles.card}
+              onLayout={(e) => setChartContainerWidth(e.nativeEvent.layout.width)}
+            >
+              {chartContainerWidth > 0 && <LineChart
                 data={data}
-                width={screenWidth}
+                width={chartContainerWidth}
                 height={220}
                 chartConfig={{
                   backgroundGradientFrom: "#ffffff",
@@ -103,7 +103,7 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
                   marginBottom: 18,
                   borderRadius: 16
                 }}
-              />
+              />}
             </View>
           )}
 

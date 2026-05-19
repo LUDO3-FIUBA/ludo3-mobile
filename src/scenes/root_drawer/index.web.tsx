@@ -71,6 +71,43 @@ import HeaderRight from './shared/HeaderRight';
 import ToastCard from './shared/ToastCard';
 import FiubaPlanScreen from '../fiuba_plan';
 
+// Detail / sub-page screens that used to be Stack-only on web.
+// IMPORTANT: import directly from each scene to avoid a circular dependency
+// with the scenes barrel (which re-exports RootDrawer).
+import ViewSemesterScreen from '../view_semester';
+import MyAttendancesScreen from '../view_semester/MyAttendances';
+import MySubmissionsScreen from '../view_semester/MySubmissions';
+import CorrelativeSubjects from '../correlative_subjects';
+import ViewEvaluationsScreen from '../view_evaluations';
+import ViewEvaluationDetailsScreen from '../view_evaluation_details';
+import AddEvaluationSubmissionScreen from '../view_evaluation_details/AddEvaluationSubmission';
+import ViewFinalDetailsScreen from '../view_final_details';
+import ViewClassDetailsScreen from '../view_class_details';
+import TeachersScreen from '../teachers';
+import TeacherSemesterStudentsScreen from '../teacher_semester/SemesterStudents';
+import TeacherSemesterEditScreen from '../teacher_semester/SemesterEditScreen';
+import TeacherEvaluationsListScreen from '../teacher_evaluations/EvaluationsList';
+import TeacherAddEvaluationScreen from '../teacher_evaluations/AddEvaluation';
+import TeacherEditEvaluationScreen from '../teacher_evaluations/EditEvaluation';
+import TeacherSubmissionsListScreen from '../teacher_evaluations/SubmissionsList';
+import TeacherSubmissionDetailsScreen from '../teacher_evaluations/SubmissionDetails';
+import TeacherFinalsListScreen from '../teacher_finals/FinalsList';
+import TeacherAddFinalScreen from '../teacher_finals/AddFinal';
+import TeacherFinalExamSubmissionsScreen from '../teacher_finals/FinalExamSubmissions';
+import TeacherStaffScreen from '../teacher_staff/Teachers';
+import TeacherStaffConfigurationScreen from '../teacher_staff/TeachersConfiguration';
+import TeacherAddStaffScreen from '../teacher_staff/AddTeachersConfigurationList';
+import TeacherSemesterAttendancesScreen from '../teacher_attendances/SemesterAttendances';
+import TeacherAttendanceDetailsScreen from '../teacher_attendances/AttendanceDetails';
+import TeacherAddClassToSemesterScreen from '../teacher_attendances/AddClassToSemester';
+import TeacherStatsScreen from '../teacher_stats';
+import TeacherSemesterCardScreen from '../teacher_semester/SemesterCard';
+import TeacherSendCommissionNotificationScreen from '../teacher_notifications/SendCommissionNotification';
+import TeacherSemesterNotificationHistoryScreen from '../teacher_notifications/SemesterNotificationHistory';
+import DocumentFormScreen from '../forms/DocumentFormScreen';
+import DigitalFormScreen from '../forms/DigitalFormScreen';
+import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
+
 type WebViewStyle = ViewStyle & { transition?: string };
 
 const LudoIcon = require('../../assets/ludo_icon.png');
@@ -124,6 +161,46 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   MyAccount: ProfileScreen,
   ChangePassword: ChangePasswordScreen,
   FiubaPlan: FiubaPlanScreen,
+
+  // Student detail / sub-pages
+  ViewSemester: ViewSemesterScreen,
+  MyAttendances: MyAttendancesScreen,
+  MySubmissions: MySubmissionsScreen,
+  CorrelativeSubjects: CorrelativeSubjects,
+  ViewEvaluations: ViewEvaluationsScreen,
+  ViewEvaluationDetails: ViewEvaluationDetailsScreen,
+  AddEvaluationSubmission: AddEvaluationSubmissionScreen,
+  ViewFinalDetails: ViewFinalDetailsScreen,
+  ViewClassDetails: ViewClassDetailsScreen,
+  Teachers: TeachersScreen,
+  Stats: StatsScreen,
+
+  // Teacher cuatrimestre sub-pages
+  SemesterCard: TeacherSemesterCardScreen,
+  SemesterStudents: TeacherSemesterStudentsScreen,
+  SemesterEditScreen: TeacherSemesterEditScreen,
+  EvaluationsList: TeacherEvaluationsListScreen,
+  AddEvaluation: TeacherAddEvaluationScreen,
+  EditEvaluation: TeacherEditEvaluationScreen,
+  SubmissionsList: TeacherSubmissionsListScreen,
+  TeacherSubmissionDetails: TeacherSubmissionDetailsScreen,
+  FinalsList: TeacherFinalsListScreen,
+  AddFinal: TeacherAddFinalScreen,
+  FinalExamSubmissions: TeacherFinalExamSubmissionsScreen,
+  TeacherStaff: TeacherStaffScreen,
+  TeachersConfiguration: TeacherStaffConfigurationScreen,
+  AddTeachersConfigurationList: TeacherAddStaffScreen,
+  SemesterAttendances: TeacherSemesterAttendancesScreen,
+  AttendanceDetails: TeacherAttendanceDetailsScreen,
+  AddClassToSemester: TeacherAddClassToSemesterScreen,
+  TeacherStats: TeacherStatsScreen,
+  SendCommissionNotification: TeacherSendCommissionNotificationScreen,
+  SemesterNotificationHistory: TeacherSemesterNotificationHistoryScreen,
+
+  // Forms detail screens
+  DocumentForm: DocumentFormScreen,
+  DigitalForm: DigitalFormScreen,
+  FormDesigner: FormDesignerScreen,
 };
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
