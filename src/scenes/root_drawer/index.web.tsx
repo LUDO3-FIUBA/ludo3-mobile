@@ -4,7 +4,7 @@ import {
   DrawerContentScrollView,
   createDrawerNavigator,
 } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   Platform,
   StyleSheet,
@@ -205,11 +205,42 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
 
-// Web-only back button rendered in the drawer header. Mirrors the back arrow
-// that the native Stack header provides on mobile.
+// Every route that's reachable directly from the side menu (top-level item or
+// any submenu child). Used to decide which screens are "roots" and therefore
+// must NOT show a back arrow even if the drawer happens to remember a
+// previously-focused screen.
+function collectMenuRoutes(menu: MenuItem[]): string[] {
+  const routes: string[] = [];
+  for (const item of menu) {
+    if (item.kind === 'direct' && item.route) routes.push(item.route);
+    else if (item.kind === 'submenu') {
+      for (const child of item.children) if (child.route) routes.push(child.route);
+    }
+  }
+  return routes;
+}
+const ALL_MENU_ROUTES = new Set<string>([
+  ...collectMenuRoutes(studentMenu),
+  ...collectMenuRoutes(teacherMenu),
+  ...collectMenuRoutes(adminMenu),
+  ...collectMenuRoutes(bedeliaMenu),
+]);
+
+// Routes that on mobile are Stack screens (and therefore show a back arrow).
+// On web they live inside the drawer, so we replicate the back arrow only for
+// these — drawer-menu items don't get one, matching mobile behavior.
+const BACK_ENABLED_ROUTES = new Set<string>(
+  hiddenWebRoutes.map(r => r.route).filter(r => !ALL_MENU_ROUTES.has(r)),
+);
+
 function HeaderBackButton() {
   const navigation = useNavigation<any>();
-  if (!navigation.canGoBack()) return null;
+  const route = useRoute();
+  // No back arrow for drawer-root screens; keep a spacer so the screen title
+  // doesn't end up flush against the side drawer.
+  if (!BACK_ENABLED_ROUTES.has(route.name) || !navigation.canGoBack()) {
+    return <View style={styles.headerLeftSpacer} />;
+  }
   return (
     <TouchableOpacity
       onPress={() => navigation.goBack()}
@@ -283,7 +314,12 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       navigation.reset({ index: 0, routes: [{ name: 'Landing' }] });
       return;
     }
-    if (item.route) navigation.navigate(item.route as never);
+    if (item.route) {
+      // Drawer menu items are navigation roots — reset the drawer history so
+      // the back arrow on sub-pages doesn't surface unrelated screens the user
+      // previously visited (e.g. MyAccount opened via the header user icon).
+      navigation.reset({ index: 0, routes: [{ name: item.route as never }] });
+    }
   };
 
   const handleSubmenuToggle = (key: string) => {
@@ -536,18 +572,27 @@ const RootDrawer = () => {
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
   };
 
-  const headerRight = () => (
-    <HeaderRight
-      canToggle={canToggle}
-      activeRole={activeRole}
-      onSetActiveRole={setActiveRole}
-      unreadCount={unreadCount}
-      onBellPress={() => setShowNotificationsDropdown(true)}
-      colors={lightModeColors}
-      user={user}
-      onUserPress={() => navigation.navigate('MyAccount')}
-    />
-  );
+  // Rendered inside each Drawer.Screen header, so useNavigation() here gives
+  // the drawer's navigation — required for navigate('MyAccount') to find the
+  // route, since on web MyAccount lives inside the drawer (not the Stack).
+  // Reset (instead of navigate) so MyAccount becomes a clean root: it never
+  // pollutes the back chain of screens the user later navigates into.
+  const HeaderRightInDrawer = () => {
+    const drawerNavigation = useNavigation<any>();
+    return (
+      <HeaderRight
+        canToggle={canToggle}
+        activeRole={activeRole}
+        onSetActiveRole={setActiveRole}
+        unreadCount={unreadCount}
+        onBellPress={() => setShowNotificationsDropdown(true)}
+        colors={lightModeColors}
+        user={user}
+        onUserPress={() => drawerNavigation.reset({ index: 0, routes: [{ name: 'MyAccount' }] })}
+      />
+    );
+  };
+  const headerRight = () => <HeaderRightInDrawer />;
 
   const menuScreens = buildMenuScreens(user);
 
@@ -555,6 +600,10 @@ const RootDrawer = () => {
     <>
       <Drawer.Navigator
         initialRouteName={homeMenuItem?.route}
+        // Default 'firstRoute' makes goBack jump to the first registered
+        // Drawer.Screen (which is the first menu item, e.g. MyAccount), instead
+        // of the previously focused screen. 'history' tracks actual visits.
+        backBehavior="history"
         screenOptions={{
           drawerType: 'permanent',
           drawerStyle: {
@@ -657,6 +706,7 @@ const styles = StyleSheet.create({
   teacherPill: { backgroundColor: lightModeColors.teacherAccent, borderRadius: 6, paddingHorizontal: 5, paddingVertical: 1, marginLeft: 6 },
   teacherPillText: { color: '#fff', fontSize: 10, fontWeight: '700' },
   headerBackButton: { paddingVertical: 4, paddingHorizontal: 12, marginLeft: 4 },
+  headerLeftSpacer: { width: 16 },
 });
 
 export default RootDrawer;

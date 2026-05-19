@@ -78,13 +78,17 @@ const webLinking = {
       GoogleRegister: 'registro/google',
       PreRegister: 'registro',
       PreRegisterPassword: 'registro/password',
-      ChangePassword: 'app/cambiar-password',
-      MyAccount: 'app/mi-cuenta',
       PreRegisterDone: 'registro/completado',
       TakePicture: 'registro/foto',
       RootDrawer: {
         path: 'app',
         screens: {
+          // On web these live inside the drawer (skipOnWeb hides them from the
+          // Stack), so their URL paths must be declared here — declaring them
+          // at the top level produces `/app/app/<path>` and confuses the
+          // drawer's linking state.
+          MyAccount: 'mi-cuenta',
+          ChangePassword: 'cambiar-password',
           // Student direct tabs
           Home: 'inicio',
           Calendar: 'calendario',

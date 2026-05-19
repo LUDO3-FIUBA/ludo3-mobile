@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterDataAsync, selectSemesterData, selectSemesterError, selectSemesterLoading } from '../../redux/reducers/teacherSemesterSlice';
@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    ...(Platform.OS === 'web' ? { paddingHorizontal: 32, paddingTop: 24 } : null),
   },
   header: {
     fontSize: 24,
