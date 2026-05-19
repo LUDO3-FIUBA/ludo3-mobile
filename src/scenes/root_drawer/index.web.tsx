@@ -205,6 +205,22 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
 
+// Web-only back button rendered in the drawer header. Mirrors the back arrow
+// that the native Stack header provides on mobile.
+function HeaderBackButton() {
+  const navigation = useNavigation<any>();
+  if (!navigation.canGoBack()) return null;
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.goBack()}
+      style={styles.headerBackButton}
+      accessibilityLabel="Volver"
+    >
+      <Icon name="arrow-left" size={24} color={lightModeColors.mainContrastColor} />
+    </TouchableOpacity>
+  );
+}
+
 function buildMenuScreens(user: User): Map<string, { title: string; condition: boolean }> {
   const result = new Map<string, { title: string; condition: boolean }>();
 
@@ -547,7 +563,7 @@ const RootDrawer = () => {
             borderRightColor: lightModeColors.lightGray,
             ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } as WebViewStyle : {})
           },
-          headerLeft: () => null,
+          headerLeft: () => <HeaderBackButton />,
           headerRight,
           headerTintColor: lightModeColors.mainContrastColor,
           headerStyle: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray },
@@ -640,6 +656,7 @@ const styles = StyleSheet.create({
   teacherActiveBorder: { borderLeftWidth: 2, borderLeftColor: lightModeColors.teacherAccent },
   teacherPill: { backgroundColor: lightModeColors.teacherAccent, borderRadius: 6, paddingHorizontal: 5, paddingVertical: 1, marginLeft: 6 },
   teacherPillText: { color: '#fff', fontSize: 10, fontWeight: '700' },
+  headerBackButton: { paddingVertical: 4, paddingHorizontal: 12, marginLeft: 4 },
 });
 
 export default RootDrawer;
