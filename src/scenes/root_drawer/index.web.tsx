@@ -69,6 +69,7 @@ import {
 import NotificationsDropdown from './shared/NotificationsDropdown';
 import HeaderRight from './shared/HeaderRight';
 import ToastCard from './shared/ToastCard';
+import UserMenuDropdown from './web/UserMenuDropdown';
 import FiubaPlanScreen from '../fiuba_plan';
 
 // Detail / sub-page screens that used to be Stack-only on web.
@@ -461,6 +462,7 @@ const RootDrawer = () => {
   const [expanded, setExpanded] = useState(false);
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastNotification, setToastNotification] = useState<UserNotification | null>(null);
   const hasLoadedNotificationsRef = useRef(false);
@@ -572,26 +574,24 @@ const RootDrawer = () => {
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
   };
 
-  // Rendered inside each Drawer.Screen header, so useNavigation() here gives
-  // the drawer's navigation — required for navigate('MyAccount') to find the
-  // route, since on web MyAccount lives inside the drawer (not the Stack).
-  // Reset (instead of navigate) so MyAccount becomes a clean root: it never
-  // pollutes the back chain of screens the user later navigates into.
-  const HeaderRightInDrawer = () => {
-    const drawerNavigation = useNavigation<any>();
-    return (
-      <HeaderRight
-        canToggle={canToggle}
-        activeRole={activeRole}
-        onSetActiveRole={setActiveRole}
-        unreadCount={unreadCount}
-        onBellPress={() => setShowNotificationsDropdown(true)}
-        colors={lightModeColors}
-        user={user}
-        onUserPress={() => drawerNavigation.reset({ index: 0, routes: [{ name: 'MyAccount' }] })}
-      />
-    );
+  const handleLogout = async () => {
+    await GoogleSignin.signOut();
+    await SessionManager.getInstance()?.clearCredentials();
+    navigation.reset({ index: 0, routes: [{ name: 'Landing' }] });
   };
+
+  const HeaderRightInDrawer = () => (
+    <HeaderRight
+      canToggle={canToggle}
+      activeRole={activeRole}
+      onSetActiveRole={setActiveRole}
+      unreadCount={unreadCount}
+      onBellPress={() => setShowNotificationsDropdown(true)}
+      colors={lightModeColors}
+      user={user}
+      onUserPress={() => setShowUserDropdown(true)}
+    />
+  );
   const headerRight = () => <HeaderRightInDrawer />;
 
   const menuScreens = buildMenuScreens(user);
@@ -668,6 +668,13 @@ const RootDrawer = () => {
         onDeleteNotification={onDeleteNotification}
         onSeeAll={() => { setShowNotificationsDropdown(false); navigation.navigate('Notifications'); }}
         formatDate={formatDate}
+      />
+
+      <UserMenuDropdown
+        visible={showUserDropdown}
+        user={user}
+        onClose={() => setShowUserDropdown(false)}
+        onLogout={handleLogout}
       />
     </>
   );
