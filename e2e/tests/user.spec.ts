@@ -1,8 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { loginAndWait } from './helpers';
+import { DNI, PADRON, FULL_NAME } from './test-config';
 
 async function openUsuario(page) {
   await page.getByLabel('Usuario').click();
+  await page.waitForTimeout(400);
+}
+
+async function goToCredential(page) {
+  await openUsuario(page);
+  await page.getByLabel('Mi credencial').click();
   await page.waitForTimeout(400);
 }
 
@@ -14,21 +21,27 @@ test.describe('User submenu flows', () => {
   // ── Mi credencial ──────────────────────────────────────────────────────────
 
   test('credential screen shows QR code', async ({ page }) => {
-    // Default landing is already Mi credencial
-    await expect(page.getByText('Federico Esteban')).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText('DNI: 37247189')).toBeVisible();
-    await expect(page.getByText('Padrón: 94557')).toBeVisible();
+    await goToCredential(page);
+    // Sidebar elements also render the user name, so scope FULL_NAME to
+    // the credential card (identified by its unique "DNI:" row).
+    await expect(page.getByText(`DNI: ${DNI}`)).toBeVisible({ timeout: 5000 });
+    const card = page.locator('div').filter({ hasText: `DNI: ${DNI}` }).filter({ hasText: FULL_NAME }).last();
+    await expect(card.getByText(FULL_NAME).last()).toBeVisible();
+    await expect(page.getByText(`Padrón: ${PADRON}`)).toBeVisible();
   });
 
   test('credential screen has Actualizar QR button', async ({ page }) => {
+    await goToCredential(page);
     await expect(page.getByText('Actualizar QR')).toBeVisible({ timeout: 5000 });
   });
 
   test('credential screen has Abrir credencial pública button', async ({ page }) => {
+    await goToCredential(page);
     await expect(page.getByText('Abrir credencial pública')).toBeVisible({ timeout: 5000 });
   });
 
   test('credential screen shows expiry notice', async ({ page }) => {
+    await goToCredential(page);
     await expect(page.locator('text=/expira|QR/i').first()).toBeVisible({ timeout: 5000 });
   });
 
@@ -36,7 +49,9 @@ test.describe('User submenu flows', () => {
 
   test('Mi Cuenta screen loads with GitHub link form', async ({ page }) => {
     await openUsuario(page);
-    await page.getByLabel(/Mi Cuenta/i).click();
+    // The sidebar user pill also carries aria-label="Mi perfil"; the submenu
+    // entry comes first in the DOM, so pick it with .first().
+    await page.getByLabel('Mi perfil').first().click();
     await page.waitForTimeout(500);
     // GitHub placeholder is unique to this screen
     await expect(page.getByPlaceholder(/github/i)).toBeVisible({ timeout: 8000 });

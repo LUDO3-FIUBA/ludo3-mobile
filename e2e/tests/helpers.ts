@@ -1,15 +1,18 @@
 import { Page, expect } from '@playwright/test';
+import { BASE, DNI, PASS } from './test-config';
 
-export const BASE = 'http://localhost:8081';
-export const DNI = '37247189';
-export const PASS = 'soydeferro';
+export { BASE, DNI, PASS };
 
-export async function loginAndWait(page: Page) {
+export async function login(page: Page, dni: string, password: string) {
   await page.goto(BASE);
   await page.waitForLoadState('networkidle');
-  await page.getByPlaceholder('DNI').fill(DNI);
-  await page.getByPlaceholder('Contraseña').fill(PASS);
+  await page.getByPlaceholder('DNI').fill(dni);
+  await page.getByPlaceholder('Contraseña').fill(password);
   await page.getByText('Ingresar').click();
+}
+
+export async function loginAndWait(page: Page) {
+  await login(page, DNI, PASS);
   await page.waitForURL(/app/, { timeout: 10000 });
   await page.waitForTimeout(300);
 }

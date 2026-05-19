@@ -3,9 +3,16 @@ import { loginAndWait } from './helpers';
 
 const IFRAME_TITLE = 'FIUBA Map';
 
+async function openFiubaMapEntry(page) {
+  // FIUBA Map lives under Académico → Plan de Carrera (route /app/plan-de-carrera).
+  await page.getByLabel('Académico').click();
+  await page.waitForTimeout(300);
+  await page.getByLabel(/Plan de [Cc]arrera/).click();
+}
+
 async function goToFiubaMap(page) {
   await loginAndWait(page);
-  await page.getByLabel('Mapa').click();
+  await openFiubaMapEntry(page);
   const iframe = page.frameLocator(`iframe[title="${IFRAME_TITLE}"]`);
   // Wait for canvas (graph) to appear — means JS loaded and FIUBA-Map is running
   await expect(iframe.locator('canvas').first()).toBeVisible({ timeout: 15000 });
@@ -20,7 +27,8 @@ test.describe('FIUBA Map — integration with Ludo', () => {
 
   test('iframe loads local bundle (not fede.dm)', async ({ page }) => {
     await loginAndWait(page);
-    await page.getByLabel('Mapa').click();
+    await openFiubaMapEntry(page);
+    await expect(page).toHaveURL(/\/app\/plan-de-carrera/, { timeout: 8000 });
     await expect(page.locator('iframe[src="/fiuba-map/index.html"]')).toBeVisible({ timeout: 8000 });
   });
 
