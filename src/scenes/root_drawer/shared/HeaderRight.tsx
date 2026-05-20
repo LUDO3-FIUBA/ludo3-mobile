@@ -68,7 +68,7 @@ const HeaderRight: React.FC<Props> = ({
         disabled={!onUserPress}
       >
         <Icon name="account-circle" size={32} color={colors.mainContrastColor} />
-        {(user.firstName || user.lastName) && (
+        {!!(user.firstName || user.lastName) && (
           <Text style={[styles.userName, { color: colors.mainContrastColor }]} numberOfLines={1}>
             {`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()}
           </Text>
