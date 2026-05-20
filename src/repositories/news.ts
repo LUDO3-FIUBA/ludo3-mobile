@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { baseUrl } from '../networking';
 import SessionManager from '../managers/sessionManager';
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
@@ -39,7 +40,7 @@ export async function fetchTags(): Promise<NewsTag[]> {
   return data.map(t => convertSnakeToCamelCase(t) as NewsTag);
 }
 
-function buildFormData(payload: NewsPayload): FormData {
+async function buildFormData(payload: NewsPayload): Promise<FormData> {
   const formData = new FormData();
   formData.append('title', payload.title);
   formData.append('tag', payload.tag);
@@ -47,7 +48,15 @@ function buildFormData(payload: NewsPayload): FormData {
     formData.append('description', payload.description);
   }
   if (payload.image) {
-    formData.append('image', payload.image as any);
+    if (Platform.OS === 'web') {
+      // Browsers require a real Blob/File — fetch the blob: or data: URI and wrap it
+      const res = await fetch(payload.image.uri);
+      const blob = await res.blob();
+      formData.append('image', new File([blob], payload.image.name, { type: payload.image.type }));
+    } else {
+      // React Native's FormData polyfill handles { uri, type, name } natively
+      formData.append('image', payload.image as any);
+    }
   }
   return formData;
 }
@@ -57,7 +66,7 @@ export async function createNews(payload: NewsPayload): Promise<News> {
   const response = await fetch(`${baseUrl}/${BASE_URL}/`, {
     method: 'POST',
     headers,
-    body: buildFormData(payload),
+    body: await buildFormData(payload),
   });
   const data = await response.json();
   if (!response.ok) {
@@ -71,7 +80,7 @@ export async function updateNews(id: number, payload: NewsPayload): Promise<News
   const response = await fetch(`${baseUrl}/${BASE_URL}/${id}/`, {
     method: 'PATCH',
     headers,
-    body: buildFormData(payload),
+    body: await buildFormData(payload),
   });
   const data = await response.json();
   if (!response.ok) {
