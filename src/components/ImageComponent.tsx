@@ -10,6 +10,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { baseUrl } from '../networking';
 import MaterialIcon from './materialIcon';
 
 type ImageComponentProps = {
@@ -34,7 +35,18 @@ const ImageComponent: React.FC<ImageComponentProps> = ({
   expandOnPress = false,
 }) => {
   const normalizedUri = useMemo(() => uri?.trim() ?? '', [uri]);
-  const hasUri = normalizedUri.length > 0;
+  const resolvedUri = useMemo(() => {
+    if (!normalizedUri) {
+      return '';
+    }
+
+    if (normalizedUri.startsWith('/')) {
+      return `${baseUrl}${normalizedUri}`;
+    }
+
+    return normalizedUri;
+  }, [normalizedUri]);
+  const hasUri = resolvedUri.length > 0;
   const [hasError, setHasError] = useState(false);
   const [fullScreenVisible, setFullScreenVisible] = useState(false);
 
@@ -84,7 +96,7 @@ const ImageComponent: React.FC<ImageComponentProps> = ({
 
   const imageElement = (
     <Image
-      source={{ uri: normalizedUri }}
+      source={{ uri: resolvedUri }}
       style={imageStyle}
       resizeMode={resizeMode}
       onError={() => setHasError(true)}
@@ -120,7 +132,7 @@ const ImageComponent: React.FC<ImageComponentProps> = ({
             onPress={() => setFullScreenVisible(false)}
           >
             <Image
-              source={{ uri: normalizedUri }}
+              source={{ uri: resolvedUri }}
               style={styles.fullScreenImage}
               resizeMode="contain"
             />
