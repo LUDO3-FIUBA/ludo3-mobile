@@ -1,0 +1,23 @@
+src/repositories/index.ts
+  s_4d9056a3efbb15::t_f9bd1fa2f10ff8 31
+src/repositories/guarani.ts
+  s_4d9056a3efbb15::t_cb4cf832f57ea5 1-24
+src/scenes/fiuba_map/index.tsx
+  s_4d9056a3efbb15::t_0e5c14874e95ce 5,15,24-25,27-34,40,43,48,95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "ed184b3c7b6481a14eeb36812f91a2ffb7e2d8f8",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
