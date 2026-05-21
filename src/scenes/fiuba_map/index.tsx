@@ -2,20 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Platform, SafeAreaView, StyleSheet } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import { Loading } from '../../components';
-import { finalExamsRepository, usersRepository } from '../../repositories';
+import { guaraniRepository, usersRepository } from '../../repositories';
 
 const FIUBA_MAP_URI =
   Platform.OS === 'android'
     ? 'file:///android_asset/fiuba-map/index.html'
     : 'https://fede.dm/FIUBA-Map/';
 
-// TODO: placeholder — replace with career fetched from student profile once the DB
-// has the career/plan field. See LUDO3-FIUBA/.github issue #32.
-const CARRERA_ID = 'informatica';
-
 const FiubaMapScreen: React.FC = () => {
   const webViewRef = useRef<WebView>(null);
   const [padron, setPadron] = useState<string | null>(null);
+  const [carreraId, setCarreraId] = useState<string | null>(null);
   const [materiasPayload, setMateriasPayload] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [initSent, setInitSent] = useState(false);
@@ -24,27 +21,31 @@ const FiubaMapScreen: React.FC = () => {
   useEffect(() => {
     Promise.all([
       usersRepository.getInfo(),
-      finalExamsRepository.fetchApproved(),
-    ]).then(([user, exams]) => {
+      guaraniRepository.fetchPlanCarrera(),
+    ]).then(([user, plan]) => {
       setPadron(user.studentId ?? null);
-      const materias = exams
-        .filter((exam) => exam.grade !== null && exam.grade >= 4)
-        .map((exam) => ({ id: exam.subject.code, nota: exam.grade }));
-      setMateriasPayload(JSON.stringify(materias));
+
+      // Pick first career with a known FIUBA-Map ID
+      const carrera = plan.carreras.find((c) => c.fiuba_map_carrera_id);
+      setCarreraId(carrera?.fiuba_map_carrera_id ?? null);
+
+      setMateriasPayload(JSON.stringify(plan.materias_aprobadas));
+    }).catch((err) => {
+      console.warn('[FiubaMap] Failed to load plan from SIU:', err);
     });
   }, []);
 
   // Step 1: map ready → send LUDO_INIT
   useEffect(() => {
-    if (!mapReady || !padron || initSent) return;
+    if (!mapReady || !padron || !carreraId || initSent) return;
     webViewRef.current?.injectJavaScript(`
       window.dispatchEvent(new MessageEvent('message', {
-        data: { type: 'LUDO_INIT', padron: '${padron}', carreraId: '${CARRERA_ID}' }
+        data: { type: 'LUDO_INIT', padron: '${padron}', carreraId: '${carreraId}' }
       }));
       true;
     `);
     setInitSent(true);
-  }, [mapReady, padron]);
+  }, [mapReady, padron, carreraId]);
 
   // Step 2: network ready for the right carrera → send materias + zoom
   useEffect(() => {
@@ -86,13 +87,12 @@ const FiubaMapScreen: React.FC = () => {
         return;
       }
       if (data.type === 'FIUBA_MAP_READY') {
-        console.log('[FIUBA-Map] READY');
         setMapReady(true);
         return;
       }
       if (data.type === 'FIUBA_MAP_NETWORK_READY') {
         console.log('[FIUBA-Map] NETWORK_READY carrera:', data.carreraKey);
-        if (data.carreraKey === CARRERA_ID) setNetworkReady(true);
+        if (data.carreraKey === carreraId) setNetworkReady(true);
         return;
       }
     } catch {}
