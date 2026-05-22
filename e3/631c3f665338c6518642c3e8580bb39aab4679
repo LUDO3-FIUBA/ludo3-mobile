@@ -1,0 +1,31 @@
+android/app/src/main/assets/fiuba-plan/static/js/main.74595f72.js
+  ai_agent 1-3
+android/app/src/main/assets/fiuba-plan/static/js/main.74595f72.js.LICENSE.txt
+  ai_agent 1-71
+src/repositories/index.ts
+  ai_agent 17,33
+android/app/src/main/assets/fiuba-plan/static/css/main.0adc6ccd.css.map
+  ai_agent 1
+android/app/src/main/assets/fiuba-plan/static/js/main.74595f72.js.map
+  ai_agent 1
+src/repositories/guarani.ts
+  ai_agent 24-30
+public/fiuba-plan/static/css/main.0adc6ccd.css.map
+  ai_agent 1
+android/app/src/main/assets/fiuba-plan/static/css/main.0adc6ccd.css
+  ai_agent 1-2
+android/app/src/main/assets/fiuba-plan/asset-manifest.json
+  ai_agent 1-21
+package-lock.json
+  ai_agent 32,41,44,50,63,6987-6995,7577-7585,7611-7621,9695-9703,13336-13344,13551-13572,13620-13625,15879-15974,16011-16030,16116-16124,16183-16198,16474-16477,18872-18876
+android/app/src/main/assets/fiuba-plan/index.html
+  ai_agent 1
+public/fiuba-plan/static/js/main.74595f72.js.map
+  ai_agent 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "e3631c3f665338c6518642c3e8580bb39aab4679",
+  "prompts": {}
+}
