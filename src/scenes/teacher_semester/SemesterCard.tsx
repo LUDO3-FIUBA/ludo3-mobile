@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
-import { View, Text, Alert, SafeAreaView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { View, Text, SafeAreaView, StyleSheet, ActivityIndicator } from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterDataAsync, selectSemesterData, selectSemesterError, selectSemesterLoading } from '../../redux/reducers/teacherSemesterSlice';
 import { SemesterHeaderRight } from './SemesterHeaderRight';

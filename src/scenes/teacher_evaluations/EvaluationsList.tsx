@@ -55,7 +55,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
     return focusUnsubscribe;
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const evaluationsData: TeacherEvaluation[] = await makeRequest(() => teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id), navigation);
@@ -70,12 +70,12 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
         'Volvé a intentar en unos minutos.',
       );
     }
-  };
+  }, [navigation, semester.commission.id]);
 
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [semester?.commission.id, navigation]),
+    }, [fetchData]),
   );
 
   return (
