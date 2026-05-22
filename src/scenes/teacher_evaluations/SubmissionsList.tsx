@@ -38,6 +38,7 @@ export default function SubmissionsList({ route }: Props) {
   const [selectedStudent, setSelectedStudent] = useState<TeacherStudent | null>(null);
 
   const { evaluation, semester: semesterFromParams } = route.params as RouteParams;
+  const activeSemester = semesterFromParams || semester;
   const subjectName =
     semesterFromParams?.commission.subjectName ||
     (semesterFromParams?.commission as any)?.subject_name ||
@@ -48,14 +49,14 @@ export default function SubmissionsList({ route }: Props) {
   const teachersTuples: TeacherTuple[] = useAppSelector(selectStaffTeachers);
   const userData = useAppSelector(selectUserData);
 
-  const isActualUserChiefTeacher = semester?.commission.chiefTeacher.id === userData?.id;
+  const isActualUserChiefTeacher = activeSemester?.commission.chiefTeacher.id === userData?.id;
   const isGradeable = (evaluation as any).isGradeable ?? true;
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      const semesterForValidation = semester || semesterFromParams;
+      const semesterForValidation = activeSemester;
       if (semesterForValidation?.commission?.id) {
         const currentEvaluations = semesterForValidation.evaluations?.length
           ? semesterForValidation.evaluations
@@ -76,11 +77,11 @@ export default function SubmissionsList({ route }: Props) {
       let submissions: Submission[] = await teacherSubmissionsRepository.getSubmissions(evaluation.id);
       submissions = submissions.sort((a, b) => a.student.lastName.localeCompare(b.student.lastName));
 
-      if (semester) {
+      if (activeSemester) {
         // Getting only teachers
         const commissionTeachers = teachersTuples.map(actual => actual.teacher);
         // Add chief teacher
-        commissionTeachers.push(semester.commission.chiefTeacher);
+        commissionTeachers.push(activeSemester.commission.chiefTeacher);
         // Set state
         setSemesterTeachers(commissionTeachers);
       }
@@ -92,7 +93,7 @@ export default function SubmissionsList({ route }: Props) {
     } finally {
       setIsLoading(false);
     }
-  }, [evaluation.id, navigation, semester, semesterFromParams, teachersTuples]);
+  }, [evaluation.id, navigation, activeSemester, teachersTuples]);
 
   const updateCorrectorToSubmission = (submission: Submission) => {
     if (submission.grade) {
