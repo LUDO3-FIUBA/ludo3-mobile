@@ -1,0 +1,45 @@
+e2e/tests/fiuba_map_integration.spec.ts
+  s_4d9056a3efbb15::t_7595ee9dff74a0 20
+  s_4d9056a3efbb15::t_0f263528a143fb 33-35
+  s_4d9056a3efbb15::t_289207a58c8c0e 66,76
+  s_4d9056a3efbb15::t_b670dafd4a74fe 3
+  s_4d9056a3efbb15::t_5a98268f62505a 23-24,26-27
+  s_4d9056a3efbb15::t_dec97ec83060d9 2,4-16
+e2e/package.json
+  s_4d9056a3efbb15::t_b14264fce8c551 11-13
+e2e/tests/helpers.ts
+  s_4d9056a3efbb15::t_d0d61a26d6e9a3 33-38,49-51
+  s_4d9056a3efbb15::t_f9ff47f88d799d 4-6
+  s_4d9056a3efbb15::t_e0a0e71fb0f7ce 39-48
+src/scenes/fiuba_map/index.web.tsx
+  s_4d9056a3efbb15::t_cfd02898535cc9 3,10,21-22,24-28,53,56,58,62,85
+  s_4d9056a3efbb15::t_5999ed82553705 15-16,38-41,46-52
+e2e/run-tests.sh
+  s_4d9056a3efbb15::t_c9f988f1e609ea 4,7-8
+e2e/setup-db.sh
+  s_4d9056a3efbb15::t_7e2facb9a3c513 85-87,90
+  s_4d9056a3efbb15::t_6cebe734c89c36 81,84,88-89,91-92,94,96
+  s_4d9056a3efbb15::t_46253dab490ab0 71-80,82-83,93,95,97-100
+  s_4d9056a3efbb15::t_e18771efd9e8ac 5
+e2e/tests/siu_integration.spec.ts
+  s_4d9056a3efbb15::t_e7376019e49b01 1-2,4-89,91-95,99-106,109-114,116-120,123-129,131-137
+  s_4d9056a3efbb15::t_9c8206d013f099 90,96-98,107-108,121-122
+  s_4d9056a3efbb15::t_08bf14be5f5dec 115,130
+  s_4d9056a3efbb15::t_ff3ef13bb53cb9 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "b9da31d259ee269fb2ef2cf7e0a2876882d83e00",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
