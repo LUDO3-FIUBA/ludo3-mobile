@@ -17,6 +17,7 @@ const FiubaMapScreen: React.FC = () => {
   const [mapReady, setMapReady] = useState(false);
   const [initSent, setInitSent] = useState(false);
   const [networkReady, setNetworkReady] = useState(false);
+  const lastNetworkCarreraRef = useRef<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -34,6 +35,13 @@ const FiubaMapScreen: React.FC = () => {
       console.warn('[FiubaMap] Failed to load plan from SIU:', err);
     });
   }, []);
+
+  // If FIUBA-Map already has the right career loaded, set networkReady as soon as carreraId is known
+  useEffect(() => {
+    if (carreraId && lastNetworkCarreraRef.current === carreraId) {
+      setNetworkReady(true);
+    }
+  }, [carreraId]);
 
   // Step 1: map ready → send LUDO_INIT
   useEffect(() => {
@@ -92,6 +100,7 @@ const FiubaMapScreen: React.FC = () => {
       }
       if (data.type === 'FIUBA_MAP_NETWORK_READY') {
         console.log('[FIUBA-Map] NETWORK_READY carrera:', data.carreraKey);
+        lastNetworkCarreraRef.current = data.carreraKey;
         if (data.carreraKey === carreraId) setNetworkReady(true);
         return;
       }
