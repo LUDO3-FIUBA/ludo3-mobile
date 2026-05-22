@@ -16,7 +16,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Loading, ProfileOverview } from '../../components';
+import { Loading } from '../../components';
 import { SessionManager } from '../../managers';
 import { lightModeColors } from '../../styles/colorPalette';
 import { usersRepository } from '../../repositories';
@@ -50,17 +50,26 @@ import StudentCredentialScreen from '../student_credential';
 import FormsListScreen from '../forms/FormsListScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
+import NewsList from '../news/NewsList';
+import NewsDetail from '../news/NewsDetail';
+import NewsForm from '../news/NewsForm';
+import MapScreen from '../map';
+import UsefulLinksScreen from '../useful_links';
+import ProfileScreen from '../my_account';
+import ChangePasswordScreen from '../password/change';
 import FiubaMapScreen from '../fiuba_map';
+import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
 
 import {
   resolveMenu, canToggleRole,
   MenuItem, SubmenuItem, DirectItem,
-  studentMenu, teacherMenu, adminMenu,
+  studentMenu, teacherMenu, adminMenu, bedeliaMenu,
   hiddenWebRoutes,
 } from './config/menu_config';
 import NotificationsDropdown from './shared/NotificationsDropdown';
 import HeaderRight from './shared/HeaderRight';
 import ToastCard from './shared/ToastCard';
+import FiubaPlanScreen from '../fiuba_plan';
 
 type WebViewStyle = ViewStyle & { transition?: string };
 
@@ -72,6 +81,8 @@ const Drawer = createDrawerNavigator();
 
 const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
 const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+const StudentNewsListScreen = () => <NewsList isAdmin={false} />;
+const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
 
 const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   Home: HomeScreen,
@@ -82,7 +93,8 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentCredential: StudentCredentialScreen,
   StudentStats: StatsScreen,
   FormsList: FormsListScreen,
-  Map: FiubaMapScreen,
+  Map: MapScreen,
+  FiubaMap: FiubaMapScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,
@@ -92,6 +104,7 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserSearch: UserSearch,
   AdminNotificationList: NotificationList,
   FormsManager: FormsManagerScreen,
+  BedeliaClassroomChange: BedeliaClassroomChangeForm,
   AdminDepartmentDetail: DepartmentDetail,
   AdminDepartmentCreate: DepartmentForm,
   AdminDepartmentEdit: DepartmentForm,
@@ -101,6 +114,16 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserDetail: UserDetail,
   AdminNotificationCreate: NotificationForm,
   Notifications: NotificationsScreen,
+  StudentNewsList: StudentNewsListScreen,
+  AdminNewsList: AdminNewsListScreen,
+  NewsDetail: NewsDetail,
+  AdminNewsCreate: NewsForm,
+  AdminNewsEdit: NewsForm,
+  StudentUsefulLinks: UsefulLinksScreen,
+  TeacherUsefulLinks: UsefulLinksScreen,
+  MyAccount: ProfileScreen,
+  ChangePassword: ChangePasswordScreen,
+  FiubaPlan: FiubaPlanScreen,
 };
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
@@ -121,7 +144,8 @@ function buildMenuScreens(user: User): Map<string, { title: string; condition: b
 
   add(studentMenu, user.isStudent());
   add(teacherMenu, user.isTeacher());
-  add(adminMenu, user.isAdmin());
+  add(adminMenu, user.isAdmin() && !(user.isBedelia?.() ?? false));
+  add(bedeliaMenu, user.isBedelia?.() ?? false);
 
   return result;
 }
@@ -152,7 +176,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       if (item.kind === 'submenu') {
         const hasActive = item.children.some(c => c.route === activeRoute);
         if (hasActive) {
-          setOpenSubmenus(prev => new Set([...prev, item.key]));
+          setOpenSubmenus(new Set([item.key]));
           return;
         }
       }
@@ -170,11 +194,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
   };
 
   const handleSubmenuToggle = (key: string) => {
-    setOpenSubmenus(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
+    setOpenSubmenus(prev => prev.has(key) ? new Set() : new Set([key]));
   };
 
   const itemColor = () => {
@@ -186,22 +206,22 @@ function WebDrawerContent(props: WebDrawerContentProps) {
 
   return (
     <View style={{ flex: 1 }}>
-      <DrawerContentScrollView {...drawerProps} scrollEnabled={false} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
-        {/* Toggle button */}
-        <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image source={LudoIcon} style={styles.logoImage} />
-            {expanded && (
-              <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 10, color: lightModeColors.institutional, letterSpacing: 1 }}>LUDO</Text>
-            )}
-          </View>
+      {/* Header — outside the scroll view so it stays visible when the menu is tall */}
+      <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image source={LudoIcon} style={styles.logoImage} />
           {expanded && (
-            <TouchableOpacity onPress={() => onSetExpanded(false)} style={styles.iconBox} accessibilityLabel="Colapsar menú">
-              <Icon name="close" size={24} color={lightModeColors.darkGray} />
-            </TouchableOpacity>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 10, color: lightModeColors.institutional, letterSpacing: 1 }}>LUDO</Text>
           )}
         </View>
+        {expanded && (
+          <TouchableOpacity onPress={() => onSetExpanded(false)} style={styles.iconBox} accessibilityLabel="Colapsar menú">
+            <Icon name="close" size={24} color={lightModeColors.darkGray} />
+          </TouchableOpacity>
+        )}
+      </View>
 
+      <DrawerContentScrollView {...drawerProps} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
         {/* Expand arrow — only when collapsed */}
         {!expanded && (
           <>
@@ -212,95 +232,88 @@ function WebDrawerContent(props: WebDrawerContentProps) {
           </>
         )}
 
-        {/* Profile overview — only when expanded */}
-      {expanded && (
-        <View style={styles.profileSection}>
-          <ProfileOverview />
-        </View>
-      )}
+        {/* Menu items */}
+        <View style={styles.menuList}>
+          {menuItems.map(item => {
+            const accentColor = itemColor();
 
-      {/* Menu items */}
-      <View style={styles.menuList}>
-        {menuItems.map(item => {
-          const accentColor = itemColor();
+            if (item.kind === 'direct') {
+              const active = isActive(item.route);
+              return (
+                <TouchableOpacity
+                  key={item.key}
+                  // @ts-expect-error — title is a valid HTML attribute on web for native tooltips
+                  title={expanded ? undefined : item.label}
+                  onPress={() => handleDirectPress(item)}
+                  accessibilityLabel={item.label}
+                  style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, active && { backgroundColor: `${accentColor}18` }]}
+                >
+                  <View style={styles.iconBox}>
+                    <Icon name={active ? item.icon : item.iconOutline} size={20} color={active ? accentColor : lightModeColors.darkGray} />
+                  </View>
+                  {expanded && (
+                    <Text style={[styles.menuLabel, { color: active ? accentColor : lightModeColors.darkGray }]}>{item.label}</Text>
+                  )}
+                </TouchableOpacity>
+              );
+            }
 
-          if (item.kind === 'direct') {
-            const active = isActive(item.route);
+            // Submenu
+            const submenuItem = item as SubmenuItem;
+            const isOpen = openSubmenus.has(item.key);
+            const hasActiveChild = submenuItem.children.some(c => isActive(c.route));
+            const headerColor = hasActiveChild ? accentColor : lightModeColors.darkGray;
+
             return (
-              <TouchableOpacity
-                key={item.key}
-                // @ts-expect-error — title is a valid HTML attribute on web for native tooltips
-                title={expanded ? undefined : item.label}
-                onPress={() => handleDirectPress(item)}
-                accessibilityLabel={item.label}
-                style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, active && { backgroundColor: `${accentColor}18` }]}
-              >
-                <View style={styles.iconBox}>
-                  <Icon name={active ? item.icon : item.iconOutline} size={20} color={active ? accentColor : lightModeColors.darkGray} />
-                </View>
-                {expanded && (
-                  <Text style={[styles.menuLabel, { color: active ? accentColor : lightModeColors.darkGray }]}>{item.label}</Text>
+              <View key={item.key} style={expanded && { alignSelf: 'stretch' }}>
+                <TouchableOpacity
+                  // @ts-ignore
+                  title={expanded ? undefined : item.label}
+                  onPress={() => {
+                    if (!expanded) {
+                      onSetExpanded(true);
+                      setOpenSubmenus(new Set([item.key]));
+                    } else {
+                      handleSubmenuToggle(item.key);
+                    }
+                  }}
+                  accessibilityLabel={item.label}
+                  style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, hasActiveChild && !expanded && { backgroundColor: `${accentColor}18` }]}
+                >
+                  <View style={styles.iconBox}>
+                    <Icon name={hasActiveChild ? item.icon : item.iconOutline} size={20} color={headerColor} />
+                  </View>
+                  {expanded && (
+                    <>
+                      <Text style={[styles.menuLabel, { color: headerColor, flex: 1 }]}>{item.label}</Text>
+                      <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={lightModeColors.darkGray} />
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                {expanded && isOpen && (
+                  <View style={styles.submenuList}>
+                    {submenuItem.children.map(child => {
+                      const childAccent = itemColor();
+                      const childActive = isActive(child.route);
+                      return (
+                        <TouchableOpacity
+                          key={child.key}
+                          onPress={() => handleDirectPress(child)}
+                          accessibilityLabel={child.label}
+                          style={[styles.submenuRow, childActive && { backgroundColor: `${childAccent}18` }]}
+                        >
+                          <Icon name={childActive ? child.icon : child.iconOutline} size={18} color={childActive ? childAccent : lightModeColors.darkGray} style={styles.submenuIcon} />
+                          <Text style={[styles.submenuLabel, { color: childActive ? childAccent : lightModeColors.darkGray }]}>{child.label}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 )}
-              </TouchableOpacity>
+              </View>
             );
-          }
-
-          // Submenu
-          const submenuItem = item as SubmenuItem;
-          const isOpen = openSubmenus.has(item.key);
-          const hasActiveChild = submenuItem.children.some(c => isActive(c.route));
-          const headerColor = hasActiveChild ? accentColor : lightModeColors.darkGray;
-
-          return (
-            <View key={item.key} style={expanded && { alignSelf: 'stretch' }}>
-              <TouchableOpacity
-                // @ts-ignore
-                title={expanded ? undefined : item.label}
-                onPress={() => {
-                if (!expanded) {
-                  onSetExpanded(true);
-                  setOpenSubmenus(prev => new Set([...prev, item.key]));
-                } else {
-                  handleSubmenuToggle(item.key);
-                }
-              }}
-                accessibilityLabel={item.label}
-                style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, hasActiveChild && !expanded && { backgroundColor: `${accentColor}18` }]}
-              >
-                <View style={styles.iconBox}>
-                  <Icon name={hasActiveChild ? item.icon : item.iconOutline} size={20} color={headerColor} />
-                </View>
-                {expanded && (
-                  <>
-                    <Text style={[styles.menuLabel, { color: headerColor, flex: 1 }]}>{item.label}</Text>
-                    <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={lightModeColors.darkGray} />
-                  </>
-                )}
-              </TouchableOpacity>
-
-              {expanded && isOpen && (
-                <View style={styles.submenuList}>
-                  {submenuItem.children.map(child => {
-                    const childAccent = itemColor();
-                    const childActive = isActive(child.route);
-                    return (
-                      <TouchableOpacity
-                        key={child.key}
-                        onPress={() => handleDirectPress(child)}
-                        accessibilityLabel={child.label}
-                        style={[styles.submenuRow, childActive && { backgroundColor: `${childAccent}18` }]}
-                      >
-                        <Icon name={childActive ? child.icon : child.iconOutline} size={18} color={childActive ? childAccent : lightModeColors.darkGray} style={styles.submenuIcon} />
-                        <Text style={[styles.submenuLabel, { color: childActive ? childAccent : lightModeColors.darkGray }]}>{child.label}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              )}
-            </View>
-          );
-        })}
-      </View>
+          })}
+        </View>
       </DrawerContentScrollView>
     </View>
   );
@@ -365,6 +378,18 @@ const RootDrawer = () => {
   useEffect(() => {
     async function fetchUser() {
       try {
+        // On a browser reload, deep linking bypasses Splash, so the in-memory
+        // access token is gone. Hydrate from the httpOnly cookie before making
+        // any authenticated request; if it fails, the session is expired and we
+        // send the user to Landing.
+        const sessionManager = SessionManager.getInstance();
+        if (!sessionManager.getAuthToken()) {
+          const ok = await sessionManager.getCredentials();
+          if (!ok) {
+            navigation.replace('Landing');
+            return;
+          }
+        }
         const fetchedUser = await usersRepository.getInfo();
         setUser(fetchedUser);
         dispatch(fetchUserDataAsync(fetchedUser));
@@ -392,6 +417,7 @@ const RootDrawer = () => {
 
   const canToggle = canToggleRole(user);
   const menuItems = resolveMenu(user, activeRole);
+  const homeMenuItem = menuItems.find(i => i.kind === 'direct' && (i as DirectItem).route) as DirectItem | undefined;
 
   const onNotificationPress = async (item: UserNotification) => {
     if (item.is_read) return;
@@ -425,6 +451,8 @@ const RootDrawer = () => {
       unreadCount={unreadCount}
       onBellPress={() => setShowNotificationsDropdown(true)}
       colors={lightModeColors}
+      user={user}
+      onUserPress={() => navigation.navigate('MyAccount')}
     />
   );
 
@@ -433,11 +461,12 @@ const RootDrawer = () => {
   return (
     <>
       <Drawer.Navigator
+        initialRouteName={homeMenuItem?.route}
         screenOptions={{
           drawerType: 'permanent',
-          drawerStyle: { 
-            width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH, 
-            borderRightWidth: 1, 
+          drawerStyle: {
+            width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH,
+            borderRightWidth: 1,
             borderRightColor: lightModeColors.lightGray,
             ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } as WebViewStyle : {})
           },
@@ -515,7 +544,6 @@ const styles = StyleSheet.create({
   toggleButton: { padding: 12, margin: 4 },
   logoImage: { width: 40, height: 40 },
   iconBox: { width: 45, height: 45, padding: 12, margin: 2, alignItems: 'center', justifyContent: 'center' },
-  profileSection: { borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray, marginBottom: 8 },
   expandArrowButton: { alignSelf: 'center', width: 45, height: 45, alignItems: 'center', justifyContent: 'center', borderRadius: 8, marginVertical: 4 },
   menuSeparator: { height: 1, backgroundColor: lightModeColors.lightGray, marginHorizontal: 8, marginBottom: 8 },
   menuList: { paddingHorizontal: 4, minWidth: 50, alignItems: 'center' },

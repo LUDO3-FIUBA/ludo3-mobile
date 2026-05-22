@@ -1,9 +1,10 @@
 // src/scenes/google_register/index.tsx
 import React, { useState, useRef, FunctionComponent } from 'react';
-import { View, SafeAreaView, Text, Alert, StyleSheet } from 'react-native';
+import { View, SafeAreaView, Text, Platform, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { preregister as style } from '../../styles';
-import { RoundedButton, FormInput } from '../../components';
+import { RoundedButton, FormInput, PasswordInput } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { authenticationRepository, usersRepository } from '../../repositories';
 import SessionManager from '../../managers/sessionManager';
 
@@ -34,16 +35,21 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
   const [lastName, setLastName] = useState(last_name || '');
   const [dniValid, setDniValid] = useState(false);
   const [padronValid, setPadronValid] = useState(false);
-  const [passwordValid, setPasswordValid] = useState(false);
   const [firstNameValid, setFirstNameValid] = useState(!!first_name);
   const [lastNameValid, setLastNameValid] = useState(!!last_name);
   const [registering, setRegistering] = useState(false);
+  const [blockingError, setBlockingError] = useState<{ title: string; message: string } | null>(null);
+
+  const passwordValid = password.length >= 6;
 
   let dniTextInput = useRef<any>(null);
   let padronTextInput = useRef<any>(null);
-  let passwordTextInput = useRef<any>(null);
   let firstNameTextInput = useRef<any>(null);
   let lastNameTextInput = useRef<any>(null);
+
+  const webWidthStyle = Platform.OS === 'web'
+    ? { width: '60%' as any, maxWidth: 480, alignSelf: 'center' as const }
+    : {};
 
   const shouldEnableRegister = () =>
     dniValid && padronValid && passwordValid && firstNameValid && lastNameValid && !registering;
@@ -75,11 +81,11 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
       }
     } catch (error) {
       if (error instanceof authenticationRepository.InvalidDNI) {
-        Alert.alert('Error', 'El DNI ingresado ya está registrado o no es válido.');
+        setBlockingError({ title: 'DNI inválido', message: 'El DNI ingresado ya está registrado o no es válido.' });
       } else if (error instanceof authenticationRepository.NotAStudent) {
-        Alert.alert('Error', 'No se pudo verificar tu condición de estudiante.');
+        setBlockingError({ title: 'Error', message: 'No se pudo verificar tu condición de estudiante.' });
       } else {
-        Alert.alert('Error', 'No se pudo completar el registro. Por favor, intenta de nuevo.');
+        setBlockingError({ title: 'Error', message: 'No se pudo completar el registro. Por favor, intentá de nuevo.' });
       }
       setRegistering(false);
     }
@@ -92,7 +98,7 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={style().scrollView}
         >
-          <View>
+          <View style={webWidthStyle}>
             <Text style={styles.headerText}>
               Completá tu registro
             </Text>
@@ -198,7 +204,6 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
               errorStyle={style().errorInInput}
               keyboardType="numeric"
               returnKeyType="next"
-              nextField={() => passwordTextInput.current}
               placeholder="Por ejemplo: 123456"
               blurOnSubmit={false}
               onTextChanged={(text, isValid) => {
@@ -219,27 +224,11 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
             <View style={style().inputLabels}>
               <Text style={[style().text, { marginTop: 12 }]}>Contraseña</Text>
             </View>
-            <FormInput
-              ref={passwordTextInput}
-              style={style().textInput}
-              placeholderColor={style().textInputPlaceholder.color}
-              errorStyle={style().errorInInput}
-              secureTextEntry={true}
+            <PasswordInput
+              value={password}
+              onChangeText={setPassword}
               placeholder="Ingresá una contraseña"
-              onTextChanged={(text, isValid) => {
-                setPassword(text);
-                setPasswordValid(isValid);
-              }}
-              validation={{
-                presence: {
-                  allowEmpty: false,
-                  message: 'Contraseña necesaria.',
-                },
-                length: {
-                  minimum: 6,
-                  message: 'La contraseña debe tener al menos 6 caracteres',
-                },
-              }}
+              editable={!registering}
             />
           </View>
           <RoundedButton
@@ -250,6 +239,15 @@ const GoogleRegisterScreen: FunctionComponent<Props> = ({ navigation, route }) =
           />
         </KeyboardAwareScrollView>
       </SafeAreaView>
+
+      <AlertDialog
+        visible={blockingError !== null}
+        title={blockingError?.title ?? ''}
+        message={blockingError?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setBlockingError(null)}
+      />
     </View>
   );
 };

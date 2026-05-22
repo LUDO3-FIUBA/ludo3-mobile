@@ -1,6 +1,7 @@
 export interface CreatedEvaluation {
   semesterId:   number;
   evaluationName: string;
+  description?: string;
   isGraded:     boolean;
   passingGrade: number | null;
   startDate:    Date;
@@ -14,6 +15,7 @@ export interface CreatedEvaluation {
 export interface CreatedEvaluationSnakeCase {
   semester_id:     number;
   evaluation_name: string;
+  description?:    string;
   is_graded:       boolean;
   passing_grade:   number | null;
   start_date:      Date;

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Linking,
+  Platform,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -81,6 +82,10 @@ const ProfileScreen: React.FC = () => {
     );
   }
 
+  const webWidthStyle = Platform.OS === 'web'
+    ? { width: '60%' as any, maxWidth: 480, alignSelf: 'center' as const }
+    : {};
+
   return (
     <Formik
       initialValues={initialValues}
@@ -90,6 +95,7 @@ const ProfileScreen: React.FC = () => {
     >
       {({ values, errors, touched, handleChange, handleBlur, handleSubmit: formikSubmit }) => (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+          <View style={webWidthStyle}>
           <Text style={styles.description}>
             Asociá tus perfiles profesionales (opcional). Otros miembros de la plataforma podrán verlos.
           </Text>
@@ -154,6 +160,7 @@ const ProfileScreen: React.FC = () => {
             onPress={() => formikSubmit()}
             style={{}}
           />
+          </View>
         </ScrollView>
       )}
     </Formik>

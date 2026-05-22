@@ -7,10 +7,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MaterialIcon } from '../../components';
+import { ImageComponent, MaterialIcon } from '../../components';
 import { newsRepository } from '../../repositories';
 import News from '../../models/News';
 
@@ -83,9 +82,7 @@ const NewsList: React.FC<Props> = ({ isAdmin }) => {
             navigation.navigate('NewsDetail', { newsId: item.id, isAdmin })
           }
         >
-          {item.pictureUrl ? (
-            <Image source={{ uri: item.pictureUrl }} style={styles.thumbnail} resizeMode="cover" />
-          ) : null}
+          <ImageComponent uri={item.image} imageStyle={styles.thumbnail} />
           <View style={styles.itemContent}>
             <View style={[styles.tagChip, { backgroundColor: item.tagColor }]}>
               <Text style={styles.tagChipText}>{item.tagLabel}</Text>

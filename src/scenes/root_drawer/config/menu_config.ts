@@ -72,6 +72,7 @@ export const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'StudentDepartmentList', scope: 'shared' },
       { kind: 'direct', key: 'student-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'StudentNewsList', scope: 'shared' },
       { kind: 'direct', key: 'student-procedures', label: 'Trámites', icon: 'file-document-edit', iconOutline: 'file-document-edit-outline', route: 'FormsList', scope: 'student' },
+      { kind: 'direct', key: 'fiuba-plan', label: 'FIUBA Plan', icon: 'calendar-clock', iconOutline: 'calendar-clock-outline', route: 'FiubaPlan', scope: 'student' },
       { kind: 'direct', key: 'fiuba-map', label: 'Plan de Carrera', icon: 'map-legend', iconOutline: 'map-legend', route: 'FiubaMap', scope: 'student' },
     ],
   },
@@ -157,6 +158,26 @@ export const adminMenu: MenuItem[] = [
   },
 ];
 
+// ─── Bedelía ──────────────────────────────────────────────────────────────────
+
+export const bedeliaMenu: MenuItem[] = [
+  {
+    kind: 'submenu', key: 'user', label: 'Usuario',
+    icon: 'account', iconOutline: 'account-outline', scope: 'shared',
+    webOrder: 2, mobileOrder: 2,
+    children: [
+      { kind: 'direct', key: 'change-password', label: 'Cambiar contraseña', icon: 'lock-reset', iconOutline: 'lock-reset', route: 'ChangePassword', scope: 'shared' },
+      { kind: 'direct', key: 'logout', label: 'Cerrar sesión', icon: 'logout-variant', iconOutline: 'logout-variant', action: 'logout', scope: 'shared' },
+    ],
+  },
+  {
+    kind: 'direct', key: 'bedelia-classroom-change', label: 'Cambio de aula',
+    icon: 'home-edit', iconOutline: 'home-edit-outline',
+    route: 'BedeliaClassroomChange', scope: 'shared',
+    webOrder: 1, mobileOrder: 1,
+  },
+];
+
 // ─── Hidden Web Routes ────────────────────────────────────────────────────────
 
 export type HiddenWebRoute = {
@@ -176,6 +197,7 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
   { route: 'AdminUserDetail', title: 'Usuario', roleFilter: 'admin' },
   { route: 'AdminNotificationCreate', title: 'Nuevo Aviso', roleFilter: 'admin' },
   { route: 'AdminNewsCreate', title: 'Nueva Novedad', roleFilter: 'admin' },
+  { route: 'BedeliaClassroomChange', title: 'Cambio de aula', roleFilter: 'admin' },
   { route: 'AdminNewsEdit', title: 'Editar Novedad', roleFilter: 'admin' },
   { route: 'NewsDetail', title: 'Novedad' },
   { route: 'Notifications', title: 'Notificaciones' },
@@ -223,7 +245,7 @@ export function resolveMenu(user: User, roleOverride?: 'student' | 'teacher'): M
   let raw: MenuItem[];
 
   if (user.isAdmin()) {
-    raw = adminMenu;
+    raw = user.isBedelia?.() ? bedeliaMenu : adminMenu;
   } else if (roleOverride === 'student') {
     raw = studentMenu;
   } else if (roleOverride === 'teacher') {

@@ -9,7 +9,6 @@ import {
   deleteMethod as basicDelete,
   StatusCodeError,
 } from '../networking';
-import { refresh } from './refreshToken';
 import SessionManager from '../managers/sessionManager';
 
 export class MustLoginAgain extends Error {
@@ -134,29 +133,15 @@ export function patch(
   });
 }
 
-interface RefreshJsonObject {
-  refresh?: string;
-  access?: string;
-}
-
-function reLogInIfNecessary(error: unknown): Promise<string> {
+async function reLogInIfNecessary(error: unknown): Promise<string> {
   if (error instanceof StatusCodeError && error.code == 401) {
-    const sessionManager: SessionManager | null = SessionManager.getInstance() 
-    const refreshToken = sessionManager?.getRefreshToken();
-    if (refreshToken) {
-      return refresh(refreshToken).then(async (json: any) => {
-          json.refresh = refreshToken;
-          await sessionManager?.saveCredentials(json);
-          return json.access;
-        })
-        .catch(async error => {
-          if (error instanceof StatusCodeError && error.code == 401) {
-            await sessionManager?.clearCredentials();
-            return Promise.reject(new MustLoginAgain());
-          }
-          return Promise.reject(error);
-        });
+    const sessionManager = SessionManager.getInstance();
+    const success = await sessionManager.getCredentials();
+    if (success) {
+      const newToken = sessionManager.getAuthToken();
+      if (newToken) return newToken;
     }
+    await sessionManager.clearCredentials();
     return Promise.reject(new MustLoginAgain());
   }
   return Promise.reject(error);

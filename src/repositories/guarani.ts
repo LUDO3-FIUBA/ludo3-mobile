@@ -21,4 +21,10 @@ export async function fetchPlanCarrera(): Promise<PlanCarrera> {
   return get('api/guarani/plan-carrera');
 }
 
-export default { fetchPlanCarrera };
+async function fetchOfertaComisiones(actividadCodigo?: string): Promise<any[]> {
+  const query = actividadCodigo ? `?actividad_codigo=${encodeURIComponent(actividadCodigo)}` : '';
+  const result = await get(`api/guarani/oferta-comisiones${query}`);
+  return Array.isArray(result) ? result : ((result as any)?.data ?? []);
+}
+
+export default { fetchPlanCarrera, fetchOfertaComisiones };
