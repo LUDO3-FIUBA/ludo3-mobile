@@ -1,0 +1,25 @@
+android/app/src/main/assets/fiuba-map/index.html
+  ai_agent 1
+android/app/src/main/assets/fiuba-map/asset-manifest.json
+  ai_agent 3,5,8
+src/scenes/fiuba_map/index.tsx
+  s_4d9056a3efbb15::t_61215550087f46 20
+  s_4d9056a3efbb15::t_8806c0d951d566 103
+  s_4d9056a3efbb15::t_5040d350e91eb2 39-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "5d3cbd9e5db5999844d93f54a9797513a0d3a8e1",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
