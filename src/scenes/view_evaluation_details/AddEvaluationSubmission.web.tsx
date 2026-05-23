@@ -51,6 +51,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
         title: 'Error',
         message: 'Hubo un error, no pudimos registrar la entrega del examen. Por favor intenta nuevamente.',
       });
+    } finally {
       setSubmitting(false);
     }
   };

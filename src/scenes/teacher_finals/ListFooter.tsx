@@ -42,7 +42,13 @@ const ListFooter: React.FC<ListFooterProps> = ({
   gradeChanges
 }) => {
   const navigation = useNavigation();
-  const [confirmDialog, setConfirmDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmLabel?: string;
+    extraActions?: Array<{ label: string; onPress: () => void; destructive?: boolean }>;
+  } | null>(null);
   if (!isEditable) return null;
 
   // const studentAdded = async (padron: string) => {
@@ -79,8 +85,9 @@ const ListFooter: React.FC<ListFooterProps> = ({
         title={confirmDialog?.title ?? ''}
         message={confirmDialog?.message ?? ''}
         mode="confirm"
-        confirmLabel="Confirmar"
+        confirmLabel={confirmDialog?.confirmLabel ?? 'Confirmar'}
         cancelLabel="Cancelar"
+        extraActions={confirmDialog?.extraActions}
         onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
         onCancel={() => setConfirmDialog(null)}
       />
@@ -129,7 +136,13 @@ const ListFooter: React.FC<ListFooterProps> = ({
           if (gradeChanges.size > 0) {
             setConfirmDialog({
               title: '¡Esperá!',
-              message: 'Todavía tenés cambios sin guardar. ¿Querés guardarlos antes de cerrar el acta?',
+              message: 'Todavía tenés cambios sin guardar. ¿Qué querés hacer con ellos antes de cerrar el acta?',
+              confirmLabel: 'Guardar',
+              extraActions: [{
+                label: 'Descartar',
+                onPress: async () => { setConfirmDialog(null); await closeAct(navigation); },
+                destructive: true,
+              }],
               onConfirm: async () => {
                 await saveChanges(async () => {
                   await closeAct(navigation);
