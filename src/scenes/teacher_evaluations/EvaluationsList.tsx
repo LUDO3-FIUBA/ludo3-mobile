@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, Button } from 'react-native';
 import { Loading, RoundedButton } from '../../components';
 import { evaluations as style } from '../../styles';
@@ -31,7 +31,13 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const { semester, evaluations: evaluationsFromParams } = route.params as EvaluationsRouteParams;
   const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>(() => sortEvaluationsByStartDate(evaluationsFromParams ?? []));
   const navigation = useNavigation<any>();
-  const hasFocusedOnce = useRef(false);
+
+  const semesterForNavigation = semester
+    ? {
+        ...semester,
+        evaluations,
+      }
+    : semester;
 
   const [loading, setLoading] = useState(!evaluationsFromParams);
 
@@ -49,7 +55,8 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
     return focusUnsubscribe;
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
       const evaluationsData: TeacherEvaluation[] = await makeRequest(() => teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id), navigation);
       setEvaluations(sortEvaluationsByStartDate(evaluationsData));
@@ -63,16 +70,12 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
         'Volvé a intentar en unos minutos.',
       );
     }
-  };
+  }, [navigation, semester.commission.id]);
 
   useFocusEffect(
     useCallback(() => {
-      if (hasFocusedOnce.current) {
-        fetchData();
-      }
-
-      hasFocusedOnce.current = true;
-    }, [evaluationsFromParams, semester?.commission.id, navigation]),
+      fetchData();
+    }, [fetchData]),
   );
 
   return (
@@ -98,7 +101,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
               onPress={() => {
                 navigation.navigate('SubmissionsList', {
                   evaluation: item,
-                  semester,
+                  semester: semesterForNavigation,
                 });
               }}
             >
