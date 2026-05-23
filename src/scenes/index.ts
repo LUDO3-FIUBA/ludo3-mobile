@@ -85,3 +85,8 @@ export { default as AdminProceduresManagerScreen } from './admin_procedures';
 export { default as MyAccountScreen } from './my_account';
 export { default as UsefulLinksScreen } from './useful_links';
 export { default as FiubaMapScreen } from './fiuba_map';
+
+// Admin Secretaries screens
+export { default as SecretaryListScreen } from './admin_secretaries/SecretaryList';
+export { default as SecretaryDetailScreen } from './admin_secretaries/SecretaryDetail';
+export { default as SecretaryFormScreen } from './admin_secretaries/SecretaryForm';

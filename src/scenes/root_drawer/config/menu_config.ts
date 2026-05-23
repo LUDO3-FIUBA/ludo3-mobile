@@ -142,6 +142,7 @@ export const adminMenu: MenuItem[] = [
     webOrder: 2, mobileOrder: 2,
     children: [
       { kind: 'direct', key: 'admin-departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'AdminDepartmentList', scope: 'shared' },
+      { kind: 'direct', key: 'admin-secretaries', label: 'Secretarías', icon: 'domain', iconOutline: 'domain', route: 'AdminSecretaryList', scope: 'shared' },
       { kind: 'direct', key: 'admin-commissions', label: 'Comisiones', icon: 'account-group', iconOutline: 'account-group-outline', route: 'AdminCommissionList', scope: 'shared' },
       { kind: 'direct', key: 'admin-user-search', label: 'Buscar Usuarios', icon: 'account-search', iconOutline: 'account-search-outline', route: 'AdminUserSearch', scope: 'shared', superAdminOnly: true },
       { kind: 'direct', key: 'admin-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'AdminNewsList', scope: 'shared', superAdminOnly: true },
@@ -191,6 +192,9 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
   { route: 'AdminDepartmentDetail', title: 'Departamento', roleFilter: 'admin' },
   { route: 'AdminDepartmentCreate', title: 'Nuevo Departamento', roleFilter: 'admin' },
   { route: 'AdminDepartmentEdit', title: 'Editar Departamento', roleFilter: 'admin' },
+  { route: 'AdminSecretaryDetail', title: 'Secretaría', roleFilter: 'admin' },
+  { route: 'AdminSecretaryCreate', title: 'Nueva Secretaría', roleFilter: 'admin' },
+  { route: 'AdminSecretaryEdit', title: 'Editar Secretaría', roleFilter: 'admin' },
   { route: 'AdminCommissionCreate', title: 'Nueva Comisión', roleFilter: 'admin' },
   { route: 'AdminCommissionDetail', title: 'Comisión', roleFilter: 'admin' },
   { route: 'AdminCommissionEdit', title: 'Editar Comisión', roleFilter: 'admin' },

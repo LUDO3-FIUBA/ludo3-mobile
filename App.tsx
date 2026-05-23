@@ -42,6 +42,9 @@ import BedeliaClassroomChangeForm from './src/scenes/bedelia/ClassroomChangeForm
 import DepartmentList from './src/scenes/admin_departments/DepartmentList';
 import DepartmentDetail from './src/scenes/admin_departments/DepartmentDetail';
 import DepartmentForm from './src/scenes/admin_departments/DepartmentForm';
+import SecretaryList from './src/scenes/admin_secretaries/SecretaryList';
+import SecretaryDetail from './src/scenes/admin_secretaries/SecretaryDetail';
+import SecretaryForm from './src/scenes/admin_secretaries/SecretaryForm';
 import CommissionList from './src/scenes/admin_commissions/CommissionList';
 import CommissionDetail from './src/scenes/admin_commissions/CommissionDetail';
 import CommissionForm from './src/scenes/admin_commissions/CommissionForm';
@@ -64,6 +67,8 @@ const Stack = createStackNavigator();
 
 const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
 const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+const StudentSecretaryListScreen = () => <SecretaryList isAdmin={false} />;
+const AdminSecretaryListScreen = () => <SecretaryList isAdmin={true} />;
 const StudentNewsListScreen = () => <NewsList isAdmin={false} />;
 const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
 
@@ -109,6 +114,7 @@ const webLinking = {
           TeacherUsefulLinks: 'docente/enlaces-utiles',
           // Admin
           AdminDepartmentList: 'admin/departamentos',
+          AdminSecretaryList: 'admin/secretarias',
           AdminCommissionList: 'admin/comisiones',
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
@@ -283,6 +289,8 @@ const App = () => {
               <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />
               <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />
               <Stack.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />
+              <Stack.Screen name="AdminSecretaryList" component={AdminSecretaryListScreen} options={{ headerShown: true, title: 'Secretarías' }} />
+              <Stack.Screen name="StudentSecretaryList" component={StudentSecretaryListScreen} options={{ headerShown: true, title: 'Secretarías' }} />
               <Stack.Screen name="AdminCommissionList" component={CommissionList} options={{ headerShown: true, title: 'Comisiones' }} />
               <Stack.Screen name="AdminUserSearch" component={UserSearch} options={{ headerShown: true, title: 'Buscar Usuarios' }} />
               <Stack.Screen name="AdminNotificationList" component={NotificationList} options={{ headerShown: true, title: 'Avisos' }} />
@@ -292,6 +300,9 @@ const App = () => {
               <Stack.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />
               <Stack.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ headerShown: true, title: 'Nuevo Departamento' }} />
               <Stack.Screen name="AdminDepartmentEdit" component={DepartmentForm} options={{ headerShown: true, title: 'Editar Departamento' }} />
+              <Stack.Screen name="AdminSecretaryDetail" component={SecretaryDetail} options={{ headerShown: true, title: 'Secretaría' }} />
+              <Stack.Screen name="AdminSecretaryCreate" component={SecretaryForm} options={{ headerShown: true, title: 'Nueva Secretaría' }} />
+              <Stack.Screen name="AdminSecretaryEdit" component={SecretaryForm} options={{ headerShown: true, title: 'Editar Secretaría' }} />
               <Stack.Screen name="AdminCommissionCreate" component={CommissionForm} options={{ headerShown: true, title: 'Nueva Comisión' }} />
               <Stack.Screen name="AdminCommissionDetail" component={CommissionDetail} options={{ headerShown: true, title: 'Comisión' }} />
               <Stack.Screen name="AdminCommissionEdit" component={CommissionForm} options={{ headerShown: true, title: 'Editar Comisión' }} />
