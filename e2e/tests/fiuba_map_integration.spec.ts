@@ -1,26 +1,38 @@
 import { test, expect } from '@playwright/test';
-import { loginAndWait } from './helpers';
+import * as net from 'net';
+import { loginAndWait, goToFiubaMap as navToFiubaMap } from './helpers';
+const SIU_HOST = '172.25.90.12';
+const SIU_PORT = 8080;
 
-const IFRAME_TITLE = 'FIUBA Map';
+function isSiuReachable(): Promise<boolean> {
+  return new Promise(resolve => {
+    const socket = new net.Socket();
+    socket.setTimeout(3000);
+    socket.on('connect', () => { socket.destroy(); resolve(true); });
+    socket.on('timeout', () => { socket.destroy(); resolve(false); });
+    socket.on('error', () => resolve(false));
+    socket.connect(SIU_PORT, SIU_HOST);
+  });
+}
 
 async function goToFiubaMap(page) {
   await loginAndWait(page);
-  await page.getByLabel('Mapa').click();
-  const iframe = page.frameLocator(`iframe[title="${IFRAME_TITLE}"]`);
-  // Wait for canvas (graph) to appear — means JS loaded and FIUBA-Map is running
-  await expect(iframe.locator('canvas').first()).toBeVisible({ timeout: 15000 });
-  // Give time for FIUBA_MAP_READY → LUDO_INIT → FIUBA_MAP_NETWORK_READY → LUDO_SET_MATERIAS
-  await page.waitForTimeout(3500);
-  return iframe;
+  return navToFiubaMap(page);
 }
 
+let siuReachable = false;
+
 test.describe('FIUBA Map — integration with Ludo', () => {
+  test.beforeAll(async () => { siuReachable = await isSiuReachable(); });
+  test.beforeEach(() => { test.skip(!siuReachable, 'SIU unavailable — connect to FIUBA VPN'); });
 
   // ── Carga del bundle local ─────────────────────────────────────────────────
 
   test('iframe loads local bundle (not fede.dm)', async ({ page }) => {
     await loginAndWait(page);
-    await page.getByLabel('Mapa').click();
+    await page.getByLabel('Académico').click();
+    await page.waitForTimeout(300);
+    await page.getByLabel('Plan de Carrera').click();
     await expect(page.locator('iframe[src="/fiuba-map/index.html"]')).toBeVisible({ timeout: 8000 });
   });
 
@@ -51,7 +63,7 @@ test.describe('FIUBA Map — integration with Ludo', () => {
     const approvedCount = await page.frames().find(f => f.url().includes('fiuba-map'))?.evaluate(() => {
       const net = (window as any).__ludoNetwork;
       if (!net) return 0;
-      return net.body.data.nodes.get({ filter: (n: any) => n.aprobada === true }).length;
+      return net.body.data.nodes.get({ filter: (n: any) => n.group === 'Aprobadas' }).length;
     }) ?? 0;
     expect(approvedCount).toBeGreaterThan(0);
   });
@@ -61,7 +73,7 @@ test.describe('FIUBA Map — integration with Ludo', () => {
     const approvedCount = await page.frames().find(f => f.url().includes('fiuba-map'))?.evaluate(() => {
       const net = (window as any).__ludoNetwork;
       if (!net) return 0;
-      return net.body.data.nodes.get({ filter: (n: any) => n.aprobada === true }).length;
+      return net.body.data.nodes.get({ filter: (n: any) => n.group === 'Aprobadas' }).length;
     }) ?? 0;
     expect(approvedCount).toBeGreaterThanOrEqual(5);
   });
