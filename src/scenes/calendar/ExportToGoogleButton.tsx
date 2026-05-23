@@ -82,11 +82,9 @@ const ExportToGoogleButton = ({ evaluations, finals, inscriptions }: Props) => {
         visible={alertDialog !== null}
         title={alertDialog?.title ?? ''}
         message={alertDialog?.message ?? ''}
-        mode="confirm"
+        mode="info"
         confirmLabel="Aceptar"
-        cancelLabel="Aceptar"
         onConfirm={() => setAlertDialog(null)}
-        onCancel={() => setAlertDialog(null)}
       />
     </View>
   );
