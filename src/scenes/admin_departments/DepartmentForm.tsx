@@ -31,7 +31,7 @@ const DepartmentForm: React.FC = () => {
   const [contactInfo, setContactInfo] = useState(existing?.contactInfo ?? '');
   const [procedures, setProcedures] = useState(existing?.procedures ?? '');
   const [saving, setSaving] = useState(false);
-  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string; onConfirm?: () => void} | null>(null);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -44,12 +44,11 @@ const DepartmentForm: React.FC = () => {
       const data = { name: name.trim(), location, schedule, contactInfo, procedures };
       if (existing) {
         await departmentsRepository.updateDepartment(existing.id, data);
-        setAlertDialog({ title: 'Éxito', message: 'Departamento actualizado correctamente.' });
+        setAlertDialog({ title: 'Éxito', message: 'Departamento actualizado correctamente.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
       } else {
         await departmentsRepository.createDepartment(data);
-        setAlertDialog({ title: 'Éxito', message: 'Departamento creado correctamente.' });
+        setAlertDialog({ title: 'Éxito', message: 'Departamento creado correctamente.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
       }
-      navigation.goBack();
     } catch (error) {
       setAlertDialog({ title: 'Error', message: 'No se pudo guardar el departamento. Intente de nuevo.' });
     } finally {
@@ -113,7 +112,7 @@ const DepartmentForm: React.FC = () => {
         message={alertDialog?.message ?? ''}
         mode="info"
         confirmLabel="Aceptar"
-        onConfirm={() => setAlertDialog(null)}
+        onConfirm={alertDialog?.onConfirm ?? (() => setAlertDialog(null))}
       />
     </KeyboardAvoidingView>
   );

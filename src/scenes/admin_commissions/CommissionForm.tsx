@@ -51,7 +51,7 @@ const CommissionForm: React.FC = () => {
       : null,
   );
   const [saving, setSaving] = useState(false);
-  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string; onConfirm?: () => void} | null>(null);
 
   // Teacher picker state
   const [showTeacherPicker, setShowTeacherPicker] = useState(false);
@@ -118,12 +118,11 @@ const CommissionForm: React.FC = () => {
 
       if (existing) {
         await adminCommissionsRepository.updateCommission(existing.id, data);
-        setAlertDialog({ title: 'Éxito', message: 'Comisión actualizada correctamente.' });
+        setAlertDialog({ title: 'Éxito', message: 'Comisión actualizada correctamente.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
       } else {
         await adminCommissionsRepository.createCommission(data);
-        setAlertDialog({ title: 'Éxito', message: 'Comisión creada correctamente.' });
+        setAlertDialog({ title: 'Éxito', message: 'Comisión creada correctamente.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
       }
-      navigation.goBack();
     } catch (error) {
       setAlertDialog({ title: 'Error', message: 'No se pudo guardar la comisión. Intente de nuevo.' });
     } finally {
@@ -249,7 +248,7 @@ const CommissionForm: React.FC = () => {
         message={alertDialog?.message ?? ''}
         mode="info"
         confirmLabel="Aceptar"
-        onConfirm={() => setAlertDialog(null)}
+        onConfirm={alertDialog?.onConfirm ?? (() => setAlertDialog(null))}
       />
     </KeyboardAvoidingView>
   );
