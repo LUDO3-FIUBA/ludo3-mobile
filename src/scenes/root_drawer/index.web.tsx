@@ -61,6 +61,7 @@ import FiubaMapScreen from '../fiuba_map';
 import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
 import SecretaryList from '../admin_secretaries/SecretaryList';
 import SecretaryDetail from '../admin_secretaries/SecretaryDetail';
+import SecretaryForm from '../admin_secretaries/SecretaryForm';
 
 import {
   resolveMenu, canToggleRole,
@@ -86,6 +87,7 @@ const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
 const StudentNewsListScreen = () => <NewsList isAdmin={false} />;
 const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
 const StudentSecretaryListScreen = () => <SecretaryList isAdmin={false} />;
+const AdminSecretaryListScreen = () => <SecretaryList isAdmin={true} />;
 
 const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   Home: HomeScreen,
@@ -125,7 +127,10 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentUsefulLinks: UsefulLinksScreen,
   TeacherUsefulLinks: UsefulLinksScreen,
   StudentSecretaryList: StudentSecretaryListScreen,
+  AdminSecretaryList: AdminSecretaryListScreen,
   AdminSecretaryDetail: SecretaryDetail,
+  AdminSecretaryCreate: SecretaryForm,
+  AdminSecretaryEdit: SecretaryForm,
   MyAccount: ProfileScreen,
   ChangePassword: ChangePasswordScreen,
   FiubaPlan: FiubaPlanScreen,
