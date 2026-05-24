@@ -40,7 +40,6 @@ async function updateSubmission(
     snakeCaseBody.feedback_text = payload.feedbackText;
   }
 
-  console.log("Request body for updating submission:", snakeCaseBody);
   const gradeChange: GradeChangeSnakeCase = await put(`${GRADE_SUBMISSION_ENDPOINT}`, snakeCaseBody) as GradeChangeSnakeCase;
   return convertSnakeToCamelCase(gradeChange) as GradeChange;
 }
