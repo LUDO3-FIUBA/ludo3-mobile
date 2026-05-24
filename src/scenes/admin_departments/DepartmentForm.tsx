@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,10 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { RoundedButton } from '../../components';
+import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { RoundedButton, MaterialIcon } from '../../components';
 import { departmentsRepository } from '../../repositories';
 import Department from '../../models/Department';
 
@@ -32,6 +33,33 @@ const DepartmentForm: React.FC = () => {
   const [procedures, setProcedures] = useState(existing?.procedures ?? '');
   const [saving, setSaving] = useState(false);
 
+  useFocusEffect(
+    useCallback(() => {
+      const currentExisting = route.params?.department;
+      setName(currentExisting?.name ?? '');
+      setLocation(currentExisting?.location ?? '');
+      setSchedule(currentExisting?.schedule ?? '');
+      setContactInfo(currentExisting?.contactInfo ?? '');
+      setProcedures(currentExisting?.procedures ?? '');
+    }, [route.params]),
+  );
+
+  useEffect(() => {
+    const title = existing ? 'Editar Departamento' : 'Nuevo Departamento';
+    const options: Record<string, any> = { title };
+    if (Platform.OS === 'web') {
+      options.headerLeft = () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('AdminDepartmentList')}
+          style={styles.backButton}
+        >
+          <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+        </TouchableOpacity>
+      );
+    }
+    navigation.setOptions(options);
+  }, [navigation, existing]);
+
   const handleSubmit = async () => {
     if (!name.trim()) {
       Alert.alert('Error', 'El nombre del departamento es obligatorio.');
@@ -44,11 +72,12 @@ const DepartmentForm: React.FC = () => {
       if (existing) {
         await departmentsRepository.updateDepartment(existing.id, data);
         Alert.alert('Éxito', 'Departamento actualizado correctamente.');
+        navigation.goBack();
       } else {
         await departmentsRepository.createDepartment(data);
         Alert.alert('Éxito', 'Departamento creado correctamente.');
+        navigation.navigate('AdminDepartmentList');
       }
-      navigation.goBack();
     } catch (error) {
       Alert.alert('Error', 'No se pudo guardar el departamento. Intente de nuevo.');
     } finally {
@@ -172,6 +201,10 @@ const styles = StyleSheet.create({
   multilineInput: {
     minHeight: 80,
     paddingTop: 10,
+  },
+  backButton: {
+    marginLeft: 16,
+    padding: 4,
   },
 });
 

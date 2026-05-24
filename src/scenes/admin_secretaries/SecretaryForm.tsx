@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {useFocusEffect, useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {RoundedButton, MaterialIcon} from '../../components';
 import {secretariesRepository} from '../../repositories';
 import Secretary from '../../models/Secretary';
@@ -40,16 +40,29 @@ const SecretaryForm: React.FC = () => {
   const [showParentPicker, setShowParentPicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    secretariesRepository
-      .fetchAll()
-      .then(data =>
-        setTopLevelOptions(
-          data.filter(s => s.parentSecretary === null && s.id !== existing?.id),
-        ),
-      )
-      .catch(() => {});
-  }, [existing?.id]);
+  useFocusEffect(
+    useCallback(() => {
+      const currentExisting = route.params?.secretary;
+      const currentParentId = route.params?.parentId ?? null;
+      setName(currentExisting?.name ?? '');
+      setLocation(currentExisting?.location ?? '');
+      setSchedule(currentExisting?.schedule ?? '');
+      setContactInfo(currentExisting?.contactInfo ?? '');
+      setParentSecretary(currentExisting?.parentSecretary ?? currentParentId);
+      setShowParentPicker(false);
+
+      secretariesRepository
+        .fetchAll()
+        .then(data =>
+          setTopLevelOptions(
+            data.filter(
+              s => s.parentSecretary === null && s.id !== currentExisting?.id,
+            ),
+          ),
+        )
+        .catch(() => {});
+    }, [route.params]),
+  );
 
   useEffect(() => {
     const title = existing
@@ -88,11 +101,12 @@ const SecretaryForm: React.FC = () => {
       if (existing) {
         await secretariesRepository.updateSecretary(existing.id, data);
         Alert.alert('Éxito', 'Secretaría actualizada correctamente.');
+        navigation.goBack();
       } else {
         await secretariesRepository.createSecretary(data);
         Alert.alert('Éxito', 'Secretaría creada correctamente.');
+        navigation.navigate('AdminSecretaryList');
       }
-      navigation.goBack();
     } catch (error) {
       Alert.alert(
         'Error',

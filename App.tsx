@@ -83,8 +83,6 @@ const webLinking = {
       GoogleRegister: 'registro/google',
       PreRegister: 'registro',
       PreRegisterPassword: 'registro/password',
-      ChangePassword: 'app/cambiar-password',
-      MyAccount: 'app/mi-cuenta',
       PreRegisterDone: 'registro/completado',
       TakePicture: 'registro/foto',
       RootDrawer: {
@@ -124,6 +122,8 @@ const webLinking = {
           BedeliaClassroomChange: 'bedelia/cambio-aula',
           Map: 'mapa',
           Notifications: 'notificaciones',
+          ChangePassword: 'cambiar-password',
+          MyAccount: 'mi-cuenta',
         },
       },
       ViewSemester: 'comision',
