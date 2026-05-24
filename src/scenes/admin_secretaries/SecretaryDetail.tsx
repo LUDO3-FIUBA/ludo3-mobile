@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { RoundedButton } from '../../components';
-import { secretariesRepository } from '../../repositories';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {RoundedButton} from '../../components';
+import {secretariesRepository} from '../../repositories';
 import Secretary from '../../models/Secretary';
 
 type SecretaryDetailRouteParams = {
-  SecretaryDetail: {
+  AdminSecretaryDetail: {
     secretaryId: number;
     isAdmin: boolean;
   };
@@ -22,10 +22,12 @@ type SecretaryDetailRouteParams = {
 
 const SecretaryDetail: React.FC = () => {
   const navigation = useNavigation<any>();
-  const route = useRoute<RouteProp<SecretaryDetailRouteParams, 'SecretaryDetail'>>();
-  const { secretaryId, isAdmin } = route.params;
+  const route =
+    useRoute<RouteProp<SecretaryDetailRouteParams, 'AdminSecretaryDetail'>>();
+  const {secretaryId, isAdmin} = route.params;
 
   const [secretary, setSecretary] = useState<Secretary | null>(null);
+  const [parentName, setParentName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,12 +38,21 @@ const SecretaryDetail: React.FC = () => {
       .finally(() => setLoading(false));
   }, [secretaryId]);
 
+  useEffect(() => {
+    if (secretary?.parentSecretary != null) {
+      secretariesRepository
+        .fetchOne(secretary.parentSecretary)
+        .then(parent => setParentName(parent.name))
+        .catch(() => {});
+    }
+  }, [secretary?.parentSecretary]);
+
   const handleDelete = () => {
     Alert.alert(
       'Eliminar secretaría',
       `¿Estás seguro de que querés eliminar "${secretary?.name}"?`,
       [
-        { text: 'Cancelar', style: 'cancel' },
+        {text: 'Cancelar', style: 'cancel'},
         {
           text: 'Eliminar',
           style: 'destructive',
@@ -78,6 +89,12 @@ const SecretaryDetail: React.FC = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.name}>{secretary.name}</Text>
 
+      {secretary.parentSecretary != null && (
+        <Section title="Subsecretaría de">
+          <Text style={styles.bodyText}>{parentName ?? '...'}</Text>
+        </Section>
+      )}
+
       {secretary.location ? (
         <Section title="Ubicación">
           <Text style={styles.bodyText}>{secretary.location}</Text>
@@ -103,11 +120,18 @@ const SecretaryDetail: React.FC = () => {
               key={sub.id}
               style={styles.subItem}
               onPress={() =>
-                navigation.navigate('AdminSecretaryDetail', { secretaryId: sub.id, isAdmin })
-              }
-            >
-              <Text style={styles.subItemName}>{sub.name}</Text>
-              {sub.location ? <Text style={styles.subItemLocation}>{sub.location}</Text> : null}
+                navigation.navigate('AdminSecretaryDetail', {
+                  secretaryId: sub.id,
+                  isAdmin,
+                })
+              }>
+              <View style={styles.subItemContent}>
+                <Text style={styles.subItemName}>{sub.name}</Text>
+                {sub.location ? (
+                  <Text style={styles.subItemLocation}>{sub.location}</Text>
+                ) : null}
+              </View>
+              <Text style={styles.subItemArrow}>›</Text>
             </TouchableOpacity>
           ))}
         </Section>
@@ -118,7 +142,7 @@ const SecretaryDetail: React.FC = () => {
           <RoundedButton
             text="Editar"
             onPress={() =>
-              navigation.navigate('AdminSecretaryEdit', { secretary })
+              navigation.navigate('AdminSecretaryEdit', {secretary})
             }
             style={{}}
           />
@@ -131,7 +155,10 @@ const SecretaryDetail: React.FC = () => {
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+const Section: React.FC<{title: string; children: React.ReactNode}> = ({
+  title,
+  children,
+}) => (
   <View style={styles.section}>
     <Text style={styles.sectionTitle}>{title}</Text>
     {children}
@@ -182,9 +209,14 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   subItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+  },
+  subItemContent: {
+    flex: 1,
   },
   subItemName: {
     fontSize: 15,
@@ -196,8 +228,19 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
+  subItemArrow: {
+    fontSize: 20,
+    color: '#aaa',
+    marginLeft: 8,
+  },
   adminActions: {
     marginTop: 8,
+  },
+  addSubButton: {
+    marginTop: 8,
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
   deleteButton: {
     alignItems: 'center',

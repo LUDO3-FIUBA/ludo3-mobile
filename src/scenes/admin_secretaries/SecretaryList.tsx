@@ -62,7 +62,9 @@ const SecretaryList: React.FC<Props> = ({ isAdmin }) => {
     );
   }
 
-  if (secretaries.length === 0) {
+  const topLevel = secretaries.filter(s => s.parentSecretary === null);
+
+  if (topLevel.length === 0) {
     return (
       <View style={styles.centered}>
         <Text style={styles.emptyText}>No hay secretarías registradas.</Text>
@@ -70,29 +72,57 @@ const SecretaryList: React.FC<Props> = ({ isAdmin }) => {
     );
   }
 
+  const navigateToDetail = (id: number) =>
+    navigation.navigate('AdminSecretaryDetail', { secretaryId: id, isAdmin });
+
   return (
     <FlatList
-      data={secretaries}
+      data={topLevel}
       keyExtractor={item => String(item.id)}
       contentContainerStyle={styles.list}
       renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.item}
-          onPress={() =>
-            navigation.navigate('AdminSecretaryDetail', { secretaryId: item.id, isAdmin })
-          }
-        >
-          <View style={styles.itemContent}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            {item.location ? <Text style={styles.itemLocation}>{item.location}</Text> : null}
-            {item.subsecretaries && item.subsecretaries.length > 0 ? (
-              <Text style={styles.subsecCount}>
-                {item.subsecretaries.length} subsecretar{item.subsecretaries.length === 1 ? 'ía' : 'ías'}
-              </Text>
-            ) : null}
-          </View>
-          <MaterialIcon name="chevron-right" fontSize={20} color="#aaa" />
-        </TouchableOpacity>
+        <View style={styles.group}>
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() => navigateToDetail(item.id)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.itemContent}>
+              <Text style={styles.itemName}>{item.name}</Text>
+              {item.location ? <Text style={styles.itemLocation}>{item.location}</Text> : null}
+            </View>
+            {isAdmin && (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('AdminSecretaryCreate', { parentId: item.id })
+                }
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.addSubButton}
+              >
+                <MaterialIcon name="plus-box-outline" fontSize={22} color="#555" />
+              </TouchableOpacity>
+            )}
+            <MaterialIcon name="chevron-right" fontSize={20} color="#aaa" />
+          </TouchableOpacity>
+
+          {item.subsecretaries?.map(sub => (
+            <TouchableOpacity
+              key={sub.id}
+              style={styles.subItem}
+              onPress={() => navigateToDetail(sub.id)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.subIndent}>
+                <MaterialIcon name="subdirectory-arrow-right" fontSize={16} color="#bbb" />
+              </View>
+              <View style={styles.itemContent}>
+                <Text style={styles.subName}>{sub.name}</Text>
+                {sub.location ? <Text style={styles.itemLocation}>{sub.location}</Text> : null}
+              </View>
+              <MaterialIcon name="chevron-right" fontSize={18} color="#aaa" />
+            </TouchableOpacity>
+          ))}
+        </View>
       )}
     />
   );
@@ -111,11 +141,13 @@ const styles = StyleSheet.create({
   list: {
     padding: 16,
   },
+  group: {
+    marginBottom: 10,
+  },
   item: {
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 16,
-    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
     elevation: 1,
@@ -123,6 +155,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
+  },
+  subItem: {
+    backgroundColor: '#fafafa',
+    borderLeftWidth: 2,
+    borderLeftColor: '#ddd',
+    marginLeft: 16,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+    paddingVertical: 10,
+    paddingRight: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  subIndent: {
+    width: 32,
+    alignItems: 'center',
+  },
+  addSubButton: {
+    marginRight: 8,
+    padding: 2,
   },
   itemContent: {
     flex: 1,
@@ -132,14 +184,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#111',
   },
+  subName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+  },
   itemLocation: {
     fontSize: 13,
     color: '#666',
-    marginTop: 2,
-  },
-  subsecCount: {
-    fontSize: 12,
-    color: '#888',
     marginTop: 2,
   },
 });
