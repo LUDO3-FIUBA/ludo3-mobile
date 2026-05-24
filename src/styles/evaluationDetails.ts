@@ -164,6 +164,21 @@ export const evaluationDetailsScreenStyles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: 'white',
   },
+  editTextButton: {
+    color: lightModeColors.institutional,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+  },
+  emptySubmissionText: {
+    fontSize: 15,
+    color: 'gray',
+    fontStyle: 'italic',
+  },
+  submissionMarkdownBody: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 22,
+  },
   saveButton: {
     backgroundColor: lightModeColors.institutional,
     paddingVertical: 12,

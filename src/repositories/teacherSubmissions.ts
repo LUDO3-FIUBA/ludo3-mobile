@@ -18,14 +18,39 @@ async function getSubmissions(evaluationId: number): Promise<Submission[]> {
   return submissions;
 }
 
-async function gradeSubmission(studentId: number, evaluationId: number, grade: number): Promise<GradeChange> {
-  const snakeCaseBody = {
-    "student": studentId,
-    "evaluation": evaluationId,
-    "grade": grade
+async function updateSubmission(
+  studentId: number,
+  evaluationId: number,
+  payload: { grade?: number; submission_status?: 'APROBADO' | 'DESAPROBADO'; feedbackText?: string | null },
+): Promise<GradeChange> {
+  const snakeCaseBody: Record<string, number | string | null> = {
+    student: studentId,
+    evaluation: evaluationId,
+  };
+
+  if (payload.grade !== undefined) {
+    snakeCaseBody.grade = payload.grade;
   }
+
+  if (payload.submission_status !== undefined) {
+    snakeCaseBody.submission_status = payload.submission_status;
+  }
+
+  if (payload.feedbackText !== undefined) {
+    snakeCaseBody.feedback_text = payload.feedbackText;
+  }
+
+  console.log("Request body for updating submission:", snakeCaseBody);
   const gradeChange: GradeChangeSnakeCase = await put(`${GRADE_SUBMISSION_ENDPOINT}`, snakeCaseBody) as GradeChangeSnakeCase;
   return convertSnakeToCamelCase(gradeChange) as GradeChange;
+}
+
+async function gradeSubmission(
+  studentId: number,
+  evaluationId: number,
+  grade: number,
+): Promise<GradeChange> {
+  return updateSubmission(studentId, evaluationId, { grade });
 }
 
 async function setSubmissionStatus(
@@ -33,17 +58,15 @@ async function setSubmissionStatus(
   evaluationId: number,
   submission_status: 'APROBADO' | 'DESAPROBADO',
 ): Promise<GradeChange> {
-  const snakeCaseBody = {
-    student: studentId,
-    evaluation: evaluationId,
-    submission_status: submission_status,
-  };
+  return updateSubmission(studentId, evaluationId, { submission_status });
+}
 
-  const statusChange: GradeChangeSnakeCase = await put(
-    STATUS_SUBMISSION_ENDPOINT,
-    snakeCaseBody,
-  ) as GradeChangeSnakeCase;
-  return convertSnakeToCamelCase(statusChange) as GradeChange;
+async function updateFeedback(
+  studentId: number,
+  evaluationId: number,
+  feedbackText: string | null,
+): Promise<GradeChange> {
+  return updateSubmission(studentId, evaluationId, { feedbackText });
 }
 
 async function assignGraderToSubmission(studentId: number, evaluationId: number, graderTeacher: number) {
@@ -72,8 +95,10 @@ async function autoAssignGraders(evaluationId: number) {
 
 export default {
   getSubmissions,
+  updateSubmission,
   gradeSubmission,
   setSubmissionStatus,
+  updateFeedback,
   assignGraderToSubmission,
   autoAssignGraders,
 };

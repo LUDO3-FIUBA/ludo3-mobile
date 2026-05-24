@@ -1,14 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import moment from 'moment';
+import Markdown from 'react-native-markdown-display';
 import {
 		EvaluationDateRangeCard,
 		EvaluationDetailsHeader,
 		EvaluationResultCard,
 		GraderUpdatedCard,
 		MaterialIcon,
+		MarkdownEditor,
 		SubmissionDateRow,
-		SubmissionTextCard,
 		EvaluationDescriptionCard,
 		SubmissionFileCard,
 } from '../../components';
@@ -52,6 +53,7 @@ export default function SubmissionDetails({ route }: any) {
 				: null,
 	);
 	const [saving, setSaving] = useState(false);
+	const [savingFeedback, setSavingFeedback] = useState(false);
 	const [statusOpen, setStatusOpen] = useState(false);
 	const [showTeacherSelectionModal, setShowTeacherSelectionModal] = useState(false);
 	const [semesterTeachers, setSemesterTeachers] = useState<TeacherModel[]>([]);
@@ -63,9 +65,11 @@ export default function SubmissionDetails({ route }: any) {
 	const endDateRaw = (evaluation as any).endDate || (evaluation as any).end_date;
 	const submissionCreatedAtRaw = (submission as any).createdAt || (submission as any).created_at;
 	const submissionUpdatedAtRaw = (submission as any).updatedAt || (submission as any).updated_at;
-	const submissionTextRaw = (submission as any).submissionText || (submission as any).submission_text;
+	const feedbackRaw = submission.feedbackText || '';
 	const [currentGrader, setCurrentGrader] = useState(submission.grader);
 	const [currentUpdatedAt, setCurrentUpdatedAt] = useState(submissionUpdatedAtRaw);
+	const [editingFeedback, setEditingFeedback] = useState(false);
+	const [feedback, setFeedback] = useState(feedbackRaw);
 
 	const passingGrade = (evaluation as any).passingGrade ?? (evaluation as any).passing_grade;
 	const gradeNumber = grade ? Number(grade) : null;
@@ -167,6 +171,25 @@ export default function SubmissionDetails({ route }: any) {
 		}
 	};
 
+	const saveFeedback = async () => {
+		try {
+			setSavingFeedback(true);
+				const feedbackChange = await teacherSubmissionsRepository.updateFeedback(
+					submission.student.id,
+					evaluation.id,
+					feedback.trim() === '' ? null : feedback,
+				);
+				setCurrentGrader(feedbackChange.grader);
+				setCurrentUpdatedAt(feedbackChange.updatedAt);
+			setEditingFeedback(false);
+		} catch (error) {
+			Alert.alert('Error', 'No pudimos guardar el feedback. Intenta nuevamente.');
+			console.error('Error updating feedback from details', error);
+		} finally {
+			setSavingFeedback(false);
+		}
+	};
+
 	const submissionAlreadyGraded = grade.trim() !== '' || Boolean(status);
 
 	const updateCorrectorToSubmission = () => {
@@ -230,7 +253,6 @@ export default function SubmissionDetails({ route }: any) {
 			</View>
 
 			<EvaluationDescriptionCard markdownText={(evaluation as any)?.description} />
-			<SubmissionTextCard submissionText={submissionTextRaw} />
 			<SubmissionFileCard
 				submissionFile={(submission as any)?.submission_file || (submission as any)?.submissionFile}
 				originalFilename={(submission as any)?.original_filename || (submission as any)?.originalFilename}
@@ -282,6 +304,46 @@ export default function SubmissionDetails({ route }: any) {
 					</View>
 				)}
 			</EvaluationResultCard>
+
+			<View style={styles.card}>
+				<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+					<Text style={evaluationDetailsTextStyles.passingGradeText}>Feedback</Text>
+					<TouchableOpacity onPress={() => setEditingFeedback((value) => !value)}>
+						<Text style={styles.editTextButton}>{editingFeedback ? 'Ver feedback' : 'Editar feedback'}</Text>
+					</TouchableOpacity>
+				</View>
+				{editingFeedback ? (
+					<MarkdownEditor
+						label="Feedback"
+						value={feedback}
+						onChangeText={setFeedback}
+						placeholder="Escribí feedback para el estudiante"
+						helperText="El feedback se edita en Markdown."
+						previewLabel="Vista previa"
+					/>
+				) : feedback.trim() ? (
+					<Markdown
+						style={{
+							body: styles.submissionMarkdownBody,
+							heading1: { fontSize: 22, fontWeight: '700', marginBottom: 8, lineHeight: 28 },
+							heading2: { fontSize: 18, fontWeight: '700', marginBottom: 6, lineHeight: 22 },
+							paragraph: { marginBottom: 8 },
+							blockquote: { borderLeftWidth: 3, borderLeftColor: '#9ca3af', paddingLeft: 12, marginVertical: 8 },
+							code_inline: { backgroundColor: '#e5e7eb', color: '#111827', borderRadius: 4, paddingHorizontal: 4 },
+							code_block: { backgroundColor: '#111827', color: '#f9fafb', borderRadius: 8, padding: 12 },
+						}}
+					>
+						{feedback}
+					</Markdown>
+				) : (
+					<Text style={styles.emptySubmissionText}>No hay feedback todavía.</Text>
+				)}
+				{editingFeedback && (
+					<TouchableOpacity style={styles.saveButton} onPress={saveFeedback} disabled={savingFeedback}>
+						<Text style={styles.saveButtonText}>{savingFeedback ? 'Guardando...' : 'Guardar feedback'}</Text>
+					</TouchableOpacity>
+				)}
+			</View>
 
 			<GraderUpdatedCard
 				graderName={getGraderName(currentGrader)}
