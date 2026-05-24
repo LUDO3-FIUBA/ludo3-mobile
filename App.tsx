@@ -115,6 +115,7 @@ const webLinking = {
           // Admin
           AdminDepartmentList: 'admin/departamentos',
           AdminSecretaryList: 'admin/secretarias',
+          StudentSecretaryList: 'secretarias',
           AdminCommissionList: 'admin/comisiones',
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
