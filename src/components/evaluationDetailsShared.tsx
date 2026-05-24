@@ -147,6 +147,30 @@ export function SubmissionTextCard({ submissionText }: { submissionText?: string
   );
 }
 
+export function FeedbackCard({ feedbackText }: { feedbackText?: string | null }) {
+  const normalizedFeedback = (feedbackText || '').trim();
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.sectionTitle}>Feedback del docente</Text>
+      {!normalizedFeedback ? (
+        <Text style={styles.emptyText}>El docente no ha añadido ningún comentario.</Text>
+      ) : (
+        <Markdown
+          style={{
+            body: styles.submissionText,
+            heading1: { fontSize: 22, fontWeight: '700', marginBottom: 8, lineHeight: 28 },
+            heading2: { fontSize: 18, fontWeight: '700', marginBottom: 6, lineHeight: 22 },
+            paragraph: { marginBottom: 8 },
+          }}
+        >
+          {normalizedFeedback}
+        </Markdown>
+      )}
+    </View>
+  );
+}
+
 export function GraderUpdatedCard({
   graderName,
   updatedAt,

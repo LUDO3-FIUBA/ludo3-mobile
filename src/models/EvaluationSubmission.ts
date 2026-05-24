@@ -4,6 +4,7 @@ import { Teacher } from "./Teachers";
 
 export default interface EvaluationSubmission {
     download_url?: string | null;
+    feedback_text?: string | null;
     evaluation: Evaluation;
     student: Student;
     grade?: number;
