@@ -12,12 +12,12 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import {
   MaterialIcon,
-  ProcedureTypesAccordionList,
+  OwnershipGroupAccordionList,
   SubmissionStatusBadge,
 } from '../../components';
 import { formsRepository } from '../../repositories';
 import Form from '../../models/Form';
-import FormProcedureType from '../../models/FormProcedureType';
+import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 import FormSubmission, { TeacherValidationStatusValue } from '../../models/FormSubmission';
 import FormItem from './components/FormItem';
 
@@ -61,7 +61,7 @@ const badgeStyles = StyleSheet.create({
 });
 
 interface Section {
-  procedure: FormProcedureType;
+  ownership_group: FormOwnershipGroup;
   forms: Form[];
 }
 
@@ -75,13 +75,13 @@ const FormsListScreen: React.FC = () => {
   const [history, setHistory] = useState<FormSubmission[]>([]);
 
   useEffect(() => {
-    Promise.all([formsRepository.fetchProcedureTypes(), formsRepository.fetchForms()])
-      .then(([procedureTypes, forms]) => {
+    Promise.all([formsRepository.fetchOwnershipGroups(), formsRepository.fetchForms()])
+      .then(([groups, forms]) => {
         setAllForms(forms);
         setSections(
-          procedureTypes.map(proc => ({
-            procedure: proc,
-            forms: forms.filter(f => f.form_procedure.id === proc.id),
+          groups.map(group => ({
+            ownership_group: group,
+            forms: forms.filter(f => f.ownership_group.id === group.id),
           })),
         );
       })
@@ -146,9 +146,9 @@ const FormsListScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <ProcedureTypesAccordionList
+      <OwnershipGroupAccordionList
         sections={sections.map(section => ({
-          procedure: section.procedure,
+          ownership_group: section.ownership_group,
           items: section.forms,
         }))}
         renderItems={items =>

@@ -1,5 +1,5 @@
 import { get, post, postMultipart, putMultipart, deleteMethod, put, patch } from './authenticatedRepository';
-import FormProcedureType from '../models/FormProcedureType';
+import FormOwnershipGroup from '../models/FormOwnershipGroup';
 import Form from '../models/Form';
 import FormDetail from '../models/FormDetail';
 import FormSubmission, { FormSubmissionStatusValue, TeacherValidationStatusValue } from '../models/FormSubmission';
@@ -22,12 +22,28 @@ export async function fetchFormTypes(): Promise<{ id: number; value: string }[]>
   return (await get(`${BASE}/form-types`)) as { id: number; value: string }[];
 }
 
-export async function fetchProcedureTypes(): Promise<FormProcedureType[]> {
-  return (await get(`${BASE}/form-procedure-types`)) as FormProcedureType[];
+export async function fetchOwnershipGroups(): Promise<FormOwnershipGroup[]> {
+  return (await get(`${BASE}/ownership-groups`)) as FormOwnershipGroup[];
 }
 
-export async function fetchForms(procedureId?: number): Promise<Form[]> {
-  const params = procedureId ? [{ key: 'procedure_id', value: procedureId }] : [];
+export async function fetchOwnershipGroup(id: number): Promise<FormOwnershipGroup> {
+  return (await get(`${BASE}/ownership-groups/${id}`)) as FormOwnershipGroup;
+}
+
+export async function createOwnershipGroup(name: string): Promise<FormOwnershipGroup> {
+  return (await post(`${BASE}/ownership-groups`, { name })) as FormOwnershipGroup;
+}
+
+export async function updateOwnershipGroup(id: number, name: string): Promise<FormOwnershipGroup> {
+  return (await put(`${BASE}/ownership-groups/${id}`, { name })) as FormOwnershipGroup;
+}
+
+export async function deleteOwnershipGroup(id: number): Promise<void> {
+  await deleteMethod(`${BASE}/ownership-groups/${id}`, {});
+}
+
+export async function fetchForms(groupId?: number): Promise<Form[]> {
+  const params = groupId ? [{ key: 'group_id', value: groupId }] : [];
   return (await get(`${BASE}/forms`, params)) as Form[];
 }
 
@@ -197,7 +213,11 @@ export async function updateTeacherSubmissionStatus(
 
 export default {
   fetchFormTypes,
-  fetchProcedureTypes,
+  fetchOwnershipGroups,
+  fetchOwnershipGroup,
+  createOwnershipGroup,
+  updateOwnershipGroup,
+  deleteOwnershipGroup,
   fetchForms,
   fetchFormDetail,
   submitDigitalForm,

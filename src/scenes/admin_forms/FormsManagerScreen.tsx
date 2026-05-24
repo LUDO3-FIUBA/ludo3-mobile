@@ -15,7 +15,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import * as XLSX from 'xlsx';
-import { AlertDialog, MaterialIcon, ProcedureTypesAccordionList, PROCEDURE_CONFIG } from '../../components';
+import { AlertDialog, MaterialIcon, OwnershipGroupAccordionList } from '../../components';
 import { formsRepository } from '../../repositories';
 import Form from '../../models/Form';
 import FormSubmission, { FormSubmissionStatusValue } from '../../models/FormSubmission';
@@ -106,23 +106,15 @@ const FormsManagerScreen: React.FC = () => {
   }, [navigation]);
 
   const sections = useMemo(() => {
-    const configuredOrder = Object.keys(PROCEDURE_CONFIG);
-    const map = new Map<number, { procedure: Form['form_procedure']; forms: Form[] }>();
+    const map = new Map<number, { ownership_group: Form['ownership_group']; forms: Form[] }>();
     forms.forEach(form => {
-      const proc = form.form_procedure;
-      if (!map.has(proc.id)) map.set(proc.id, { procedure: proc, forms: [] });
-      map.get(proc.id)!.forms.push(form);
+      const group = form.ownership_group;
+      if (!map.has(group.id)) map.set(group.id, { ownership_group: group, forms: [] });
+      map.get(group.id)!.forms.push(form);
     });
-    return Array.from(map.values()).sort((a, b) => {
-      const aIndex = configuredOrder.indexOf(a.procedure.value);
-      const bIndex = configuredOrder.indexOf(b.procedure.value);
-
-      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-      if (aIndex !== -1) return -1;
-      if (bIndex !== -1) return 1;
-
-      return a.procedure.value.localeCompare(b.procedure.value);
-    });
+    return Array.from(map.values()).sort((a, b) =>
+      a.ownership_group.name.localeCompare(b.ownership_group.name),
+    );
   }, [forms]);
 
   const toggleForm = async (form: Form) => {
@@ -267,9 +259,9 @@ const FormsManagerScreen: React.FC = () => {
     }
   };
 
-  const handleRefreshProcedure = async (procedureId: number, procedureForms: Form[]) => {
-    if (refreshingProcedureId === procedureId || procedureForms.length === 0) return;
-    setRefreshingProcedureId(procedureId);
+  const handleRefreshProcedure = async (groupId: number, groupForms: Form[]) => {
+    if (refreshingProcedureId === groupId || groupForms.length === 0) return;
+    setRefreshingProcedureId(groupId);
     try {
       const results = await Promise.all(
         procedureForms.map(async form => {
@@ -466,29 +458,29 @@ const FormsManagerScreen: React.FC = () => {
 
   return (
     <>
-      <ProcedureTypesAccordionList
+      <OwnershipGroupAccordionList
         sections={sections.map(section => ({
-          procedure: section.procedure,
+          ownership_group: section.ownership_group,
           items: section.forms,
         }))}
         emptyText="Sin formularios."
-        renderSectionAction={(section, config) => (
+        renderSectionAction={section => (
           <TouchableOpacity
             onPress={(e) => {
               e.stopPropagation();
-              handleRefreshProcedure(section.procedure.id, section.items);
+              handleRefreshProcedure(section.ownership_group.id, section.items);
             }}
-            disabled={refreshingProcedureId === section.procedure.id}
+            disabled={refreshingProcedureId === section.ownership_group.id}
             style={{ marginRight: 6 }}
           >
-            {refreshingProcedureId === section.procedure.id ? (
-              <ActivityIndicator size="small" color={config.color} />
+            {refreshingProcedureId === section.ownership_group.id ? (
+              <ActivityIndicator size="small" color="#757575" />
             ) : (
-              <MaterialIcon name="refresh" fontSize={22} color={config.color} />
+              <MaterialIcon name="refresh" fontSize={22} color="#757575" />
             )}
           </TouchableOpacity>
         )}
-        renderItems={(items, section, config) =>
+        renderItems={(items, _section) =>
           items.map(item => {
             const isFormExpanded = expandedFormId === item.form_id;
             const submissions = submissionsCache[item.form_id] ?? [];
@@ -498,7 +490,7 @@ const FormsManagerScreen: React.FC = () => {
               <ManagerFormItem
                 key={item.form_id}
                 form={item}
-                color={config.color}
+                color="#757575"
                 isExpanded={isFormExpanded}
                 submissions={submissions}
                 submissionsLoading={submissionsLoading}

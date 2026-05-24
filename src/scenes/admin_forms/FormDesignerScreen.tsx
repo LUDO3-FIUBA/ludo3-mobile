@@ -18,7 +18,7 @@ import { MaterialIcon, ReorderableFieldList, RoundedButton } from '../../compone
 import { formsRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import { StatusCodeError } from '../../networking';
-import FormProcedureType from '../../models/FormProcedureType';
+import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 import { lightModeColors } from '../../styles/colorPalette';
 
 interface FieldOption {
@@ -58,7 +58,7 @@ const FormDesignerScreen: React.FC = () => {
   const isEditing = typeof editingFormId === 'number';
 
   const [loadingConfig, setLoadingConfig] = useState(true);
-  const [procedureTypes, setProcedureTypes] = useState<FormProcedureType[]>([]);
+  const [ownershipGroups, setOwnershipGroups] = useState<FormOwnershipGroup[]>([]);
   const [formTypes, setFormTypes] = useState<{ id: number; value: string }[]>([]);
   const [fieldTypes, setFieldTypes] = useState<{ id: number; value: string }[]>([]);
   const [catalogs, setCatalogs] = useState<{ catalog_id: number; catalog_name: string }[]>([]);
@@ -66,7 +66,7 @@ const FormDesignerScreen: React.FC = () => {
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formInformation, setFormInformation] = useState('');
-  const [procedureId, setProcedureId] = useState<number | null>(null);
+  const [ownershipGroupId, setOwnershipGroupId] = useState<number | null>(null);
   const [isDigital, setIsDigital] = useState(true);
   const [requiresTeacherValidation, setRequiresTeacherValidation] = useState(false);
   const [documentUrl, setDocumentUrl] = useState('');
@@ -88,6 +88,11 @@ const FormDesignerScreen: React.FC = () => {
   const [modalOptValue, setModalOptValue] = useState('');
   const [modalOptLabel, setModalOptLabel] = useState('');
 
+  const [groupModalVisible, setGroupModalVisible] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupError, setNewGroupError] = useState<string | null>(null);
+  const [creatingGroup, setCreatingGroup] = useState(false);
+
   const [catalogModalVisible, setCatalogModalVisible] = useState(false);
   const [creatingCatalog, setCreatingCatalog] = useState(false);
   const [newCatalogName, setNewCatalogName] = useState('');
@@ -107,15 +112,15 @@ const FormDesignerScreen: React.FC = () => {
 
   useEffect(() => {
     Promise.all([
-      formsRepository.fetchProcedureTypes(),
+      formsRepository.fetchOwnershipGroups(),
       formsRepository.fetchFormTypes(),
       formsRepository.fetchFieldTypes(),
       formsRepository.fetchCatalogs().catch(() => []),
       isEditing ? formsRepository.fetchFormDetail(editingFormId) : Promise.resolve(null),
     ])
-      .then(([procs, types, fts, cats, existingForm]) => {
-        setProcedureTypes(procs);
-        if (procs.length > 0 && !isEditing) setProcedureId(procs[0].id);
+      .then(([groups, types, fts, cats, existingForm]) => {
+        setOwnershipGroups(groups);
+        if (groups.length > 0 && !isEditing) setOwnershipGroupId(groups[0].id);
         setFormTypes(types);
         const digital = types.find(t => t.value === 'Digital');
         if (digital && !isEditing) setIsDigital(true);
@@ -130,7 +135,7 @@ const FormDesignerScreen: React.FC = () => {
           setFormName(existingForm.form_name);
           setFormDescription(existingForm.form_description);
           setFormInformation(existingForm.form_information ?? '');
-          setProcedureId(existingForm.form_procedure.id);
+          setOwnershipGroupId(existingForm.ownership_group.id);
           setRequiresTeacherValidation(existingForm.requires_teacher_validation ?? false);
 
           const editingDigital = existingForm.form_type.value === 'Digital';
@@ -240,6 +245,26 @@ const FormDesignerScreen: React.FC = () => {
     });
   };
 
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim()) {
+      setNewGroupError('El nombre del grupo es obligatorio.');
+      return;
+    }
+    setCreatingGroup(true);
+    setNewGroupError(null);
+    try {
+      const created = await formsRepository.createOwnershipGroup(newGroupName.trim());
+      setOwnershipGroups(prev => [...prev, created]);
+      setOwnershipGroupId(created.id);
+      setGroupModalVisible(false);
+      setNewGroupName('');
+    } catch (err) {
+      setNewGroupError(extractApiError(err));
+    } finally {
+      setCreatingGroup(false);
+    }
+  };
+
   const resetCatalogModal = () => {
     setNewCatalogName('');
     setNewCatalogKey('');
@@ -347,8 +372,8 @@ const FormDesignerScreen: React.FC = () => {
       Alert.alert('Error', 'La descripción es obligatoria.');
       return;
     }
-    if (!procedureId) {
-      Alert.alert('Error', 'Seleccioná un tipo de trámite.');
+    if (!ownershipGroupId) {
+      Alert.alert('Error', 'Seleccioná un grupo de propiedad.');
       return;
     }
     if (!isDigital && !documentUrl.trim() && !templateFile) {
@@ -373,7 +398,7 @@ const FormDesignerScreen: React.FC = () => {
       form_name: formName.trim(),
       form_description: formDescription.trim(),
       form_information: formInformation.trim() || null,
-      form_procedure_id: procedureId,
+      ownership_group_id: ownershipGroupId,
       form_type_id: formTypeId,
       requires_teacher_validation: requiresTeacherValidation,
     };
@@ -469,17 +494,36 @@ const FormDesignerScreen: React.FC = () => {
             textAlignVertical="top"
           />
 
-          <Text style={styles.label}>Tipo de trámite *</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={procedureId}
-              onValueChange={v => setProcedureId(Number(v))}
+          <View style={styles.groupHeader}>
+            <Text style={styles.label}>Grupo de propiedad *</Text>
+            <TouchableOpacity
+              style={styles.createGroupBtn}
+              onPress={() => {
+                setNewGroupName('');
+                setNewGroupError(null);
+                setGroupModalVisible(true);
+              }}
             >
-              {procedureTypes.map(pt => (
-                <Picker.Item key={pt.id} label={pt.value} value={pt.id} />
-              ))}
-            </Picker>
+              <MaterialIcon name="plus" fontSize={14} color={lightModeColors.institutional} />
+              <Text style={styles.createGroupText}>Crear nuevo</Text>
+            </TouchableOpacity>
           </View>
+          {ownershipGroups.length === 0 ? (
+            <Text style={styles.emptyFields}>
+              No hay grupos disponibles. Creá uno con el botón "Crear nuevo".
+            </Text>
+          ) : (
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={ownershipGroupId}
+                onValueChange={v => setOwnershipGroupId(Number(v))}
+              >
+                {ownershipGroups.map(group => (
+                  <Picker.Item key={group.id} label={group.name} value={group.id} />
+                ))}
+              </Picker>
+            </View>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -858,6 +902,56 @@ const FormDesignerScreen: React.FC = () => {
           </ScrollView>
         </View>
       </Modal>
+
+      <Modal
+        visible={groupModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setGroupModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { paddingBottom: 32 }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Nuevo grupo de propiedad</Text>
+              <TouchableOpacity onPress={() => setGroupModalVisible(false)}>
+                <MaterialIcon name="close" fontSize={22} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.label}>Nombre *</Text>
+            <TextInput
+              style={styles.input}
+              value={newGroupName}
+              onChangeText={text => {
+                setNewGroupName(text);
+                if (newGroupError) setNewGroupError(null);
+              }}
+              placeholder="ej: Departamento de Alumnos"
+              placeholderTextColor="#aaa"
+              maxLength={100}
+            />
+
+            {newGroupError ? (
+              <View style={[styles.statusCard, styles.statusCardError]}>
+                <Text style={[styles.statusText, styles.statusTextError]}>{newGroupError}</Text>
+              </View>
+            ) : null}
+
+            <View style={styles.buttonWrapper}>
+              <RoundedButton
+                text={creatingGroup ? 'Creando...' : 'Crear grupo'}
+                enabled={!creatingGroup}
+                onPress={handleCreateGroup}
+              />
+              {creatingGroup ? (
+                <View pointerEvents="none" style={styles.buttonSpinnerOverlay}>
+                  <ActivityIndicator color="white" />
+                </View>
+              ) : null}
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 };
@@ -992,6 +1086,27 @@ const styles = StyleSheet.create({
   },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   modalTitle: { fontSize: 18, fontWeight: '700', color: '#222' },
+  groupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  createGroupBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: lightModeColors.institutional,
+    borderStyle: 'dashed',
+  },
+  createGroupText: {
+    color: lightModeColors.institutional,
+    fontWeight: '600',
+    fontSize: 12,
+  },
   catalogHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
