@@ -607,7 +607,7 @@ export type HiddenWebRoute = {
 };
 
 export const hiddenWebRoutes: HiddenWebRoute[] = [
-  {route: 'AdminDepartmentDetail', title: 'Departamento', roleFilter: 'admin'},
+  {route: 'AdminDepartmentDetail', title: 'Departamento'},
   {
     route: 'AdminDepartmentCreate',
     title: 'Nuevo Departamento',

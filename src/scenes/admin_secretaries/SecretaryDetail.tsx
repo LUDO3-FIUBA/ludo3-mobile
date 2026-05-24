@@ -7,9 +7,10 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
-import {RoundedButton} from '../../components';
+import {RoundedButton, MaterialIcon} from '../../components';
 import {secretariesRepository} from '../../repositories';
 import Secretary from '../../models/Secretary';
 
@@ -29,6 +30,22 @@ const SecretaryDetail: React.FC = () => {
   const [secretary, setSecretary] = useState<Secretary | null>(null);
   const [parentName, setParentName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const listRoute = isAdmin ? 'AdminSecretaryList' : 'StudentSecretaryList';
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.navigate(listRoute)}
+            style={styles.backButton}
+          >
+            <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [navigation, isAdmin]);
 
   useEffect(() => {
     secretariesRepository
@@ -250,6 +267,10 @@ const styles = StyleSheet.create({
     color: '#e53e3e',
     fontSize: 16,
     fontWeight: '600',
+  },
+  backButton: {
+    marginLeft: 16,
+    padding: 4,
   },
 });
 

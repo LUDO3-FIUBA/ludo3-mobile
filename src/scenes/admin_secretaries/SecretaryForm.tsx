@@ -52,19 +52,22 @@ const SecretaryForm: React.FC = () => {
   }, [existing?.id]);
 
   useEffect(() => {
-    if (existing) {
-      navigation.setOptions({
-        title:
-          existing.parentSecretary != null
-            ? 'Editar Subsecretaría'
-            : 'Editar Secretaría',
-      });
-    } else {
-      navigation.setOptions({
-        title:
-          paramParentId != null ? 'Nueva Subsecretaría' : 'Nueva Secretaría',
-      });
+    const title = existing
+      ? existing.parentSecretary != null ? 'Editar Subsecretaría' : 'Editar Secretaría'
+      : paramParentId != null ? 'Nueva Subsecretaría' : 'Nueva Secretaría';
+
+    const options: Record<string, any> = { title };
+    if (Platform.OS === 'web') {
+      options.headerLeft = () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('AdminSecretaryList')}
+          style={styles.backButton}
+        >
+          <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+        </TouchableOpacity>
+      );
     }
+    navigation.setOptions(options);
   }, [navigation, existing, paramParentId]);
 
   const handleSubmit = async () => {
@@ -316,6 +319,10 @@ const styles = StyleSheet.create({
   pickerOptionTextSelected: {
     color: '#1a56db',
     fontWeight: '600',
+  },
+  backButton: {
+    marginLeft: 16,
+    padding: 4,
   },
 });
 

@@ -7,9 +7,10 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { RoundedButton } from '../../components';
+import { RoundedButton, MaterialIcon } from '../../components';
 import { departmentsRepository } from '../../repositories';
 import Department from '../../models/Department';
 
@@ -35,6 +36,22 @@ const DepartmentDetail: React.FC = () => {
       .catch(() => Alert.alert('Error', 'No se pudo cargar el departamento.'))
       .finally(() => setLoading(false));
   }, [departmentId]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const listRoute = isAdmin ? 'AdminDepartmentList' : 'StudentDepartmentList';
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.navigate(listRoute)}
+            style={styles.backButton}
+          >
+            <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [navigation, isAdmin]);
 
   const handleDelete = () => {
     Alert.alert(
@@ -181,6 +198,10 @@ const styles = StyleSheet.create({
     color: '#e53e3e',
     fontSize: 16,
     fontWeight: '600',
+  },
+  backButton: {
+    marginLeft: 16,
+    padding: 4,
   },
 });
 
