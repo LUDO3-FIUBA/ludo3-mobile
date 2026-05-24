@@ -1,5 +1,5 @@
 import { get, post, postMultipart, putMultipart, deleteMethod, put, patch } from './authenticatedRepository';
-import FormOwnershipGroup from '../models/FormOwnershipGroup';
+import FormOwnershipGroup, { EligibleEntity, FormOwnershipGroupDetail, OwnershipMemberInput } from '../models/FormOwnershipGroup';
 import Form from '../models/Form';
 import FormDetail from '../models/FormDetail';
 import FormSubmission, { FormSubmissionStatusValue, TeacherValidationStatusValue } from '../models/FormSubmission';
@@ -26,16 +26,23 @@ export async function fetchOwnershipGroups(): Promise<FormOwnershipGroup[]> {
   return (await get(`${BASE}/ownership-groups`)) as FormOwnershipGroup[];
 }
 
-export async function fetchOwnershipGroup(id: number): Promise<FormOwnershipGroup> {
-  return (await get(`${BASE}/ownership-groups/${id}`)) as FormOwnershipGroup;
+export async function fetchOwnershipGroup(id: number): Promise<FormOwnershipGroupDetail> {
+  return (await get(`${BASE}/ownership-groups/${id}`)) as FormOwnershipGroupDetail;
 }
 
-export async function createOwnershipGroup(name: string): Promise<FormOwnershipGroup> {
-  return (await post(`${BASE}/ownership-groups`, { name })) as FormOwnershipGroup;
+export async function fetchEligibleEntities(): Promise<EligibleEntity[]> {
+  return (await get(`${BASE}/ownership-groups/eligible-entities`)) as EligibleEntity[];
 }
 
-export async function updateOwnershipGroup(id: number, name: string): Promise<FormOwnershipGroup> {
-  return (await put(`${BASE}/ownership-groups/${id}`, { name })) as FormOwnershipGroup;
+export async function createOwnershipGroup(
+  name: string,
+  members?: OwnershipMemberInput[],
+): Promise<FormOwnershipGroup> {
+  return (await post(`${BASE}/ownership-groups`, { name, members: members ?? [] })) as FormOwnershipGroup;
+}
+
+export async function updateOwnershipGroup(id: number, name: string, members: OwnershipMemberInput[]): Promise<FormOwnershipGroup> {
+  return (await put(`${BASE}/ownership-groups/${id}`, { name, members })) as FormOwnershipGroup;
 }
 
 export async function deleteOwnershipGroup(id: number): Promise<void> {
@@ -215,6 +222,7 @@ export default {
   fetchFormTypes,
   fetchOwnershipGroups,
   fetchOwnershipGroup,
+  fetchEligibleEntities,
   createOwnershipGroup,
   updateOwnershipGroup,
   deleteOwnershipGroup,

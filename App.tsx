@@ -31,6 +31,7 @@ import {
   // Forms screens
   FormsListScreen, DocumentFormScreen, DigitalFormScreen,
   TeacherFormsScreen, FormsManagerScreen, FormDesignerScreen,
+  OwnershipGroupsListScreen, OwnershipGroupEditorScreen,
   TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
   FiubaMapScreen,
 } from './src/scenes';
@@ -118,6 +119,7 @@ const webLinking = {
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
           FormsManager: 'admin/tramites',
+          OwnershipGroupsList: 'admin/grupos-propiedad',
           AdminNewsList: 'admin/novedades',
           BedeliaClassroomChange: 'bedelia/cambio-aula',
           Map: 'mapa',
@@ -492,6 +494,16 @@ const App = () => {
                 name="FormDesigner"
                 component={FormDesignerScreen}
                 options={{ headerShown: true, title: 'Nuevo formulario' }}
+              />
+              <Stack.Screen
+                name="OwnershipGroupsList"
+                component={OwnershipGroupsListScreen}
+                options={{ headerShown: true, title: 'Grupos de propiedad' }}
+              />
+              <Stack.Screen
+                name="OwnershipGroupEditor"
+                component={OwnershipGroupEditorScreen}
+                options={{ headerShown: true, title: 'Grupo de propiedad' }}
               />
               <Stack.Screen
                 name="SendCommissionNotification"

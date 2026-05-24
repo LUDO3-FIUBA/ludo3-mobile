@@ -50,6 +50,9 @@ import StudentCredentialScreen from '../student_credential';
 import FormsListScreen from '../forms/FormsListScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
+import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
+import OwnershipGroupsListScreen from '../admin_forms/OwnershipGroupsList';
+import OwnershipGroupEditorScreen from '../admin_forms/OwnershipGroupEditor';
 import NewsList from '../news/NewsList';
 import NewsDetail from '../news/NewsDetail';
 import NewsForm from '../news/NewsForm';
@@ -109,6 +112,9 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserSearch: UserSearch,
   AdminNotificationList: NotificationList,
   FormsManager: FormsManagerScreen,
+  FormDesigner: FormDesignerScreen,
+  OwnershipGroupsList: OwnershipGroupsListScreen,
+  OwnershipGroupEditor: OwnershipGroupEditorScreen,
   BedeliaClassroomChange: BedeliaClassroomChangeForm,
   AdminDepartmentDetail: DepartmentDetail,
   AdminDepartmentCreate: DepartmentForm,

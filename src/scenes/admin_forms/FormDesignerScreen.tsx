@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,16 +9,17 @@ import {
   Modal,
   Alert,
   ActivityIndicator,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { MaterialIcon, ReorderableFieldList, RoundedButton } from '../../components';
 import { formsRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import { StatusCodeError } from '../../networking';
-import FormOwnershipGroup from '../../models/FormOwnershipGroup';
+import FormOwnershipGroup, { EligibleEntity, FormOwnershipGroupDetail, GroupMember, OwnershipMemberInput } from '../../models/FormOwnershipGroup';
 import { lightModeColors } from '../../styles/colorPalette';
 
 interface FieldOption {
@@ -59,6 +60,7 @@ const FormDesignerScreen: React.FC = () => {
 
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [ownershipGroups, setOwnershipGroups] = useState<FormOwnershipGroup[]>([]);
+  const [ownershipGroupDetailKey, setOwnershipGroupDetailKey] = useState(0);
   const [formTypes, setFormTypes] = useState<{ id: number; value: string }[]>([]);
   const [fieldTypes, setFieldTypes] = useState<{ id: number; value: string }[]>([]);
   const [catalogs, setCatalogs] = useState<{ catalog_id: number; catalog_name: string }[]>([]);
@@ -92,6 +94,12 @@ const FormDesignerScreen: React.FC = () => {
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupError, setNewGroupError] = useState<string | null>(null);
   const [creatingGroup, setCreatingGroup] = useState(false);
+  const [eligibleEntities, setEligibleEntities] = useState<EligibleEntity[]>([]);
+  const [loadingEntities, setLoadingEntities] = useState(false);
+  const [selectedMembers, setSelectedMembers] = useState<OwnershipMemberInput[]>([]);
+
+  const [selectedGroupDetail, setSelectedGroupDetail] = useState<FormOwnershipGroupDetail | null>(null);
+  const [loadingGroupDetail, setLoadingGroupDetail] = useState(false);
 
   const [catalogModalVisible, setCatalogModalVisible] = useState(false);
   const [creatingCatalog, setCreatingCatalog] = useState(false);
@@ -102,6 +110,39 @@ const FormDesignerScreen: React.FC = () => {
   const [newCatalogItemValue, setNewCatalogItemValue] = useState('');
   const [newCatalogItemLabel, setNewCatalogItemLabel] = useState('');
   const [catalogError, setCatalogError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('FormsManager')}
+            style={styles.backButton}
+          >
+            <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [navigation]);
+
+  useEffect(() => {
+    if (ownershipGroupId === null) {
+      setSelectedGroupDetail(null);
+      return;
+    }
+    setLoadingGroupDetail(true);
+    formsRepository.fetchOwnershipGroup(ownershipGroupId)
+      .then(setSelectedGroupDetail)
+      .catch(() => setSelectedGroupDetail(null))
+      .finally(() => setLoadingGroupDetail(false));
+  }, [ownershipGroupId, ownershipGroupDetailKey]);
+
+  // Re-fetch groups and detail on focus so edits from OwnershipGroupEditor are reflected.
+  useFocusEffect(useCallback(() => {
+    formsRepository.fetchOwnershipGroups().then(setOwnershipGroups).catch(() => {});
+    setOwnershipGroupDetailKey(k => k + 1);
+  }, []));
 
   useEffect(() => {
     if (fieldTypes.length > 0 && modalTypeId === null) {
@@ -250,19 +291,40 @@ const FormDesignerScreen: React.FC = () => {
       setNewGroupError('El nombre del grupo es obligatorio.');
       return;
     }
+    if (selectedMembers.length > 0 && !selectedMembers.some(m => m.is_editor)) {
+      setNewGroupError('Al menos un miembro debe tener rol de editor.');
+      return;
+    }
     setCreatingGroup(true);
     setNewGroupError(null);
     try {
-      const created = await formsRepository.createOwnershipGroup(newGroupName.trim());
+      const created = await formsRepository.createOwnershipGroup(newGroupName.trim(), selectedMembers);
       setOwnershipGroups(prev => [...prev, created]);
       setOwnershipGroupId(created.id);
       setGroupModalVisible(false);
       setNewGroupName('');
+      setSelectedMembers([]);
     } catch (err) {
       setNewGroupError(extractApiError(err));
     } finally {
       setCreatingGroup(false);
     }
+  };
+
+  const toggleMember = (entity: EligibleEntity) => {
+    const key = `${entity.entity_type}:${entity.entity_id}`;
+    setSelectedMembers(prev => {
+      const exists = prev.find(m => `${m.entity_type}:${m.entity_id}` === key);
+      if (exists) return prev.filter(m => `${m.entity_type}:${m.entity_id}` !== key);
+      return [...prev, { entity_type: entity.entity_type, entity_id: entity.entity_id, is_editor: false }];
+    });
+  };
+
+  const toggleEditor = (entity: EligibleEntity) => {
+    const key = `${entity.entity_type}:${entity.entity_id}`;
+    setSelectedMembers(prev =>
+      prev.map(m => `${m.entity_type}:${m.entity_id}` === key ? { ...m, is_editor: !m.is_editor } : m),
+    );
   };
 
   const resetCatalogModal = () => {
@@ -501,7 +563,13 @@ const FormDesignerScreen: React.FC = () => {
               onPress={() => {
                 setNewGroupName('');
                 setNewGroupError(null);
+                setSelectedMembers([]);
                 setGroupModalVisible(true);
+                setLoadingEntities(true);
+                formsRepository.fetchEligibleEntities()
+                  .then(setEligibleEntities)
+                  .catch(() => setNewGroupError('No se pudieron cargar las entidades disponibles.'))
+                  .finally(() => setLoadingEntities(false));
               }}
             >
               <MaterialIcon name="plus" fontSize={14} color={lightModeColors.institutional} />
@@ -522,6 +590,39 @@ const FormDesignerScreen: React.FC = () => {
                   <Picker.Item key={group.id} label={group.name} value={group.id} />
                 ))}
               </Picker>
+            </View>
+          )}
+
+          {ownershipGroupId !== null && (
+            <View style={styles.groupDetailCard}>
+              <Text style={styles.groupDetailTitle}>Miembros del grupo</Text>
+              {loadingGroupDetail ? (
+                <ActivityIndicator size="small" color={lightModeColors.institutional} style={{ marginVertical: 4 }} />
+              ) : !selectedGroupDetail || selectedGroupDetail.members.length === 0 ? (
+                <Text style={styles.groupDetailEmpty}>Sin miembros asignados.</Text>
+              ) : (
+                selectedGroupDetail.members.map((m: GroupMember) => {
+                  const isSubsecretary = m.entity_type === 'secretary' && !!m.parent_secretary_name;
+                  const typeLabel = m.entity_type === 'department'
+                    ? 'Departamento'
+                    : isSubsecretary
+                      ? `Subsecretaría · ${m.parent_secretary_name}`
+                      : 'Secretaría';
+                  return (
+                    <View key={`${m.entity_type}:${m.entity_id}`} style={styles.groupMemberRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.groupMemberName}>{m.name}</Text>
+                        <Text style={styles.groupMemberType}>{typeLabel}</Text>
+                      </View>
+                      {m.is_editor && (
+                        <View style={styles.editorBadge}>
+                          <Text style={styles.editorBadgeText}>Editor</Text>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })
+              )}
             </View>
           )}
         </View>
@@ -910,7 +1011,7 @@ const FormDesignerScreen: React.FC = () => {
         onRequestClose={() => setGroupModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalCard, { paddingBottom: 32 }]}>
+          <ScrollView contentContainerStyle={[styles.modalCard, { paddingBottom: 32 }]} keyboardShouldPersistTaps="handled">
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Nuevo grupo de propiedad</Text>
               <TouchableOpacity onPress={() => setGroupModalVisible(false)}>
@@ -931,6 +1032,64 @@ const FormDesignerScreen: React.FC = () => {
               maxLength={100}
             />
 
+            <View style={styles.membersHeader}>
+              <Text style={styles.label}>Miembros</Text>
+              {selectedMembers.length > 0 && (
+                <Text style={styles.membersCount}>
+                  {selectedMembers.length} seleccionado{selectedMembers.length !== 1 ? 's' : ''}
+                </Text>
+              )}
+            </View>
+
+            <View style={styles.editorWarningBanner}>
+              <MaterialIcon name="alert-circle" fontSize={15} color="#92400E" />
+              <Text style={styles.editorWarningText}>
+                Al menos un miembro debe tener rol de <Text style={styles.editorWarningBold}>Editor</Text> para poder guardar.
+              </Text>
+            </View>
+
+            {loadingEntities ? (
+              <ActivityIndicator size="small" style={{ marginVertical: 8 }} />
+            ) : eligibleEntities.length === 0 ? (
+              <Text style={styles.emptyFields}>No hay departamentos ni secretarías disponibles.</Text>
+            ) : (
+              eligibleEntities.map(entity => {
+                const key = `${entity.entity_type}:${entity.entity_id}`;
+                const member = selectedMembers.find(m => `${m.entity_type}:${m.entity_id}` === key);
+                const isSelected = !!member;
+                const isSubsecretary = entity.entity_type === 'secretary' && !!entity.parent_secretary_name;
+                return (
+                  <View key={key} style={[styles.entityRow, isSelected && styles.entityRowSelected]}>
+                    <TouchableOpacity style={styles.entityRowMain} onPress={() => toggleMember(entity)} activeOpacity={0.7}>
+                      <View style={[styles.entityCheckbox, isSelected && styles.entityCheckboxChecked]}>
+                        {isSelected && <MaterialIcon name="check" fontSize={14} color="white" />}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.entityName}>{entity.name}</Text>
+                        <Text style={styles.entityType}>
+                          {entity.entity_type === 'department'
+                            ? 'Departamento'
+                            : isSubsecretary
+                              ? `Subsecretaría · depende de ${entity.parent_secretary_name}`
+                              : 'Secretaría'}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                    {isSelected && (
+                      <TouchableOpacity style={styles.entityEditorRow} onPress={() => toggleEditor(entity)} activeOpacity={0.7}>
+                        <View style={[styles.entityEditorCheckbox, member.is_editor && styles.entityEditorCheckboxChecked]}>
+                          {member.is_editor && <MaterialIcon name="check" fontSize={13} color="white" />}
+                        </View>
+                        <Text style={[styles.entityEditorLabel, member.is_editor && styles.entityEditorLabelActive]}>
+                          Editor
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              })
+            )}
+
             {newGroupError ? (
               <View style={[styles.statusCard, styles.statusCardError]}>
                 <Text style={[styles.statusText, styles.statusTextError]}>{newGroupError}</Text>
@@ -949,7 +1108,7 @@ const FormDesignerScreen: React.FC = () => {
                 </View>
               ) : null}
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </>
@@ -957,6 +1116,7 @@ const FormDesignerScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  backButton: { marginLeft: 16, padding: 4 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   container: { padding: 16, gap: 16 },
   section: {
@@ -1128,6 +1288,165 @@ const styles = StyleSheet.create({
     color: lightModeColors.institutional,
     fontWeight: '600',
     fontSize: 12,
+  },
+  groupDetailCard: {
+    backgroundColor: '#F0F4FF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#C7D7F5',
+    padding: 10,
+    gap: 6,
+  },
+  groupDetailTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: lightModeColors.institutional,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  groupDetailEmpty: {
+    fontSize: 12,
+    color: '#aaa',
+    fontStyle: 'italic',
+  },
+  groupMemberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 5,
+    paddingHorizontal: 6,
+    backgroundColor: 'white',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E2EAF8',
+  },
+  groupMemberName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#222',
+  },
+  groupMemberType: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 1,
+  },
+  editorBadge: {
+    backgroundColor: '#D1FAE5',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: '#6EE7B7',
+  },
+  editorBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#065F46',
+  },
+  membersHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  membersCount: {
+    fontSize: 12,
+    color: lightModeColors.institutional,
+    fontWeight: '600',
+  },
+  editorWarningBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  editorWarningText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#78350F',
+    lineHeight: 17,
+  },
+  editorWarningBold: {
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  entityRow: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    backgroundColor: '#fafafa',
+    overflow: 'hidden',
+  },
+  entityRowSelected: {
+    borderColor: lightModeColors.institutional,
+    backgroundColor: '#EEF3FB',
+  },
+  entityRowMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 10,
+  },
+  entityCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+  },
+  entityCheckboxChecked: {
+    backgroundColor: lightModeColors.institutional,
+    borderColor: lightModeColors.institutional,
+  },
+  entityName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#222',
+  },
+  entityType: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 1,
+  },
+  entityEditorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingBottom: 8,
+    paddingTop: 2,
+    borderTopWidth: 1,
+    borderTopColor: '#d0dff5',
+  },
+  entityEditorCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#059669',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+  },
+  entityEditorCheckboxChecked: {
+    backgroundColor: '#059669',
+    borderColor: '#059669',
+  },
+  entityEditorLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  entityEditorLabelActive: {
+    color: '#059669',
   },
   templatePicker: {
     flexDirection: 'row',

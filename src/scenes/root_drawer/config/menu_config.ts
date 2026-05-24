@@ -637,6 +637,9 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
   {route: 'AdminCommissionDetail', title: 'Comisión', roleFilter: 'admin'},
   {route: 'AdminCommissionEdit', title: 'Editar Comisión', roleFilter: 'admin'},
   {route: 'AdminUserDetail', title: 'Usuario', roleFilter: 'admin'},
+  {route: 'FormDesigner', title: 'Nuevo formulario', roleFilter: 'admin'},
+  {route: 'OwnershipGroupsList', title: 'Grupos de propiedad', roleFilter: 'admin'},
+  {route: 'OwnershipGroupEditor', title: 'Grupo de propiedad', roleFilter: 'admin'},
   {route: 'AdminNotificationCreate', title: 'Nuevo Aviso', roleFilter: 'admin'},
   {route: 'AdminNewsCreate', title: 'Nueva Novedad', roleFilter: 'admin'},
   {

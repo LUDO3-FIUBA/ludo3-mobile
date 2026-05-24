@@ -74,6 +74,8 @@ export { default as TeacherFormsScreen } from './teacher_forms/TeacherFormsScree
 // Forms — Admin screens
 export { default as FormsManagerScreen } from './admin_forms/FormsManagerScreen';
 export { default as FormDesignerScreen } from './admin_forms/FormDesignerScreen';
+export { default as OwnershipGroupsListScreen } from './admin_forms/OwnershipGroupsList';
+export { default as OwnershipGroupEditorScreen } from './admin_forms/OwnershipGroupEditor';
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
 export { default as StudentIdentityViewerScreen } from './student_identity_viewer';

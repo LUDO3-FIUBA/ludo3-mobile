@@ -95,12 +95,20 @@ const FormsManagerScreen: React.FC = () => {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          style={{ marginRight: 16 }}
-          onPress={() => navigation.navigate('FormDesigner')}
-        >
-          <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity
+            style={{ marginRight: 12 }}
+            onPress={() => navigation.navigate('OwnershipGroupsList')}
+          >
+            <MaterialIcon name="folder-account-outline" fontSize={24} color={lightModeColors.mainContrastColor} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ marginRight: 16 }}
+            onPress={() => navigation.navigate('FormDesigner')}
+          >
+            <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
+          </TouchableOpacity>
+        </View>
       ),
     });
   }, [navigation]);
@@ -264,7 +272,7 @@ const FormsManagerScreen: React.FC = () => {
     setRefreshingProcedureId(groupId);
     try {
       const results = await Promise.all(
-        procedureForms.map(async form => {
+        groupForms.map(async form => {
           const [subs, detail] = await Promise.all([
             formsRepository.fetchFormSubmissions(form.form_id),
             formsRepository.fetchFormDetail(form.form_id),
