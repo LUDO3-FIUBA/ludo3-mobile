@@ -9,6 +9,7 @@ import {
 		GraderUpdatedCard,
 		MaterialIcon,
 		MarkdownEditor,
+		SubmissionTextCard,
 		SubmissionDateRow,
 		EvaluationDescriptionCard,
 		SubmissionFileCard,
@@ -65,7 +66,8 @@ export default function SubmissionDetails({ route }: any) {
 	const endDateRaw = (evaluation as any).endDate || (evaluation as any).end_date;
 	const submissionCreatedAtRaw = (submission as any).createdAt || (submission as any).created_at;
 	const submissionUpdatedAtRaw = (submission as any).updatedAt || (submission as any).updated_at;
-	const feedbackRaw = submission.feedbackText || '';
+	const submissionTextRaw = (submission as any).submissionText || (submission as any).submission_text;
+	const feedbackRaw = (submission as any).feedbackText || (submission as any).feedback_text || '';
 	const [currentGrader, setCurrentGrader] = useState(submission.grader);
 	const [currentUpdatedAt, setCurrentUpdatedAt] = useState(submissionUpdatedAtRaw);
 	const [editingFeedback, setEditingFeedback] = useState(false);
@@ -253,6 +255,7 @@ export default function SubmissionDetails({ route }: any) {
 			</View>
 
 			<EvaluationDescriptionCard markdownText={(evaluation as any)?.description} />
+			<SubmissionTextCard submissionText={submissionTextRaw} />
 			<SubmissionFileCard
 				submissionFile={(submission as any)?.submission_file || (submission as any)?.submissionFile}
 				originalFilename={(submission as any)?.original_filename || (submission as any)?.originalFilename}
