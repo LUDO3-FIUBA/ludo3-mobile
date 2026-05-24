@@ -63,13 +63,14 @@ test.describe('User submenu flows', () => {
     await expect(page.getByText('Bolsa de Trabajo')).toBeVisible({ timeout: 8000 });
   });
 
-  test('Enlaces útiles shows all 5 FIUBA resources', async ({ page }) => {
+  test('Enlaces útiles shows all 6 FIUBA resources', async ({ page }) => {
     await openUsuario(page);
     await page.getByLabel(/Enlaces/i).click();
     await page.waitForTimeout(500);
     await expect(page.getByText('Bolsa de Trabajo')).toBeVisible({ timeout: 8000 });
     await expect(page.getByText('RPL')).toBeVisible();
     await expect(page.getByText('Campus Grado')).toBeVisible();
+    await expect(page.getByText('Programas de asignaturas')).toBeVisible();
     await expect(page.getByText('SIU Guaraní')).toBeVisible();
     await expect(page.getByText('Página de Tesis')).toBeVisible();
   });

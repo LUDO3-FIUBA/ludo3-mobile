@@ -33,8 +33,8 @@ const NewsForm: React.FC = () => {
   const [description, setDescription] = useState(existing?.description ?? '');
   const [tag, setTag] = useState<string>(existing?.tag ?? '');
   const [tags, setTags] = useState<NewsTag[]>([]);
-  const [picture, setPicture] = useState<NewsImagePayload | null>(null);
-  const [keepExistingPicture, setKeepExistingPicture] = useState<boolean>(!!existing?.pictureUrl);
+  const [image, setImage] = useState<NewsImagePayload | null>(null);
+  const [keepExistingImage, setKeepExistingImage] = useState<boolean>(!!existing?.image);
   const [saving, setSaving] = useState(false);
   const [alertDialog, setAlertDialog] = useState<{ title: string; message: string; onConfirm?: () => void } | null>(null);
 
@@ -64,18 +64,18 @@ const NewsForm: React.FC = () => {
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
       const ext = asset.uri.split('.').pop() ?? 'jpg';
-      setPicture({
+      setImage({
         uri: asset.uri,
         type: asset.mimeType ?? `image/${ext}`,
         name: asset.fileName ?? `news.${ext}`,
       });
-      setKeepExistingPicture(false);
+      setKeepExistingImage(false);
     }
   };
 
   const removePicture = () => {
-    setPicture(null);
-    setKeepExistingPicture(false);
+    setImage(null);
+    setKeepExistingImage(false);
   };
 
   const handleSubmit = async () => {
@@ -94,7 +94,7 @@ const NewsForm: React.FC = () => {
         title: title.trim(),
         description: description.trim(),
         tag,
-        picture,
+        image,
       };
       if (existing) {
         await newsRepository.updateNews(existing.id, payload);
@@ -173,17 +173,17 @@ const NewsForm: React.FC = () => {
 
         <View style={styles.field}>
           <Text style={styles.label}>Imagen (opcional)</Text>
-          {picture ? (
+          {image ? (
             <View>
-              <Image source={{ uri: picture.uri }} style={styles.imagePreview} resizeMode="cover" />
+              <Image source={{ uri: image.uri }} style={styles.imagePreview} resizeMode="cover" />
               <TouchableOpacity style={styles.removeImage} onPress={removePicture}>
                 <MaterialIcon name="close-circle" fontSize={22} color="#ef4444" />
                 <Text style={styles.removeImageText}>Quitar imagen</Text>
               </TouchableOpacity>
             </View>
-          ) : keepExistingPicture && existing?.pictureUrl ? (
+          ) : keepExistingImage && existing?.image ? (
             <View>
-              <Image source={{ uri: existing.pictureUrl }} style={styles.imagePreview} resizeMode="cover" />
+              <Image source={{ uri: existing.image }} style={styles.imagePreview} resizeMode="cover" />
               <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
                 <MaterialIcon name="image-edit" fontSize={22} color="#6b7280" />
                 <Text style={styles.imagePickerText}>Reemplazar imagen</Text>

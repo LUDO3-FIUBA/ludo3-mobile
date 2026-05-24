@@ -8,7 +8,7 @@ export default interface News {
   id: number;
   title: string;
   description: string;
-  pictureUrl: string;
+  image?: string | null;
   tag: string;
   tagLabel: string;
   tagColor: string;
