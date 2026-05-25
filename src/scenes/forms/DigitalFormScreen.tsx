@@ -63,6 +63,17 @@ const DigitalFormScreen: React.FC = () => {
   const [recipientError, setRecipientError] = useState<string | null>(null);
 
   useEffect(() => {
+    setForm(null);
+    setLoading(true);
+    setAnswers({});
+    setFileAnswers({});
+    setFieldErrors({});
+    setSubmitStatus(null);
+    setSelectedTeacher(null);
+    setTeacherError(null);
+    setRecipientEntityType(null);
+    setRecipientEntityId(null);
+    setRecipientError(null);
     formsRepository
       .fetchFormDetail(formId)
       .then(detail => {
@@ -73,7 +84,7 @@ const DigitalFormScreen: React.FC = () => {
       })
       .catch(() => Alert.alert('Error', 'No se pudo cargar el formulario.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [formId]);
 
   const setAnswer = (fieldId: number, value: string | null) => {
     setAnswers(prev => ({ ...prev, [fieldId]: value }));

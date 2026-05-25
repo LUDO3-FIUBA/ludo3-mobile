@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import {
   MaterialIcon,
   OwnershipGroupAccordionList,
@@ -74,25 +74,28 @@ const FormsListScreen: React.FC = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [history, setHistory] = useState<FormSubmission[]>([]);
 
-  useEffect(() => {
-    formsRepository.fetchForms()
-      .then(forms => {
-        setAllForms(forms);
-        const groupMap = new Map<number, { ownership_group: FormOwnershipGroup; forms: Form[] }>();
-        forms.forEach(f => {
-          const g = f.ownership_group;
-          if (!groupMap.has(g.id)) groupMap.set(g.id, { ownership_group: g, forms: [] });
-          groupMap.get(g.id)!.forms.push(f);
-        });
-        setSections(
-          Array.from(groupMap.values()).sort((a, b) =>
-            a.ownership_group.name.localeCompare(b.ownership_group.name),
-          ),
-        );
-      })
-      .catch(() => Alert.alert('Error', 'No se pudieron cargar los trámites.'))
-      .finally(() => setLoading(false));
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      formsRepository.fetchForms()
+        .then(forms => {
+          setAllForms(forms);
+          const groupMap = new Map<number, { ownership_group: FormOwnershipGroup; forms: Form[] }>();
+          forms.forEach(f => {
+            const g = f.ownership_group;
+            if (!groupMap.has(g.id)) groupMap.set(g.id, { ownership_group: g, forms: [] });
+            groupMap.get(g.id)!.forms.push(f);
+          });
+          setSections(
+            Array.from(groupMap.values()).sort((a, b) =>
+              a.ownership_group.name.localeCompare(b.ownership_group.name),
+            ),
+          );
+        })
+        .catch(() => Alert.alert('Error', 'No se pudieron cargar los trámites.'))
+        .finally(() => setLoading(false));
+    }, []),
+  );
 
   const formById = React.useMemo(() => {
     const map = new Map<number, Form>();
