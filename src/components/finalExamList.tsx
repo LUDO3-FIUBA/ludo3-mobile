@@ -1,5 +1,6 @@
 import React, { useState, useEffect, FC } from 'react';
-import { View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
+import AlertDialog from './AlertDialog';
 import FinalExamCard from './finalExamCard';
 import Loading from './loading';
 import { finalExamList as style } from '../styles';
@@ -17,6 +18,7 @@ const FinalExamList: FC<FinalExamListProps> = ({ filter, fetch, emptyMessage, na
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [finalExams, setFinalExams] = useState<FinalExam[]>([]);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -45,16 +47,20 @@ const FinalExamList: FC<FinalExamListProps> = ({ filter, fetch, emptyMessage, na
         setLoading(false);
       }
       console.log('Error', error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No sabemos pero no pudimos buscar tu información. ' +
-        'Volvé a intentar en unos minutos.'
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No sabemos pero no pudimos buscar tu información. Volvé a intentar en unos minutos.' });
     }
   };
 
   return (
     <View style={style().view}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {loading && <Loading />}
       {!loading && !finalExams.length && (
         <View style={style().textContainer}>

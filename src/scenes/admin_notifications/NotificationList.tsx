@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     FlatList,
     StyleSheet,
     Text,
@@ -10,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { adminNotificationsRepository } from '../../repositories';
 import AdminNotification from '../../models/AdminNotification';
 
@@ -17,13 +17,14 @@ const NotificationList: React.FC = () => {
     const navigation = useNavigation<any>();
     const [notifications, setNotifications] = useState<AdminNotification[]>([]);
     const [loading, setLoading] = useState(true);
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
     const loadNotifications = async () => {
         try {
             const data = await adminNotificationsRepository.fetchAll();
             setNotifications(data);
         } catch {
-            Alert.alert('Error', 'No se pudieron cargar las notificaciones.');
+            setAlertDialog({ title: 'Error', message: 'No se pudieron cargar las notificaciones.' });
         } finally {
             setLoading(false);
         }
@@ -48,23 +49,15 @@ const NotificationList: React.FC = () => {
         });
     }, [navigation]);
 
-    if (loading) {
-        return (
-            <View style={styles.centered}>
-                <ActivityIndicator size="large" />
-            </View>
-        );
-    }
-
-    if (notifications.length === 0) {
-        return (
-            <View style={styles.centered}>
-                <Text style={styles.emptyText}>No hay notificaciones enviadas.</Text>
-            </View>
-        );
-    }
-
-    return (
+    const content = loading ? (
+        <View style={styles.centered}>
+            <ActivityIndicator size="large" />
+        </View>
+    ) : notifications.length === 0 ? (
+        <View style={styles.centered}>
+            <Text style={styles.emptyText}>No hay notificaciones enviadas.</Text>
+        </View>
+    ) : (
         <FlatList
             data={notifications}
             keyExtractor={item => String(item.id)}
@@ -92,6 +85,20 @@ const NotificationList: React.FC = () => {
                 </View>
             )}
         />
+    );
+
+    return (
+        <View style={{ flex: 1 }}>
+            {content}
+            <AlertDialog
+                visible={alertDialog !== null}
+                title={alertDialog?.title ?? ''}
+                message={alertDialog?.message ?? ''}
+                mode="info"
+                confirmLabel="Aceptar"
+                onConfirm={() => setAlertDialog(null)}
+            />
+        </View>
     );
 };
 

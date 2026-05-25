@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import moment from 'moment';
 import {
 		EvaluationDateRangeCard,
@@ -64,6 +65,7 @@ export default function SubmissionDetails({ route }: any) {
 	const submissionCreatedAtRaw = (submission as any).createdAt || (submission as any).created_at;
 	const submissionUpdatedAtRaw = (submission as any).updatedAt || (submission as any).updated_at;
 	const submissionTextRaw = (submission as any).submissionText || (submission as any).submission_text;
+	const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 	const [currentGrader, setCurrentGrader] = useState(submission.grader);
 	const [currentUpdatedAt, setCurrentUpdatedAt] = useState(submissionUpdatedAtRaw);
 
@@ -131,12 +133,12 @@ export default function SubmissionDetails({ route }: any) {
 			setSaving(true);
 			if (isGradeable) {
 				if (grade.trim() === '') {
-					Alert.alert('Error', 'Ingresá una nota.');
+					setAlertDialog({ title: 'Error', message: 'Ingresá una nota.' });
 					return;
 				}
 				const numericGrade = Number(grade);
 				if (Number.isNaN(numericGrade) || numericGrade < 0 || numericGrade > 10) {
-					Alert.alert('Error', 'La nota debe estar entre 0 y 10.');
+					setAlertDialog({ title: 'Error', message: 'La nota debe estar entre 0 y 10.' });
 					return;
 				}
 				const gradeChange = await teacherSubmissionsRepository.gradeSubmission(submission.student.id, evaluation.id, numericGrade);
@@ -144,7 +146,7 @@ export default function SubmissionDetails({ route }: any) {
 				setCurrentUpdatedAt(gradeChange.updatedAt);
 			} else {
 				if (!status) {
-					Alert.alert('Error', 'Seleccioná un estado.');
+					setAlertDialog({ title: 'Error', message: 'Seleccioná un estado.' });
 					return;
 				}
 				const gradeChange = await teacherSubmissionsRepository.setSubmissionStatus(
@@ -160,7 +162,7 @@ export default function SubmissionDetails({ route }: any) {
 			}
 			setEditing(false);
 		} catch (error) {
-			Alert.alert('Error', 'No pudimos guardar los cambios. Intenta nuevamente.');
+			setAlertDialog({ title: 'Error', message: 'No pudimos guardar los cambios. Intenta nuevamente.' });
 			console.error('Error updating submission from details', error);
 		} finally {
 			setSaving(false);
@@ -171,7 +173,7 @@ export default function SubmissionDetails({ route }: any) {
 
 	const updateCorrectorToSubmission = () => {
 		if (submissionAlreadyGraded) {
-			Alert.alert('Error', 'No se puede cambiar el corrector de una entrega ya calificada.');
+			setAlertDialog({ title: 'Error', message: 'No se puede cambiar el corrector de una entrega ya calificada.' });
 			return;
 		}
 
@@ -185,7 +187,7 @@ export default function SubmissionDetails({ route }: any) {
 			return;
 		}
 
-		Alert.alert('Error', 'No tiene permisos para cambiar el corrector de esta entrega.');
+		setAlertDialog({ title: 'Error', message: 'No tiene permisos para cambiar el corrector de esta entrega.' });
 	};
 
 	const assignCorrectorToStudent = async (newCorrector: TeacherModel) => {
@@ -199,7 +201,7 @@ export default function SubmissionDetails({ route }: any) {
 				await dispatch(fetchSemesterDataAsync(semester.commission.id));
 			}
 		} catch (error) {
-			Alert.alert('Error', 'Hubo un error al agregar el corrector');
+			setAlertDialog({ title: 'Error', message: 'Hubo un error al agregar el corrector.' });
 			console.error('Error assigning grader from details', error);
 		}
 	};
@@ -307,6 +309,14 @@ export default function SubmissionDetails({ route }: any) {
 				onSelect={(selectedTeacher) => assignCorrectorToStudent(selectedTeacher as TeacherModel)}
 				onClose={() => setShowTeacherSelectionModal(false)}
 				title="Asignar corrector"
+			/>
+			<AlertDialog
+				visible={alertDialog !== null}
+				title={alertDialog?.title ?? ''}
+				message={alertDialog?.message ?? ''}
+				mode="info"
+				confirmLabel="Aceptar"
+				onConfirm={() => setAlertDialog(null)}
 			/>
 		</>
 	);

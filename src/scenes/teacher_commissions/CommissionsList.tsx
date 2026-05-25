@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { CommissionCard, Loading } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { commissions as style } from '../../styles';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchTeacherCommissionsAsync, selectTeacherCommissions, selectTeacherLoading } from '../../redux/reducers/teacherUserDataSlice';
@@ -14,6 +15,7 @@ const CommissionsList: React.FC<CommissionsListProps> = ({ navigation }) => {
   const dispatch = useAppDispatch()
   const [hasDoneFirstLoad, setHasDoneFirstLoad] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
   const commissions = useAppSelector(selectTeacherCommissions)
   const loading = useAppSelector(selectTeacherLoading)
 
@@ -23,11 +25,10 @@ const CommissionsList: React.FC<CommissionsListProps> = ({ navigation }) => {
         .unwrap()
         .catch((error: any) => {
           console.log("Error", error);
-          Alert.alert(
-            '¿Qué pasó?',
-            'No sabemos pero no pudimos buscar tus comisiones. ' +
-            'Volvé a intentar en unos minutos.',
-          );
+          setAlertDialog({
+            title: '¿Qué pasó?',
+            message: 'No sabemos pero no pudimos buscar tus comisiones. Volvé a intentar en unos minutos.',
+          });
         })
         .finally(() => {
           setHasDoneFirstLoad(true);
@@ -37,6 +38,14 @@ const CommissionsList: React.FC<CommissionsListProps> = ({ navigation }) => {
 
   return (
     <View style={style().view}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {(loading || !hasDoneFirstLoad) && <Loading />}
       {hasDoneFirstLoad && !loading && !commissions.length && (
         <View style={style().containerView}>

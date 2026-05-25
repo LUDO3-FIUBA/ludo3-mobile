@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   Text,
   View,
   TouchableOpacity,
@@ -8,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Loading, MaterialIcon, RoundedButton } from '../../components';
 import { getStyleSheet as style } from '../../styles';
@@ -42,6 +42,7 @@ const AddFinal: React.FC<Props> = () => {
   const [showFinishDatePicker, setShowFinishDatePicker] = useState(false);
   const [showFinishTimePicker, setShowFinishTimePicker] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const navigation = useNavigation();
   const route = useRoute();
@@ -136,6 +137,7 @@ const AddFinal: React.FC<Props> = () => {
 
   const [finalName, setFinalName] = useState('')
   return (
+    <>
     <ScrollView style={style().containerView}>
       <View style={{ marginBottom: 100 }}>
         <View style={style().dateButtonInputs}>
@@ -347,14 +349,10 @@ const AddFinal: React.FC<Props> = () => {
                   })
                   .catch((error: any) => {
                     setCreating(false);
-                    Alert.alert(
-                      'Te fallamos',
-                      'No pudimos crear este final. ' +
-                      'Volvé a intentar en unos minutos.',
-                    );
+                    setAlertDialog({ title: 'Te fallamos', message: 'No pudimos crear este final. Volvé a intentar en unos minutos.' });
                   });
               } else {
-                Alert.alert('Error', 'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.');
+                setAlertDialog({ title: 'Error', message: 'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.' });
               }
             } else {
               throw ('Date or Time is null');
@@ -364,6 +362,15 @@ const AddFinal: React.FC<Props> = () => {
         {creating && <Loading />}
       </View>
     </ScrollView>
+    <AlertDialog
+      visible={alertDialog !== null}
+      title={alertDialog?.title ?? ''}
+      message={alertDialog?.message ?? ''}
+      mode="info"
+      confirmLabel="Aceptar"
+      onConfirm={() => setAlertDialog(null)}
+    />
+    </>
   );
 };
 

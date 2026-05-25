@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
 import moment from 'moment';
@@ -27,6 +28,8 @@ const AttendanceDetails: React.FC = () => {
     const [presentStudents, setPresentStudents] = useState<TeacherStudent[]>([]);
     const [absentStudents, setAbsentStudents] = useState<TeacherStudent[]>([]);
     const [showQRModal, setShowQRModal] = useState(false);
+    const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
+    const [confirmDialog, setConfirmDialog] = useState<{title: string; message: string; onConfirm: () => void} | null>(null);
 
     const setNavOptions = useCallback(() => {
         navigation.setOptions({
@@ -105,14 +108,11 @@ const AttendanceDetails: React.FC = () => {
     };
 
     const handleConfirmAttendance = (student: TeacherStudent) => {
-        Alert.alert(
-            'Confirmar asistencia',
-            `¿Está seguro de que desea agregar asistencia para ${student.firstName} ${student.lastName}?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Confirmar', onPress: () => handleAddManualAttendance(student) },
-            ]
-        );
+        setConfirmDialog({
+            title: 'Confirmar asistencia',
+            message: `¿Está seguro de que desea agregar asistencia para ${student.firstName} ${student.lastName}?`,
+            onConfirm: () => handleAddManualAttendance(student),
+        });
     };
 
     const handleAddManualAttendance = async (student: TeacherStudent) => {
@@ -122,19 +122,16 @@ const AttendanceDetails: React.FC = () => {
             setAbsentStudents(prevState => prevState.filter(s => s.id !== student.id));
             dispatch(fetchSemesterAttendances(semesterData.id));
         } else {
-            Alert.alert('Error', 'No se pudo agregar la asistencia');
+            setAlertDialog({ title: 'Error', message: 'No se pudo agregar la asistencia' });
         }
     };
 
     const handleConfirmRemoveAttendance = (student: TeacherStudent) => {
-        Alert.alert(
-            'Confirmar remover asistencia',
-            `¿Está seguro de que desea remover la asistencia para ${student.firstName} ${student.lastName}?`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Confirmar', onPress: () => handleRemoveAttendance(student) },
-            ]
-        );
+        setConfirmDialog({
+            title: 'Confirmar remover asistencia',
+            message: `¿Está seguro de que desea remover la asistencia para ${student.firstName} ${student.lastName}?`,
+            onConfirm: () => handleRemoveAttendance(student),
+        });
     };
 
     const handleRemoveAttendance = async (student: TeacherStudent) => {
@@ -144,7 +141,7 @@ const AttendanceDetails: React.FC = () => {
             setAbsentStudents(prevState => [...prevState, student]);
             dispatch(fetchSemesterAttendances(semesterData.id));
         } else {
-            Alert.alert('Error', 'No se pudo remover la asistencia');
+            setAlertDialog({ title: 'Error', message: 'No se pudo remover la asistencia' });
         }
     };
 
@@ -209,6 +206,24 @@ const AttendanceDetails: React.FC = () => {
             ) : (
                 <Text style={styles.noAttendanceText}>No hay estudiantes para este cuatrimestre</Text>
             )}
+            <AlertDialog
+                visible={alertDialog !== null}
+                title={alertDialog?.title ?? ''}
+                message={alertDialog?.message ?? ''}
+                mode="info"
+                confirmLabel="Aceptar"
+                onConfirm={() => setAlertDialog(null)}
+            />
+            <AlertDialog
+                visible={confirmDialog !== null}
+                title={confirmDialog?.title ?? ''}
+                message={confirmDialog?.message ?? ''}
+                mode="confirm"
+                confirmLabel="Confirmar"
+                cancelLabel="Cancelar"
+                onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+                onCancel={() => setConfirmDialog(null)}
+            />
         </View>
     );
 };
