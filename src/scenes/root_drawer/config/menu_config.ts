@@ -143,6 +143,7 @@ export const adminMenu: MenuItem[] = [
     children: [
       { kind: 'direct', key: 'admin-departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'AdminDepartmentList', scope: 'shared' },
       { kind: 'direct', key: 'admin-commissions', label: 'Comisiones', icon: 'account-group', iconOutline: 'account-group-outline', route: 'AdminCommissionList', scope: 'shared' },
+      { kind: 'direct', key: 'admin-finals-approve', label: 'Finales para aprobar', icon: 'calendar-check', iconOutline: 'calendar-check-outline', route: 'AdminFinalsToApprove', scope: 'shared' },
       { kind: 'direct', key: 'admin-user-search', label: 'Buscar Usuarios', icon: 'account-search', iconOutline: 'account-search-outline', route: 'AdminUserSearch', scope: 'shared', superAdminOnly: true },
       { kind: 'direct', key: 'admin-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'AdminNewsList', scope: 'shared', superAdminOnly: true },
       { kind: 'direct', key: 'deptadmin-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'StudentNewsList', scope: 'shared', departmentAdminOnly: true },
