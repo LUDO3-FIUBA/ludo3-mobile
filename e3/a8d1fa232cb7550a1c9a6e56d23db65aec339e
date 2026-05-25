@@ -1,0 +1,21 @@
+e2e/tests/fiuba_map_integration.spec.ts
+  s_4d9056a3efbb15::t_d4dc2085fe649a 19
+  s_4d9056a3efbb15::t_d91cdbf55c3f3f 32
+  s_4d9056a3efbb15::t_ee990b6e455d7c 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.1",
+  "base_commit_sha": "e3a8d1fa232cb7550a1c9a6e56d23db65aec339e",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
