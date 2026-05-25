@@ -75,14 +75,19 @@ const FormsListScreen: React.FC = () => {
   const [history, setHistory] = useState<FormSubmission[]>([]);
 
   useEffect(() => {
-    Promise.all([formsRepository.fetchOwnershipGroups(), formsRepository.fetchForms()])
-      .then(([groups, forms]) => {
+    formsRepository.fetchForms()
+      .then(forms => {
         setAllForms(forms);
+        const groupMap = new Map<number, { ownership_group: FormOwnershipGroup; forms: Form[] }>();
+        forms.forEach(f => {
+          const g = f.ownership_group;
+          if (!groupMap.has(g.id)) groupMap.set(g.id, { ownership_group: g, forms: [] });
+          groupMap.get(g.id)!.forms.push(f);
+        });
         setSections(
-          groups.map(group => ({
-            ownership_group: group,
-            forms: forms.filter(f => f.ownership_group.id === group.id),
-          })),
+          Array.from(groupMap.values()).sort((a, b) =>
+            a.ownership_group.name.localeCompare(b.ownership_group.name),
+          ),
         );
       })
       .catch(() => Alert.alert('Error', 'No se pudieron cargar los trámites.'))
@@ -209,6 +214,11 @@ const FormsListScreen: React.FC = () => {
                         <Text style={styles.rowDate}>{formatDate(submission.submitted_at)}</Text>
                       </View>
                       <View>
+                        {!!submission.recipient_name && (
+                          <Text style={styles.rowTeacher}>
+                            Destinatario: {submission.recipient_name}
+                          </Text>
+                        )}
                         <View style={styles.badgesLeft}>
                         {requiresTeacher && (
                           <View style={styles.rowAlignLeft}>

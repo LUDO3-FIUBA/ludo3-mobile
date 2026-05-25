@@ -1,4 +1,4 @@
-import FormOwnershipGroup from './FormOwnershipGroup';
+import FormOwnershipGroup, { GroupMember } from './FormOwnershipGroup';
 import { FormTypeSummary } from './Form';
 
 export interface FormFieldTypeSummary {
@@ -33,12 +33,16 @@ export interface FormField {
   options: FormFieldOption[] | null;
 }
 
+export interface FormDetailOwnershipGroup extends FormOwnershipGroup {
+  members: GroupMember[];
+}
+
 export default interface FormDetail {
   form_id: number;
   form_name: string;
   form_description: string;
   form_information: string | null;
-  ownership_group: FormOwnershipGroup;
+  ownership_group: FormDetailOwnershipGroup;
   form_type: FormTypeSummary;
   requires_teacher_validation: boolean;
   fields: FormField[];

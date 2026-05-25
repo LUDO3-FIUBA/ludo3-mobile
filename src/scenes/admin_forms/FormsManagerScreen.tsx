@@ -18,6 +18,7 @@ import * as XLSX from 'xlsx';
 import { AlertDialog, MaterialIcon, OwnershipGroupAccordionList } from '../../components';
 import { formsRepository } from '../../repositories';
 import Form from '../../models/Form';
+import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 import FormSubmission, { FormSubmissionStatusValue } from '../../models/FormSubmission';
 import FormDetail from '../../models/FormDetail';
 import { FormAnswer } from '../../models/FormSubmission';
@@ -35,6 +36,7 @@ function showMessage(title: string, message: string) {
 const FormsManagerScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [forms, setForms] = useState<Form[]>([]);
+  const [ownershipGroups, setOwnershipGroups] = useState<FormOwnershipGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedFormId, setExpandedFormId] = useState<number | null>(null);
   const [submissionsCache, setSubmissionsCache] = useState<Record<number, FormSubmission[]>>({});
@@ -55,8 +57,12 @@ const FormsManagerScreen: React.FC = () => {
 
   const loadForms = useCallback(async () => {
     try {
-      const data = await formsRepository.fetchForms();
+      const [data, groups] = await Promise.all([
+        formsRepository.fetchForms(),
+        formsRepository.fetchOwnershipGroups(),
+      ]);
       setForms(data);
+      setOwnershipGroups(groups);
     } catch {
       showMessage('Error', 'No se pudieron cargar los formularios.');
     } finally {
@@ -92,6 +98,18 @@ const FormsManagerScreen: React.FC = () => {
     });
   }, [forms]);
 
+  // Set of group IDs where the current admin is an editor (from annotated list response).
+  const editorGroupIds = useMemo(() => {
+    const ids = new Set<number>();
+    ownershipGroups.forEach(g => {
+      // is_editor=true → editor; is_editor=undefined (super admin) → treat as editor.
+      if (g.is_editor !== false) ids.add(g.id);
+    });
+    return ids;
+  }, [ownershipGroups]);
+
+  const isAnyGroupEditor = editorGroupIds.size > 0;
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -102,16 +120,18 @@ const FormsManagerScreen: React.FC = () => {
           >
             <MaterialIcon name="folder-account-outline" fontSize={24} color={lightModeColors.mainContrastColor} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={{ marginRight: 16 }}
-            onPress={() => navigation.navigate('FormDesigner')}
-          >
-            <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
-          </TouchableOpacity>
+          {isAnyGroupEditor && (
+            <TouchableOpacity
+              style={{ marginRight: 16 }}
+              onPress={() => navigation.navigate('FormDesigner')}
+            >
+              <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
+            </TouchableOpacity>
+          )}
         </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, isAnyGroupEditor]);
 
   const sections = useMemo(() => {
     const map = new Map<number, { ownership_group: Form['ownership_group']; forms: Form[] }>();
@@ -192,11 +212,13 @@ const FormsManagerScreen: React.FC = () => {
     const { submission, formId } = submissionToDelete;
     try {
       await formsRepository.deleteSubmission(submission.submission_id);
-      const [formsData, subs] = await Promise.all([
+      const [formsData, groups, subs] = await Promise.all([
         formsRepository.fetchForms(),
+        formsRepository.fetchOwnershipGroups(),
         formsRepository.fetchFormSubmissions(formId),
       ]);
       setForms(formsData);
+      setOwnershipGroups(groups);
       setSubmissionsCache(prev => ({ ...prev, [formId]: subs }));
     } catch {
       showMessage('Error', 'No se pudo eliminar la respuesta.');
@@ -215,8 +237,12 @@ const FormsManagerScreen: React.FC = () => {
     setDeletingFormId(form.form_id);
     try {
       await formsRepository.deleteForm(form.form_id);
-      const formsData = await formsRepository.fetchForms();
+      const [formsData, groups] = await Promise.all([
+        formsRepository.fetchForms(),
+        formsRepository.fetchOwnershipGroups(),
+      ]);
       setForms(formsData);
+      setOwnershipGroups(groups);
       setSubmissionsCache(prev => {
         const next = { ...prev };
         delete next[form.form_id];
@@ -507,6 +533,7 @@ const FormsManagerScreen: React.FC = () => {
                 isDeleting={deletingFormId === item.form_id}
                 isExporting={exportingFormId === item.form_id}
                 downloadingSubmissionId={downloadingSubmissionId}
+                canEdit={editorGroupIds.has(item.ownership_group.id)}
                 onToggle={() => toggleForm(item)}
                 onEdit={() => navigation.navigate('FormDesigner', { formId: item.form_id })}
                 onDelete={() => handleDeleteForm(item)}

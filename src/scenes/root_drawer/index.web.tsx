@@ -48,6 +48,8 @@ import NotificationForm from '../admin_notifications/NotificationForm';
 import NotificationsScreen from '../notifications';
 import StudentCredentialScreen from '../student_credential';
 import FormsListScreen from '../forms/FormsListScreen';
+import DigitalFormScreen from '../forms/DigitalFormScreen';
+import DocumentFormScreen from '../forms/DocumentFormScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
 import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
@@ -101,6 +103,8 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentCredential: StudentCredentialScreen,
   StudentStats: StatsScreen,
   FormsList: FormsListScreen,
+  DigitalForm: DigitalFormScreen,
+  DocumentForm: DocumentFormScreen,
   Map: MapScreen,
   FiubaMap: FiubaMapScreen,
   StudentDepartmentList: StudentDepartmentListScreen,

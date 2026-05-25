@@ -13,7 +13,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import { RoundedButton, MaterialIcon, TeacherSearch } from '../../components';
+import { RoundedButton, MaterialIcon, TeacherSearch, RecipientSelector } from '../../components';
 import { formsRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import FormDetail, { FormField } from '../../models/FormDetail';
@@ -36,6 +36,19 @@ const DigitalFormScreen: React.FC = () => {
   const route = useRoute();
   const { formId } = route.params as RouteParams;
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          style={{ marginLeft: 16, padding: 4 }}
+          onPress={() => navigation.navigate('FormsList')}
+        >
+          <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
   const [form, setForm] = useState<FormDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<AnswerMap>({});
@@ -45,6 +58,9 @@ const DigitalFormScreen: React.FC = () => {
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<TeacherModelSnakeCase | null>(null);
   const [teacherError, setTeacherError] = useState<string | null>(null);
+  const [recipientEntityType, setRecipientEntityType] = useState<string | null>(null);
+  const [recipientEntityId, setRecipientEntityId] = useState<number | null>(null);
+  const [recipientError, setRecipientError] = useState<string | null>(null);
 
   useEffect(() => {
     formsRepository
@@ -127,11 +143,21 @@ const DigitalFormScreen: React.FC = () => {
     }
     setTeacherError(null);
 
+    const members = form.ownership_group.members ?? [];
+    if (members.length > 1 && (recipientEntityType === null || recipientEntityId === null)) {
+      setRecipientError('Debés seleccionar un destinatario para enviar este formulario.');
+      return;
+    }
+    setRecipientError(null);
+
     const adjuntoField = form.fields.find(f => f.form_field_type.value === 'adjunto');
     const adjuntoFile = adjuntoField ? fileAnswers[adjuntoField.form_field_id] ?? null : null;
     const nonAdjuntoAnswers = form.fields
       .filter(f => f.form_field_type.value !== 'adjunto')
       .map(f => ({ field_id: f.form_field_id, answer_value: answers[f.form_field_id] ?? null }));
+
+    const recipientType = members.length > 1 ? recipientEntityType : null;
+    const recipientId = members.length > 1 ? recipientEntityId : null;
 
     setSubmitting(true);
     setSubmitStatus(null);
@@ -142,13 +168,21 @@ const DigitalFormScreen: React.FC = () => {
           nonAdjuntoAnswers,
           adjuntoFile,
           selectedTeacher?.id,
+          recipientType,
+          recipientId,
         );
       } else {
-        await formsRepository.submitDigitalForm(formId, nonAdjuntoAnswers, selectedTeacher?.id);
+        await formsRepository.submitDigitalForm(
+          formId,
+          nonAdjuntoAnswers,
+          selectedTeacher?.id,
+          recipientType,
+          recipientId,
+        );
       }
       setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
       setTimeout(() => {
-        navigation.goBack();
+        navigation.navigate('FormsList');
       }, 2000);
     } catch {
       setSubmitStatus({
@@ -224,6 +258,20 @@ const DigitalFormScreen: React.FC = () => {
               error={teacherError}
             />
           </View>
+        )}
+
+        {(form.ownership_group.members ?? []).length > 1 && (
+          <RecipientSelector
+            members={form.ownership_group.members}
+            selectedEntityType={recipientEntityType}
+            selectedEntityId={recipientEntityId}
+            onSelect={(entityType, entityId) => {
+              setRecipientEntityType(entityType);
+              setRecipientEntityId(entityId);
+              setRecipientError(null);
+            }}
+            error={recipientError}
+          />
         )}
 
         {submitStatus ? (

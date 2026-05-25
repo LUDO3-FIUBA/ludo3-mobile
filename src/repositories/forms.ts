@@ -62,8 +62,15 @@ export async function submitDigitalForm(
   formId: number,
   answers: { field_id: number; answer_value: string | null }[],
   teacherId?: number,
+  recipientEntityType?: string | null,
+  recipientEntityId?: number | null,
 ): Promise<void> {
-  await post(`${BASE}/forms/${formId}/submissions`, { answers, teacher_id: teacherId });
+  await post(`${BASE}/forms/${formId}/submissions`, {
+    answers,
+    teacher_id: teacherId,
+    recipient_entity_type: recipientEntityType ?? undefined,
+    recipient_entity_id: recipientEntityId ?? undefined,
+  });
 }
 
 export async function submitDigitalFormWithAdjunto(
@@ -71,10 +78,14 @@ export async function submitDigitalFormWithAdjunto(
   answers: { field_id: number; answer_value: string | null }[],
   adjuntoFile: LocalFile,
   teacherId?: number,
+  recipientEntityType?: string | null,
+  recipientEntityId?: number | null,
 ): Promise<void> {
   const fd = new FormData();
   fd.append('answers', JSON.stringify(answers));
   if (teacherId !== undefined) fd.append('teacher_id', String(teacherId));
+  if (recipientEntityType != null) fd.append('recipient_entity_type', recipientEntityType);
+  if (recipientEntityId != null) fd.append('recipient_entity_id', String(recipientEntityId));
   if (adjuntoFile.file) {
     // Web (Expo web / browser): use the native browser File object.
     fd.append('file', adjuntoFile.file, adjuntoFile.name);
@@ -89,9 +100,13 @@ export async function submitDocumentForm(
   formId: number,
   file: LocalFile,
   teacherId?: number,
+  recipientEntityType?: string | null,
+  recipientEntityId?: number | null,
 ): Promise<FormSubmission> {
   const fd = new FormData();
   if (teacherId !== undefined) fd.append('teacher_id', String(teacherId));
+  if (recipientEntityType != null) fd.append('recipient_entity_type', recipientEntityType);
+  if (recipientEntityId != null) fd.append('recipient_entity_id', String(recipientEntityId));
   if (file.file) {
     // Web (Expo web / browser): expo-document-picker returns a native File object.
     // FormData.append accepts File directly and builds the correct multipart body.

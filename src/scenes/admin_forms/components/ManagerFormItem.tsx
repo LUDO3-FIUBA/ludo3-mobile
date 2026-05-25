@@ -25,6 +25,8 @@ interface ManagerFormItemProps {
   isDeleting: boolean;
   isExporting: boolean;
   downloadingSubmissionId: number | null;
+  /** Whether the current admin is an editor in this form's group. Controls edit/delete visibility. */
+  canEdit?: boolean;
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -73,6 +75,7 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
   isDeleting,
   isExporting,
   downloadingSubmissionId,
+  canEdit = true,
   onToggle,
   onEdit,
   onDelete,
@@ -141,23 +144,27 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
               </Text>
             </View>
           )}
-          <TouchableOpacity
-            onPress={event => { event.stopPropagation(); onEdit(); }}
-            hitSlop={8}
-          >
-            <MaterialIcon name="pencil" fontSize={20} color={lightModeColors.institutional} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={event => { event.stopPropagation(); onDelete(); }}
-            disabled={isDeleting}
-            hitSlop={8}
-          >
-            {isDeleting ? (
-              <ActivityIndicator size="small" color="#D32F2F" />
-            ) : (
-              <MaterialIcon name="trash-can-outline" fontSize={20} color="#D32F2F" />
-            )}
-          </TouchableOpacity>
+          {canEdit && (
+            <TouchableOpacity
+              onPress={event => { event.stopPropagation(); onEdit(); }}
+              hitSlop={8}
+            >
+              <MaterialIcon name="pencil" fontSize={20} color={lightModeColors.institutional} />
+            </TouchableOpacity>
+          )}
+          {canEdit && (
+            <TouchableOpacity
+              onPress={event => { event.stopPropagation(); onDelete(); }}
+              disabled={isDeleting}
+              hitSlop={8}
+            >
+              {isDeleting ? (
+                <ActivityIndicator size="small" color="#D32F2F" />
+              ) : (
+                <MaterialIcon name="trash-can-outline" fontSize={20} color="#D32F2F" />
+              )}
+            </TouchableOpacity>
+          )}
           <MaterialIcon name={isExpanded ? 'chevron-up' : 'chevron-down'} fontSize={20} color="#666" />
         </View>
       </TouchableOpacity>

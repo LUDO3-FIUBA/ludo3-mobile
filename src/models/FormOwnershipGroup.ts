@@ -24,6 +24,8 @@ export interface GroupMember {
 export default interface FormOwnershipGroup {
   id: number;
   name: string;
+  /** Annotated by the backend for authenticated admin users. Undefined for students/super-admin list. */
+  is_editor?: boolean;
 }
 
 export interface FormOwnershipGroupDetail extends FormOwnershipGroup {

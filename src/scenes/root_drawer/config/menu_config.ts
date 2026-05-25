@@ -648,6 +648,8 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
     roleFilter: 'admin',
   },
   {route: 'AdminNewsEdit', title: 'Editar Novedad', roleFilter: 'admin'},
+  {route: 'DigitalForm', title: 'Formulario digital'},
+  {route: 'DocumentForm', title: 'Formulario documento'},
   {route: 'NewsDetail', title: 'Novedad'},
   {route: 'Notifications', title: 'Notificaciones'},
 ];
