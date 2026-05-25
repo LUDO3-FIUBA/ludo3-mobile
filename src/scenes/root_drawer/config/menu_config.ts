@@ -290,7 +290,7 @@ export const teacherMenu: MenuItem[] = [
     icon: 'account',
     iconOutline: 'account-outline',
     scope: 'teacher',
-    webOrder: 3,
+    webOrder: 4,
     mobileOrder: 1,
     children: [
       {
@@ -370,7 +370,7 @@ export const teacherMenu: MenuItem[] = [
     icon: 'bank',
     iconOutline: 'bank-outline',
     scope: 'teacher',
-    webOrder: 4,
+    webOrder: 3,
     mobileOrder: 4,
     children: [
       {
@@ -423,7 +423,7 @@ export const adminMenu: MenuItem[] = [
     icon: 'account',
     iconOutline: 'account-outline',
     scope: 'shared',
-    webOrder: 3,
+    webOrder: 4,
     mobileOrder: 1,
     children: [
       {
@@ -484,8 +484,8 @@ export const adminMenu: MenuItem[] = [
     icon: 'bank',
     iconOutline: 'bank-outline',
     scope: 'shared',
-    webOrder: 4,
-    mobileOrder: 4,
+    webOrder: 3,
+    mobileOrder: 3,
     children: [
       {
         kind: 'direct',
@@ -547,7 +547,7 @@ export const adminMenu: MenuItem[] = [
     scope: 'shared',
     superAdminOnly: true,
     webOrder: 1,
-    mobileOrder: 3,
+    mobileOrder: 4,
   },
 ];
 
