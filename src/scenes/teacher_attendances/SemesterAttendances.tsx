@@ -1,5 +1,6 @@
-import React, { useEffect, useLayoutEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterAttendances, fetchSemesterDataAsync, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { ClassAttendance } from '../../models/ClassAttendance';
@@ -15,6 +16,8 @@ const SemesterAttendances: React.FC = () => {
   const attendances = useAppSelector(selectSemesterAttendances);
   const semesterData = useAppSelector(selectSemesterData);
   const navigation = useNavigation<any>();
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{title: string; message: string; onConfirm: () => void} | null>(null);
 
   const onPressAddNewClass = () => {
     navigation.navigate('SemesterAttendanceQR', {});
@@ -60,18 +63,11 @@ const SemesterAttendances: React.FC = () => {
           dispatch(fetchSemesterAttendances(semesterData.id));
         }
       } catch {
-        Alert.alert('Error', 'No se pudo eliminar la sesión. Intentá de nuevo más tarde.');
+        setAlertDialog({ title: 'Error', message: 'No se pudo eliminar la sesión. Intentá de nuevo más tarde.' });
       }
     };
 
-    if (Platform.OS === 'web') {
-      if (window.confirm(message)) onConfirm();
-    } else {
-      Alert.alert('Eliminar sesión', message, [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Eliminar', style: 'destructive', onPress: onConfirm },
-      ]);
-    }
+    setConfirmDialog({ title: 'Eliminar sesión', message, onConfirm });
   };
 
   const renderClassAttendance = ({ item }: { item: ClassAttendance }) => (
@@ -99,6 +95,24 @@ const SemesterAttendances: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
       <FlatList
         data={attendances}
         renderItem={renderClassAttendance}

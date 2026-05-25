@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { departmentsRepository } from '../../repositories';
 import Department from '../../models/Department';
 
@@ -21,13 +21,14 @@ const DepartmentList: React.FC<Props> = ({ isAdmin }) => {
   const navigation = useNavigation<any>();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const loadDepartments = async () => {
     try {
       const data = await departmentsRepository.fetchAll();
       setDepartments(data);
     } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar los departamentos.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los departamentos.' });
     } finally {
       setLoading(false);
     }
@@ -54,23 +55,15 @@ const DepartmentList: React.FC<Props> = ({ isAdmin }) => {
     }
   }, [navigation, isAdmin]);
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (departments.length === 0) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.emptyText}>No hay departamentos registrados.</Text>
-      </View>
-    );
-  }
-
-  return (
+  const content = loading ? (
+    <View style={styles.centered}>
+      <ActivityIndicator size="large" />
+    </View>
+  ) : departments.length === 0 ? (
+    <View style={styles.centered}>
+      <Text style={styles.emptyText}>No hay departamentos registrados.</Text>
+    </View>
+  ) : (
     <FlatList
       data={departments}
       keyExtractor={item => String(item.id)}
@@ -90,6 +83,20 @@ const DepartmentList: React.FC<Props> = ({ isAdmin }) => {
         </TouchableOpacity>
       )}
     />
+  );
+
+  return (
+    <View style={{ flex: 1 }}>
+      {content}
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+    </View>
   );
 };
 

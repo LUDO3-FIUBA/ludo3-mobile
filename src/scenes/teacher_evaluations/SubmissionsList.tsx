@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Alert, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { Submission } from '../../models/Submission';
 import { teacherEvaluationsRepository, teacherSubmissionsRepository } from '../../repositories';
 import { useNavigation } from '@react-navigation/native';
@@ -32,6 +33,7 @@ export default function SubmissionsList({ route }: Props) {
   const semester = useAppSelector(selectSemesterData);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const [semesterTeachers, setSemesterTeachers] = useState<TeacherModel[]>([]);
   const [showTeacherSelectionModal, setShowTeacherSelectionModal] = useState(false);
@@ -88,7 +90,7 @@ export default function SubmissionsList({ route }: Props) {
 
       setSubmissions(submissions);
     } catch (error) {
-      Alert.alert('Error', 'No pudimos conseguir información. Intenta nuevamente.');
+      setAlertDialog({ title: 'Error', message: 'No pudimos conseguir información. Intenta nuevamente.' });
       console.error("Error fetching data", error);
     } finally {
       setIsLoading(false);
@@ -97,14 +99,14 @@ export default function SubmissionsList({ route }: Props) {
 
   const updateCorrectorToSubmission = (submission: Submission) => {
     if (submission.grade) {
-      Alert.alert('Error', 'No se puede cambiar el corrector de una entrega ya calificada.');
+      setAlertDialog({ title: 'Error', message: 'No se puede cambiar el corrector de una entrega ya calificada.' });
       return;
     } else if (isActualUserChiefTeacher) {
       setSelectedStudent(submission.student);
       setShowTeacherSelectionModal(true);
     } else {
       // You should never get here
-      Alert.alert('Error', 'No tiene permisos para cambiar el corrector de esta entrega.');
+      setAlertDialog({ title: 'Error', message: 'No tiene permisos para cambiar el corrector de esta entrega.' });
     }
   };
 
@@ -117,7 +119,7 @@ export default function SubmissionsList({ route }: Props) {
       // force-refresh
       fetchData();
     } catch (error) {
-      Alert.alert("Error", "Hubo un error al agregar el corrector");
+      setAlertDialog({ title: 'Error', message: 'Hubo un error al agregar el corrector.' });
     }
   };
 
@@ -172,6 +174,14 @@ export default function SubmissionsList({ route }: Props) {
 
   return (
     <View style={styles.view}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {isLoading && <Loading />}
       {!isLoading && (
         <FlatList

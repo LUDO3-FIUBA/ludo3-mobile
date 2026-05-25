@@ -1,5 +1,6 @@
 import React, { useState, useEffect, FC } from 'react';
-import { View, Text, FlatList, Alert } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
+import AlertDialog from '../AlertDialog';
 import EvaluationCard from './evaluationCard';
 import Loading from '../loading';
 import { finalExamList as style } from '../../styles';
@@ -14,6 +15,7 @@ const EvaluationList: FC<EvaluationListProps> = ({ fetch, emptyMessage }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -42,16 +44,20 @@ const EvaluationList: FC<EvaluationListProps> = ({ fetch, emptyMessage }) => {
         setLoading(false);
       }
       console.log('Error', error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No sabemos pero no pudimos buscar tu información. ' +
-        'Volvé a intentar en unos minutos.'
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No sabemos pero no pudimos buscar tu información. Volvé a intentar en unos minutos.' });
     }
   };
 
   return (
     <View style={style().view}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {loading && <Loading />}
       {!loading && !evaluations.length && (
         <View style={style().textContainer}>

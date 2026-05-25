@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { adminCommissionsRepository } from '../../repositories';
 import AdminCommission from '../../models/AdminCommission';
 
@@ -17,13 +17,14 @@ const CommissionList: React.FC = () => {
   const navigation = useNavigation<any>();
   const [commissions, setCommissions] = useState<AdminCommission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
 
   const loadCommissions = async () => {
     try {
       const data = await adminCommissionsRepository.fetchAll();
       setCommissions(data);
     } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar las comisiones.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar las comisiones.' });
     } finally {
       setLoading(false);
     }
@@ -65,27 +66,37 @@ const CommissionList: React.FC = () => {
   }
 
   return (
-    <FlatList
-      data={commissions}
-      keyExtractor={item => String(item.id)}
-      contentContainerStyle={styles.list}
-      renderItem={({ item }) => (
-        <TouchableOpacity
-          style={styles.item}
-          onPress={() =>
-            navigation.navigate('AdminCommissionDetail', { commissionId: item.id })
-          }
-        >
-          <View style={styles.itemContent}>
-            <Text style={styles.itemName}>{item.subjectName}</Text>
-            <Text style={styles.itemSubtitle}>
-              {item.chiefTeacher.lastName}, {item.chiefTeacher.firstName}
-            </Text>
-          </View>
-          <MaterialIcon name="chevron-right" fontSize={20} color="#aaa" />
-        </TouchableOpacity>
-      )}
-    />
+    <View style={{ flex: 1 }}>
+      <FlatList
+        data={commissions}
+        keyExtractor={item => String(item.id)}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.item}
+            onPress={() =>
+              navigation.navigate('AdminCommissionDetail', { commissionId: item.id })
+            }
+          >
+            <View style={styles.itemContent}>
+              <Text style={styles.itemName}>{item.subjectName}</Text>
+              <Text style={styles.itemSubtitle}>
+                {item.chiefTeacher.lastName}, {item.chiefTeacher.firstName}
+              </Text>
+            </View>
+            <MaterialIcon name="chevron-right" fontSize={20} color="#aaa" />
+          </TouchableOpacity>
+        )}
+      />
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+    </View>
   );
 };
 

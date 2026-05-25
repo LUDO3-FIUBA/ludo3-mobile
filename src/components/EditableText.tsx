@@ -1,10 +1,12 @@
 import React from "react";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
+import AlertDialog from "./AlertDialog";
 
 const EditableText = ({ value, onChange, editable }: { value: string, onChange: (text: string) => void, editable: boolean }) => {
 	const [isEditing, setIsEditing] = useState(false);
 	const [text, setText] = useState(value);
+	const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
 	const handleBlur = () => {
 		setIsEditing(false);
@@ -14,8 +16,8 @@ const EditableText = ({ value, onChange, editable }: { value: string, onChange: 
 		}
 
 		if (isNaN(grade) || grade < 1 || grade > 10) {
-			Alert.alert('Error', 'La nota debe ser un número entre 1 y 10.');
-			setText(value); // reset to original value
+			setAlertDialog({ title: 'Error', message: 'La nota debe ser un número entre 1 y 10.' });
+			setText(value);
 			return;
 		}
 
@@ -24,6 +26,14 @@ const EditableText = ({ value, onChange, editable }: { value: string, onChange: 
 
 	return (
 		<View style={styles.editableTextContainer}>
+			<AlertDialog
+				visible={alertDialog !== null}
+				title={alertDialog?.title ?? ''}
+				message={alertDialog?.message ?? ''}
+				mode="info"
+				confirmLabel="Aceptar"
+				onConfirm={() => setAlertDialog(null)}
+			/>
 			{isEditing ? (
 				<TextInput
 					inputMode='numeric'

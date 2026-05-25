@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Alert, View, LayoutChangeEvent } from 'react-native';
+import { View, LayoutChangeEvent } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import RNFS from 'react-native-fs';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { RoundedButton } from '../../components';
@@ -17,6 +18,7 @@ interface Props {
 const EvaluationQR: React.FC<Props> = ({ route }: Props) => {
   const [downloading, setDownloading] = useState<boolean>(false);
   const [qrSize, setQrSize] = useState<number>(300);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
   const svgRef = useRef<any>(null);
 
   const semesterData = useAppSelector(selectSemesterData)!
@@ -34,16 +36,10 @@ const EvaluationQR: React.FC<Props> = ({ route }: Props) => {
         const path = `${RNFS.CachesDirectoryPath}/${semesterId}-${evaluation.evaluationName}.png`;
         await RNFS.writeFile(path, data, 'base64');
         await CameraRoll.save(path, { type: 'photo', album: 'QrCodes' });
-        Alert.alert('Éxito', 'QR guardado en la galería.');
+        setAlertDialog({ title: 'Éxito', message: 'QR guardado en la galería.' });
       } catch (error) {
         console.log("error", error);
-        Alert.alert(
-          'Te fallamos',
-          'No pudimos descargar el QR. ' +
-          'Usalo desde el teléfono o pedile al departamento que ' +
-          'te lo pase/imprima. Sino siempre podés volver a ' +
-          'intentar en unos minutos.'
-        );
+        setAlertDialog({ title: 'Te fallamos', message: 'No pudimos descargar el QR. Usalo desde el teléfono o pedile al departamento que te lo pase/imprima. Sino siempre podés volver a intentar en unos minutos.' });
       } finally {
         setDownloading(false);
       }
@@ -57,6 +53,14 @@ const EvaluationQR: React.FC<Props> = ({ route }: Props) => {
 
   return (
     <View style={style().view} onLayout={handleLayout}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {qrValue && (
         <QRCode
           value={qrValue}

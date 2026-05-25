@@ -5,11 +5,11 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RoundedButton } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { departmentsRepository } from '../../repositories';
 import Department from '../../models/Department';
 
@@ -27,35 +27,30 @@ const DepartmentDetail: React.FC = () => {
 
   const [department, setDepartment] = useState<Department | null>(null);
   const [loading, setLoading] = useState(true);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{title: string; message: string; onConfirm: () => void} | null>(null);
 
   useEffect(() => {
     departmentsRepository
       .fetchOne(departmentId)
       .then(setDepartment)
-      .catch(() => Alert.alert('Error', 'No se pudo cargar el departamento.'))
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar el departamento.' }))
       .finally(() => setLoading(false));
   }, [departmentId]);
 
   const handleDelete = () => {
-    Alert.alert(
-      'Eliminar departamento',
-      `¿Estás seguro de que querés eliminar "${department?.name}"?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await departmentsRepository.deleteDepartment(departmentId);
-              navigation.goBack();
-            } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar el departamento.');
-            }
-          },
-        },
-      ],
-    );
+    setConfirmDialog({
+      title: 'Eliminar departamento',
+      message: `¿Estás seguro de que querés eliminar "${department?.name}"?`,
+      onConfirm: async () => {
+        try {
+          await departmentsRepository.deleteDepartment(departmentId);
+          navigation.goBack();
+        } catch (error) {
+          setAlertDialog({ title: 'Error', message: 'No se pudo eliminar el departamento.' });
+        }
+      },
+    });
   };
 
   if (loading) {
@@ -75,48 +70,68 @@ const DepartmentDetail: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.name}>{department.name}</Text>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.name}>{department.name}</Text>
 
-      {department.location ? (
-        <Section title="Ubicación">
-          <Text style={styles.bodyText}>{department.location}</Text>
-        </Section>
-      ) : null}
+        {department.location ? (
+          <Section title="Ubicación">
+            <Text style={styles.bodyText}>{department.location}</Text>
+          </Section>
+        ) : null}
 
-      {department.schedule ? (
-        <Section title="Horario de atención">
-          <Text style={styles.bodyText}>{department.schedule}</Text>
-        </Section>
-      ) : null}
+        {department.schedule ? (
+          <Section title="Horario de atención">
+            <Text style={styles.bodyText}>{department.schedule}</Text>
+          </Section>
+        ) : null}
 
-      {department.contactInfo ? (
-        <Section title="Información de contacto">
-          <Text style={styles.bodyText}>{department.contactInfo}</Text>
-        </Section>
-      ) : null}
+        {department.contactInfo ? (
+          <Section title="Información de contacto">
+            <Text style={styles.bodyText}>{department.contactInfo}</Text>
+          </Section>
+        ) : null}
 
-      {department.procedures ? (
-        <Section title="Trámites">
-          <Text style={styles.bodyText}>{department.procedures}</Text>
-        </Section>
-      ) : null}
+        {department.procedures ? (
+          <Section title="Trámites">
+            <Text style={styles.bodyText}>{department.procedures}</Text>
+          </Section>
+        ) : null}
 
-      {isAdmin && (
-        <View style={styles.adminActions}>
-          <RoundedButton
-            text="Editar"
-            onPress={() =>
-              navigation.navigate('AdminDepartmentEdit', { department })
-            }
-            style={{}}
-          />
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-            <Text style={styles.deleteButtonText}>Eliminar</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </ScrollView>
+        {isAdmin && (
+          <View style={styles.adminActions}>
+            <RoundedButton
+              text="Editar"
+              onPress={() =>
+                navigation.navigate('AdminDepartmentEdit', { department })
+              }
+              style={{}}
+            />
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+              <Text style={styles.deleteButtonText}>Eliminar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
+    </View>
   );
 };
 

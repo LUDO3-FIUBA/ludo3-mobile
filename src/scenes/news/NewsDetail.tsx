@@ -5,9 +5,9 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { ImageComponent, RoundedButton } from '../../components';
 import { newsRepository } from '../../repositories';
@@ -27,13 +27,15 @@ const NewsDetail: React.FC = () => {
 
   const [post, setPost] = useState<News | null>(null);
   const [loading, setLoading] = useState(true);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
 
   const load = () => {
     setLoading(true);
     newsRepository
       .fetchOne(newsId)
       .then(setPost)
-      .catch(() => Alert.alert('Error', 'No se pudo cargar la novedad.'))
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar la novedad.' }))
       .finally(() => setLoading(false));
   };
 
@@ -44,49 +46,40 @@ const NewsDetail: React.FC = () => {
   }, [newsId, navigation]);
 
   const handleDelete = () => {
-    Alert.alert(
-      'Eliminar novedad',
-      `¿Estás seguro de que querés eliminar "${post?.title}"?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await newsRepository.deleteNews(newsId);
-              navigation.goBack();
-            } catch {
-              Alert.alert('Error', 'No se pudo eliminar la novedad.');
-            }
-          },
-        },
-      ],
-    );
+    setConfirmDialog({
+      title: 'Eliminar novedad',
+      message: `¿Estás seguro de que querés eliminar "${post?.title}"?`,
+      onConfirm: async () => {
+        try {
+          await newsRepository.deleteNews(newsId);
+          navigation.goBack();
+        } catch {
+          setAlertDialog({ title: 'Error', message: 'No se pudo eliminar la novedad.' });
+        }
+      },
+    });
   };
-
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (!post) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Novedad no encontrada.</Text>
-      </View>
-    );
-  }
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString();
   };
 
-  return (
+  let content: React.ReactNode;
+  if (loading) {
+    content = (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  } else if (!post) {
+    content = (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>Novedad no encontrada.</Text>
+      </View>
+    );
+  } else {
+    content = (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <ImageComponent uri={post.image} imageStyle={styles.picture} expandOnPress />
 
@@ -115,6 +108,31 @@ const NewsDetail: React.FC = () => {
         </View>
       )}
     </ScrollView>
+    );
+  }
+
+  return (
+    <>
+      {content}
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
+    </>
   );
 };
 

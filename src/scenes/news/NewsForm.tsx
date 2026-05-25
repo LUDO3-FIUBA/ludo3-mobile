@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcon, RoundedButton } from '../../components';
@@ -36,6 +36,7 @@ const NewsForm: React.FC = () => {
   const [image, setImage] = useState<NewsImagePayload | null>(null);
   const [keepExistingImage, setKeepExistingImage] = useState<boolean>(!!existing?.image);
   const [saving, setSaving] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string; onConfirm?: () => void } | null>(null);
 
   useEffect(() => {
     newsRepository
@@ -46,13 +47,13 @@ const NewsForm: React.FC = () => {
           setTag(fetched[0].key);
         }
       })
-      .catch(() => Alert.alert('Error', 'No se pudieron cargar las categorías.'));
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudieron cargar las categorías.' }));
   }, []);
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permiso denegado', 'Necesitamos acceso a tu galería para adjuntar imágenes.');
+      setAlertDialog({ title: 'Permiso denegado', message: 'Necesitamos acceso a tu galería para adjuntar imágenes.' });
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -79,11 +80,11 @@ const NewsForm: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'El título es obligatorio.');
+      setAlertDialog({ title: 'Error', message: 'El título es obligatorio.' });
       return;
     }
     if (!tag) {
-      Alert.alert('Error', 'Seleccioná una categoría.');
+      setAlertDialog({ title: 'Error', message: 'Seleccioná una categoría.' });
       return;
     }
 
@@ -97,20 +98,28 @@ const NewsForm: React.FC = () => {
       };
       if (existing) {
         await newsRepository.updateNews(existing.id, payload);
-        Alert.alert('Éxito', 'Novedad actualizada correctamente.');
+        setAlertDialog({ title: 'Éxito', message: 'Novedad actualizada correctamente.', onConfirm: () => navigation.goBack() });
       } else {
         await newsRepository.createNews(payload);
-        Alert.alert('Éxito', 'Novedad creada correctamente.');
+        setAlertDialog({ title: 'Éxito', message: 'Novedad creada correctamente.', onConfirm: () => navigation.goBack() });
       }
-      navigation.goBack();
     } catch {
-      Alert.alert('Error', 'No se pudo guardar la novedad. Intentá de nuevo.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo guardar la novedad. Intentá de nuevo.' });
     } finally {
       setSaving(false);
     }
   };
 
   return (
+    <>
+    <AlertDialog
+      visible={alertDialog !== null}
+      title={alertDialog?.title ?? ''}
+      message={alertDialog?.message ?? ''}
+      mode="info"
+      confirmLabel="Aceptar"
+      onConfirm={() => { alertDialog?.onConfirm?.(); setAlertDialog(null); }}
+    />
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -196,6 +205,7 @@ const NewsForm: React.FC = () => {
         />
       </ScrollView>
     </KeyboardAvoidingView>
+    </>
   );
 };
 
