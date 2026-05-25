@@ -497,7 +497,11 @@ const FormDesignerScreen: React.FC = () => {
         message: isEditing ? 'Formulario actualizado correctamente.' : 'Formulario guardado correctamente.',
       });
       setTimeout(() => {
-        navigation.goBack();
+        if (Platform.OS === 'web') {
+          navigation.navigate('FormsManager');
+        } else {
+          navigation.goBack();
+        }
       }, 2000);
     } catch (err) {
       setSubmitStatus({ type: 'error', message: extractApiError(err) });
