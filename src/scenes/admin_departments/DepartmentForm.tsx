@@ -5,12 +5,12 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RoundedButton } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { departmentsRepository } from '../../repositories';
 import Department from '../../models/Department';
 
@@ -31,10 +31,11 @@ const DepartmentForm: React.FC = () => {
   const [contactInfo, setContactInfo] = useState(existing?.contactInfo ?? '');
   const [procedures, setProcedures] = useState(existing?.procedures ?? '');
   const [saving, setSaving] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string; onConfirm?: () => void} | null>(null);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'El nombre del departamento es obligatorio.');
+      setAlertDialog({ title: 'Error', message: 'El nombre del departamento es obligatorio.' });
       return;
     }
 
@@ -43,14 +44,13 @@ const DepartmentForm: React.FC = () => {
       const data = { name: name.trim(), location, schedule, contactInfo, procedures };
       if (existing) {
         await departmentsRepository.updateDepartment(existing.id, data);
-        Alert.alert('Éxito', 'Departamento actualizado correctamente.');
+        setAlertDialog({ title: 'Éxito', message: 'Departamento actualizado correctamente.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
       } else {
         await departmentsRepository.createDepartment(data);
-        Alert.alert('Éxito', 'Departamento creado correctamente.');
+        setAlertDialog({ title: 'Éxito', message: 'Departamento creado correctamente.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
       }
-      navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', 'No se pudo guardar el departamento. Intente de nuevo.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo guardar el departamento. Intente de nuevo.' });
     } finally {
       setSaving(false);
     }
@@ -106,6 +106,14 @@ const DepartmentForm: React.FC = () => {
           style={{}}
         />
       </ScrollView>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={alertDialog?.onConfirm ?? (() => setAlertDialog(null))}
+      />
     </KeyboardAvoidingView>
   );
 };

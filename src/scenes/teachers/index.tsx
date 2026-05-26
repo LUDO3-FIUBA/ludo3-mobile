@@ -1,10 +1,11 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, Alert, ToastAndroid, TouchableOpacity, Linking } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, ToastAndroid, TouchableOpacity, Linking } from 'react-native';
 import { lightModeColors } from '../../styles/colorPalette';
 import { Teacher, TeacherTuple, ChiefTeacher } from '../../models';
 import { commissionsRepository } from '../../repositories';
 import { CopyableEmailText } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 const UserIcon = require('./img/usericon.jpg');
 
 
@@ -59,6 +60,7 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
   const navigation = useNavigation();
   // const route = useRoute();
   const [isLoading, setIsLoading] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const commissionId = (route.params as TeachersRouteParams).commissionId;
   const chiefTeacher = (route.params as TeachersRouteParams).chiefTeacher;
@@ -77,11 +79,7 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching data", error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No sabemos pero no pudimos conseguir información acerca del cuatrimestre. ' +
-        'Volvé a intentar en unos minutos.',
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No sabemos pero no pudimos conseguir información acerca del cuatrimestre. Volvé a intentar en unos minutos.' });
       setIsLoading(false);
     }
   }, [isLoading, commissionId]);
@@ -95,6 +93,14 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
   
   return (
     <SafeAreaView style={styles.container}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {chiefTeacher && <ChiefCard {...chiefTeacher} />}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Cuerpo docente</Text>

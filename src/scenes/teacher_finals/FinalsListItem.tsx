@@ -1,5 +1,6 @@
-import React from 'react';
-import { TouchableOpacity, Alert, View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { TeacherFinal } from '../../models/TeacherFinal';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
@@ -15,17 +16,18 @@ interface FinalsListItemProps {
 
 const FinalsListItem: React.FC<FinalsListItemProps> = ({ final, subjectId }) => {
   const navigation = useNavigation();
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const onPressItem = () => {
     const currentStatus = calculateFinalCurrentStatus(final)
     if (currentStatus === FinalStatus.Draft) {
-      Alert.alert('Este final todavía no fue aprobado', 'Por favor espere a que se apruebe para poder ver los detalles.');
+      setAlertDialog({ title: 'Este final todavía no fue aprobado', message: 'Por favor espere a que se apruebe para poder ver los detalles.' });
       return;
     } else if (currentStatus === FinalStatus.Rejected) {
-      Alert.alert('Este final fue rechazado', 'Por favor consulte al departamento para obtener mas información.');
+      setAlertDialog({ title: 'Este final fue rechazado', message: 'Por favor consulte al departamento para obtener mas información.' });
       return;
     } else if (currentStatus === FinalStatus.Future) {
-      Alert.alert('Este final aún no ha comenzado', 'Por favor espere a que comience para poder ver los detalles.');
+      setAlertDialog({ title: 'Este final aún no ha comenzado', message: 'Por favor espere a que comience para poder ver los detalles.' });
       return;
     } else if (currentStatus === FinalStatus.Closed) {
       console.log('Final status: Closed', final);
@@ -74,6 +76,15 @@ const FinalsListItem: React.FC<FinalsListItemProps> = ({ final, subjectId }) => 
   };
 
   return (
+    <>
+    <AlertDialog
+      visible={alertDialog !== null}
+      title={alertDialog?.title ?? ''}
+      message={alertDialog?.message ?? ''}
+      mode="info"
+      confirmLabel="Aceptar"
+      onConfirm={() => setAlertDialog(null)}
+    />
     <TouchableOpacity onPress={onPressItem}>
       <View style={styles.view}>
         <Text style={styles.date}>
@@ -83,6 +94,7 @@ const FinalsListItem: React.FC<FinalsListItemProps> = ({ final, subjectId }) => 
         <Text style={styles.status}>{getStatusText()}</Text>
       </View>
     </TouchableOpacity>
+    </>
   );
 };
 

@@ -4,7 +4,7 @@ import {
   DrawerContentScrollView,
   createDrawerNavigator,
 } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   Platform,
   StyleSheet,
@@ -69,7 +69,45 @@ import {
 import NotificationsDropdown from './shared/NotificationsDropdown';
 import HeaderRight from './shared/HeaderRight';
 import ToastCard from './shared/ToastCard';
+import UserMenuDropdown from './web/UserMenuDropdown';
 import FiubaPlanScreen from '../fiuba_plan';
+
+// Detail / sub-page screens that used to be Stack-only on web.
+// IMPORTANT: import directly from each scene to avoid a circular dependency
+// with the scenes barrel (which re-exports RootDrawer).
+import ViewSemesterScreen from '../view_semester';
+import MyAttendancesScreen from '../view_semester/MyAttendances';
+import MySubmissionsScreen from '../view_semester/MySubmissions';
+import CorrelativeSubjects from '../correlative_subjects';
+import ViewEvaluationsScreen from '../view_evaluations';
+import ViewEvaluationDetailsScreen from '../view_evaluation_details';
+import AddEvaluationSubmissionScreen from '../view_evaluation_details/AddEvaluationSubmission';
+import ViewFinalDetailsScreen from '../view_final_details';
+import ViewClassDetailsScreen from '../view_class_details';
+import TeachersScreen from '../teachers';
+import TeacherSemesterStudentsScreen from '../teacher_semester/SemesterStudents';
+import TeacherSemesterEditScreen from '../teacher_semester/SemesterEditScreen';
+import TeacherEvaluationsListScreen from '../teacher_evaluations/EvaluationsList';
+import TeacherAddEvaluationScreen from '../teacher_evaluations/AddEvaluation';
+import TeacherEditEvaluationScreen from '../teacher_evaluations/EditEvaluation';
+import TeacherSubmissionsListScreen from '../teacher_evaluations/SubmissionsList';
+import TeacherSubmissionDetailsScreen from '../teacher_evaluations/SubmissionDetails';
+import TeacherFinalsListScreen from '../teacher_finals/FinalsList';
+import TeacherAddFinalScreen from '../teacher_finals/AddFinal';
+import TeacherFinalExamSubmissionsScreen from '../teacher_finals/FinalExamSubmissions';
+import TeacherStaffScreen from '../teacher_staff/Teachers';
+import TeacherStaffConfigurationScreen from '../teacher_staff/TeachersConfiguration';
+import TeacherAddStaffScreen from '../teacher_staff/AddTeachersConfigurationList';
+import TeacherSemesterAttendancesScreen from '../teacher_attendances/SemesterAttendances';
+import TeacherAttendanceDetailsScreen from '../teacher_attendances/AttendanceDetails';
+import TeacherAddClassToSemesterScreen from '../teacher_attendances/AddClassToSemester';
+import TeacherStatsScreen from '../teacher_stats';
+import TeacherSemesterCardScreen from '../teacher_semester/SemesterCard';
+import TeacherSendCommissionNotificationScreen from '../teacher_notifications/SendCommissionNotification';
+import TeacherSemesterNotificationHistoryScreen from '../teacher_notifications/SemesterNotificationHistory';
+import DocumentFormScreen from '../forms/DocumentFormScreen';
+import DigitalFormScreen from '../forms/DigitalFormScreen';
+import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
 
 type WebViewStyle = ViewStyle & { transition?: string };
 
@@ -124,9 +162,96 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   MyAccount: ProfileScreen,
   ChangePassword: ChangePasswordScreen,
   FiubaPlan: FiubaPlanScreen,
+
+  // Student detail / sub-pages
+  ViewSemester: ViewSemesterScreen,
+  MyAttendances: MyAttendancesScreen,
+  MySubmissions: MySubmissionsScreen,
+  CorrelativeSubjects: CorrelativeSubjects,
+  ViewEvaluations: ViewEvaluationsScreen,
+  ViewEvaluationDetails: ViewEvaluationDetailsScreen,
+  AddEvaluationSubmission: AddEvaluationSubmissionScreen,
+  ViewFinalDetails: ViewFinalDetailsScreen,
+  ViewClassDetails: ViewClassDetailsScreen,
+  Teachers: TeachersScreen,
+  Stats: StatsScreen,
+
+  // Teacher cuatrimestre sub-pages
+  SemesterCard: TeacherSemesterCardScreen,
+  SemesterStudents: TeacherSemesterStudentsScreen,
+  SemesterEditScreen: TeacherSemesterEditScreen,
+  EvaluationsList: TeacherEvaluationsListScreen,
+  AddEvaluation: TeacherAddEvaluationScreen,
+  EditEvaluation: TeacherEditEvaluationScreen,
+  SubmissionsList: TeacherSubmissionsListScreen,
+  TeacherSubmissionDetails: TeacherSubmissionDetailsScreen,
+  FinalsList: TeacherFinalsListScreen,
+  AddFinal: TeacherAddFinalScreen,
+  FinalExamSubmissions: TeacherFinalExamSubmissionsScreen,
+  TeacherStaff: TeacherStaffScreen,
+  TeachersConfiguration: TeacherStaffConfigurationScreen,
+  AddTeachersConfigurationList: TeacherAddStaffScreen,
+  SemesterAttendances: TeacherSemesterAttendancesScreen,
+  AttendanceDetails: TeacherAttendanceDetailsScreen,
+  AddClassToSemester: TeacherAddClassToSemesterScreen,
+  TeacherStats: TeacherStatsScreen,
+  SendCommissionNotification: TeacherSendCommissionNotificationScreen,
+  SemesterNotificationHistory: TeacherSemesterNotificationHistoryScreen,
+
+  // Forms detail screens
+  DocumentForm: DocumentFormScreen,
+  DigitalForm: DigitalFormScreen,
+  FormDesigner: FormDesignerScreen,
 };
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
+
+// Every route that's reachable directly from the side menu (top-level item or
+// any submenu child). Used to decide which screens are "roots" and therefore
+// must NOT show a back arrow even if the drawer happens to remember a
+// previously-focused screen.
+function collectMenuRoutes(menu: MenuItem[]): string[] {
+  const routes: string[] = [];
+  for (const item of menu) {
+    if (item.kind === 'direct' && item.route) routes.push(item.route);
+    else if (item.kind === 'submenu') {
+      for (const child of item.children) if (child.route) routes.push(child.route);
+    }
+  }
+  return routes;
+}
+const ALL_MENU_ROUTES = new Set<string>([
+  ...collectMenuRoutes(studentMenu),
+  ...collectMenuRoutes(teacherMenu),
+  ...collectMenuRoutes(adminMenu),
+  ...collectMenuRoutes(bedeliaMenu),
+]);
+
+// Routes that on mobile are Stack screens (and therefore show a back arrow).
+// On web they live inside the drawer, so we replicate the back arrow only for
+// these — drawer-menu items don't get one, matching mobile behavior.
+const BACK_ENABLED_ROUTES = new Set<string>(
+  hiddenWebRoutes.map(r => r.route).filter(r => !ALL_MENU_ROUTES.has(r)),
+);
+
+function HeaderBackButton() {
+  const navigation = useNavigation<any>();
+  const route = useRoute();
+  // No back arrow for drawer-root screens; keep a spacer so the screen title
+  // doesn't end up flush against the side drawer.
+  if (!BACK_ENABLED_ROUTES.has(route.name) || !navigation.canGoBack()) {
+    return <View style={styles.headerLeftSpacer} />;
+  }
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.goBack()}
+      style={styles.headerBackButton}
+      accessibilityLabel="Volver"
+    >
+      <Icon name="arrow-left" size={24} color={lightModeColors.mainContrastColor} />
+    </TouchableOpacity>
+  );
+}
 
 function buildMenuScreens(user: User): Map<string, { title: string; condition: boolean }> {
   const result = new Map<string, { title: string; condition: boolean }>();
@@ -190,7 +315,12 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       navigation.reset({ index: 0, routes: [{ name: 'Landing' }] });
       return;
     }
-    if (item.route) navigation.navigate(item.route as never);
+    if (item.route) {
+      // Drawer menu items are navigation roots — reset the drawer history so
+      // the back arrow on sub-pages doesn't surface unrelated screens the user
+      // previously visited (e.g. MyAccount opened via the header user icon).
+      navigation.reset({ index: 0, routes: [{ name: item.route as never }] });
+    }
   };
 
   const handleSubmenuToggle = (key: string) => {
@@ -332,6 +462,7 @@ const RootDrawer = () => {
   const [expanded, setExpanded] = useState(false);
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastNotification, setToastNotification] = useState<UserNotification | null>(null);
   const hasLoadedNotificationsRef = useRef(false);
@@ -443,7 +574,13 @@ const RootDrawer = () => {
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
   };
 
-  const headerRight = () => (
+  const handleLogout = async () => {
+    await GoogleSignin.signOut();
+    await SessionManager.getInstance()?.clearCredentials();
+    navigation.reset({ index: 0, routes: [{ name: 'Landing' }] });
+  };
+
+  const HeaderRightInDrawer = () => (
     <HeaderRight
       canToggle={canToggle}
       activeRole={activeRole}
@@ -452,9 +589,10 @@ const RootDrawer = () => {
       onBellPress={() => setShowNotificationsDropdown(true)}
       colors={lightModeColors}
       user={user}
-      onUserPress={() => navigation.navigate('MyAccount')}
+      onUserPress={() => setShowUserDropdown(true)}
     />
   );
+  const headerRight = () => <HeaderRightInDrawer />;
 
   const menuScreens = buildMenuScreens(user);
 
@@ -462,6 +600,10 @@ const RootDrawer = () => {
     <>
       <Drawer.Navigator
         initialRouteName={homeMenuItem?.route}
+        // Default 'firstRoute' makes goBack jump to the first registered
+        // Drawer.Screen (which is the first menu item, e.g. MyAccount), instead
+        // of the previously focused screen. 'history' tracks actual visits.
+        backBehavior="history"
         screenOptions={{
           drawerType: 'permanent',
           drawerStyle: {
@@ -470,7 +612,7 @@ const RootDrawer = () => {
             borderRightColor: lightModeColors.lightGray,
             ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } as WebViewStyle : {})
           },
-          headerLeft: () => null,
+          headerLeft: () => <HeaderBackButton />,
           headerRight,
           headerTintColor: lightModeColors.mainContrastColor,
           headerStyle: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray },
@@ -527,6 +669,13 @@ const RootDrawer = () => {
         onSeeAll={() => { setShowNotificationsDropdown(false); navigation.navigate('Notifications'); }}
         formatDate={formatDate}
       />
+
+      <UserMenuDropdown
+        visible={showUserDropdown}
+        user={user}
+        onClose={() => setShowUserDropdown(false)}
+        onLogout={handleLogout}
+      />
     </>
   );
 };
@@ -563,6 +712,8 @@ const styles = StyleSheet.create({
   teacherActiveBorder: { borderLeftWidth: 2, borderLeftColor: lightModeColors.teacherAccent },
   teacherPill: { backgroundColor: lightModeColors.teacherAccent, borderRadius: 6, paddingHorizontal: 5, paddingVertical: 1, marginLeft: 6 },
   teacherPillText: { color: '#fff', fontSize: 10, fontWeight: '700' },
+  headerBackButton: { paddingVertical: 4, paddingHorizontal: 12, marginLeft: 4 },
+  headerLeftSpacer: { width: 16 },
 });
 
 export default RootDrawer;

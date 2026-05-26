@@ -6,9 +6,9 @@ import {
   Modal,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   StyleSheet,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useNavigation } from '@react-navigation/native';
 import {
   MaterialIcon,
@@ -73,6 +73,7 @@ const FormsListScreen: React.FC = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [history, setHistory] = useState<FormSubmission[]>([]);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     Promise.all([formsRepository.fetchProcedureTypes(), formsRepository.fetchForms()])
@@ -85,7 +86,7 @@ const FormsListScreen: React.FC = () => {
           })),
         );
       })
-      .catch(() => Alert.alert('Error', 'No se pudieron cargar los trámites.'))
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los trámites.' }))
       .finally(() => setLoading(false));
   }, []);
 
@@ -112,7 +113,7 @@ const FormsListScreen: React.FC = () => {
         .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
       setHistory(merged);
     } catch {
-      Alert.alert('Error', 'No se pudo cargar el historial.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo cargar el historial.' });
     } finally {
       setHistoryLoading(false);
     }
@@ -139,6 +140,14 @@ const FormsListScreen: React.FC = () => {
 
   return (
     <>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       <View style={styles.toolbar}>
         <TouchableOpacity style={styles.historyBtn} onPress={openHistory}>
           <MaterialIcon name="history" fontSize={16} color="#455A64" />

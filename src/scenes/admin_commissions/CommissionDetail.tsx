@@ -5,11 +5,11 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RoundedButton } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { adminCommissionsRepository } from '../../repositories';
 import AdminCommission from '../../models/AdminCommission';
 
@@ -26,13 +26,15 @@ const CommissionDetail: React.FC = () => {
 
   const [commission, setCommission] = useState<AdminCommission | null>(null);
   const [loading, setLoading] = useState(true);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{title: string; message: string; onConfirm: () => void} | null>(null);
 
   const loadCommission = async () => {
     try {
       const data = await adminCommissionsRepository.fetchOne(commissionId);
       setCommission(data);
     } catch {
-      Alert.alert('Error', 'No se pudo cargar la comisión.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo cargar la comisión.' });
     } finally {
       setLoading(false);
     }
@@ -45,25 +47,18 @@ const CommissionDetail: React.FC = () => {
   }, [commissionId, navigation]);
 
   const handleDelete = () => {
-    Alert.alert(
-      'Eliminar comisión',
-      `¿Estás seguro de que querés eliminar la comisión de "${commission?.subjectName}"?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await adminCommissionsRepository.deleteCommission(commissionId);
-              navigation.goBack();
-            } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar la comisión.');
-            }
-          },
-        },
-      ],
-    );
+    setConfirmDialog({
+      title: 'Eliminar comisión',
+      message: `¿Estás seguro de que querés eliminar la comisión de "${commission?.subjectName}"?`,
+      onConfirm: async () => {
+        try {
+          await adminCommissionsRepository.deleteCommission(commissionId);
+          navigation.goBack();
+        } catch (error) {
+          setAlertDialog({ title: 'Error', message: 'No se pudo eliminar la comisión.' });
+        }
+      },
+    });
   };
 
   if (loading) {
@@ -83,42 +78,62 @@ const CommissionDetail: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.name}>{commission.subjectName}</Text>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.name}>{commission.subjectName}</Text>
 
-      <Section title="ID SIU de Materia">
-        <Text style={styles.bodyText}>{commission.subjectSiuId}</Text>
-      </Section>
+        <Section title="ID SIU de Materia">
+          <Text style={styles.bodyText}>{commission.subjectSiuId}</Text>
+        </Section>
 
-      <Section title="ID SIU de Comisión">
-        <Text style={styles.bodyText}>{commission.siuId}</Text>
-      </Section>
+        <Section title="ID SIU de Comisión">
+          <Text style={styles.bodyText}>{commission.siuId}</Text>
+        </Section>
 
-      <Section title="Docente a cargo">
-        <Text style={styles.bodyText}>
-          {commission.chiefTeacher.lastName}, {commission.chiefTeacher.firstName}
-        </Text>
-        <Text style={styles.secondaryText}>{commission.chiefTeacher.email}</Text>
-        <Text style={styles.secondaryText}>Legajo: {commission.chiefTeacher.legajo}</Text>
-      </Section>
+        <Section title="Docente a cargo">
+          <Text style={styles.bodyText}>
+            {commission.chiefTeacher.lastName}, {commission.chiefTeacher.firstName}
+          </Text>
+          <Text style={styles.secondaryText}>{commission.chiefTeacher.email}</Text>
+          <Text style={styles.secondaryText}>Legajo: {commission.chiefTeacher.legajo}</Text>
+        </Section>
 
-      <Section title="Peso del corrector (jefe de cátedra)">
-        <Text style={styles.bodyText}>{commission.chiefTeacherGraderWeight}</Text>
-      </Section>
+        <Section title="Peso del corrector (jefe de cátedra)">
+          <Text style={styles.bodyText}>{commission.chiefTeacherGraderWeight}</Text>
+        </Section>
 
-      <View style={styles.adminActions}>
-        <RoundedButton
-          text="Editar"
-          onPress={() =>
-            navigation.navigate('AdminCommissionEdit', { commission })
-          }
-          style={{}}
-        />
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Eliminar</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+        <View style={styles.adminActions}>
+          <RoundedButton
+            text="Editar"
+            onPress={() =>
+              navigation.navigate('AdminCommissionEdit', { commission })
+            }
+            style={{}}
+          />
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Eliminar</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
+    </View>
   );
 };
 

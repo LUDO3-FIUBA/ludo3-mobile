@@ -12,4 +12,5 @@ export default interface AdminCommission {
     legajo: string;
   };
   chiefTeacherGraderWeight: number;
+  department: number | null;
 }

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Alert, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { Submission } from '../../models/Submission';
 import { teacherEvaluationsRepository, teacherSubmissionsRepository } from '../../repositories';
 import { useNavigation } from '@react-navigation/native';
@@ -32,12 +33,14 @@ export default function SubmissionsList({ route }: Props) {
   const semester = useAppSelector(selectSemesterData);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const [semesterTeachers, setSemesterTeachers] = useState<TeacherModel[]>([]);
   const [showTeacherSelectionModal, setShowTeacherSelectionModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<TeacherStudent | null>(null);
 
   const { evaluation, semester: semesterFromParams } = route.params as RouteParams;
+  const activeSemester = semesterFromParams || semester;
   const subjectName =
     semesterFromParams?.commission.subjectName ||
     (semesterFromParams?.commission as any)?.subject_name ||
@@ -48,14 +51,14 @@ export default function SubmissionsList({ route }: Props) {
   const teachersTuples: TeacherTuple[] = useAppSelector(selectStaffTeachers);
   const userData = useAppSelector(selectUserData);
 
-  const isActualUserChiefTeacher = semester?.commission.chiefTeacher.id === userData?.id;
+  const isActualUserChiefTeacher = activeSemester?.commission.chiefTeacher.id === userData?.id;
   const isGradeable = (evaluation as any).isGradeable ?? true;
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      const semesterForValidation = semester || semesterFromParams;
+      const semesterForValidation = activeSemester;
       if (semesterForValidation?.commission?.id) {
         const currentEvaluations = semesterForValidation.evaluations?.length
           ? semesterForValidation.evaluations
@@ -76,34 +79,34 @@ export default function SubmissionsList({ route }: Props) {
       let submissions: Submission[] = await teacherSubmissionsRepository.getSubmissions(evaluation.id);
       submissions = submissions.sort((a, b) => a.student.lastName.localeCompare(b.student.lastName));
 
-      if (semester) {
+      if (activeSemester) {
         // Getting only teachers
         const commissionTeachers = teachersTuples.map(actual => actual.teacher);
         // Add chief teacher
-        commissionTeachers.push(semester.commission.chiefTeacher);
+        commissionTeachers.push(activeSemester.commission.chiefTeacher);
         // Set state
         setSemesterTeachers(commissionTeachers);
       }
 
       setSubmissions(submissions);
     } catch (error) {
-      Alert.alert('Error', 'No pudimos conseguir información. Intenta nuevamente.');
+      setAlertDialog({ title: 'Error', message: 'No pudimos conseguir información. Intenta nuevamente.' });
       console.error("Error fetching data", error);
     } finally {
       setIsLoading(false);
     }
-  }, [evaluation.id, navigation, semester, semesterFromParams, teachersTuples]);
+  }, [evaluation.id, navigation, activeSemester, teachersTuples]);
 
   const updateCorrectorToSubmission = (submission: Submission) => {
     if (submission.grade) {
-      Alert.alert('Error', 'No se puede cambiar el corrector de una entrega ya calificada.');
+      setAlertDialog({ title: 'Error', message: 'No se puede cambiar el corrector de una entrega ya calificada.' });
       return;
     } else if (isActualUserChiefTeacher) {
       setSelectedStudent(submission.student);
       setShowTeacherSelectionModal(true);
     } else {
       // You should never get here
-      Alert.alert('Error', 'No tiene permisos para cambiar el corrector de esta entrega.');
+      setAlertDialog({ title: 'Error', message: 'No tiene permisos para cambiar el corrector de esta entrega.' });
     }
   };
 
@@ -116,7 +119,7 @@ export default function SubmissionsList({ route }: Props) {
       // force-refresh
       fetchData();
     } catch (error) {
-      Alert.alert("Error", "Hubo un error al agregar el corrector");
+      setAlertDialog({ title: 'Error', message: 'Hubo un error al agregar el corrector.' });
     }
   };
 
@@ -171,6 +174,14 @@ export default function SubmissionsList({ route }: Props) {
 
   return (
     <View style={styles.view}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {isLoading && <Loading />}
       {!isLoading && (
         <FlatList

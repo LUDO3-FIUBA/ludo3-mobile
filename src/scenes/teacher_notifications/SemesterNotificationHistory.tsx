@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
-    Alert,
     FlatList,
     Image,
     RefreshControl,
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { notificationsRepository } from '../../repositories';
 import { TeacherSentNotification } from '../../repositories/notifications';
 import { lightModeColors } from '../../styles/colorPalette';
@@ -34,6 +34,7 @@ const SemesterNotificationHistory: React.FC = () => {
     const [notifications, setNotifications] = useState<TeacherSentNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
     const load = useCallback(async (isRefresh = false) => {
         if (!isRefresh) setLoading(true);
@@ -41,7 +42,7 @@ const SemesterNotificationHistory: React.FC = () => {
             const data = await notificationsRepository.fetchSemesterNotifications(semesterId);
             setNotifications(data);
         } catch {
-            Alert.alert('Error', 'No se pudieron cargar los avisos del cuatrimestre.');
+            setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los avisos del cuatrimestre.' });
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -72,27 +73,19 @@ const SemesterNotificationHistory: React.FC = () => {
         });
     }, [navigation, semesterId, subjectName]);
 
-    if (loading) {
-        return (
-            <View style={styles.centered}>
-                <ActivityIndicator size="large" color={lightModeColors.institutional} />
-            </View>
-        );
-    }
-
-    if (notifications.length === 0) {
-        return (
-            <View style={styles.centered}>
-                <MaterialIcon name="bell-outline" fontSize={48} color="gray" />
-                <Text style={styles.emptyTitle}>No enviaste avisos</Text>
-                <Text style={styles.emptyText}>
-                    Tocá el "+" arriba para enviar un aviso a los alumnos del cuatrimestre.
-                </Text>
-            </View>
-        );
-    }
-
-    return (
+    const content = loading ? (
+        <View style={styles.centered}>
+            <ActivityIndicator size="large" color={lightModeColors.institutional} />
+        </View>
+    ) : notifications.length === 0 ? (
+        <View style={styles.centered}>
+            <MaterialIcon name="bell-outline" fontSize={48} color="gray" />
+            <Text style={styles.emptyTitle}>No enviaste avisos</Text>
+            <Text style={styles.emptyText}>
+                Tocá el "+" arriba para enviar un aviso a los alumnos del cuatrimestre.
+            </Text>
+        </View>
+    ) : (
         <FlatList
             data={notifications}
             keyExtractor={item => String(item.id)}
@@ -132,6 +125,20 @@ const SemesterNotificationHistory: React.FC = () => {
                 </View>
             )}
         />
+    );
+
+    return (
+        <View style={{ flex: 1 }}>
+            {content}
+            <AlertDialog
+                visible={alertDialog !== null}
+                title={alertDialog?.title ?? ''}
+                message={alertDialog?.message ?? ''}
+                mode="info"
+                confirmLabel="Aceptar"
+                onConfirm={() => setAlertDialog(null)}
+            />
+        </View>
     );
 };
 
