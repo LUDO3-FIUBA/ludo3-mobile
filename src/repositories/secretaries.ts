@@ -1,5 +1,5 @@
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
-import { get, post, put, deleteMethod } from './authenticatedRepository';
+import { get, post, put, deleteMethod, patch } from './authenticatedRepository';
 import Secretary from '../models/Secretary';
 
 const BASE_URL = 'api/secretaries';
@@ -38,4 +38,15 @@ export async function deleteSecretary(id: number): Promise<void> {
   await deleteMethod(`${BASE_URL}/${id}`, {});
 }
 
-export default { fetchAll, fetchOne, createSecretary, updateSecretary, deleteSecretary };
+export async function updateMemberships(
+  id: number,
+  groups: { groupId: number; isEditor: boolean }[],
+): Promise<Secretary> {
+  const payload = {
+    groups: groups.map(g => ({ group_id: g.groupId, is_editor: g.isEditor })),
+  };
+  const result = await patch(`${BASE_URL}/${id}/ownership-groups`, payload);
+  return convertSnakeToCamelCase(result) as Secretary;
+}
+
+export default { fetchAll, fetchOne, createSecretary, updateSecretary, deleteSecretary, updateMemberships };

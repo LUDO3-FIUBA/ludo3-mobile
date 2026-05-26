@@ -53,7 +53,6 @@ import DocumentFormScreen from '../forms/DocumentFormScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
 import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
-import OwnershipGroupsListScreen from '../admin_forms/OwnershipGroupsList';
 import OwnershipGroupEditorScreen from '../admin_forms/OwnershipGroupEditor';
 import NewsList from '../news/NewsList';
 import NewsDetail from '../news/NewsDetail';
@@ -117,7 +116,6 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminNotificationList: NotificationList,
   FormsManager: FormsManagerScreen,
   FormDesigner: FormDesignerScreen,
-  OwnershipGroupsList: OwnershipGroupsListScreen,
   OwnershipGroupEditor: OwnershipGroupEditorScreen,
   BedeliaClassroomChange: BedeliaClassroomChangeForm,
   AdminDepartmentDetail: DepartmentDetail,

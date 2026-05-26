@@ -9,6 +9,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import MaterialIcon from './materialIcon';
+import { lightModeColors } from '../styles/colorPalette';
 
 export interface OwnershipGroupSection<TItem> {
   ownership_group: { id: number; name: string };
@@ -28,9 +29,6 @@ interface OwnershipGroupAccordionListProps<TItem> {
   contentContainerStyle?: StyleProp<ViewStyle>;
 }
 
-const DEFAULT_ICON = 'folder';
-const DEFAULT_COLOR = '#757575';
-
 const OwnershipGroupAccordionList = <TItem,>({
   sections,
   renderItems,
@@ -46,30 +44,29 @@ const OwnershipGroupAccordionList = <TItem,>({
         const isExpanded = expandedId === section.ownership_group.id;
 
         return (
-          <View
-            key={section.ownership_group.id}
-            style={[styles.groupBlock, { borderLeftColor: DEFAULT_COLOR }]}
-          >
+          <View key={section.ownership_group.id} style={styles.groupBlock}>
             <TouchableOpacity
               style={styles.groupCard}
               onPress={() => setExpandedId(isExpanded ? null : section.ownership_group.id)}
               activeOpacity={0.75}
             >
               <View style={styles.groupCardLeft}>
-                <MaterialIcon name={DEFAULT_ICON} fontSize={28} color={DEFAULT_COLOR} />
-                <Text style={[styles.groupTitle, { color: DEFAULT_COLOR }]}>
+                <View style={styles.groupIcon}>
+                  <MaterialIcon name="folder-account" fontSize={22} color={lightModeColors.institutional} />
+                </View>
+                <Text style={styles.groupTitle}>
                   {section.ownership_group.name}
                 </Text>
               </View>
               <View style={styles.groupCardRight}>
                 {renderSectionAction?.(section)}
-                <View style={[styles.badge, { backgroundColor: DEFAULT_COLOR }]}>
+                <View style={styles.badge}>
                   <Text style={styles.badgeText}>{section.items.length}</Text>
                 </View>
                 <MaterialIcon
                   name={isExpanded ? 'chevron-up' : 'chevron-down'}
                   fontSize={20}
-                  color="#666"
+                  color="#bbb"
                 />
               </View>
             </TouchableOpacity>
@@ -95,15 +92,15 @@ const styles = StyleSheet.create({
 
   groupBlock: {
     backgroundColor: 'white',
-    borderLeftWidth: 4,
     borderRadius: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingVertical: 12,
+    paddingLeft: 14,
+    paddingRight: 8,
     gap: 10,
-    elevation: 2,
+    elevation: 1,
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
     shadowOffset: { width: 0, height: 1 },
   },
   groupCard: {
@@ -113,9 +110,17 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     paddingHorizontal: 2,
   },
-  groupCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  groupCardRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  groupTitle: { fontSize: 17, fontWeight: '700' },
+  groupIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#F0F4FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  groupCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
+  groupCardRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  groupTitle: { flex: 1, fontSize: 15, fontWeight: '600', color: '#222' },
   badge: {
     minWidth: 26,
     height: 26,
@@ -123,6 +128,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 6,
+    backgroundColor: lightModeColors.institutional,
   },
   badgeText: { color: 'white', fontSize: 12, fontWeight: '700' },
 

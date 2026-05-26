@@ -16,10 +16,11 @@ import { Picker } from '@react-native-picker/picker';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { MaterialIcon, ReorderableFieldList, RoundedButton } from '../../components';
-import { formsRepository } from '../../repositories';
+import { formsRepository, usersRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import { StatusCodeError } from '../../networking';
-import FormOwnershipGroup, { EligibleEntity, FormOwnershipGroupDetail, GroupMember, OwnershipMemberInput } from '../../models/FormOwnershipGroup';
+import FormOwnershipGroup, { EligibleEntity, EntityType, FormOwnershipGroupDetail, GroupMember, OwnershipMemberInput } from '../../models/FormOwnershipGroup';
+import User from '../../models/User';
 import { lightModeColors } from '../../styles/colorPalette';
 
 interface FieldOption {
@@ -59,6 +60,7 @@ const FormDesignerScreen: React.FC = () => {
   const isEditing = typeof editingFormId === 'number';
 
   const [loadingConfig, setLoadingConfig] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [ownershipGroups, setOwnershipGroups] = useState<FormOwnershipGroup[]>([]);
   const [ownershipGroupDetailKey, setOwnershipGroupDetailKey] = useState(0);
   const [formTypes, setFormTypes] = useState<{ id: number; value: string }[]>([]);
@@ -158,10 +160,14 @@ const FormDesignerScreen: React.FC = () => {
       formsRepository.fetchFieldTypes(),
       formsRepository.fetchCatalogs().catch(() => []),
       isEditing ? formsRepository.fetchFormDetail(editingFormId) : Promise.resolve(null),
+      usersRepository.getInfo(),
     ])
-      .then(([groups, types, fts, cats, existingForm]) => {
+      .then(([groups, types, fts, cats, existingForm, user]) => {
+        setCurrentUser(user);
         setOwnershipGroups(groups);
-        if (groups.length > 0 && !isEditing) setOwnershipGroupId(groups[0].id);
+        const isSuperAdmin = user?.isSuperAdmin?.() ?? false;
+        const editorGroups = isSuperAdmin ? groups : groups.filter(g => g.is_editor === true);
+        if (editorGroups.length > 0 && !isEditing) setOwnershipGroupId(editorGroups[0].id);
         setFormTypes(types);
         const digital = types.find(t => t.value === 'Digital');
         if (digital && !isEditing) setIsDigital(true);
@@ -291,7 +297,7 @@ const FormDesignerScreen: React.FC = () => {
       setNewGroupError('El nombre del grupo es obligatorio.');
       return;
     }
-    if (selectedMembers.length > 0 && !selectedMembers.some(m => m.is_editor)) {
+    if (isSuperAdmin && selectedMembers.length > 0 && !selectedMembers.some(m => m.is_editor)) {
       setNewGroupError('Al menos un miembro debe tener rol de editor.');
       return;
     }
@@ -299,7 +305,7 @@ const FormDesignerScreen: React.FC = () => {
     setNewGroupError(null);
     try {
       const created = await formsRepository.createOwnershipGroup(newGroupName.trim(), selectedMembers);
-      setOwnershipGroups(prev => [...prev, created]);
+      setOwnershipGroups(prev => [...prev, { ...created, is_editor: true }]);
       setOwnershipGroupId(created.id);
       setGroupModalVisible(false);
       setNewGroupName('');
@@ -424,6 +430,15 @@ const FormDesignerScreen: React.FC = () => {
       Alert.alert('Error', 'No se pudo seleccionar el archivo.');
     }
   };
+
+  const isSuperAdmin = currentUser?.isSuperAdmin?.() ?? false;
+  const selectableGroups = isSuperAdmin
+    ? ownershipGroups
+    : ownershipGroups.filter(g => g.is_editor === true);
+  const userEntityType: EntityType | null = currentUser?.departmentId
+    ? 'department'
+    : currentUser?.secretaryId ? 'secretary' : null;
+  const userEntityId: number | null = currentUser?.departmentId ?? currentUser?.secretaryId ?? null;
 
   const handleSave = async () => {
     if (!formName.trim()) {
@@ -567,11 +582,21 @@ const FormDesignerScreen: React.FC = () => {
               onPress={() => {
                 setNewGroupName('');
                 setNewGroupError(null);
+                // Pre-populate the user's own entity as editor for non-superadmins.
                 setSelectedMembers([]);
                 setGroupModalVisible(true);
                 setLoadingEntities(true);
                 formsRepository.fetchEligibleEntities()
-                  .then(setEligibleEntities)
+                  .then(entities => {
+                    setEligibleEntities(entities);
+                    if (!isSuperAdmin) {
+                      setSelectedMembers(entities.map(e => ({
+                        entity_type: e.entity_type,
+                        entity_id: e.entity_id,
+                        is_editor: e.entity_type === userEntityType && e.entity_id === userEntityId,
+                      })));
+                    }
+                  })
                   .catch(() => setNewGroupError('No se pudieron cargar las entidades disponibles.'))
                   .finally(() => setLoadingEntities(false));
               }}
@@ -580,7 +605,7 @@ const FormDesignerScreen: React.FC = () => {
               <Text style={styles.createGroupText}>Crear nuevo</Text>
             </TouchableOpacity>
           </View>
-          {ownershipGroups.length === 0 ? (
+          {selectableGroups.length === 0 ? (
             <Text style={styles.emptyFields}>
               No hay grupos disponibles. Creá uno con el botón "Crear nuevo".
             </Text>
@@ -590,7 +615,7 @@ const FormDesignerScreen: React.FC = () => {
                 selectedValue={ownershipGroupId}
                 onValueChange={v => setOwnershipGroupId(Number(v))}
               >
-                {ownershipGroups.map(group => (
+                {selectableGroups.map(group => (
                   <Picker.Item key={group.id} label={group.name} value={group.id} />
                 ))}
               </Picker>
@@ -1045,12 +1070,21 @@ const FormDesignerScreen: React.FC = () => {
               )}
             </View>
 
-            <View style={styles.editorWarningBanner}>
-              <MaterialIcon name="alert-circle" fontSize={15} color="#92400E" />
-              <Text style={styles.editorWarningText}>
-                Al menos un miembro debe tener rol de <Text style={styles.editorWarningBold}>Editor</Text> para poder guardar.
-              </Text>
-            </View>
+            {isSuperAdmin ? (
+              <View style={styles.editorWarningBanner}>
+                <MaterialIcon name="alert-circle" fontSize={15} color="#92400E" />
+                <Text style={styles.editorWarningText}>
+                  Al menos un miembro debe tener rol de <Text style={styles.editorWarningBold}>Editor</Text> para poder guardar.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.readOnlyBanner}>
+                <MaterialIcon name="information" fontSize={15} color="#1e40af" />
+                <Text style={styles.readOnlyBannerText}>
+                  Los miembros se asignan automáticamente según tu perfil.
+                </Text>
+              </View>
+            )}
 
             {loadingEntities ? (
               <ActivityIndicator size="small" style={{ marginVertical: 8 }} />
@@ -1062,9 +1096,14 @@ const FormDesignerScreen: React.FC = () => {
                 const member = selectedMembers.find(m => `${m.entity_type}:${m.entity_id}` === key);
                 const isSelected = !!member;
                 const isSubsecretary = entity.entity_type === 'secretary' && !!entity.parent_secretary_name;
+                const isLocked = !isSuperAdmin;
                 return (
                   <View key={key} style={[styles.entityRow, isSelected && styles.entityRowSelected]}>
-                    <TouchableOpacity style={styles.entityRowMain} onPress={() => toggleMember(entity)} activeOpacity={0.7}>
+                    <TouchableOpacity
+                      style={styles.entityRowMain}
+                      onPress={isLocked ? undefined : () => toggleMember(entity)}
+                      activeOpacity={isLocked ? 1 : 0.7}
+                    >
                       <View style={[styles.entityCheckbox, isSelected && styles.entityCheckboxChecked]}>
                         {isSelected && <MaterialIcon name="check" fontSize={14} color="white" />}
                       </View>
@@ -1078,16 +1117,30 @@ const FormDesignerScreen: React.FC = () => {
                               : 'Secretaría'}
                         </Text>
                       </View>
+                      {isLocked && (
+                        <MaterialIcon name="lock" fontSize={14} color="#6d28d9" />
+                      )}
                     </TouchableOpacity>
                     {isSelected && (
-                      <TouchableOpacity style={styles.entityEditorRow} onPress={() => toggleEditor(entity)} activeOpacity={0.7}>
-                        <View style={[styles.entityEditorCheckbox, member.is_editor && styles.entityEditorCheckboxChecked]}>
-                          {member.is_editor && <MaterialIcon name="check" fontSize={13} color="white" />}
+                      isLocked ? (
+                        <View style={[styles.entityEditorRow, { opacity: 0.6 }]}>
+                          <View style={[styles.entityEditorCheckbox, styles.entityEditorCheckboxChecked]}>
+                            <MaterialIcon name="check" fontSize={13} color="white" />
+                          </View>
+                          <Text style={[styles.entityEditorLabel, styles.entityEditorLabelActive]}>
+                            Editor
+                          </Text>
                         </View>
-                        <Text style={[styles.entityEditorLabel, member.is_editor && styles.entityEditorLabelActive]}>
-                          Editor
-                        </Text>
-                      </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity style={styles.entityEditorRow} onPress={() => toggleEditor(entity)} activeOpacity={0.7}>
+                          <View style={[styles.entityEditorCheckbox, member.is_editor && styles.entityEditorCheckboxChecked]}>
+                            {member.is_editor && <MaterialIcon name="check" fontSize={13} color="white" />}
+                          </View>
+                          <Text style={[styles.entityEditorLabel, member.is_editor && styles.entityEditorLabelActive]}>
+                            Editor
+                          </Text>
+                        </TouchableOpacity>
+                      )
                     )}
                   </View>
                 );
@@ -1379,6 +1432,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#92400E',
   },
+  readOnlyBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: '#DBEAFE',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  readOnlyBannerText: { flex: 1, fontSize: 12, color: '#1e3a8a', lineHeight: 17 },
   entityRow: {
     borderWidth: 1,
     borderColor: '#e0e0e0',

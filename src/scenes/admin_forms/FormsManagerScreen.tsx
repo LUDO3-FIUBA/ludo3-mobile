@@ -16,7 +16,8 @@ import { useNavigation } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import * as XLSX from 'xlsx';
 import { AlertDialog, MaterialIcon, OwnershipGroupAccordionList } from '../../components';
-import { formsRepository } from '../../repositories';
+import { formsRepository, usersRepository } from '../../repositories';
+import User from '../../models/User';
 import Form from '../../models/Form';
 import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 import FormSubmission, { FormSubmissionStatusValue } from '../../models/FormSubmission';
@@ -37,12 +38,15 @@ const FormsManagerScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [forms, setForms] = useState<Form[]>([]);
   const [ownershipGroups, setOwnershipGroups] = useState<FormOwnershipGroup[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedFormId, setExpandedFormId] = useState<number | null>(null);
   const [submissionsCache, setSubmissionsCache] = useState<Record<number, FormSubmission[]>>({});
   const [formDetailsCache, setFormDetailsCache] = useState<Record<number, FormDetail>>({});
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
+  const [groupToDelete, setGroupToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [deletingGroup, setDeletingGroup] = useState(false);
   const [refreshingProcedureId, setRefreshingProcedureId] = useState<number | null>(null);
   const [exportingFormId, setExportingFormId] = useState<number | null>(null);
   const [downloadingSubmissionId, setDownloadingSubmissionId] = useState<number | null>(null);
@@ -57,12 +61,14 @@ const FormsManagerScreen: React.FC = () => {
 
   const loadForms = useCallback(async () => {
     try {
-      const [data, groups] = await Promise.all([
+      const [data, groups, user] = await Promise.all([
         formsRepository.fetchForms(),
         formsRepository.fetchOwnershipGroups(),
+        usersRepository.getInfo(),
       ]);
       setForms(data);
       setOwnershipGroups(groups);
+      setCurrentUser(user);
     } catch {
       showMessage('Error', 'No se pudieron cargar los formularios.');
     } finally {
@@ -109,18 +115,22 @@ const FormsManagerScreen: React.FC = () => {
   }, [ownershipGroups]);
 
   const isAnyGroupEditor = editorGroupIds.size > 0;
+  const isSuperAdmin = currentUser?.isSuperAdmin?.() ?? false;
+  const canCreateForms = (currentUser?.isAdmin?.() ?? false);
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity
-            style={{ marginRight: 12 }}
-            onPress={() => navigation.navigate('OwnershipGroupsList')}
-          >
-            <MaterialIcon name="folder-account-outline" fontSize={24} color={lightModeColors.mainContrastColor} />
-          </TouchableOpacity>
-          {isAnyGroupEditor && (
+          {isSuperAdmin && (
+            <TouchableOpacity
+              style={{ marginRight: 12 }}
+              onPress={() => navigation.navigate('OwnershipGroupEditor')}
+            >
+              <MaterialIcon name="folder-account-outline" fontSize={24} color={lightModeColors.mainContrastColor} />
+            </TouchableOpacity>
+          )}
+          {canCreateForms && (
             <TouchableOpacity
               style={{ marginRight: 16 }}
               onPress={() => navigation.navigate('FormDesigner')}
@@ -131,19 +141,22 @@ const FormsManagerScreen: React.FC = () => {
         </View>
       ),
     });
-  }, [navigation, isAnyGroupEditor]);
+  }, [navigation, isAnyGroupEditor, isSuperAdmin, canCreateForms]);
 
   const sections = useMemo(() => {
-    const map = new Map<number, { ownership_group: Form['ownership_group']; forms: Form[] }>();
+    const formsMap = new Map<number, Form[]>();
     forms.forEach(form => {
-      const group = form.ownership_group;
-      if (!map.has(group.id)) map.set(group.id, { ownership_group: group, forms: [] });
-      map.get(group.id)!.forms.push(form);
+      const gId = form.ownership_group.id;
+      if (!formsMap.has(gId)) formsMap.set(gId, []);
+      formsMap.get(gId)!.push(form);
     });
-    return Array.from(map.values()).sort((a, b) =>
-      a.ownership_group.name.localeCompare(b.ownership_group.name),
-    );
-  }, [forms]);
+    return ownershipGroups
+      .map(group => ({
+        ownership_group: { id: group.id, name: group.name },
+        forms: formsMap.get(group.id) ?? [],
+      }))
+      .sort((a, b) => a.ownership_group.name.localeCompare(b.ownership_group.name));
+  }, [forms, ownershipGroups]);
 
   const toggleForm = async (form: Form) => {
     if (expandedFormId === form.form_id) {
@@ -256,6 +269,27 @@ const FormsManagerScreen: React.FC = () => {
     } finally {
       setDeletingFormId(null);
       setFormToDelete(null);
+    }
+  };
+
+  const confirmDeleteGroup = async () => {
+    if (!groupToDelete) return;
+    setDeletingGroup(true);
+    try {
+      await formsRepository.deleteOwnershipGroup(groupToDelete.id);
+      const [formsData, groups] = await Promise.all([
+        formsRepository.fetchForms(),
+        formsRepository.fetchOwnershipGroups(),
+      ]);
+      setForms(formsData);
+      setOwnershipGroups(groups);
+    } catch (err: any) {
+      const detail = err?.info?.detail ?? err?.info;
+      const msg = typeof detail === 'string' ? detail : 'No se pudo eliminar el grupo.';
+      showMessage('Error', msg);
+    } finally {
+      setDeletingGroup(false);
+      setGroupToDelete(null);
     }
   };
 
@@ -475,11 +509,17 @@ const FormsManagerScreen: React.FC = () => {
   };
 
   const daysSince = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const date = new Date(dateStr);
+    const diff = Date.now() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'hoy';
-    if (days === 1) return 'hace 1 día';
-    return `hace ${days} días`;
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const dateLabel = date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const timeLabel = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    const ago = days === 0
+      ? hours === 0 ? 'hace menos de 1 hora' : `hace ${hours} h`
+      : days === 1 ? 'hace 1 día'
+      : `hace ${days} días`;
+    return `${dateLabel} ${timeLabel} · ${ago}`;
   };
 
   if (loading) {
@@ -499,20 +539,46 @@ const FormsManagerScreen: React.FC = () => {
         }))}
         emptyText="Sin formularios."
         renderSectionAction={section => (
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation();
-              handleRefreshProcedure(section.ownership_group.id, section.items);
-            }}
-            disabled={refreshingProcedureId === section.ownership_group.id}
-            style={{ marginRight: 6 }}
-          >
-            {refreshingProcedureId === section.ownership_group.id ? (
-              <ActivityIndicator size="small" color="#757575" />
-            ) : (
-              <MaterialIcon name="refresh" fontSize={22} color="#757575" />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+            {isSuperAdmin && (
+              <>
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    navigation.navigate('OwnershipGroupEditor', { groupId: section.ownership_group.id });
+                  }}
+                  style={{ padding: 4 }}
+                  hitSlop={4}
+                >
+                  <MaterialIcon name="pencil-outline" fontSize={20} color="#757575" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    setGroupToDelete(section.ownership_group);
+                  }}
+                  style={{ padding: 4 }}
+                  hitSlop={4}
+                >
+                  <MaterialIcon name="delete-outline" fontSize={20} color="#D32F2F" />
+                </TouchableOpacity>
+              </>
             )}
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                handleRefreshProcedure(section.ownership_group.id, section.items);
+              }}
+              disabled={refreshingProcedureId === section.ownership_group.id}
+              style={{ padding: 4 }}
+            >
+              {refreshingProcedureId === section.ownership_group.id ? (
+                <ActivityIndicator size="small" color="#757575" />
+              ) : (
+                <MaterialIcon name="refresh" fontSize={20} color="#757575" />
+              )}
+            </TouchableOpacity>
+          </View>
         )}
         renderItems={(items, _section) =>
           items.map(item => {
@@ -534,6 +600,7 @@ const FormsManagerScreen: React.FC = () => {
                 isExporting={exportingFormId === item.form_id}
                 downloadingSubmissionId={downloadingSubmissionId}
                 canEdit={editorGroupIds.has(item.ownership_group.id)}
+                currentUser={currentUser}
                 onToggle={() => toggleForm(item)}
                 onEdit={() => navigation.navigate('FormDesigner', { formId: item.form_id })}
                 onDelete={() => handleDeleteForm(item)}
@@ -552,6 +619,21 @@ const FormsManagerScreen: React.FC = () => {
             );
           })
         }
+      />
+
+      <AlertDialog
+        visible={!!groupToDelete}
+        title="Eliminar grupo"
+        message={
+          groupToDelete
+            ? `¿Estás seguro de eliminar el grupo "${groupToDelete.name}"? Solo se puede eliminar si no tiene formularios asociados.`
+            : ''
+        }
+        destructive
+        loading={deletingGroup}
+        confirmLabel="Eliminar"
+        onConfirm={confirmDeleteGroup}
+        onCancel={() => setGroupToDelete(null)}
       />
 
       <AlertDialog

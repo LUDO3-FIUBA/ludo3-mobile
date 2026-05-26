@@ -9,11 +9,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Switch,
 } from 'react-native';
 import {useFocusEffect, useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {RoundedButton, MaterialIcon} from '../../components';
-import {secretariesRepository} from '../../repositories';
+import {secretariesRepository, formsRepository, usersRepository} from '../../repositories';
 import Secretary from '../../models/Secretary';
+import FormOwnershipGroup from '../../models/FormOwnershipGroup';
+
+interface PendingMembership {
+  groupId: number;
+  groupName: string;
+  isEditor: boolean;
+}
 
 type SecretaryFormRouteParams = {
   SecretaryForm: {
@@ -40,6 +48,11 @@ const SecretaryForm: React.FC = () => {
   const [showParentPicker, setShowParentPicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<PendingMembership[]>([]);
+  const [showGroupPicker, setShowGroupPicker] = useState(false);
+
   useFocusEffect(
     useCallback(() => {
       const currentExisting = route.params?.secretary;
@@ -61,6 +74,24 @@ const SecretaryForm: React.FC = () => {
           ),
         )
         .catch(() => {});
+
+      Promise.all([
+        usersRepository.getInfo(),
+        formsRepository.fetchOwnershipGroups(),
+      ]).then(([user, groups]) => {
+        const superAdmin = user.isSuperAdmin?.() ?? false;
+        setIsSuperAdmin(superAdmin);
+        setAllGroups(groups);
+        if (superAdmin && currentExisting) {
+          setSelectedGroups(
+            (currentExisting.ownershipGroups ?? []).map(m => ({
+              groupId: m.groupId,
+              groupName: m.groupName,
+              isEditor: m.isEditor,
+            })),
+          );
+        }
+      }).catch(() => {});
     }, [route.params]),
   );
 
@@ -83,6 +114,20 @@ const SecretaryForm: React.FC = () => {
     navigation.setOptions(options);
   }, [navigation, existing, paramParentId]);
 
+  const toggleGroup = (group: FormOwnershipGroup) => {
+    setSelectedGroups(prev => {
+      const exists = prev.find(p => p.groupId === group.id);
+      if (exists) return prev.filter(p => p.groupId !== group.id);
+      return [...prev, {groupId: group.id, groupName: group.name, isEditor: false}];
+    });
+  };
+
+  const toggleEditor = (groupId: number) => {
+    setSelectedGroups(prev =>
+      prev.map(p => (p.groupId === groupId ? {...p, isEditor: !p.isEditor} : p)),
+    );
+  };
+
   const handleSubmit = async () => {
     if (!name.trim()) {
       Alert.alert('Error', 'El nombre de la secretaría es obligatorio.');
@@ -100,18 +145,30 @@ const SecretaryForm: React.FC = () => {
       };
       if (existing) {
         await secretariesRepository.updateSecretary(existing.id, data);
+        if (isSuperAdmin) {
+          await secretariesRepository.updateMemberships(
+            existing.id,
+            selectedGroups.map(g => ({groupId: g.groupId, isEditor: g.isEditor})),
+          );
+        }
         Alert.alert('Éxito', 'Secretaría actualizada correctamente.');
         navigation.goBack();
       } else {
-        await secretariesRepository.createSecretary(data);
+        const created = await secretariesRepository.createSecretary(data);
+        if (isSuperAdmin && selectedGroups.length > 0) {
+          await secretariesRepository.updateMemberships(
+            created.id,
+            selectedGroups.map(g => ({groupId: g.groupId, isEditor: g.isEditor})),
+          );
+        }
         Alert.alert('Éxito', 'Secretaría creada correctamente.');
         navigation.navigate('AdminSecretaryList');
       }
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        'No se pudo guardar la secretaría. Intente de nuevo.',
-      );
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.detail ??
+        'No se pudo guardar la secretaría. Intente de nuevo.';
+      Alert.alert('Error', msg);
     } finally {
       setSaving(false);
     }
@@ -217,6 +274,69 @@ const SecretaryForm: React.FC = () => {
           multiline
           numberOfLines={3}
         />
+
+        {isSuperAdmin && (
+          <View style={styles.fieldContainer}>
+            <TouchableOpacity
+              style={styles.groupPickerHeader}
+              onPress={() => setShowGroupPicker(prev => !prev)}
+              activeOpacity={0.7}>
+              <Text style={styles.label}>Grupos de propiedad</Text>
+              <MaterialIcon
+                name={showGroupPicker ? 'chevron-up' : 'chevron-down'}
+                fontSize={18}
+                color="#555"
+              />
+            </TouchableOpacity>
+
+            {selectedGroups.length > 0 && !showGroupPicker && (
+              <Text style={styles.groupSummary}>
+                {selectedGroups.map(g => g.groupName).join(', ')}
+              </Text>
+            )}
+
+            {showGroupPicker && (
+              <View style={styles.groupPickerDropdown}>
+                {allGroups.length === 0 ? (
+                  <Text style={styles.emptyText}>No hay grupos disponibles</Text>
+                ) : (
+                  allGroups.map(g => {
+                    const membership = selectedGroups.find(p => p.groupId === g.id);
+                    const isSelected = !!membership;
+                    return (
+                      <View key={g.id} style={styles.groupEditRow}>
+                        <TouchableOpacity
+                          style={styles.groupEditCheckbox}
+                          onPress={() => toggleGroup(g)}>
+                          <MaterialIcon
+                            name={
+                              isSelected
+                                ? 'checkbox-marked'
+                                : 'checkbox-blank-outline'
+                            }
+                            fontSize={22}
+                            color={isSelected ? '#1a56db' : '#aaa'}
+                          />
+                          <Text style={styles.groupEditName}>{g.name}</Text>
+                        </TouchableOpacity>
+                        {isSelected && (
+                          <View style={styles.editorToggle}>
+                            <Text style={styles.editorToggleLabel}>Editor</Text>
+                            <Switch
+                              value={membership.isEditor}
+                              onValueChange={() => toggleEditor(g.id)}
+                              trackColor={{true: '#1a56db'}}
+                            />
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })
+                )}
+              </View>
+            )}
+          </View>
+        )}
 
         <RoundedButton
           text={
@@ -337,6 +457,59 @@ const styles = StyleSheet.create({
   backButton: {
     marginLeft: 16,
     padding: 4,
+  },
+  groupPickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  groupSummary: {
+    fontSize: 13,
+    color: '#555',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  groupPickerDropdown: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  groupEditRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eee',
+  },
+  groupEditCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  groupEditName: {
+    fontSize: 15,
+    color: '#222',
+    marginLeft: 8,
+    flex: 1,
+  },
+  editorToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 6,
+    paddingLeft: 30,
+  },
+  editorToggleLabel: {
+    fontSize: 13,
+    color: '#555',
+    marginRight: 8,
+  },
+  emptyText: {
+    padding: 12,
+    fontSize: 14,
+    color: '#aaa',
+    fontStyle: 'italic',
   },
 });
 

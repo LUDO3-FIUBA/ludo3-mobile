@@ -13,6 +13,7 @@ import SubmissionStatusBadge from '../../../components/SubmissionStatusBadge';
 import { lightModeColors } from '../../../styles/colorPalette';
 import Form from '../../../models/Form';
 import FormSubmission, { FormSubmissionStatusValue, TeacherValidationStatusValue } from '../../../models/FormSubmission';
+import User from '../../../models/User';
 
 interface ManagerFormItemProps {
   form: Form;
@@ -27,6 +28,7 @@ interface ManagerFormItemProps {
   downloadingSubmissionId: number | null;
   /** Whether the current admin is an editor in this form's group. Controls edit/delete visibility. */
   canEdit?: boolean;
+  currentUser?: User | null;
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -76,6 +78,7 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
   isExporting,
   downloadingSubmissionId,
   canEdit = true,
+  currentUser,
   onToggle,
   onEdit,
   onDelete,
@@ -88,6 +91,14 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
   daysSince,
 }) => {
   const isLoadingSubmissions = submissionsLoading && !hasSubmissionsCache;
+
+  const isRecipientOf = (sub: FormSubmission): boolean => {
+    if (!currentUser || currentUser.isSuperAdmin?.()) return false;
+    if (!sub.recipient_entity_type || !sub.recipient_entity_id) return true;
+    if (sub.recipient_entity_type === 'department' && currentUser.departmentId === sub.recipient_entity_id) return true;
+    if (sub.recipient_entity_type === 'secretary' && currentUser.secretaryId === sub.recipient_entity_id) return true;
+    return false;
+  };
   const [showStatusActions, setShowStatusActions] = useState<Record<number, boolean>>({});
   const [teacherModalSub, setTeacherModalSub] = useState<FormSubmission | null>(null);
   const [confirmStatus, setConfirmStatus] = useState<{
@@ -207,6 +218,8 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
                     form.requires_teacher_validation &&
                     sub.teacher_status !== 'approved';
 
+                  const canChangeStatus = isRecipientOf(sub);
+
                   return (
                     <View key={sub.submission_id} style={styles.submissionRow}>
                       <View style={styles.subTopRow}>
@@ -230,14 +243,18 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
                               />
                             </TouchableOpacity>
                           )}
-                          {showStatusActions[sub.submission_id] ? (
-                            <TouchableOpacity onPress={() => toggleStatusActions(sub.submission_id)} hitSlop={8}>
-                              <MaterialIcon name="dots-horizontal" fontSize={20} color="#555" />
-                            </TouchableOpacity>
+                          {canChangeStatus ? (
+                            showStatusActions[sub.submission_id] ? (
+                              <TouchableOpacity onPress={() => toggleStatusActions(sub.submission_id)} hitSlop={8}>
+                                <MaterialIcon name="dots-horizontal" fontSize={20} color="#555" />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity onPress={() => toggleStatusActions(sub.submission_id)} hitSlop={8}>
+                                <MaterialIcon name="check-circle-outline" fontSize={20} color="#1B5E20" />
+                              </TouchableOpacity>
+                            )
                           ) : (
-                            <TouchableOpacity onPress={() => toggleStatusActions(sub.submission_id)} hitSlop={8}>
-                              <MaterialIcon name="check-circle-outline" fontSize={20} color="#1B5E20" />
-                            </TouchableOpacity>
+                            <MaterialIcon name="check-circle-outline" fontSize={20} color="#ccc" />
                           )}
                           {isDigital ? (
                             <TouchableOpacity onPress={() => onOpenAnswers(sub)}>
@@ -261,58 +278,68 @@ const ManagerFormItem: React.FC<ManagerFormItemProps> = ({
                         </View>
                       </View>
                       <View style={styles.statusRow}>
-                        {currentStatus ? <SubmissionStatusBadge value={currentStatus} /> : null}
+                        {currentStatus ?
+                          <SubmissionStatusBadge value={currentStatus} />
+                        : null}
+                        {sub.recipient_name && (
+                          <View style={styles.recipientChipRow}>
+                            <View style={styles.recipientChip}>
+                              <Text style={styles.chipComment}> Destinatario: </Text>
+                              <Text style={styles.recipientChipText} numberOfLines={1}>
+                                {sub.recipient_name}
+                              </Text>
+                            </View>
+                          </View>
+                        )}
                         <View style={styles.statusActions}>
                           {isUpdatingStatus ? (
                             <ActivityIndicator size="small" color="#555" />
                           ) : (
-                            <>
-                              {showStatusActions[sub.submission_id] && (
-                                <>
-                                  <TouchableOpacity
-                                    style={[
-                                      styles.statusBtn,
-                                      styles.approveBtn,
-                                      (currentStatus === 'approved' || approveBlocked) && styles.statusBtnActive,
-                                    ]}
-                                    onPress={() => handleStatusPress(sub, 'approved')}
-                                    disabled={currentStatus === 'approved' || approveBlocked}
-                                    hitSlop={4}
-                                  >
-                                    <MaterialIcon name="check" fontSize={14} color="#1B5E20" />
-                                    <Text style={styles.approveText}>
-                                      {approveBlocked ? 'Esperando docente' : 'Aprobar'}
-                                    </Text>
-                                  </TouchableOpacity>
-                                  <TouchableOpacity
-                                    style={[
-                                      styles.statusBtn,
-                                      styles.pendingBtn,
-                                      currentStatus === 'pending_approval' && styles.statusBtnActive,
-                                    ]}
-                                    onPress={() => handleStatusPress(sub, 'pending_approval')}
-                                    disabled={currentStatus === 'pending_approval'}
-                                    hitSlop={4}
-                                  >
-                                    <MaterialIcon name="clock-outline" fontSize={14} color="#EF6C00" />
-                                    <Text style={styles.pendingText}>Pendiente</Text>
-                                  </TouchableOpacity>
-                                  <TouchableOpacity
-                                    style={[
-                                      styles.statusBtn,
-                                      styles.denyBtn,
-                                      currentStatus === 'denied' && styles.statusBtnActive,
-                                    ]}
-                                    onPress={() => handleStatusPress(sub, 'denied')}
-                                    disabled={currentStatus === 'denied'}
-                                    hitSlop={4}
-                                  >
-                                    <MaterialIcon name="close" fontSize={14} color="#B71C1C" />
-                                    <Text style={styles.denyText}>Rechazar</Text>
-                                  </TouchableOpacity>
-                                </>
-                              )}
-                            </>
+                            canChangeStatus && showStatusActions[sub.submission_id] && (
+                              <>
+                                <TouchableOpacity
+                                  style={[
+                                    styles.statusBtn,
+                                    styles.approveBtn,
+                                    (currentStatus === 'approved' || approveBlocked) && styles.statusBtnActive,
+                                  ]}
+                                  onPress={() => handleStatusPress(sub, 'approved')}
+                                  disabled={currentStatus === 'approved' || approveBlocked}
+                                  hitSlop={4}
+                                >
+                                  <MaterialIcon name="check" fontSize={14} color="#1B5E20" />
+                                  <Text style={styles.approveText}>
+                                    {approveBlocked ? 'Esperando docente' : 'Aprobar'}
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={[
+                                    styles.statusBtn,
+                                    styles.pendingBtn,
+                                    currentStatus === 'pending_approval' && styles.statusBtnActive,
+                                  ]}
+                                  onPress={() => handleStatusPress(sub, 'pending_approval')}
+                                  disabled={currentStatus === 'pending_approval'}
+                                  hitSlop={4}
+                                >
+                                  <MaterialIcon name="clock-outline" fontSize={14} color="#EF6C00" />
+                                  <Text style={styles.pendingText}>Pendiente</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={[
+                                    styles.statusBtn,
+                                    styles.denyBtn,
+                                    currentStatus === 'denied' && styles.statusBtnActive,
+                                  ]}
+                                  onPress={() => handleStatusPress(sub, 'denied')}
+                                  disabled={currentStatus === 'denied'}
+                                  hitSlop={4}
+                                >
+                                  <MaterialIcon name="close" fontSize={14} color="#B71C1C" />
+                                  <Text style={styles.denyText}>Rechazar</Text>
+                                </TouchableOpacity>
+                              </>
+                            )
                           )}
                         </View>
                       </View>
@@ -525,6 +552,24 @@ const styles = StyleSheet.create({
   subInfo: { flex: 1, gap: 3 },
   subName: { fontSize: 14, fontWeight: '600', color: '#1f2937' },
   subPadron: { fontSize: 12, color: '#64748b' },
+  chipComment: { fontSize: 12, color: '#64748b' },
+  recipientChipRow: { flexDirection: 'row' },
+  recipientChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#ede9fe',
+    borderRadius: 12,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    alignSelf: 'flex-start',
+  },
+  recipientChipText: {
+    fontSize: 11,
+    color: '#6d28d9',
+    fontWeight: '500',
+    maxWidth: 180,
+  },
   subDate: { fontSize: 12, color: '#94a3b8' },
   subActions: { flexDirection: 'row', gap: 14 },
   statusRow: {

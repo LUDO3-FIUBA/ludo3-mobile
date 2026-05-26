@@ -1,3 +1,5 @@
+import { OwnershipGroupMembership } from './Department';
+
 export default interface Secretary {
   id: number;
   name: string;
@@ -6,6 +8,7 @@ export default interface Secretary {
   schedule: string;
   contactInfo: string;
   subsecretaries: Secretary[];
+  ownershipGroups: OwnershipGroupMembership[];
   createdAt: string;
   updatedAt: string;
 }

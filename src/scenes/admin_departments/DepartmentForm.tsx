@@ -9,17 +9,25 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Switch,
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RoundedButton, MaterialIcon } from '../../components';
-import { departmentsRepository } from '../../repositories';
+import { departmentsRepository, formsRepository, usersRepository } from '../../repositories';
 import Department from '../../models/Department';
+import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 
 type DepartmentFormRouteParams = {
   DepartmentForm: {
     department?: Department;
   };
 };
+
+interface PendingMembership {
+  groupId: number;
+  groupName: string;
+  isEditor: boolean;
+}
 
 const DepartmentForm: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -30,8 +38,12 @@ const DepartmentForm: React.FC = () => {
   const [location, setLocation] = useState(existing?.location ?? '');
   const [schedule, setSchedule] = useState(existing?.schedule ?? '');
   const [contactInfo, setContactInfo] = useState(existing?.contactInfo ?? '');
-  const [procedures, setProcedures] = useState(existing?.procedures ?? '');
   const [saving, setSaving] = useState(false);
+
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
+  const [selectedGroups, setSelectedGroups] = useState<PendingMembership[]>([]);
+  const [showGroupPicker, setShowGroupPicker] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -40,7 +52,24 @@ const DepartmentForm: React.FC = () => {
       setLocation(currentExisting?.location ?? '');
       setSchedule(currentExisting?.schedule ?? '');
       setContactInfo(currentExisting?.contactInfo ?? '');
-      setProcedures(currentExisting?.procedures ?? '');
+
+      Promise.all([
+        usersRepository.getInfo(),
+        formsRepository.fetchOwnershipGroups(),
+      ]).then(([user, groups]) => {
+        const superAdmin = user.isSuperAdmin?.() ?? false;
+        setIsSuperAdmin(superAdmin);
+        setAllGroups(groups);
+        if (superAdmin && currentExisting) {
+          setSelectedGroups(
+            (currentExisting.ownershipGroups ?? []).map(m => ({
+              groupId: m.groupId,
+              groupName: m.groupName,
+              isEditor: m.isEditor,
+            })),
+          );
+        }
+      }).catch(() => {});
     }, [route.params]),
   );
 
@@ -60,6 +89,20 @@ const DepartmentForm: React.FC = () => {
     navigation.setOptions(options);
   }, [navigation, existing]);
 
+  const toggleGroup = (group: FormOwnershipGroup) => {
+    setSelectedGroups(prev => {
+      const exists = prev.find(p => p.groupId === group.id);
+      if (exists) return prev.filter(p => p.groupId !== group.id);
+      return [...prev, { groupId: group.id, groupName: group.name, isEditor: false }];
+    });
+  };
+
+  const toggleEditor = (groupId: number) => {
+    setSelectedGroups(prev =>
+      prev.map(p => (p.groupId === groupId ? { ...p, isEditor: !p.isEditor } : p)),
+    );
+  };
+
   const handleSubmit = async () => {
     if (!name.trim()) {
       Alert.alert('Error', 'El nombre del departamento es obligatorio.');
@@ -68,18 +111,31 @@ const DepartmentForm: React.FC = () => {
 
     setSaving(true);
     try {
-      const data = { name: name.trim(), location, schedule, contactInfo, procedures };
+      const data = { name: name.trim(), location, schedule, contactInfo };
       if (existing) {
         await departmentsRepository.updateDepartment(existing.id, data);
+        if (isSuperAdmin) {
+          await departmentsRepository.updateMemberships(
+            existing.id,
+            selectedGroups.map(g => ({ groupId: g.groupId, isEditor: g.isEditor })),
+          );
+        }
         Alert.alert('Éxito', 'Departamento actualizado correctamente.');
         navigation.goBack();
       } else {
-        await departmentsRepository.createDepartment(data);
+        const created = await departmentsRepository.createDepartment(data);
+        if (isSuperAdmin && selectedGroups.length > 0) {
+          await departmentsRepository.updateMemberships(
+            created.id,
+            selectedGroups.map(g => ({ groupId: g.groupId, isEditor: g.isEditor })),
+          );
+        }
         Alert.alert('Éxito', 'Departamento creado correctamente.');
         navigation.navigate('AdminDepartmentList');
       }
-    } catch (error) {
-      Alert.alert('Error', 'No se pudo guardar el departamento. Intente de nuevo.');
+    } catch (error: any) {
+      const msg = error?.response?.data?.detail ?? 'No se pudo guardar el departamento. Intente de nuevo.';
+      Alert.alert('Error', msg);
     } finally {
       setSaving(false);
     }
@@ -119,14 +175,67 @@ const DepartmentForm: React.FC = () => {
           multiline
           numberOfLines={3}
         />
-        <Field
-          label="Trámites"
-          value={procedures}
-          onChangeText={setProcedures}
-          placeholder="Ej: Equivalencias, pedido de constancias..."
-          multiline
-          numberOfLines={4}
-        />
+
+        {isSuperAdmin && (
+          <View style={styles.fieldContainer}>
+            <TouchableOpacity
+              style={styles.groupPickerHeader}
+              onPress={() => setShowGroupPicker(prev => !prev)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.label}>Grupos de propiedad</Text>
+              <MaterialIcon
+                name={showGroupPicker ? 'chevron-up' : 'chevron-down'}
+                fontSize={18}
+                color="#555"
+              />
+            </TouchableOpacity>
+
+            {selectedGroups.length > 0 && !showGroupPicker && (
+              <Text style={styles.groupSummary}>
+                {selectedGroups.map(g => g.groupName).join(', ')}
+              </Text>
+            )}
+
+            {showGroupPicker && (
+              <View style={styles.groupPickerDropdown}>
+                {allGroups.length === 0 ? (
+                  <Text style={styles.emptyText}>No hay grupos disponibles</Text>
+                ) : (
+                  allGroups.map(g => {
+                    const membership = selectedGroups.find(p => p.groupId === g.id);
+                    const isSelected = !!membership;
+                    return (
+                      <View key={g.id} style={styles.groupEditRow}>
+                        <TouchableOpacity
+                          style={styles.groupEditCheckbox}
+                          onPress={() => toggleGroup(g)}
+                        >
+                          <MaterialIcon
+                            name={isSelected ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                            fontSize={22}
+                            color={isSelected ? '#1a56db' : '#aaa'}
+                          />
+                          <Text style={styles.groupEditName}>{g.name}</Text>
+                        </TouchableOpacity>
+                        {isSelected && (
+                          <View style={styles.editorToggle}>
+                            <Text style={styles.editorToggleLabel}>Editor</Text>
+                            <Switch
+                              value={membership.isEditor}
+                              onValueChange={() => toggleEditor(g.id)}
+                              trackColor={{ true: '#1a56db' }}
+                            />
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })
+                )}
+              </View>
+            )}
+          </View>
+        )}
 
         <RoundedButton
           text={saving ? 'Guardando...' : existing ? 'Guardar cambios' : 'Crear departamento'}
@@ -205,6 +314,59 @@ const styles = StyleSheet.create({
   backButton: {
     marginLeft: 16,
     padding: 4,
+  },
+  groupPickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  groupSummary: {
+    fontSize: 13,
+    color: '#555',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  groupPickerDropdown: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  groupEditRow: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eee',
+  },
+  groupEditCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  groupEditName: {
+    fontSize: 15,
+    color: '#222',
+    marginLeft: 8,
+    flex: 1,
+  },
+  editorToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginTop: 6,
+    paddingLeft: 30,
+  },
+  editorToggleLabel: {
+    fontSize: 13,
+    color: '#555',
+    marginRight: 8,
+  },
+  emptyText: {
+    padding: 12,
+    fontSize: 14,
+    color: '#aaa',
+    fontStyle: 'italic',
   },
 });
 

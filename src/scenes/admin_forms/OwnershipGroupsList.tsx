@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AlertDialog, MaterialIcon } from '../../components';
-import { formsRepository } from '../../repositories';
+import { formsRepository, usersRepository } from '../../repositories';
 import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 import { lightModeColors } from '../../styles/colorPalette';
 
@@ -29,11 +29,18 @@ const OwnershipGroupsList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [groupToDelete, setGroupToDelete] = useState<FormOwnershipGroup | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isAnyAdmin, setIsAnyAdmin] = useState(false);
 
   const loadGroups = useCallback(async () => {
     try {
-      const data = await formsRepository.fetchOwnershipGroups();
+      const [data, user] = await Promise.all([
+        formsRepository.fetchOwnershipGroups(),
+        usersRepository.getInfo(),
+      ]);
       setGroups(data);
+      setIsSuperAdmin(user.isSuperAdmin?.() ?? false);
+      setIsAnyAdmin(user.isAdmin?.() ?? false);
     } catch {
       showMessage('Error', 'No se pudieron cargar los grupos de propiedad.');
     } finally {
@@ -57,16 +64,18 @@ const OwnershipGroupsList: React.FC = () => {
           <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
         </TouchableOpacity>
       ),
-      headerRight: () => (
-        <TouchableOpacity
-          style={{ marginRight: 16 }}
-          onPress={() => navigation.navigate('OwnershipGroupEditor')}
-        >
-          <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
-        </TouchableOpacity>
-      ),
+      headerRight: isAnyAdmin
+        ? () => (
+            <TouchableOpacity
+              style={{ marginRight: 16 }}
+              onPress={() => navigation.navigate('OwnershipGroupEditor')}
+            >
+              <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
+            </TouchableOpacity>
+          )
+        : undefined,
     });
-  }, [navigation]);
+  }, [navigation, isSuperAdmin, isAnyAdmin]);
 
   const confirmDelete = async () => {
     if (!groupToDelete) return;
@@ -105,22 +114,24 @@ const OwnershipGroupsList: React.FC = () => {
           <View style={styles.card}>
             <TouchableOpacity
               style={styles.cardMain}
-              onPress={() => navigation.navigate('OwnershipGroupEditor', { groupId: item.id })}
-              activeOpacity={0.7}
+              onPress={isSuperAdmin ? () => navigation.navigate('OwnershipGroupEditor', { groupId: item.id }) : undefined}
+              activeOpacity={isSuperAdmin ? 0.7 : 1}
             >
               <View style={styles.cardIcon}>
                 <MaterialIcon name="folder-account" fontSize={22} color={lightModeColors.institutional} />
               </View>
               <Text style={styles.cardName}>{item.name}</Text>
-              <MaterialIcon name="chevron-right" fontSize={20} color="#bbb" />
+              {isSuperAdmin && <MaterialIcon name="chevron-right" fontSize={20} color="#bbb" />}
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.deleteBtn}
-              onPress={() => setGroupToDelete(item)}
-              hitSlop={8}
-            >
-              <MaterialIcon name="delete-outline" fontSize={20} color="#D32F2F" />
-            </TouchableOpacity>
+            {isSuperAdmin && (
+              <TouchableOpacity
+                style={styles.deleteBtn}
+                onPress={() => setGroupToDelete(item)}
+                hitSlop={8}
+              >
+                <MaterialIcon name="delete-outline" fontSize={20} color="#D32F2F" />
+              </TouchableOpacity>
+            )}
           </View>
         )}
       />

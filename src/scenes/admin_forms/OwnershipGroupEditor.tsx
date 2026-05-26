@@ -12,8 +12,9 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { MaterialIcon, RoundedButton } from '../../components';
-import { formsRepository } from '../../repositories';
-import { EligibleEntity, GroupMember, OwnershipMemberInput } from '../../models/FormOwnershipGroup';
+import { formsRepository, usersRepository } from '../../repositories';
+import { EligibleEntity, EntityType, GroupMember, OwnershipMemberInput } from '../../models/FormOwnershipGroup';
+import User from '../../models/User';
 import { StatusCodeError } from '../../networking';
 import { lightModeColors } from '../../styles/colorPalette';
 
@@ -26,6 +27,7 @@ const OwnershipGroupEditor: React.FC = () => {
   const isEditing = typeof editingGroupId === 'number';
 
   const [loadingData, setLoadingData] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [groupName, setGroupName] = useState('');
   const [eligibleEntities, setEligibleEntities] = useState<EligibleEntity[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<OwnershipMemberInput[]>([]);
@@ -34,13 +36,22 @@ const OwnershipGroupEditor: React.FC = () => {
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
 
   useEffect(() => {
-    const loads: Promise<unknown>[] = [formsRepository.fetchEligibleEntities()];
+    setLoadingData(true);
+    setGroupName('');
+    setSelectedMembers([]);
+    setSubmitStatus(null);
+
+    const loads: Promise<unknown>[] = [
+      formsRepository.fetchEligibleEntities(),
+      usersRepository.getInfo(),
+    ];
     if (isEditing) {
       loads.push(formsRepository.fetchOwnershipGroup(editingGroupId));
     }
     Promise.all(loads)
-      .then(([entities, detail]) => {
+      .then(([entities, user, detail]) => {
         setEligibleEntities(entities as EligibleEntity[]);
+        setCurrentUser(user as User);
         if (detail) {
           const d = detail as { name: string; members: GroupMember[] };
           setGroupName(d.name);
@@ -68,7 +79,7 @@ const OwnershipGroupEditor: React.FC = () => {
       headerLeft: () => (
         <TouchableOpacity
           style={{ marginLeft: 16, padding: 4 }}
-          onPress={() => navigation.navigate('OwnershipGroupsList')}
+          onPress={() => navigation.navigate('FormsManager')}
         >
           <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
         </TouchableOpacity>
@@ -108,12 +119,18 @@ const OwnershipGroupEditor: React.FC = () => {
     return 'No se pudo guardar el grupo. Verificá los datos e intentá nuevamente.';
   };
 
+  const isSuperAdmin = currentUser?.isSuperAdmin?.() ?? false;
+  const userEntityType: EntityType | null = currentUser?.departmentId
+    ? 'department'
+    : currentUser?.secretaryId ? 'secretary' : null;
+  const userEntityId: number | null = currentUser?.departmentId ?? currentUser?.secretaryId ?? null;
+
   const handleSave = async () => {
     if (!groupName.trim()) {
       setSubmitStatus({ type: 'error', message: 'El nombre del grupo es obligatorio.' });
       return;
     }
-    if (selectedMembers.length > 0 && !selectedMembers.some(m => m.is_editor)) {
+    if (isSuperAdmin && selectedMembers.length > 0 && !selectedMembers.some(m => m.is_editor)) {
       setSubmitStatus({ type: 'error', message: 'Al menos un miembro debe tener rol de editor.' });
       return;
     }
@@ -129,7 +146,7 @@ const OwnershipGroupEditor: React.FC = () => {
         type: 'success',
         message: isEditing ? 'Grupo actualizado correctamente.' : 'Grupo creado correctamente.',
       });
-      setTimeout(() => navigation.navigate('OwnershipGroupsList'), 1500);
+      setTimeout(() => navigation.navigate('FormsManager'), 1500);
     } catch (err) {
       setSubmitStatus({ type: 'error', message: extractApiError(err) });
     } finally {
@@ -166,60 +183,107 @@ const OwnershipGroupEditor: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Miembros</Text>
 
-        <View style={styles.editorWarningBanner}>
-          <MaterialIcon name="alert-circle" fontSize={15} color="#92400E" />
-          <Text style={styles.editorWarningText}>
-            Al menos un miembro debe tener rol de{' '}
-            <Text style={styles.editorWarningBold}>Editor</Text> para poder guardar.
-          </Text>
-        </View>
+        {isSuperAdmin ? (
+          <>
+            <View style={styles.editorWarningBanner}>
+              <MaterialIcon name="alert-circle" fontSize={15} color="#92400E" />
+              <Text style={styles.editorWarningText}>
+                Al menos un miembro debe tener rol de{' '}
+                <Text style={styles.editorWarningBold}>Editor</Text> para poder guardar.
+              </Text>
+            </View>
 
-        {eligibleEntities.length === 0 ? (
-          <Text style={styles.emptyText}>No hay departamentos ni secretarías disponibles.</Text>
+            {eligibleEntities.length === 0 ? (
+              <Text style={styles.emptyText}>No hay departamentos ni secretarías disponibles.</Text>
+            ) : (
+              eligibleEntities.map(entity => {
+                const key = `${entity.entity_type}:${entity.entity_id}`;
+                const member = selectedMembers.find(m => `${m.entity_type}:${m.entity_id}` === key);
+                const isSelected = !!member;
+                const isSubsecretary =
+                  entity.entity_type === 'secretary' && !!entity.parent_secretary_name;
+
+                return (
+                  <View key={key} style={[styles.entityRow, isSelected && styles.entityRowSelected]}>
+                    <TouchableOpacity
+                      style={styles.entityRowMain}
+                      onPress={() => toggleMember(entity)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.entityCheckbox, isSelected && styles.entityCheckboxChecked]}>
+                        {isSelected && <MaterialIcon name="check" fontSize={14} color="white" />}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.entityName}>{entity.name}</Text>
+                        <Text style={styles.entityType}>
+                          {entity.entity_type === 'department'
+                            ? 'Departamento'
+                            : isSubsecretary
+                            ? `Subsecretaría · depende de ${entity.parent_secretary_name}`
+                            : 'Secretaría'}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                    {isSelected && (
+                      <TouchableOpacity
+                        style={styles.editorToggleRow}
+                        onPress={() => toggleEditor(entity)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.editorCheckbox, member.is_editor && styles.editorCheckboxChecked]}>
+                          {member.is_editor && <MaterialIcon name="check" fontSize={14} color="white" />}
+                        </View>
+                        <Text style={styles.editorToggleLabel}>Editor</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              })
+            )}
+          </>
         ) : (
-          eligibleEntities.map(entity => {
-            const key = `${entity.entity_type}:${entity.entity_id}`;
-            const member = selectedMembers.find(m => `${m.entity_type}:${m.entity_id}` === key);
-            const isSelected = !!member;
-            const isSubsecretary =
-              entity.entity_type === 'secretary' && !!entity.parent_secretary_name;
+          <>
+            <View style={styles.readOnlyBanner}>
+              <MaterialIcon name="information" fontSize={15} color="#1e40af" />
+              <Text style={styles.readOnlyBannerText}>
+                Los miembros se asignan automáticamente según tu perfil.
+              </Text>
+            </View>
 
-            return (
-              <View key={key} style={[styles.entityRow, isSelected && styles.entityRowSelected]}>
-                <TouchableOpacity
-                  style={styles.entityRowMain}
-                  onPress={() => toggleMember(entity)}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.entityCheckbox, isSelected && styles.entityCheckboxChecked]}>
-                    {isSelected && <MaterialIcon name="check" fontSize={14} color="white" />}
+            {eligibleEntities.map(entity => {
+              const key = `${entity.entity_type}:${entity.entity_id}`;
+              const isSubsecretary = entity.entity_type === 'secretary' && !!entity.parent_secretary_name;
+              const willBeEditor =
+                entity.entity_type === userEntityType && entity.entity_id === userEntityId;
+
+              return (
+                <View key={key} style={[styles.entityRow, styles.entityRowSelected]}>
+                  <View style={styles.entityRowMain}>
+                    <View style={[styles.entityCheckbox, styles.entityCheckboxChecked]}>
+                      <MaterialIcon name="check" fontSize={14} color="white" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.entityName}>{entity.name}</Text>
+                      <Text style={styles.entityType}>
+                        {entity.entity_type === 'department'
+                          ? 'Departamento'
+                          : isSubsecretary
+                          ? `Subsecretaría · depende de ${entity.parent_secretary_name}`
+                          : 'Secretaría'}
+                      </Text>
+                    </View>
+                    <MaterialIcon name="lock" fontSize={14} color="#6d28d9" />
                   </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.entityName}>{entity.name}</Text>
-                    <Text style={styles.entityType}>
-                      {entity.entity_type === 'department'
-                        ? 'Departamento'
-                        : isSubsecretary
-                        ? `Subsecretaría · depende de ${entity.parent_secretary_name}`
-                        : 'Secretaría'}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-                {isSelected && (
-                  <TouchableOpacity
-                    style={styles.editorToggleRow}
-                    onPress={() => toggleEditor(entity)}
-                    activeOpacity={0.7}
-                  >
-                    <View style={[styles.editorCheckbox, member.is_editor && styles.editorCheckboxChecked]}>
-                      {member.is_editor && <MaterialIcon name="check" fontSize={14} color="white" />}
+                  <View style={[styles.editorToggleRow, { opacity: 0.6 }]}>
+                    <View style={[styles.editorCheckbox, willBeEditor && styles.editorCheckboxChecked]}>
+                      {willBeEditor && <MaterialIcon name="check" fontSize={14} color="white" />}
                     </View>
                     <Text style={styles.editorToggleLabel}>Editor</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            );
-          })
+                  </View>
+                </View>
+              );
+            })}
+          </>
         )}
       </View>
 
@@ -290,6 +354,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
   },
   emptyText: { color: '#888', fontSize: 14 },
+  readOnlyBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: '#DBEAFE',
+    borderRadius: 8,
+    padding: 10,
+  },
+  readOnlyBannerText: { flex: 1, fontSize: 13, color: '#1e3a8a', lineHeight: 18 },
   editorWarningBanner: {
     flexDirection: 'row',
     alignItems: 'flex-start',
