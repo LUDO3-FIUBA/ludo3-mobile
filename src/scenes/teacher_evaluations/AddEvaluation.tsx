@@ -43,6 +43,7 @@ export default function AddEvaluation() {
         submitting={creating}
         initialValues={{
           evaluationName: '',
+          description: '',
           minimumPassingGrade: '',
           startDate: null,
           startTime: null,
