@@ -112,6 +112,9 @@ import TeacherStatsScreen from '../teacher_stats';
 import TeacherSemesterCardScreen from '../teacher_semester/SemesterCard';
 import TeacherSendCommissionNotificationScreen from '../teacher_notifications/SendCommissionNotification';
 import TeacherSemesterNotificationHistoryScreen from '../teacher_notifications/SemesterNotificationHistory';
+import DocumentFormScreen from '../forms/DocumentFormScreen';
+import DigitalFormScreen from '../forms/DigitalFormScreen';
+import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
 
 type WebViewStyle = ViewStyle & { transition?: string };
 

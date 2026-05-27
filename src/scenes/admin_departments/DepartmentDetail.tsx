@@ -103,7 +103,7 @@ const DepartmentDetail: React.FC = () => {
       setPending(current);
       setEditingGroups(true);
     } catch {
-      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los grupos de propiedad.' });
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los grupos de propiedad.');
     }
   };
 
