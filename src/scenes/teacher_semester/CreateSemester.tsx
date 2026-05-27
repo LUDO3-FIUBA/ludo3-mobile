@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import AlertDialog from '../../components/AlertDialog';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { RoundedButton } from '../../components';
@@ -96,12 +96,21 @@ const CreateSemester = () => {
         const response = await teacherSemestersRepository.createSemester(chosenCommission, yearMoment, combinedStartDateAndTime, numberClasses, mininumAttendance)
         console.log("Response", response);
 
-        navigation.navigate('TeacherHome');
+        if (Platform.OS === 'web') {
+          navigation.navigate('TeacherHome');
+        } else {
+          navigation.navigate('RootDrawer', { screen: 'TeacherHome' });
+        }
       } else {
         setAlertDialog({ title: 'Error', message: 'No se completaron todos los campos antes de enviar el formulario.' });
       }
-    } catch (error) {
-
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 403) {
+        setAlertDialog({ title: 'Error', message: 'No sos docente titular de esta comisión.' });
+      } else {
+        setAlertDialog({ title: 'Error', message: 'No se pudo crear el cuatrimestre.' });
+      }
     }
   }
 
