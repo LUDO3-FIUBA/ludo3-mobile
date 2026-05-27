@@ -96,7 +96,7 @@ const CreateSemester = () => {
         const response = await teacherSemestersRepository.createSemester(chosenCommission, yearMoment, combinedStartDateAndTime, numberClasses, mininumAttendance)
         console.log("Response", response);
 
-        navigation.navigate('TeacherHome');
+        navigation.goBack();
       } else {
         setAlertDialog({ title: 'Error', message: 'No se completaron todos los campos antes de enviar el formulario.' });
       }
