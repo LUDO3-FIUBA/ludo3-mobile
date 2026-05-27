@@ -74,6 +74,7 @@ export const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'student-procedures', label: 'Trámites', icon: 'file-document-edit', iconOutline: 'file-document-edit-outline', route: 'FormsList', scope: 'student' },
       { kind: 'direct', key: 'fiuba-plan', label: 'FIUBA Plan', icon: 'calendar-clock', iconOutline: 'calendar-clock-outline', route: 'FiubaPlan', scope: 'student' },
       { kind: 'direct', key: 'fiuba-map', label: 'Plan de Carrera', icon: 'map-legend', iconOutline: 'map-legend', route: 'FiubaMap', scope: 'student' },
+      { kind: 'direct', key: 'contacts', label: 'Contactos', icon: 'account-group', iconOutline: 'account-group-outline', route: 'Contacts', scope: 'student' },
     ],
   },
   {
