@@ -34,6 +34,15 @@ const AgendaItem = (props: IProps) => {
             });
         }
         // institutional events are not navigable
+        else if (item.type === 'catedra') {
+            navigation.navigate('ViewCatedraDetails', {
+                entry: item.data,
+                classOccurrence: item.classOccurrence
+                    ? { ...item.classOccurrence, date: item.classOccurrence.date.toISOString() }
+                    : undefined,
+                inscription: item.inscription,
+            });
+        }
     }, [item, navigation]);
 
     if (item.type === 'evaluation') {
@@ -79,6 +88,44 @@ const AgendaItem = (props: IProps) => {
                     </Text>
                 </View>
             </View>
+        );
+    }
+
+    if (item.type === 'catedra') {
+        const { data, classOccurrence, inscription } = item;
+        const schedules = inscription?.semester?.schedules ?? [];
+        const fallbackSchedule = schedules.find(s => {
+            // JS: 0=Dom,1=Lun…6=Sab → backend: 0=Lun…5=Sab
+            const jsDay = new Date(data.date).getDay();
+            const backendDay = jsDay === 0 ? 6 : jsDay - 1;
+            return s.day_of_week === backendDay;
+        }) ?? schedules[0];
+        const startTime = classOccurrence?.startTime.slice(0, 5) ?? fallbackSchedule?.start_time.slice(0, 5);
+        const endTime   = classOccurrence?.endTime.slice(0, 5)   ?? fallbackSchedule?.end_time.slice(0, 5);
+        const subjectName = classOccurrence?.subjectName;
+        const label = data.class_number ? `Clase ${data.class_number}` : null;
+        return (
+            <TouchableOpacity style={[style().item, { borderLeftWidth: 4, borderLeftColor: classColor }]} onPress={onPress}>
+                <Text style={style().itemHourText}>{startTime ?? '—'}</Text>
+                <View style={{ flex: 1, paddingLeft: 10 }}>
+                    <Text style={style().itemTitleText}>
+                        {label ? `${label} — ` : ''}{data.topic}
+                    </Text>
+                    {subjectName && (
+                        <Text style={style().itemFooterText}>{subjectName}{startTime ? ` · ${startTime}–${endTime}` : ''}</Text>
+                    )}
+                    {data.notes.length > 0 && (
+                        <Text style={[style().itemFooterText, { color: '#666', marginTop: 2 }]} numberOfLines={2}>{data.notes}</Text>
+                    )}
+                </View>
+                {data.links.length > 0 ? (
+                    <Icon name='link-variant' size={16} color={classColor} style={{ marginLeft: 6 }} />
+                ) : (
+                    <View style={style().itemButtonContainer}>
+                        <Icon style={[style().itemButton, { color: classColor }]} name='chevron-right' />
+                    </View>
+                )}
+            </TouchableOpacity>
         );
     }
 
