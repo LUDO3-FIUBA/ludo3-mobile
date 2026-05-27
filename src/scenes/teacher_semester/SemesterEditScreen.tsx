@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { ActivityIndicator, View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { teacherSemestersRepository } from '../../repositories';
@@ -17,6 +17,8 @@ const SemesterEditScreen: React.FC = () => {
     const [totalClasses, setTotalClasses] = useState<string>(semesterData.classesAmount.toString());
     const [minAttendance, setMinAttendance] = useState<string>(semesterData.minimumAttendance.toString());
     const [attendanceError, setAttendanceError] = useState<string | null>(null);
+    const [calendarUrl, setCalendarUrl] = useState<string>(semesterData.calendarSourceUrl ?? '');
+    const [syncing, setSyncing] = useState(false);
 
     const dataNotValid = (): boolean => {
         const parsedMinAttendance = parseFloat(minAttendance);
@@ -59,6 +61,23 @@ const SemesterEditScreen: React.FC = () => {
         }
     };
 
+    const handleSyncCalendar = async () => {
+        if (!calendarUrl.trim()) {
+            Alert.alert('Error', 'Ingresá un link de Google Sheets primero.');
+            return;
+        }
+        setSyncing(true);
+        try {
+            await teacherSemestersRepository.setCalendarSourceUrl(semesterData.id, calendarUrl.trim());
+            const result = await teacherSemestersRepository.syncCatedraCalendar(semesterData.id);
+            Alert.alert('Sincronizado', `Se importaron ${result.synced} entradas del calendario.`);
+        } catch {
+            Alert.alert('Error', 'No se pudo sincronizar el calendario. Verificá que el link sea un Google Sheets publicado.');
+        } finally {
+            setSyncing(false);
+        }
+    };
+
     return (
         <View style={styles.container}>
             <Text style={styles.label}>Cantidad de Clases Totales</Text>
@@ -76,12 +95,35 @@ const SemesterEditScreen: React.FC = () => {
                 keyboardType="numeric"
             />
             {attendanceError && <Text style={styles.errorText}>{attendanceError}</Text>}
-            {/* <SquaredButton text="Guardar Cambios" disabled={dataNotValid()} onPress={handleUpdateSemester} /> */}
             <RoundedButton
                 text='Guardar Cambios'
                 onPress={handleUpdateSemester}
-                style={{ }} // TODO: move this to the src/styles collection
+                style={{}}
             />
+
+            <Text style={[styles.label, { marginTop: 30 }]}>Calendario de cátedra</Text>
+            <Text style={styles.hint}>
+                Pegá el link de tu Google Sheets publicado. Los alumnos verán el tema de cada clase en su calendario.
+            </Text>
+            <TextInput
+                style={styles.input}
+                value={calendarUrl}
+                onChangeText={setCalendarUrl}
+                placeholder="https://docs.google.com/spreadsheets/d/..."
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+            />
+            {syncing
+                ? <ActivityIndicator style={{ marginTop: 8 }} />
+                : (
+                    <RoundedButton
+                        text='Sincronizar calendario'
+                        onPress={handleSyncCalendar}
+                        style={{}}
+                    />
+                )
+            }
         </View>
     );
 };
@@ -110,6 +152,11 @@ const styles = StyleSheet.create({
     errorText: {
         color: 'red',
         marginBottom: 20,
+    },
+    hint: {
+        fontSize: 13,
+        color: '#666',
+        marginBottom: 10,
     },
 });
 
