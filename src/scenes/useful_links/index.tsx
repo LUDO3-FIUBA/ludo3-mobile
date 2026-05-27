@@ -34,6 +34,13 @@ const LINKS: UsefulLink[] = [
     color: '#ff9900',
   },
   {
+    title: 'Programas de asignaturas',
+    description: 'Planificaciones y programas de cada asignatura',
+    url: 'https://sites.google.com/fi.uba.ar/academica/docentes/planificaciones?authuser=0',
+    icon: 'book-open-page-variant',
+    color: '#0f766e',
+  },
+  {
     title: 'SIU Guaraní',
     description: 'Gestión académica: inscripciones, trámites y certificados',
     url: 'https://guaraniautogestion.fi.uba.ar/g3w/acceso/login?ref=http://guaraniautogestion.fi.uba.ar/g3w/inicio_alumno/',

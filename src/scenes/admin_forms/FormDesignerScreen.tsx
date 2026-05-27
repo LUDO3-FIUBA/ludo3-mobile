@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Switch,
   Modal,
-  Alert,
   ActivityIndicator,
   Platform,
   StyleSheet,
@@ -15,6 +14,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
+import AlertDialog from '../../components/AlertDialog';
 import { MaterialIcon, ReorderableFieldList, RoundedButton } from '../../components';
 import { formsRepository, usersRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
@@ -77,6 +77,7 @@ const FormDesignerScreen: React.FC = () => {
   const [templateFile, setTemplateFile] = useState<LocalFile | null>(null);
   const [fields, setFields] = useState<DesignerField[]>([]);
 
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
   const [saving, setSaving] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
   const [fieldModal, setFieldModal] = useState(false);
@@ -208,7 +209,7 @@ const FormDesignerScreen: React.FC = () => {
           }
         }
       })
-      .catch(() => Alert.alert('Error', 'No se pudo cargar la configuración del formulario.'))
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar la configuración del formulario.' }))
       .finally(() => setLoadingConfig(false));
   }, [isEditing, editingFormId]);
 
@@ -254,11 +255,11 @@ const FormDesignerScreen: React.FC = () => {
     }
     setModalLabelError(null);
     if (modalTypeValue === 'options' && modalOptions.length === 0) {
-      Alert.alert('Error', 'Los campos de tipo opciones deben tener al menos una opción.');
+      setAlertDialog({ title: 'Error', message: 'Los campos de tipo opciones deben tener al menos una opción.' });
       return;
     }
     if (modalTypeValue === 'catalog' && !modalCatalogId) {
-      Alert.alert('Error', 'Los campos de tipo catálogo deben tener un catálogo seleccionado.');
+      setAlertDialog({ title: 'Error', message: 'Los campos de tipo catálogo deben tener un catálogo seleccionado.' });
       return;
     }
     const updated: DesignerField = {
@@ -427,7 +428,7 @@ const FormDesignerScreen: React.FC = () => {
       });
       setDocumentUrl('');
     } catch {
-      Alert.alert('Error', 'No se pudo seleccionar el archivo.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo seleccionar el archivo.' });
     }
   };
 
@@ -442,11 +443,11 @@ const FormDesignerScreen: React.FC = () => {
 
   const handleSave = async () => {
     if (!formName.trim()) {
-      Alert.alert('Error', 'El título del formulario es obligatorio.');
+      setAlertDialog({ title: 'Error', message: 'El título del formulario es obligatorio.' });
       return;
     }
     if (!formDescription.trim()) {
-      Alert.alert('Error', 'La descripción es obligatoria.');
+      setAlertDialog({ title: 'Error', message: 'La descripción es obligatoria.' });
       return;
     }
     if (!ownershipGroupId) {
@@ -454,11 +455,11 @@ const FormDesignerScreen: React.FC = () => {
       return;
     }
     if (!isDigital && !documentUrl.trim() && !templateFile) {
-      Alert.alert('Error', 'Subí un archivo o indicá una URL para el documento.');
+      setAlertDialog({ title: 'Error', message: 'Subí un archivo o indicá una URL para el documento.' });
       return;
     }
     if (isDigital && fields.length === 0) {
-      Alert.alert('Error', 'Un formulario Digital debe tener al menos un campo.');
+      setAlertDialog({ title: 'Error', message: 'Un formulario Digital debe tener al menos un campo.' });
       return;
     }
 
@@ -467,7 +468,7 @@ const FormDesignerScreen: React.FC = () => {
     const formTypeId = isDigital ? digitalTypeId : documentTypeId;
 
     if (!formTypeId) {
-      Alert.alert('Error', 'No se pudo determinar el tipo de formulario.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo determinar el tipo de formulario.' });
       return;
     }
 
@@ -1168,6 +1169,14 @@ const FormDesignerScreen: React.FC = () => {
           </ScrollView>
         </View>
       </Modal>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
     </>
   );
 };

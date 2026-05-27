@@ -26,6 +26,7 @@ export { default as academicCalendarRepository } from './academicCalendar';
 export { default as departmentsRepository } from './departments';
 export { default as secretariesRepository } from './secretaries';
 export { default as adminCommissionsRepository } from './adminCommissions';
+export { default as adminFinalsRepository } from './adminFinals';
 export { default as adminUsersRepository } from './adminUsers';
 export { default as formsRepository } from './forms';
 export { default as adminNotificationsRepository } from './adminNotifications';

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useAppSelector } from '../../redux/hooks';
 import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import EntitySelectionModal from './EntitySelectionModal';
@@ -20,6 +21,7 @@ interface Props {
 export function SubmissionsHeaderRight({ evaluation, fetchData, isActualUserChiefTeacher, submissions }: Props) {
   const semesterData = useAppSelector(selectSemesterData);
   const [modalVisible, setModalVisible] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   const navigation = useNavigation();
 
   const showEvaluationQR = () => {
@@ -44,37 +46,19 @@ export function SubmissionsHeaderRight({ evaluation, fetchData, isActualUserChie
   };
 
   const showConfirmAutoAssignGraders = () => {
-    Alert.alert(
-      'Auto-asignar correctores',
-      `¿Está seguro de que desea auto-asignar correctores para las entregas aún no calificadas? Se sobreescribirán los correctores ya asignados \n\nPara ajustar las ponderaciones diríjase a Cuerpo Docente > Editar`,
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Confirmar',
-          onPress: autoAssignGraders,
-        },
-      ]
-    );
+    setConfirmDialog({
+      title: 'Auto-asignar correctores',
+      message: '¿Está seguro de que desea auto-asignar correctores para las entregas aún no calificadas? Se sobreescribirán los correctores ya asignados.\n\nPara ajustar las ponderaciones diríjase a Cuerpo Docente > Editar',
+      onConfirm: autoAssignGraders,
+    });
   };
 
   const showConfirmNotifyStudents = () => {
-    Alert.alert(
-      'Notificar estudiantes',
-      `¿Está seguro de que desea notificar a los estudiantes de sus notas? Se enviará una notificación a todos los estudiantes que hayan recibido una nota`,
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Confirmar',
-          onPress: async () => teacherEvaluationsRepository.notifyStudents(evaluation.id)
-        },
-      ]
-    );
+    setConfirmDialog({
+      title: 'Notificar estudiantes',
+      message: '¿Está seguro de que desea notificar a los estudiantes de sus notas? Se enviará una notificación a todos los estudiantes que hayan recibido una nota',
+      onConfirm: () => teacherEvaluationsRepository.notifyStudents(evaluation.id),
+    });
   };
 
   const semesterStudentsThatHaveNotSubmitted = () => {
@@ -103,6 +87,16 @@ export function SubmissionsHeaderRight({ evaluation, fetchData, isActualUserChie
 
   return (
     <View style={styles.navButtonsContainer}>
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Confirmar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
       <EntitySelectionModal
         visible={modalVisible}
         entities={semesterStudentsThatHaveNotSubmitted()}

@@ -1,6 +1,7 @@
 // src/scenes/teacher_evaluations/EvaluationForm.tsx
 import React, { useEffect, useState } from 'react';
-import { Alert, Text, View, TouchableOpacity, TextInput, ScrollView, Switch, Platform } from 'react-native';
+import { Text, View, TouchableOpacity, TextInput, ScrollView, Switch } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { Loading, MarkdownEditor, RoundedButton } from '../../components';
@@ -101,6 +102,7 @@ export default function EvaluationForm({
   const [evaluationsItems, setEvaluationsItems] = useState<Array<{ label: string; value: string }>>([]);
   const [openEvaluationsDropdown, setOpenEvaluationsDropdown] = useState(false);
   const [loadingEvaluations, setLoadingEvaluations] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const handleMinimumPassingGradeChange = (text: string) => {
     const onlyDigits = text.replace(/[^0-9]/g, '');
@@ -181,7 +183,7 @@ export default function EvaluationForm({
       }));
       setEvaluationsItems(items);
     } catch (error) {
-      showErrorAlert('No pudimos cargar las evaluaciones. Volvé a intentar en unos minutos.');
+      setAlertDialog({ title: 'Error', message: 'No pudimos cargar las evaluaciones. Volvé a intentar en unos minutos.' });
     } finally {
       setLoadingEvaluations(false);
     }
@@ -215,20 +217,11 @@ export default function EvaluationForm({
     (!isMakeUp || !!parentEvaluation) &&
     !submitting;
 
-  const showErrorAlert = (message: string) => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.alert(message);
-      return;
-    }
-
-    Alert.alert('Error', message);
-  };
-
   const submit = async () => {
     if (!startDate || !startTime || !finishDate || !finishTime) return;
 
     if (!isFinishAfterStart(startDate, startTime, finishDate, finishTime)) {
-      showErrorAlert('La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.');
+      setAlertDialog({ title: 'Error', message: 'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.' });
       return;
     }
 
@@ -249,6 +242,7 @@ export default function EvaluationForm({
   };
 
   return (
+    <>
     <ScrollView style={style().containerView} nestedScrollEnabled keyboardShouldPersistTaps="always" keyboardDismissMode="on-drag">
       <View style={{ marginBottom: 100 }}>
         <View style={style().dateButtonInputs}>
@@ -543,5 +537,14 @@ export default function EvaluationForm({
         {submitting && <Loading />}
       </View>
     </ScrollView>
+    <AlertDialog
+      visible={alertDialog !== null}
+      title={alertDialog?.title ?? ''}
+      message={alertDialog?.message ?? ''}
+      mode="info"
+      confirmLabel="Aceptar"
+      onConfirm={() => setAlertDialog(null)}
+    />
+    </>
   );
 }

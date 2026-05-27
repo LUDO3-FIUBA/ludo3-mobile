@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, Alert, StyleSheet, TextInput, ToastAndroid } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, ToastAndroid } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { Loading } from '../../components';
 import { teacherFinalsRepository } from '../../repositories';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -25,6 +26,7 @@ const FinalExamSubmissions: React.FC = () => {
   const [finalExams, setFinalExams] = useState<TeacherFinalExam[]>([]);
   const [editingGrade, setEditingGrade] = useState<number | null>(null);
   const [gradeText, setGradeText] = useState<string>('');
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const userData = useAppSelector(selectUserData);
   const semesterData = useAppSelector(selectSemesterData);
@@ -38,10 +40,7 @@ const FinalExamSubmissions: React.FC = () => {
       const finalData = await teacherFinalsRepository.getDetail(final.id);
       setFinalExams(finalData.finalExams.sort((a, b) => a.student.lastName.localeCompare(b.student.lastName)));
     } catch (error) {
-      Alert.alert(
-        '¿Qué pasó?',
-        'No sabemos pero no pudimos buscar los exámenes. Volvé a intentar en unos minutos.',
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No sabemos pero no pudimos buscar los exámenes. Volvé a intentar en unos minutos.' });
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -78,7 +77,7 @@ const FinalExamSubmissions: React.FC = () => {
     }
 
     if (isNaN(grade) || grade < 1 || grade > 10) {
-      Alert.alert('Error', 'La nota debe ser un número entre 1 y 10.');
+      setAlertDialog({ title: 'Error', message: 'La nota debe ser un número entre 1 y 10.' });
       return;
     }
 
@@ -89,7 +88,7 @@ const FinalExamSubmissions: React.FC = () => {
 
       fetchData();
     } catch (error) {
-      Alert.alert("Error", "Hubo un error al guardar la calificación");
+      setAlertDialog({ title: 'Error', message: 'Hubo un error al guardar la calificación.' });
     }
   };
 
@@ -157,6 +156,14 @@ const FinalExamSubmissions: React.FC = () => {
 
   return (
     <View style={styles.view}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {loading && <Loading />}
       {renderHeader()}
       <FlatList

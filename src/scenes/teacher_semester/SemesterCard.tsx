@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { View, Text, Alert, SafeAreaView, StyleSheet, ActivityIndicator } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useCallback, useEffect } from 'react';
+import { View, Text, SafeAreaView, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterDataAsync, selectSemesterData, selectSemesterError, selectSemesterLoading } from '../../redux/reducers/teacherSemesterSlice';
 import { SemesterHeaderRight } from './SemesterHeaderRight';
@@ -104,10 +104,12 @@ export function SemesterCard({ route }: Props) {
     }
   ];
 
-  useEffect(() => {
-    dispatch(fetchSemesterDataAsync(commission.id));
-    dispatch(fetchStaffTeachers(commission.id));
-  }, [dispatch, commission.id]);
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(fetchSemesterDataAsync(commission.id));
+      dispatch(fetchStaffTeachers(commission.id));
+    }, [dispatch, commission.id]),
+  );
 
   useEffect(() => {
     if (error) {
@@ -160,6 +162,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    ...(Platform.OS === 'web' ? { paddingHorizontal: 32, paddingTop: 24 } : null),
   },
   header: {
     fontSize: 24,

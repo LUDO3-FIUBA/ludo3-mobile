@@ -6,12 +6,12 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { RoundedButton } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { adminUsersRepository } from '../../repositories';
 import AdminUser from '../../models/AdminUser';
 
@@ -29,6 +29,8 @@ const UserDetail: React.FC = () => {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
 
   // Editable fields
   const [firstName, setFirstName] = useState('');
@@ -53,7 +55,7 @@ const UserDetail: React.FC = () => {
       setPadron(data.padron ?? '');
       setLegajo(data.legajo ?? '');
     } catch {
-      Alert.alert('Error', 'No se pudo cargar el usuario.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo cargar el usuario.' });
     } finally {
       setLoading(false);
     }
@@ -76,7 +78,7 @@ const UserDetail: React.FC = () => {
     if (user.isTeacher && legajo !== (user.legajo ?? '')) changes.legajo = legajo;
 
     if (Object.keys(changes).length === 0) {
-      Alert.alert('Sin cambios', 'No se realizaron modificaciones.');
+      setAlertDialog({ title: 'Sin cambios', message: 'No se realizaron modificaciones.' });
       return;
     }
 
@@ -84,9 +86,9 @@ const UserDetail: React.FC = () => {
     try {
       const updated = await adminUsersRepository.updateUser(userId, changes);
       setUser(updated);
-      Alert.alert('Éxito', 'Usuario actualizado correctamente.');
+      setAlertDialog({ title: 'Éxito', message: 'Usuario actualizado correctamente.' });
     } catch (error) {
-      Alert.alert('Error', 'No se pudo actualizar el usuario.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo actualizar el usuario.' });
     } finally {
       setSaving(false);
     }
@@ -94,72 +96,60 @@ const UserDetail: React.FC = () => {
 
   const handlePromoteToTeacher = async () => {
     if (!newLegajo.trim()) {
-      Alert.alert('Error', 'El legajo es obligatorio para promover a docente.');
+      setAlertDialog({ title: 'Error', message: 'El legajo es obligatorio para promover a docente.' });
       return;
     }
 
-    Alert.alert(
-      'Promover a docente',
-      `¿Estás seguro de que querés agregar el rol de docente a este usuario?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Confirmar',
-          onPress: async () => {
-            setSaving(true);
-            try {
-              const updated = await adminUsersRepository.updateUser(userId, {
-                promoteToTeacher: true,
-                newLegajo: newLegajo.trim(),
-              });
-              setUser(updated);
-              setLegajo(updated.legajo ?? '');
-              setNewLegajo('');
-              Alert.alert('Éxito', 'Usuario promovido a docente correctamente.');
-            } catch (error) {
-              Alert.alert('Error', 'No se pudo promover al usuario.');
-            } finally {
-              setSaving(false);
-            }
-          },
-        },
-      ],
-    );
+    setConfirmDialog({
+      title: 'Promover a docente',
+      message: `¿Estás seguro de que querés agregar el rol de docente a este usuario?`,
+      onConfirm: async () => {
+        setSaving(true);
+        try {
+          const updated = await adminUsersRepository.updateUser(userId, {
+            promoteToTeacher: true,
+            newLegajo: newLegajo.trim(),
+          });
+          setUser(updated);
+          setLegajo(updated.legajo ?? '');
+          setNewLegajo('');
+          setAlertDialog({ title: 'Éxito', message: 'Usuario promovido a docente correctamente.' });
+        } catch (error) {
+          setAlertDialog({ title: 'Error', message: 'No se pudo promover al usuario.' });
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
   const handlePromoteToStudent = async () => {
     if (!newPadron.trim()) {
-      Alert.alert('Error', 'El padrón es obligatorio para promover a estudiante.');
+      setAlertDialog({ title: 'Error', message: 'El padrón es obligatorio para promover a estudiante.' });
       return;
     }
 
-    Alert.alert(
-      'Promover a estudiante',
-      `¿Estás seguro de que querés agregar el rol de estudiante a este usuario?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Confirmar',
-          onPress: async () => {
-            setSaving(true);
-            try {
-              const updated = await adminUsersRepository.updateUser(userId, {
-                promoteToStudent: true,
-                newPadron: newPadron.trim(),
-              });
-              setUser(updated);
-              setPadron(updated.padron ?? '');
-              setNewPadron('');
-              Alert.alert('Éxito', 'Usuario promovido a estudiante correctamente.');
-            } catch (error) {
-              Alert.alert('Error', 'No se pudo promover al usuario.');
-            } finally {
-              setSaving(false);
-            }
-          },
-        },
-      ],
-    );
+    setConfirmDialog({
+      title: 'Promover a estudiante',
+      message: `¿Estás seguro de que querés agregar el rol de estudiante a este usuario?`,
+      onConfirm: async () => {
+        setSaving(true);
+        try {
+          const updated = await adminUsersRepository.updateUser(userId, {
+            promoteToStudent: true,
+            newPadron: newPadron.trim(),
+          });
+          setUser(updated);
+          setPadron(updated.padron ?? '');
+          setNewPadron('');
+          setAlertDialog({ title: 'Éxito', message: 'Usuario promovido a estudiante correctamente.' });
+        } catch (error) {
+          setAlertDialog({ title: 'Error', message: 'No se pudo promover al usuario.' });
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
   if (loading) {
@@ -305,6 +295,24 @@ const UserDetail: React.FC = () => {
           </View>
         )}
       </ScrollView>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        confirmLabel="Confirmar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
     </KeyboardAvoidingView>
   );
 };

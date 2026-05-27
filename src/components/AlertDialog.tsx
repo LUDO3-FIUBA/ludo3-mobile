@@ -12,6 +12,12 @@ import { lightModeColors } from '../styles/colorPalette';
 
 type AlertDialogMode = 'info' | 'confirm' | 'type-to-confirm';
 
+interface ExtraAction {
+  label: string;
+  onPress: () => void;
+  destructive?: boolean;
+}
+
 interface AlertDialogProps {
   visible: boolean;
   title: string;
@@ -22,6 +28,7 @@ interface AlertDialogProps {
   cancelLabel?: string;
   destructive?: boolean;
   loading?: boolean;
+  extraActions?: ExtraAction[];
   onConfirm: () => void;
   onCancel?: () => void;
 }
@@ -36,6 +43,7 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
   cancelLabel = 'Cancelar',
   destructive = false,
   loading = false,
+  extraActions,
   onConfirm,
   onCancel = () => {},
 }) => {
@@ -91,6 +99,16 @@ const AlertDialog: React.FC<AlertDialogProps> = ({
                 <Text style={styles.cancelText}>{cancelLabel}</Text>
               </TouchableOpacity>
             )}
+            {extraActions?.map((action, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.button, { backgroundColor: action.destructive ? lightModeColors.failed : '#eeeeee' }]}
+                onPress={action.onPress}
+                disabled={loading}
+              >
+                <Text style={action.destructive ? styles.confirmText : styles.cancelText}>{action.label}</Text>
+              </TouchableOpacity>
+            ))}
             <TouchableOpacity
               style={[
                 styles.button,
