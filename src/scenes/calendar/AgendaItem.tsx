@@ -95,8 +95,8 @@ const AgendaItem = (props: IProps) => {
         const { data, classOccurrence, inscription } = item;
         const schedules = inscription?.semester?.schedules ?? [];
         const fallbackSchedule = schedules.find(s => {
-            // JS: 0=Dom,1=Lun…6=Sab → backend: 0=Lun…5=Sab
-            const jsDay = new Date(data.date).getDay();
+            const [y, m, d] = data.date.split('-').map(Number);
+            const jsDay = new Date(y, m - 1, d).getDay();
             const backendDay = jsDay === 0 ? 6 : jsDay - 1;
             return s.day_of_week === backendDay;
         }) ?? schedules[0];

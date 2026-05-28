@@ -40,7 +40,8 @@ const ViewCatedraDetailsScreen = ({ route }: { route: any }) => {
   // Use classOccurrence times if available; otherwise fall back to the inscription schedule
   const fallbackSchedule = (() => {
     if (schedules.length === 0) return undefined;
-    const jsDay = new Date(entry.date).getDay();
+    const [y, m, d] = entry.date.split('-').map(Number);
+    const jsDay = new Date(y, m - 1, d).getDay();
     const backendDay = jsDay === 0 ? 6 : jsDay - 1;
     return schedules.find(s => s.day_of_week === backendDay) ?? schedules[0];
   })();
