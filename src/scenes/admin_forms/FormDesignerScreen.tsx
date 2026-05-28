@@ -141,10 +141,26 @@ const FormDesignerScreen: React.FC = () => {
       .finally(() => setLoadingGroupDetail(false));
   }, [ownershipGroupId, ownershipGroupDetailKey]);
 
+  const isEditingRef = React.useRef(isEditing);
+  isEditingRef.current = isEditing;
+
   // Re-fetch groups and detail on focus so edits from OwnershipGroupEditor are reflected.
+  // Also reset form data on focus when creating (not editing) — the drawer keeps this
+  // component mounted, so state from a previous creation session persists otherwise.
   useFocusEffect(useCallback(() => {
     formsRepository.fetchOwnershipGroups().then(setOwnershipGroups).catch(() => {});
     setOwnershipGroupDetailKey(k => k + 1);
+    if (!isEditingRef.current) {
+      setFormName('');
+      setFormDescription('');
+      setFormInformation('');
+      setRequiresTeacherValidation(false);
+      setIsDigital(true);
+      setDocumentUrl('');
+      setTemplateFile(null);
+      setFields([]);
+      setSubmitStatus(null);
+    }
   }, []));
 
   useEffect(() => {

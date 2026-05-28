@@ -29,6 +29,12 @@ import CommissionList from '../admin_commissions/CommissionList';
 import UserSearch from '../admin_users/UserSearch';
 import NewsList from '../news/NewsList';
 import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
+import FormsListScreen from '../forms/FormsListScreen';
+import DigitalFormScreen from '../forms/DigitalFormScreen';
+import DocumentFormScreen from '../forms/DocumentFormScreen';
+import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
+import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
+import OwnershipGroupEditorScreen from '../admin_forms/OwnershipGroupEditor';
 import { resolveMenu, canToggleRole, SubmenuItem, DirectItem } from './config/menu_config';
 
 const Tab = createBottomTabNavigator();
@@ -241,6 +247,13 @@ const RootDrawer = () => {
         }}
       >
         {tabs}
+        {/* Forms screens: hidden from the tab bar but kept inside the Tab Navigator
+            so the tab bar remains visible when navigating to them. */}
+        <Tab.Screen name="FormsList" component={FormsListScreen} options={{ tabBarItemStyle: { display: 'none' }, headerShown: true, title: 'Trámites', headerRight }} />
+        <Tab.Screen name="DigitalForm" component={DigitalFormScreen} options={{ tabBarItemStyle: { display: 'none' }, headerShown: true, title: 'Completar formulario', headerRight }} />
+        <Tab.Screen name="DocumentForm" component={DocumentFormScreen} options={{ tabBarItemStyle: { display: 'none' }, headerShown: true, title: 'Formulario', headerRight }} />
+        <Tab.Screen name="FormDesigner" component={FormDesignerScreen} options={{ tabBarItemStyle: { display: 'none' }, headerShown: true, title: 'Diseñar formulario', headerRight }} />
+        <Tab.Screen name="OwnershipGroupEditor" component={OwnershipGroupEditorScreen} options={{ tabBarItemStyle: { display: 'none' }, headerShown: true, title: 'Grupo de propiedad', headerRight }} />
       </Tab.Navigator>
 
       <ToastCard
@@ -287,6 +300,7 @@ const DIRECT_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentNewsList: StudentNewsListScreen,
   AdminNewsList: AdminNewsListScreen,
   BedeliaClassroomChange: BedeliaClassroomChangeForm,
+  FormsManager: FormsManagerScreen,
 };
 
 function isDarkTheme() {

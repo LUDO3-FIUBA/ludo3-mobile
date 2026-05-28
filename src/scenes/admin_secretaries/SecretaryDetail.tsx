@@ -39,6 +39,7 @@ const SecretaryDetail: React.FC = () => {
   const [parentName, setParentName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isTeacher, setIsTeacher] = useState(false);
 
   const [editingGroups, setEditingGroups] = useState(false);
   const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
@@ -69,6 +70,7 @@ const SecretaryDetail: React.FC = () => {
       .then(([sec, user]) => {
         setSecretary(sec);
         setIsSuperAdmin(user.isSuperAdmin?.() ?? false);
+        setIsTeacher(user.isTeacher() && !user.isAdmin());
       })
       .catch(() => Alert.alert('Error', 'No se pudo cargar la secretaría.'))
       .finally(() => setLoading(false));
@@ -235,20 +237,30 @@ const SecretaryDetail: React.FC = () => {
 
         {!editingGroups ? (
           secretary.ownershipGroups && secretary.ownershipGroups.length > 0 ? (
-            secretary.ownershipGroups.map(g => (
-              <TouchableOpacity
-                key={g.groupId}
-                style={styles.groupItem}
-                onPress={() => navigation.navigate('FormsManager')}>
-                <View style={styles.groupItemContent}>
-                  <Text style={styles.groupItemName}>{g.groupName}</Text>
-                  <Text style={styles.groupItemRole}>
-                    {g.isEditor ? 'Editor' : 'Lector'}
-                  </Text>
-                </View>
-                <Text style={styles.groupItemArrow}>›</Text>
-              </TouchableOpacity>
-            ))
+            <>
+              {secretary.ownershipGroups.map(g => {
+                const onPress = isAdmin
+                  ? () => navigation.navigate('FormsManager')
+                  : isTeacher
+                  ? undefined
+                  : () => navigation.navigate('FormsList');
+                const Wrapper = onPress ? TouchableOpacity : View;
+                return (
+                  <Wrapper
+                    key={g.groupId}
+                    style={styles.groupItem}
+                    onPress={onPress}>
+                    <View style={styles.groupItemContent}>
+                      <Text style={styles.groupItemName}>{g.groupName}</Text>
+                      <Text style={styles.groupItemRole}>
+                        {g.isEditor ? 'Editor' : 'Lector'}
+                      </Text>
+                    </View>
+                    {onPress ? <Text style={styles.groupItemArrow}>›</Text> : null}
+                  </Wrapper>
+                );
+              })}
+            </>
           ) : (
             <Text style={styles.emptyText}>Sin grupos asignados</Text>
           )

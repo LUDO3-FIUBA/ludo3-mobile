@@ -145,6 +145,16 @@ const webLinking = {
   },
 };
 
+// Route names that render INSIDE the mobile Tab Navigator; on mobile they must
+// not also live at the Stack root, or the tab bar would be hidden when visited.
+const MOBILE_TAB_EMBEDDED_ROUTES = new Set<string>([
+  'FormsList', 'DigitalForm', 'DocumentForm', 'FormsManager', 'FormDesigner',
+  'OwnershipGroupEditor',
+]);
+
+const skipOnMobile = (name: string): boolean =>
+  Platform.OS !== 'web' && MOBILE_TAB_EMBEDDED_ROUTES.has(name);
+
 // Route names that render INSIDE the web drawer; on web they must not also live
 // at the Stack root, or we'd have duplicate routes and the Stack version would
 // shadow the drawer one.
@@ -306,7 +316,7 @@ const App = () => {
               {!skipOnWeb('ApprovedSubjects') && <Stack.Screen name="ApprovedSubjects" component={ApprovedSubjectsScreen} options={{ headerShown: true, title: 'Materias aprobadas' }} />}
               {!skipOnWeb('PendingSubjects') && <Stack.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ headerShown: true, title: 'Materias pendientes' }} />}
               {!skipOnWeb('StudentDepartmentList') && <Stack.Screen name="StudentDepartmentList" component={StudentDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />}
-              {!skipOnWeb('FormsList') && <Stack.Screen name="FormsList" component={FormsListScreen} options={{ headerShown: true, title: 'Trámites' }} />}
+              {!skipOnWeb('FormsList') && !skipOnMobile('FormsList') && <Stack.Screen name="FormsList" component={FormsListScreen} options={{ headerShown: true, title: 'Trámites' }} />}
               {!skipOnWeb('StudentUsefulLinks') && <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />}
               {!skipOnWeb('TeacherUsefulLinks') && <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />}
               {!skipOnWeb('Map') && <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />}
@@ -319,7 +329,7 @@ const App = () => {
               {!skipOnWeb('AdminFinalsToApprove') && <Stack.Screen name="AdminFinalsToApprove" component={FinalsToApproveList} options={{ headerShown: true, title: 'Finales para aprobar' }} />}
               {!skipOnWeb('AdminUserSearch') && <Stack.Screen name="AdminUserSearch" component={UserSearch} options={{ headerShown: true, title: 'Buscar Usuarios' }} />}
               {!skipOnWeb('AdminNotificationList') && <Stack.Screen name="AdminNotificationList" component={NotificationList} options={{ headerShown: true, title: 'Avisos' }} />}
-              {!skipOnWeb('FormsManager') && <Stack.Screen name="FormsManager" component={FormsManagerScreen} options={{ headerShown: true, title: 'Gestor de Trámites' }} />}
+              {!skipOnWeb('FormsManager') && !skipOnMobile('FormsManager') && <Stack.Screen name="FormsManager" component={FormsManagerScreen} options={{ headerShown: true, title: 'Gestor de Trámites' }} />}
               {!skipOnWeb('BedeliaClassroomChange') && <Stack.Screen name="BedeliaClassroomChange" component={BedeliaClassroomChangeForm} options={{ headerShown: true, title: 'Cambio de aula' }} />}
               {/* Detail routes (formerly hidden drawer screens) */}
               {!skipOnWeb('AdminDepartmentDetail') && <Stack.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />}
@@ -549,21 +559,21 @@ const App = () => {
               )}
 
               {/* Forms stack screens */}
-              {!skipOnWeb('DocumentForm') && (
+              {!skipOnWeb('DocumentForm') && !skipOnMobile('DocumentForm') && (
                 <Stack.Screen
                   name="DocumentForm"
                   component={DocumentFormScreen}
                   options={{ headerShown: true, title: 'Formulario' }}
                 />
               )}
-              {!skipOnWeb('DigitalForm') && (
+              {!skipOnWeb('DigitalForm') && !skipOnMobile('DigitalForm') && (
                 <Stack.Screen
                   name="DigitalForm"
                   component={DigitalFormScreen}
                   options={{ headerShown: true, title: 'Completar formulario' }}
                 />
               )}
-              {!skipOnWeb('FormDesigner') && (
+              {!skipOnWeb('FormDesigner') && !skipOnMobile('FormDesigner') && (
                 <Stack.Screen
                   name="FormDesigner"
                   component={FormDesignerScreen}
