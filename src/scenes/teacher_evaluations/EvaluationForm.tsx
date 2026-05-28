@@ -71,7 +71,7 @@ export default function EvaluationForm({
   const pickerPlaceholderTextStyle = { color: placeholderColor };
 
   const [evaluationName, setEvaluationName] = useState(initialValues.evaluationName);
-  const [description, setDescription] = useState(initialValues.description);
+  const [description, setDescription] = useState(initialValues.description ?? '');
   const [minimumPassingGrade, setMinimumPassingGrade] = useState(initialValues.minimumPassingGrade);
 
   const [startDate, setStartDate] = useState<Date | null>(initialValues.startDate);

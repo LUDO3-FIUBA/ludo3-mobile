@@ -137,6 +137,7 @@ export default function MarkdownEditor({
   helperText = 'Usá la barra para dar formato y ver el resultado abajo.',
   previewLabel = 'Vista previa',
 }: MarkdownEditorProps) {
+  const safeValue = value ?? '';
   const [selection, setSelection] = useState<Selection>(DEFAULT_SELECTION);
   const inputRef = useRef<any>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -170,7 +171,7 @@ export default function MarkdownEditor({
   );
 
   const applyAction = (action: MarkdownAction) => {
-    const next = action.insert(value, selection);
+    const next = action.insert(safeValue, selection);
     onChangeText(next.text);
     setSelection(next.selection);
     // restore focus to the input so the keyboard stays open and caret is placed
@@ -222,7 +223,7 @@ export default function MarkdownEditor({
         style={styles.input}
         multiline
         textAlignVertical="top"
-        value={value}
+        value={safeValue}
         onChangeText={onChangeText}
         ref={inputRef}
         onSelectionChange={(event) => setSelection(event.nativeEvent.selection)}
@@ -234,8 +235,8 @@ export default function MarkdownEditor({
 
       <View style={styles.previewCard}>
         <Text style={styles.previewLabel}>{previewLabel}</Text>
-        {value.trim() ? (
-          <Markdown style={markdownStyles}>{value}</Markdown>
+        {safeValue.trim() ? (
+          <Markdown style={markdownStyles}>{safeValue}</Markdown>
         ) : (
           <Text style={styles.previewEmpty}>Todavía no hay contenido para previsualizar.</Text>
         )}
