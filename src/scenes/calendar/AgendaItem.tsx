@@ -102,17 +102,18 @@ const AgendaItem = (props: IProps) => {
         }) ?? schedules[0];
         const startTime = classOccurrence?.startTime.slice(0, 5) ?? fallbackSchedule?.start_time.slice(0, 5);
         const endTime   = classOccurrence?.endTime.slice(0, 5)   ?? fallbackSchedule?.end_time.slice(0, 5);
-        const subjectName = classOccurrence?.subjectName;
+        const subjectName = classOccurrence?.subjectName ?? inscription?.semester?.commission?.subject_name;
         const label = data.class_number ? `Clase ${data.class_number}` : null;
+        const topicLine = label ? `${label} — ${data.topic}` : data.topic;
         return (
             <TouchableOpacity style={[style().item, { borderLeftWidth: 4, borderLeftColor: classColor }]} onPress={onPress}>
                 <Text style={style().itemHourText}>{startTime ?? '—'}</Text>
                 <View style={{ flex: 1, paddingLeft: 10 }}>
                     <Text style={style().itemTitleText}>
-                        {label ? `${label} — ` : ''}{data.topic}
+                        {subjectName ?? topicLine}
                     </Text>
                     {subjectName && (
-                        <Text style={style().itemFooterText}>{subjectName}{startTime ? ` · ${startTime}–${endTime}` : ''}</Text>
+                        <Text style={style().itemFooterText}>{topicLine}{startTime ? ` · ${startTime}–${endTime}` : ''}</Text>
                     )}
                     {data.notes.length > 0 && (
                         <Text style={[style().itemFooterText, { color: '#666', marginTop: 2 }]} numberOfLines={2}>{data.notes}</Text>
