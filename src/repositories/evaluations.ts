@@ -1,4 +1,4 @@
-import { get, post } from './authenticatedRepository';
+import { get, postMultipart } from './authenticatedRepository';
 import { Evaluation, EvaluationSubmission } from '../models';
 
 const domainUrl = 'api/evaluations';
@@ -46,16 +46,16 @@ async function fetchMySubmissions(semester_id: string): Promise<EvaluationSubmis
 
 
 
-async function submitEvaluation(
+export async function submitEvaluation(
     evaluationId: string,
     submissionText: string = '',
     submissionFile?: { uri?: string; name: string; type?: string; size?: number },
 ): Promise<EvaluationSubmission> {
-    if (submissionFile) {
-        const form = new FormData();
-        form.append('evaluation', evaluationId);
-        form.append('submission_text', submissionText);
+    const form = new FormData();
+    form.append('evaluation', evaluationId);
+    form.append('submission_text', submissionText);
 
+    if (submissionFile) {
         if ((submissionFile as any).uri) {
             const f: any = submissionFile as any;
             form.append('submission_file', {
@@ -66,14 +66,9 @@ async function submitEvaluation(
         } else {
             form.append('submission_file', submissionFile as any);
         }
-
-        return await post(`${domainUrl}/submissions/submit_evaluation`, form) as EvaluationSubmission;
     }
 
-    return await post(`${domainUrl}/submissions/submit_evaluation`, {
-        evaluation: evaluationId,
-        submission_text: submissionText,
-    }) as EvaluationSubmission
+    return await postMultipart(`${domainUrl}/submissions/submit_evaluation`, form) as EvaluationSubmission;
 }
 
 function convertJsonToEvaluationsList(json: any): Evaluation[] {
