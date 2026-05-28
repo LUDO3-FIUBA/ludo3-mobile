@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { teacherSemestersRepository } from '../../repositories';
@@ -114,6 +115,16 @@ const SemesterEditScreen: React.FC = () => {
                 autoCorrect={false}
                 keyboardType="url"
             />
+            <View style={styles.calendarStatus}>
+                <Icon
+                    name={semesterData.calendarSourceUrl ? 'check-circle' : 'close-circle-outline'}
+                    size={16}
+                    color={semesterData.calendarSourceUrl ? '#2ecc71' : '#999'}
+                />
+                <Text style={[styles.calendarStatusText, { color: semesterData.calendarSourceUrl ? '#2ecc71' : '#999' }]}>
+                    {semesterData.calendarSourceUrl ? 'Calendario configurado' : 'Sin calendario'}
+                </Text>
+            </View>
             {syncing
                 ? <ActivityIndicator style={{ marginTop: 8 }} />
                 : (
@@ -157,6 +168,15 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#666',
         marginBottom: 10,
+    },
+    calendarStatus: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+        gap: 6,
+    },
+    calendarStatusText: {
+        fontSize: 13,
     },
 });
 
