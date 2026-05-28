@@ -26,14 +26,20 @@ test.describe('SIU Guaraní — real integration (VPN required)', () => {
   test.beforeAll(async ({ request }) => {
     siuReachable = await isSiuReachable();
     if (!siuReachable) return;
-    const resp = await request.post(`${BACKEND}/auth/login/`, {
+    const loginResp = await request.post(`${BACKEND}/auth/login/`, {
       data: { dni: DNI, password: PASS },
     });
-    accessToken = (await resp.json()).access ?? '';
+    accessToken = (await loginResp.json()).access ?? '';
+    if (!accessToken) { siuReachable = false; return; }
+    // Verify the SIU service itself is responding — TCP reachable but 503 means service is down
+    const healthResp = await request.get(`${BACKEND}/api/guarani/plan-carrera/`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    siuReachable = healthResp.status() === 200;
   });
 
   test.beforeEach(() => {
-    test.skip(!siuReachable, 'SIU Guaraní unavailable — connect to FIUBA VPN');
+    test.skip(!siuReachable, 'SIU Guaraní unavailable (VPN required or service down)');
   });
 
   // ── Backend API ────────────────────────────────────────────────────────────

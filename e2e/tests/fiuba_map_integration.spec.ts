@@ -1,6 +1,6 @@
 import {test, expect} from '@playwright/test';
 import * as net from 'net';
-import {loginAndWait, goToFiubaMap as navToFiubaMap} from './helpers';
+import {loginAndWait, goToFiubaMap as navToFiubaMap, BACKEND, DNI, PASS} from './helpers';
 const SIU_HOST = '172.25.90.12';
 const SIU_PORT = 8080;
 
@@ -36,11 +36,26 @@ async function goToFiubaMap(page) {
 let siuReachable = false;
 
 test.describe('FIUBA Map — integration with Ludo', () => {
-  test.beforeAll(async () => {
-    siuReachable = await isSiuReachable();
+  test.beforeAll(async ({ request }) => {
+    const tcpOk = await isSiuReachable();
+    if (!tcpOk) return;
+    try {
+      const loginResp = await request.post(`${BACKEND}/auth/login/`, {
+        data: { dni: DNI, password: PASS },
+      });
+      const token = (await loginResp.json()).access ?? '';
+      if (!token) return;
+      // Verify the SIU service itself is responding — TCP reachable but 503 means service is down
+      const healthResp = await request.get(`${BACKEND}/api/guarani/plan-carrera/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      siuReachable = healthResp.status() === 200;
+    } catch {
+      siuReachable = false;
+    }
   });
   test.beforeEach(() => {
-    test.skip(!siuReachable, 'SIU unavailable — connect to FIUBA VPN');
+    test.skip(!siuReachable, 'SIU Guaraní unavailable (VPN required or service down)');
   });
 
   // ── Carga del bundle local ─────────────────────────────────────────────────

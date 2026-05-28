@@ -46,7 +46,7 @@ export async function goToFiubaMap(page: Page) {
       { timeout: 20000 },
     ).catch(() => {}); // if SIU has < 10 subjects, fall through to fixed wait
   }
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(500).catch(() => {}); // page may have closed if SIU data never loaded
   return iframe;
 }
 
