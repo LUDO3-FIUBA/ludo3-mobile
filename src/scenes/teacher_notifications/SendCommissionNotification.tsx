@@ -50,7 +50,7 @@ const SendCommissionNotification: React.FC = () => {
     const [isUrgent, setIsUrgent] = useState(false);
     const [image, setImage] = useState<{ uri: string; type: string; name: string } | null>(null);
     const [saving, setSaving] = useState(false);
-    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string; onConfirm?: () => void } | null>(null);
 
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -93,8 +93,7 @@ const SendCommissionNotification: React.FC = () => {
                 isUrgent,
                 image,
             });
-            setAlertDialog({ title: 'Aviso enviado', message: 'Los alumnos del cuatrimestre lo van a recibir.' });
-            navigation.goBack();
+            setAlertDialog({ title: 'Aviso enviado', message: 'Los alumnos del cuatrimestre lo van a recibir.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
         } catch {
             setAlertDialog({ title: 'Error', message: 'No se pudo enviar el aviso. Intentá de nuevo.' });
         } finally {
@@ -194,7 +193,7 @@ const SendCommissionNotification: React.FC = () => {
                 message={alertDialog?.message ?? ''}
                 mode="info"
                 confirmLabel="Aceptar"
-                onConfirm={() => setAlertDialog(null)}
+                onConfirm={alertDialog?.onConfirm ?? (() => setAlertDialog(null))}
             />
         </KeyboardAvoidingView>
     );

@@ -10,6 +10,7 @@ import {
   MaterialIcon,
   SubmissionDateRow,
   SubmissionTextCard,
+  FeedbackCard,
   EvaluationDescriptionCard,
   SubmissionFileCard,
 } from '../../components';
@@ -118,7 +119,7 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
       <SubmissionFileCard
         submissionFile={evaluationSubmission?.submission_file}
         originalFilename={evaluationSubmission?.original_filename}
-        downloadUrl={evaluationSubmission?.download_url ?? evaluationSubmission?.downloadUrl}
+        downloadUrl={evaluationSubmission?.download_url}
       />
 
       <EvaluationResultCard
@@ -128,6 +129,8 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
         isNumericEvaluation={isNumericEvaluation}
         passingGrade={detailedEvaluation.passing_grade}
       />
+
+      <FeedbackCard feedbackText={evaluationSubmission?.feedback_text} />
 
       {evaluationStatus !== EvaluationStatus.NOT_TAKEN &&
         <GraderUpdatedCard

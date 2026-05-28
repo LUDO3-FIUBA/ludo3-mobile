@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import { Loading, MaterialIcon } from '../../components';
@@ -105,8 +105,16 @@ const MySubmissionsScreen: React.FC<any> = ({ route }) => {
   const renderSubmission = ({ item }: { item: EvaluationSubmission }) => {
     const result = getSubmissionResult(item);
 
+    const goToEvaluationDetails = () => {
+      navigation.navigate('ViewEvaluationDetails', {
+        evaluation: item.evaluation,
+      });
+    };
+
     return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={goToEvaluationDetails}
       style={[
         styles.sessionContainer,
         result === 'FAILED' && styles.rejectedContainer,
@@ -143,7 +151,7 @@ const MySubmissionsScreen: React.FC<any> = ({ route }) => {
       >
         {getStatusLabel(result)}
       </Text>
-    </View>
+    </TouchableOpacity>
     );
   };
 

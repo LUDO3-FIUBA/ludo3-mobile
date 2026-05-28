@@ -1,6 +1,7 @@
 import { FinalStatus } from './FinalStatus';
 import { TeacherSubject } from './TeacherSubject';
 import { TeacherFinalExam, TeacherFinalExamCamelCase } from './TeacherFinalExam';
+import { TeacherCommission, TeacherCommissionSnakeCase } from './TeacherCommission';
 
 export interface TeacherFinal {
   id: number;
@@ -12,6 +13,7 @@ export interface TeacherFinal {
   act: null;
   finalExams: TeacherFinalExam[];
   teacher: number;
+  commissions: TeacherCommission[];
 }
 
 export interface TeacherFinalCamelCase {
@@ -24,6 +26,7 @@ export interface TeacherFinalCamelCase {
   act: null;
   final_exams?: TeacherFinalExamCamelCase[];
   teacher: number;
+  commissions?: TeacherCommissionSnakeCase[];
 }
 
 export function calculateFinalCurrentStatus(final: TeacherFinal): FinalStatus {

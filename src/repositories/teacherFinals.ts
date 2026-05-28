@@ -1,10 +1,12 @@
 import { TeacherFinal, TeacherFinalCamelCase } from '../models/TeacherFinal';
 import { TeacherFinalExam } from '../models/TeacherFinalExam';
+import { TeacherCommission, TeacherCommissionSnakeCase } from '../models/TeacherCommission';
 import { get, post, put } from './authenticatedRepository';
 import { StatusCodeError } from '../networking';
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
 
 const domainUrl = 'api/finals';
+const teacherCommissionsUrl = 'api/teacher/commissions';
 
 export class IdentityFail extends Error {
   constructor() {
@@ -81,15 +83,27 @@ export async function sendAct(finalId: number, image: string): Promise<boolean> 
   }
 }
 
-export async function createFinal(subjectId: number, subjectName: string, date: Date): Promise<TeacherFinal> {
-  console.log("Creating final", subjectId, subjectName);
-
+export async function createFinal(
+  subjectId: number,
+  subjectName: string,
+  date: Date,
+  commissionIds: number[],
+): Promise<TeacherFinal> {
   const createdFinal = await post(`${domainUrl}`, {
     subject_siu_id: subjectId,
     subject_name: subjectName,
     timestamp: Math.trunc(date.getTime() / 1000),
+    commission_ids: commissionIds,
   }) as TeacherFinalCamelCase
   return convertSnakeToCamelCase(createdFinal) as TeacherFinal;
+}
+
+export async function fetchShareableCommissions(subjectSiuId: number): Promise<TeacherCommission[]> {
+  const response = await get(
+    `${teacherCommissionsUrl}/shareable_for_final`,
+    [{ key: 'subject_siu_id', value: subjectSiuId }],
+  ) as TeacherCommissionSnakeCase[];
+  return response.map(c => convertSnakeToCamelCase(c) as TeacherCommission);
 }
 
 export function notifyGrades(finalId: number): Promise<boolean> {
@@ -107,6 +121,7 @@ export default {
   sendAct,
   createFinal,
   notifyGrades,
+  fetchShareableCommissions,
   IdentityFail,
   FaceRegistrationPending,
 };

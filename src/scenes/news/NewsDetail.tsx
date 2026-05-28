@@ -6,11 +6,10 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
-  Image,
 } from 'react-native';
 import AlertDialog from '../../components/AlertDialog';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { RoundedButton } from '../../components';
+import { ImageComponent, RoundedButton } from '../../components';
 import { newsRepository } from '../../repositories';
 import News from '../../models/News';
 
@@ -82,9 +81,7 @@ const NewsDetail: React.FC = () => {
   } else {
     content = (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {post.pictureUrl ? (
-        <Image source={{ uri: post.pictureUrl }} style={styles.picture} resizeMode="cover" />
-      ) : null}
+      <ImageComponent uri={post.image} imageStyle={styles.picture} expandOnPress />
 
       <View style={[styles.tagChip, { backgroundColor: post.tagColor }]}>
         <Text style={styles.tagChipText}>{post.tagLabel}</Text>

@@ -84,6 +84,7 @@ export default function EditEvaluation() {
         submitting={saving || deleting}
         initialValues={{
           evaluationName: evaluation.evaluationName,
+          description: evaluation.description ?? '',
           minimumPassingGrade: String(evaluation.passingGrade) ?? '',
           startDate: start,
           startTime: start,

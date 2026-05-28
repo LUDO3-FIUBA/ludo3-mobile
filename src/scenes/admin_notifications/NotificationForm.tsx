@@ -41,7 +41,7 @@ const NotificationForm: React.FC = () => {
     const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
     const [image, setImage] = useState<{ uri: string; type: string; name: string } | null>(null);
     const [saving, setSaving] = useState(false);
-    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string; onConfirm?: () => void } | null>(null);
 
     const toggleGroup = (key: string) => {
         if (key === 'all') {
@@ -103,8 +103,7 @@ const NotificationForm: React.FC = () => {
                 recipientGroups: selectedGroups,
                 image,
             });
-            setAlertDialog({ title: 'Enviada', message: 'La notificación fue enviada correctamente.' });
-            navigation.goBack();
+            setAlertDialog({ title: 'Enviada', message: 'La notificación fue enviada correctamente.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
         } catch {
             setAlertDialog({ title: 'Error', message: 'No se pudo enviar la notificación. Intentá de nuevo.' });
         } finally {
@@ -188,7 +187,7 @@ const NotificationForm: React.FC = () => {
                 message={alertDialog?.message ?? ''}
                 mode="info"
                 confirmLabel="Aceptar"
-                onConfirm={() => setAlertDialog(null)}
+                onConfirm={alertDialog?.onConfirm ?? (() => setAlertDialog(null))}
             />
         </KeyboardAvoidingView>
     );

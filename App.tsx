@@ -45,6 +45,7 @@ import DepartmentForm from './src/scenes/admin_departments/DepartmentForm';
 import CommissionList from './src/scenes/admin_commissions/CommissionList';
 import CommissionDetail from './src/scenes/admin_commissions/CommissionDetail';
 import CommissionForm from './src/scenes/admin_commissions/CommissionForm';
+import FinalsToApproveList from './src/scenes/admin_finals/FinalsToApproveList';
 import UserSearch from './src/scenes/admin_users/UserSearch';
 import UserDetail from './src/scenes/admin_users/UserDetail';
 import NotificationList from './src/scenes/admin_notifications/NotificationList';
@@ -78,13 +79,17 @@ const webLinking = {
       GoogleRegister: 'registro/google',
       PreRegister: 'registro',
       PreRegisterPassword: 'registro/password',
-      ChangePassword: 'app/cambiar-password',
-      MyAccount: 'app/mi-cuenta',
       PreRegisterDone: 'registro/completado',
       TakePicture: 'registro/foto',
       RootDrawer: {
         path: 'app',
         screens: {
+          // On web these live inside the drawer (skipOnWeb hides them from the
+          // Stack), so their URL paths must be declared here — declaring them
+          // at the top level produces `/app/app/<path>` and confuses the
+          // drawer's linking state.
+          MyAccount: 'mi-cuenta',
+          ChangePassword: 'cambiar-password',
           // Student direct tabs
           Home: 'inicio',
           Calendar: 'calendario',
@@ -110,6 +115,7 @@ const webLinking = {
           // Admin
           AdminDepartmentList: 'admin/departamentos',
           AdminCommissionList: 'admin/comisiones',
+          AdminFinalsToApprove: 'admin/finales-a-aprobar',
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
           FormsManager: 'admin/tramites',
@@ -304,6 +310,7 @@ const App = () => {
               {!skipOnWeb('TeacherForms') && <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />}
               {!skipOnWeb('AdminDepartmentList') && <Stack.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />}
               {!skipOnWeb('AdminCommissionList') && <Stack.Screen name="AdminCommissionList" component={CommissionList} options={{ headerShown: true, title: 'Comisiones' }} />}
+              {!skipOnWeb('AdminFinalsToApprove') && <Stack.Screen name="AdminFinalsToApprove" component={FinalsToApproveList} options={{ headerShown: true, title: 'Finales para aprobar' }} />}
               {!skipOnWeb('AdminUserSearch') && <Stack.Screen name="AdminUserSearch" component={UserSearch} options={{ headerShown: true, title: 'Buscar Usuarios' }} />}
               {!skipOnWeb('AdminNotificationList') && <Stack.Screen name="AdminNotificationList" component={NotificationList} options={{ headerShown: true, title: 'Avisos' }} />}
               {!skipOnWeb('FormsManager') && <Stack.Screen name="FormsManager" component={FormsManagerScreen} options={{ headerShown: true, title: 'Gestor de Trámites' }} />}

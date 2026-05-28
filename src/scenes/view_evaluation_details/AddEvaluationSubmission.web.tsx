@@ -43,7 +43,10 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
       setAlertDialog({
         title: 'Éxito',
         message: 'Entrega realizada con éxito.',
-        onConfirm: () => navigation.popToTop(),
+        onConfirm: () => navigation.reset({
+          index: 0,
+          routes: [{ name: 'ViewEvaluationDetails', params: { evaluation } }],
+        }),
       });
     } catch (error) {
       console.log('Error', error);
@@ -51,6 +54,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
         title: 'Error',
         message: 'Hubo un error, no pudimos registrar la entrega del examen. Por favor intenta nuevamente.',
       });
+    } finally {
       setSubmitting(false);
     }
   };
@@ -83,7 +87,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
         message={alertDialog?.message ?? ''}
         mode="info"
         confirmLabel="Aceptar"
-        onConfirm={() => { alertDialog?.onConfirm?.(); setAlertDialog(null); }}
+        onConfirm={() => { const onConfirm = alertDialog?.onConfirm; setAlertDialog(null); onConfirm?.(); }}
       />
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.card}>

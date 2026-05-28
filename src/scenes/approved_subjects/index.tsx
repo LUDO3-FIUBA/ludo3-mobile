@@ -79,11 +79,9 @@ const ApprovedSubjects: React.FC<ApprovedSubjectsProps> = ({ navigation }) => {
         visible={alertDialog !== null}
         title={alertDialog?.title ?? ''}
         message={alertDialog?.message ?? ''}
-        mode="confirm"
+        mode="info"
         confirmLabel="Aceptar"
-        cancelLabel="Aceptar"
         onConfirm={() => setAlertDialog(null)}
-        onCancel={() => setAlertDialog(null)}
       />
     </SafeAreaView>
   );
