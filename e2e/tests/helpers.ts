@@ -1,10 +1,6 @@
 import { Page, expect } from '@playwright/test';
-import { BASE, DNI, PASS } from './test-config';
-
-export const BASE = 'http://localhost:8081';
-export const BACKEND = 'http://localhost:8007';
-export const DNI = '43990892';
-export const PASS = 'testpass';
+import { BASE, BACKEND, DNI, PASS } from './test-config';
+export { BASE, BACKEND, DNI, PASS };
 
 export async function login(page: Page, dni: string, password: string) {
   await page.goto(BASE);

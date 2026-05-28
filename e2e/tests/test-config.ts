@@ -31,6 +31,7 @@ function required(key: string): string {
 }
 
 export const BASE = required('TEST_BASE_URL');
+export const BACKEND = required('TEST_BACKEND_URL');
 export const DNI = required('TEST_USER_DNI');
 export const PASS = required('TEST_USER_PASSWORD');
 export const EMAIL = required('TEST_USER_EMAIL');
