@@ -39,3 +39,5 @@ export const PADRON = required('TEST_USER_PADRON');
 export const FIRST_NAME = required('TEST_USER_FIRST_NAME');
 export const LAST_NAME = required('TEST_USER_LAST_NAME');
 export const FULL_NAME = `${FIRST_NAME} ${LAST_NAME}`;
+export const SIU_HOST = required('SIU_HOST');
+export const SIU_PORT = parseInt(required('SIU_PORT'), 10);

@@ -26,6 +26,20 @@ el runtime y los specs usen la misma copia de `@playwright/test`.
    cd ludo3-mobile && npm run web
    ```
 
+3. **(Opcional) VPN de FIUBA** para los tests de integración con SIU Guaraní.
+   Los tests en `siu_integration.spec.ts` y `fiuba_map_integration.spec.ts` se
+   **saltean automáticamente** si el servidor SIU no es alcanzable o devuelve un
+   error — no hace falta conectarse a la VPN para correr el resto de los tests.
+
+   Si la VPN está conectada pero el servicio SIU devuelve 503 (caído
+   temporalmente), los tests también se saltean en lugar de fallar.
+
+   El host y puerto del servidor SIU se configuran en `test-user.env`:
+   ```
+   SIU_HOST=172.25.90.12
+   SIU_PORT=8080
+   ```
+
 ## Correr los tests
 
 ```bash
@@ -57,12 +71,17 @@ Hay dos archivos de configuración, con responsabilidades distintas:
 
    ```
    TEST_BASE_URL=http://localhost:8081
-   TEST_USER_DNI=37247189
-   TEST_USER_EMAIL=fede.est@gmail.com
-   TEST_USER_PADRON=94557
+   TEST_BACKEND_URL=http://localhost:8007
+   TEST_USER_DNI=00000001
+   TEST_USER_EMAIL=user.test@ludo.com
+   TEST_USER_PADRON=00001
    TEST_USER_PASSWORD=pelusa22
-   TEST_USER_FIRST_NAME=Federico
-   TEST_USER_LAST_NAME=Esteban
+   TEST_USER_FIRST_NAME=Joe
+   TEST_USER_LAST_NAME=Doe
+
+   # SIU Guaraní (VPN required — tests skip automatically when unreachable)
+   SIU_HOST=172.25.90.12
+   SIU_PORT=8080
    ```
 
 2. **`scripts/seed_test_data.py`** — datos académicos que NO van por env:
@@ -91,7 +110,8 @@ e2e/
 │   ├── user.spec.ts              # submenu de Usuario (credencial, cuenta, etc.)
 │   ├── alert_dialog.spec.ts      # AlertDialog component (fix/alert-compatibility)
 │   ├── map_floor.spec.ts         # mapa de pisos, búsqueda, cambio de piso
-│   └── fiuba_map_integration.spec.ts  # integración con FIUBA-Map
+│   ├── fiuba_map_integration.spec.ts  # integración con FIUBA-Map (VPN)
+│   └── siu_integration.spec.ts   # integración con SIU Guaraní (VPN)
 ├── test-user.env                 # identidad del usuario + URL (shell/Python/TS)
 ├── scripts/
 │   ├── seed_test_data.py         # lógica + datos académicos del seed (Python)

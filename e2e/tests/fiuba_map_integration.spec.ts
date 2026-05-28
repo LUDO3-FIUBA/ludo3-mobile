@@ -1,8 +1,7 @@
 import {test, expect} from '@playwright/test';
 import * as net from 'net';
 import {loginAndWait, goToFiubaMap as navToFiubaMap, BACKEND, DNI, PASS} from './helpers';
-const SIU_HOST = '172.25.90.12';
-const SIU_PORT = 8080;
+import {SIU_HOST, SIU_PORT} from './test-config';
 
 function isSiuReachable(): Promise<boolean> {
   return new Promise(resolve => {

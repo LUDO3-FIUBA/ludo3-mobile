@@ -1,9 +1,7 @@
 import { test, expect } from '@playwright/test';
 import * as net from 'net';
 import { BASE, BACKEND, DNI, PASS, loginAndWait, goToFiubaMap } from './helpers';
-
-const SIU_HOST = '172.25.90.12';
-const SIU_PORT = 8080;
+import { SIU_HOST, SIU_PORT } from './test-config';
 const EXPECTED_CAREER = 'informatica-2020';
 const EXPECTED_SUBJECTS = ['AMII', 'FDP', 'PDP', 'INGSOFTI', 'PYE'];
 const MIN_SUBJECTS = 20;
