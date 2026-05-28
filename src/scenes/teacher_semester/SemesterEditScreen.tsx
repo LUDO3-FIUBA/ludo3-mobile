@@ -20,6 +20,7 @@ const SemesterEditScreen: React.FC = () => {
     const [attendanceError, setAttendanceError] = useState<string | null>(null);
     const [calendarUrl, setCalendarUrl] = useState<string>(semesterData.calendarSourceUrl ?? '');
     const [syncing, setSyncing] = useState(false);
+    const [syncResult, setSyncResult] = useState<{ ok: boolean; message: string } | null>(null);
 
     const dataNotValid = (): boolean => {
         const parsedMinAttendance = parseFloat(minAttendance);
@@ -64,16 +65,17 @@ const SemesterEditScreen: React.FC = () => {
 
     const handleSyncCalendar = async () => {
         if (!calendarUrl.trim()) {
-            Alert.alert('Error', 'Ingresá un link de Google Sheets primero.');
+            setSyncResult({ ok: false, message: 'Ingresá un link de Google Sheets primero.' });
             return;
         }
         setSyncing(true);
+        setSyncResult(null);
         try {
             await teacherSemestersRepository.setCalendarSourceUrl(semesterData.id, calendarUrl.trim());
             const result = await teacherSemestersRepository.syncCatedraCalendar(semesterData.id);
-            Alert.alert('Sincronizado', `Se importaron ${result.synced} entradas del calendario.`);
+            setSyncResult({ ok: true, message: `Se importaron ${result.synced} entradas del calendario.` });
         } catch {
-            Alert.alert('Error', 'No se pudo sincronizar el calendario. Verificá que el link sea un Google Sheets publicado.');
+            setSyncResult({ ok: false, message: 'No se pudo sincronizar el calendario. Verificá que el link sea un Google Sheets publicado.' });
         } finally {
             setSyncing(false);
         }
@@ -135,6 +137,18 @@ const SemesterEditScreen: React.FC = () => {
                     />
                 )
             }
+            {syncResult && (
+                <View style={[styles.syncBanner, { backgroundColor: syncResult.ok ? '#d4edda' : '#f8d7da' }]}>
+                    <Icon
+                        name={syncResult.ok ? 'check-circle' : 'alert-circle'}
+                        size={16}
+                        color={syncResult.ok ? '#155724' : '#721c24'}
+                    />
+                    <Text style={[styles.syncBannerText, { color: syncResult.ok ? '#155724' : '#721c24' }]}>
+                        {syncResult.message}
+                    </Text>
+                </View>
+            )}
         </View>
     );
 };
@@ -177,6 +191,18 @@ const styles = StyleSheet.create({
     },
     calendarStatusText: {
         fontSize: 13,
+    },
+    syncBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 8,
+    },
+    syncBannerText: {
+        fontSize: 13,
+        flex: 1,
     },
 });
 
