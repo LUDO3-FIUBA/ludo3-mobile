@@ -1,0 +1,30 @@
+e2e/tests/contacts.spec.ts
+  s_4d9056a3efbb15::t_54ecf051488351 61-64
+  s_4d9056a3efbb15::t_3e48294ad787f7 200-214,216-232,234-240
+  s_4d9056a3efbb15::t_59414040ef5192 215
+  s_4d9056a3efbb15::t_a97a032f56a58b 39-47,49-54
+  s_4d9056a3efbb15::t_605dfc4c7d3ebe 48
+  s_4d9056a3efbb15::t_ecec5cac55a5d0 233
+src/scenes/root_drawer/index.web.tsx
+  s_4d9056a3efbb15::t_7bc8257ad0dc17 3
+  s_4d9056a3efbb15::t_23746b6b3be0f5 568
+  s_4d9056a3efbb15::t_f14c9e6dad7d63 558-561,565-567
+src/repositories/notifications.ts
+  s_4d9056a3efbb15::t_bb839ccf2b90a7 22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "3409dbd6a82f90f60be1ddd4290c6f0beb9a7cad",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
