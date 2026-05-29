@@ -1,0 +1,28 @@
+src/scenes/study_groups/GroupScheduleScreen.tsx
+  s_4d9056a3efbb15::t_cc0d4804e2cd81 48,51-80
+  s_4d9056a3efbb15::t_91603957d49038 6
+  s_4d9056a3efbb15::t_5c43b1964f2485 117-125
+src/repositories/studyGroups.ts
+  s_4d9056a3efbb15::t_1f08ea03cdc3b1 29-44,50
+e2e/tests/study_groups.spec.ts
+  s_4d9056a3efbb15::t_e1b5ef5d16cee0 310
+  s_4d9056a3efbb15::t_982c2a954909f2 141-156
+  s_4d9056a3efbb15::t_1598dc4e524f67 196-198,200-214,223-227
+  s_4d9056a3efbb15::t_dece3a2c1b6344 230-264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "67647b77b6f6c6089e78a955b05a45bb08d17bc9",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
