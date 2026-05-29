@@ -409,5 +409,139 @@ test.describe('Contacts — red de contactos', () => {
     await expect(page.getByText(/Ninguno de los dos está cursando/)).not.toBeVisible({ timeout: 3000 });
     // At least one day label should appear
     await expect(page.getByText(/Lunes|Martes|Miércoles|Jueves|Viernes/i).first()).toBeVisible({ timeout: 5000 });
+    // Free gaps section should appear since both have schedules
+    await expect(page.getByText(/Franjas libres en común/i)).toBeVisible({ timeout: 5000 });
+  });
+
+  // ─── Schedule comparison: 5 student scenarios ──────────────────────────────
+  // All via raw fetch to avoid Playwright cookie/session bleed
+
+  async function getScheduleGaps(user1Dni: string, user1Pass: string, user2Padron: string) {
+    const r1 = await fetch(`${BACKEND}/auth/login/`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dni: user1Dni, password: user1Pass }),
+    });
+    const { access: t1 } = await r1.json();
+
+    // Clean existing contacts for user1
+    const existing = await (await fetch(`${BACKEND}/api/contacts/`, { headers: { Authorization: `Bearer ${t1}` } })).json();
+    for (const c of Array.isArray(existing) ? existing : []) {
+      await fetch(`${BACKEND}/api/contacts/${c.id}/`, { method: 'DELETE', headers: { Authorization: `Bearer ${t1}` } });
+    }
+
+    const c = await (await fetch(`${BACKEND}/api/contacts/`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t1}` },
+      body: JSON.stringify({ padron: user2Padron }),
+    })).json();
+
+    const r2 = await fetch(`${BACKEND}/auth/login/`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dni: user1Dni === '37247189' ? '12345678' : user1Dni, password: 'testpass' }),
+    });
+    // Accept as user2
+    const loginU2Resp = await fetch(`${BACKEND}/auth/login/`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ padron: user2Padron, dni: '', password: 'testpass' }),
+    });
+
+    // Find user2's token by padron lookup
+    const user2Resp = await fetch(`${BACKEND}/api/students/search/?q=${user2Padron}`, {
+      headers: { Authorization: `Bearer ${t1}` },
+    });
+    const students = await user2Resp.json();
+    const user2 = students.find((s: any) => s.padron === user2Padron);
+
+    // We need to know user2's DNI to login — use a helper
+    return { contactId: c.id, token: t1, contactObj: c };
+  }
+
+  // Simpler helper: login + clean + create contact + accept + get gaps
+  async function compareSchedules(
+    myDni: string, myPass: string,
+    theirDni: string, theirPass: string,
+    theirPadron: string,
+  ) {
+    const meResp = await fetch(`${BACKEND}/auth/login/`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dni: myDni, password: myPass }),
+    });
+    const { access: meToken } = await meResp.json();
+
+    // Clean my contacts first
+    const myContacts = await (await fetch(`${BACKEND}/api/contacts/`, { headers: { Authorization: `Bearer ${meToken}` } })).json();
+    for (const c of Array.isArray(myContacts) ? myContacts : []) {
+      await fetch(`${BACKEND}/api/contacts/${c.id}/`, { method: 'DELETE', headers: { Authorization: `Bearer ${meToken}` } });
+    }
+
+    const createResp = await fetch(`${BACKEND}/api/contacts/`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${meToken}` },
+      body: JSON.stringify({ padron: theirPadron }),
+    });
+    const contact = await createResp.json();
+
+    const themResp = await fetch(`${BACKEND}/auth/login/`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dni: theirDni, password: theirPass }),
+    });
+    const { access: themToken } = await themResp.json();
+    await fetch(`${BACKEND}/api/contacts/${contact.id}/accept/`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${themToken}` },
+    });
+
+    const compResp = await fetch(`${BACKEND}/api/contacts/${contact.id}/schedule-comparison/`, {
+      headers: { Authorization: `Bearer ${meToken}` },
+    });
+    return await compResp.json();
+  }
+
+  test('gaps: Fede(Lun/Mié 10-12, Mar/Jue 14-16) vs José(Lun/Mié 12-14) — lunes tiene gap 08-10 y 14-22', async () => {
+    const data = await compareSchedules('37247189', 'soydeferro', '12345678', 'testpass', '99999');
+    expect(data.mine.length).toBeGreaterThan(0);
+    expect(data.theirs.length).toBeGreaterThan(0);
+    expect(data.free_gaps.length).toBeGreaterThan(0);
+    const monGaps = data.free_gaps.filter((g: any) => g.day_of_week === 0);
+    expect(monGaps.length).toBeGreaterThanOrEqual(1);
+    // Lunes: Fede 10-12, José 12-14 → gap 08-10 and 14-22
+    expect(monGaps.some((g: any) => g.start_time === '08:00' && g.end_time === '10:00')).toBe(true);
+    expect(monGaps.some((g: any) => g.start_time === '14:00' && g.end_time === '22:00')).toBe(true);
+  });
+
+  test('gaps: Fede vs Ana(Lun/Jue 08-10) — lunes no hay solapamiento, gap entre cursos', async () => {
+    const data = await compareSchedules('37247189', 'soydeferro', '11000001', 'testpass', '11001');
+    // Lunes: Ana 08-10, Fede 10-12 → no overlap, gap after Fede ends: 12-22
+    const monGaps = data.free_gaps.filter((g: any) => g.day_of_week === 0);
+    expect(monGaps.some((g: any) => g.start_time === '12:00')).toBe(true);
+    // Martes: Fede 14-16, Ana nothing → full day minus Fede, gap 08-14 and 16-22
+    const tueGaps = data.free_gaps.filter((g: any) => g.day_of_week === 1);
+    expect(tueGaps.some((g: any) => g.start_time === '08:00' && g.end_time === '14:00')).toBe(true);
+    expect(tueGaps.some((g: any) => g.start_time === '16:00' && g.end_time === '22:00')).toBe(true);
+  });
+
+  test('gaps: Fede vs Carlos(Mar/Jue 10-12) — martes: Carlos 10-12 + Fede 14-16 → gap 08-10, 12-14, 16-22', async () => {
+    const data = await compareSchedules('37247189', 'soydeferro', '22000001', 'testpass', '22001');
+    const tueGaps = data.free_gaps.filter((g: any) => g.day_of_week === 1);
+    expect(tueGaps.some((g: any) => g.start_time === '08:00' && g.end_time === '10:00')).toBe(true);
+    expect(tueGaps.some((g: any) => g.start_time === '12:00' && g.end_time === '14:00')).toBe(true);
+    expect(tueGaps.some((g: any) => g.start_time === '16:00' && g.end_time === '22:00')).toBe(true);
+  });
+
+  test('gaps: Fede vs María(Lun 10-12) — solapamiento total lunes → no hay gap 10-12, sí 08-10 y 12-22', async () => {
+    const data = await compareSchedules('37247189', 'soydeferro', '33000001', 'testpass', '33001');
+    const monGaps = data.free_gaps.filter((g: any) => g.day_of_week === 0);
+    // Both busy 10-12 → gap 08-10 and 12-22
+    expect(monGaps.some((g: any) => g.start_time === '08:00' && g.end_time === '10:00')).toBe(true);
+    expect(monGaps.some((g: any) => g.start_time === '12:00' && g.end_time === '22:00')).toBe(true);
+    // No gap that starts exactly at 10:00 (that slot is busy for both)
+    expect(monGaps.some((g: any) => g.start_time === '10:00')).toBe(false);
+  });
+
+  test('gaps: José vs Carlos(Mar/Jue 10-12) — días distintos, todos los días con alguien son gaps parciales', async () => {
+    const data = await compareSchedules('12345678', 'testpass', '22000001', 'testpass', '22001');
+    // José: Mon/Wed 12-14. Carlos: Tue/Thu 10-12. No common busy days.
+    // Each day only one person has class → full gaps except that block
+    const tueGaps = data.free_gaps.filter((g: any) => g.day_of_week === 1);
+    // Martes: only Carlos 10-12 → gaps 08-10 and 12-22
+    expect(tueGaps.some((g: any) => g.start_time === '08:00' && g.end_time === '10:00')).toBe(true);
+    expect(tueGaps.some((g: any) => g.start_time === '12:00' && g.end_time === '22:00')).toBe(true);
   });
 });

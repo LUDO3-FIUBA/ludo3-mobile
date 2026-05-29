@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   gapsSection: { margin: 12, padding: 12, backgroundColor: '#d1e7dd', borderRadius: 10, borderLeftWidth: 3, borderLeftColor: '#198754' },
   gapsSectionTitle: { fontSize: 13, fontWeight: '700', color: '#198754', marginBottom: 8, textTransform: 'uppercase' as const, letterSpacing: 0.4 },
   gapRow: { flexDirection: 'row' as const, alignItems: 'center' as const, marginBottom: 4 },
-  gapDay: { fontSize: 13, fontWeight: '600' as const, color: '#198754', width: 40 },
+  gapDay: { fontSize: 13, fontWeight: '600' as const, color: '#198754', marginRight: 8 },
   gapTime: { fontSize: 13, color: '#0f5132' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyText: { marginTop: 12, fontSize: 14, color: lightModeColors.darkGray, textAlign: 'center', padding: 20 },
