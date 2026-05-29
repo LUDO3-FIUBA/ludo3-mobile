@@ -38,7 +38,7 @@ const SearchBar: React.FC<{ onAdd: (padron: string) => void }> = ({ onAdd }) => 
   }, []);
 
   return (
-    <View style={styles.searchContainer}>
+    <View style={styles.searchWrapper}>
       <View style={styles.searchInputRow}>
         <Icon name="magnify" size={20} color={lightModeColors.darkGray} style={styles.searchIcon} />
         <TextInput
@@ -49,6 +49,7 @@ const SearchBar: React.FC<{ onAdd: (padron: string) => void }> = ({ onAdd }) => 
           onChangeText={search}
           autoCapitalize="none"
         />
+        {searching && <ActivityIndicator size="small" color={lightModeColors.mainColor} style={{ marginRight: 4 }} />}
         {query.length > 0 && (
           <TouchableOpacity onPress={() => { setQuery(''); setResults([]); }}>
             <Icon name="close-circle" size={18} color={lightModeColors.darkGray} />
@@ -56,16 +57,10 @@ const SearchBar: React.FC<{ onAdd: (padron: string) => void }> = ({ onAdd }) => 
         )}
       </View>
 
-      {searching && <ActivityIndicator size="small" color={lightModeColors.mainColor} style={{ marginTop: 8 }} />}
-
       {results.length > 0 && (
-        <FlatList
-          data={results}
-          keyExtractor={item => item.padron}
-          style={styles.searchResults}
-          keyboardShouldPersistTaps="handled"
-          renderItem={({ item }) => (
-            <View style={styles.searchResultRow}>
+        <View style={styles.searchDropdown}>
+          {results.map(item => (
+            <View key={item.padron} style={styles.searchResultRow}>
               <View style={styles.searchResultInfo}>
                 <Text style={styles.searchResultName}>{item.full_name}</Text>
                 <Text style={styles.searchResultPadron}>Padrón: {item.padron}</Text>
@@ -77,8 +72,8 @@ const SearchBar: React.FC<{ onAdd: (padron: string) => void }> = ({ onAdd }) => 
                 <Icon name="account-plus" size={20} color="white" />
               </TouchableOpacity>
             </View>
-          )}
-        />
+          ))}
+        </View>
       )}
     </View>
   );
@@ -302,12 +297,12 @@ const styles = StyleSheet.create({
   listContent: { padding: 12, flexGrow: 1 },
 
   // Search
-  searchContainer: { padding: 12, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray },
+  searchWrapper: { padding: 12, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray, zIndex: 100 },
   searchInputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
   searchIcon: { marginRight: 6 },
   searchInput: { flex: 1, fontSize: 15, color: '#000' },
-  searchResults: { maxHeight: 220, marginTop: 8, borderRadius: 8, borderWidth: 1, borderColor: lightModeColors.lightGray },
-  searchResultRow: { flexDirection: 'row', alignItems: 'center', padding: 10, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray },
+  searchDropdown: { position: 'absolute', top: 60, left: 12, right: 12, backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: lightModeColors.lightGray, zIndex: 200, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 6, elevation: 8, maxHeight: 300 },
+  searchResultRow: { flexDirection: 'row', alignItems: 'center', padding: 12, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
   searchResultInfo: { flex: 1 },
   searchResultName: { fontSize: 14, fontWeight: '600', color: '#000' },
   searchResultPadron: { fontSize: 12, color: lightModeColors.darkGray, marginTop: 2 },
