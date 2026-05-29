@@ -60,6 +60,7 @@ test.describe('Contacts — red de contactos', () => {
   test.beforeEach(async () => {
     await Promise.all([
       deleteAllContacts(DNI, PASS),
+      deleteAllContacts(JOSE_DNI, JOSE_PASS),
       deleteAllNotifications(JOSE_DNI, JOSE_PASS),
     ]);
   });
@@ -293,29 +294,118 @@ test.describe('Contacts — red de contactos', () => {
     await expect(page.getByLabel('schedule-comparison-screen')).toBeVisible({ timeout: 5000 });
   });
 
-  test('endpoint schedule-comparison devuelve mine y theirs', async ({ request }) => {
-    // Create accepted contact via API
-    const loginResp = await request.post(`${BACKEND}/auth/login/`, { data: { dni: DNI, password: PASS } });
-    const { access } = await loginResp.json();
-    const createResp = await request.post(`${BACKEND}/api/contacts/`, {
-      data: { padron: JOSE_PADRON },
-      headers: { Authorization: `Bearer ${access}` },
+  test('endpoint schedule-comparison devuelve mine y theirs', async () => {
+    // Use raw fetch (no Playwright cookie management) to avoid session bleed between tests
+    const apiFetch = async (url: string, options: RequestInit = {}) => {
+      const res = await fetch(url, {
+        ...options,
+        headers: { 'Content-Type': 'application/json', ...options.headers },
+      });
+      return res;
+    };
+
+    // Use hardcoded Fede credentials to avoid import aliasing issues from siu_integration.spec.ts
+    const FEDE_DNI = '37247189';
+    const FEDE_PASS = 'soydeferro';
+    const loginRes = await apiFetch(`${BACKEND}/auth/login/`, {
+      method: 'POST',
+      body: JSON.stringify({ dni: FEDE_DNI, password: FEDE_PASS }),
     });
-    const contact = await createResp.json();
-    const joseLogin = await request.post(`${BACKEND}/auth/login/`, { data: { dni: JOSE_DNI, password: JOSE_PASS } });
-    const { access: joseToken } = await joseLogin.json();
-    await request.post(`${BACKEND}/api/contacts/${contact.id}/accept/`, {
-      headers: { Authorization: `Bearer ${joseToken}` },
+    const { access } = await loginRes.json();
+
+    // Clean up existing contacts for Fede first
+    const existingRes = await apiFetch(`${BACKEND}/api/contacts/`, {
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+    });
+    const existing = await existingRes.json();
+    for (const c of Array.isArray(existing) ? existing : []) {
+      await apiFetch(`${BACKEND}/api/contacts/${c.id}/`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+      });
+    }
+
+    const createRes = await apiFetch(`${BACKEND}/api/contacts/`, {
+      method: 'POST',
+      body: JSON.stringify({ padron: JOSE_PADRON }),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
+    });
+    const contact = await createRes.json();
+
+    const joseLoginRes = await apiFetch(`${BACKEND}/auth/login/`, {
+      method: 'POST',
+      body: JSON.stringify({ dni: JOSE_DNI, password: JOSE_PASS }),
+    });
+    const { access: joseToken } = await joseLoginRes.json();
+    await apiFetch(`${BACKEND}/api/contacts/${contact.id}/accept/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${joseToken}` },
     });
 
-    const resp = await request.get(`${BACKEND}/api/contacts/${contact.id}/schedule-comparison/`, {
-      headers: { Authorization: `Bearer ${access}` },
+    const resp = await apiFetch(`${BACKEND}/api/contacts/${contact.id}/schedule-comparison/`, {
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${access}` },
     });
-    expect(resp.status()).toBe(200);
+    expect(resp.status).toBe(200);
     const data = await resp.json();
     expect(data).toHaveProperty('mine');
     expect(data).toHaveProperty('theirs');
     expect(Array.isArray(data.mine)).toBe(true);
     expect(Array.isArray(data.theirs)).toBe(true);
+
+    // Fede (DNI=37247189) has active inscriptions WITH schedules loaded by setup-db.sh
+    // mine (Fede's own blocks) must be non-empty — the request is from Fede's token
+    expect(data.mine.length).toBeGreaterThan(0);
+    // Each block must have the required fields
+    for (const block of data.mine) {
+      expect(block).toHaveProperty('subject_name');
+      expect(block).toHaveProperty('day_of_week');
+      expect(block).toHaveProperty('start_time');
+      expect(block).toHaveProperty('end_time');
+      expect(typeof block.day_of_week).toBe('number');
+    }
+  });
+
+  test('pantalla de comparación muestra bloques cuando hay horarios', async ({ page }) => {
+    // Hardcode Fede's credentials — DNI import may be aliased to Luca in some test contexts
+    const FEDE_DNI = '37247189';
+    const FEDE_PASS = 'soydeferro';
+
+    // Create Fede→José accepted contact via separate contexts (no cookie bleed)
+    const fedeCtx = await playwrightRequest.newContext({ storageState: { cookies: [], origins: [] } });
+    const joseCtx2 = await playwrightRequest.newContext({ storageState: { cookies: [], origins: [] } });
+
+    const fedeLogin = await fedeCtx.post(`${BACKEND}/auth/login/`, { data: { dni: FEDE_DNI, password: FEDE_PASS } });
+    const { access: fedeToken } = await fedeLogin.json();
+
+    // Clean up existing Fede contacts first
+    const existingContacts = await (await fedeCtx.get(`${BACKEND}/api/contacts/`, { headers: { Authorization: `Bearer ${fedeToken}` } })).json();
+    for (const c of Array.isArray(existingContacts) ? existingContacts : []) {
+      await fedeCtx.delete(`${BACKEND}/api/contacts/${c.id}/`, { headers: { Authorization: `Bearer ${fedeToken}` } });
+    }
+
+    const createResp = await fedeCtx.post(`${BACKEND}/api/contacts/`, {
+      data: { padron: JOSE_PADRON },
+      headers: { Authorization: `Bearer ${fedeToken}` },
+    });
+    const contact = await createResp.json();
+    await fedeCtx.dispose();
+
+    const joseLogin2 = await joseCtx2.post(`${BACKEND}/auth/login/`, { data: { dni: JOSE_DNI, password: JOSE_PASS } });
+    const { access: joseToken2 } = await joseLogin2.json();
+    await joseCtx2.post(`${BACKEND}/api/contacts/${contact.id}/accept/`, {
+      headers: { Authorization: `Bearer ${joseToken2}` },
+    });
+    await joseCtx2.dispose();
+
+    // José navigates to compare schedules with Fede
+    await loginAs(page, JOSE_DNI, JOSE_PASS);
+    await goToContacts(page);
+    await page.getByLabel('ver-horarios').click();
+    await expect(page.getByLabel('schedule-comparison-screen')).toBeVisible({ timeout: 5000 });
+
+    // Fede has schedules — should show day sections, not the empty state
+    await expect(page.getByText(/Ninguno de los dos está cursando/)).not.toBeVisible({ timeout: 3000 });
+    // At least one day label should appear
+    await expect(page.getByText(/Lunes|Martes|Miércoles|Jueves|Viernes/i).first()).toBeVisible({ timeout: 5000 });
   });
 });

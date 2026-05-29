@@ -68,6 +68,35 @@ else:
     print(f'[setup-db] Created {len(SUBJECTS)} approved subjects.')
 PYTHON
 
+echo "[setup-db] Adding schedules to Fede's active commissions..."
+docker-compose -f "$BACKEND_DIR/docker-compose.yml" exec -T web python manage.py shell << 'PYTHON'
+from backend.models import Student, CommissionInscription, SemesterSchedule
+from datetime import time
+
+fede = Student.objects.filter(user__dni='37247189').first()
+if not fede:
+    print('[setup-db] Fede not found, skipping schedules.')
+else:
+    inscriptions = CommissionInscription.objects.filter(student=fede, status='A').select_related('semester')
+    # Schedule data: (semester, day_of_week, start_time, end_time)
+    # day_of_week: 0=Mon 1=Tue 2=Wed 3=Thu 4=Fri
+    SCHEDULES = [
+        # Catedra 1 (semester 8) — Lunes y Miércoles 10-12
+        (8, 0, time(10, 0), time(12, 0)),
+        (8, 2, time(10, 0), time(12, 0)),
+        # Catedra 2 (semester 10) — Martes y Jueves 14-16
+        (10, 1, time(14, 0), time(16, 0)),
+        (10, 3, time(14, 0), time(16, 0)),
+    ]
+    created = 0
+    for sem_id, day, start, end in SCHEDULES:
+        insc = inscriptions.filter(semester_id=sem_id).first()
+        if insc and not SemesterSchedule.objects.filter(semester_id=sem_id, day_of_week=day).exists():
+            SemesterSchedule.objects.create(semester_id=sem_id, day_of_week=day, start_time=start, end_time=end)
+            created += 1
+    print(f'[setup-db] Created {created} schedule slots for Fede.')
+PYTHON
+
 echo "[setup-db] Creating SIU test user (Luca)..."
 docker-compose -f "$BACKEND_DIR/docker-compose.yml" exec -T web python manage.py shell << 'PYTHON'
 from backend.models import User, Student
