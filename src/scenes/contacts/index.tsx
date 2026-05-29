@@ -14,7 +14,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { lightModeColors } from '../../styles/colorPalette';
-import { contactsRepository, Contact, ContactStudent } from '../../repositories/contacts';
+import { contactsRepository } from '../../repositories';
+import type { Contact, ContactStudent } from '../../repositories/contacts';
 
 // ─── Search Bar ────────────────────────────────────────────────────────────────
 
@@ -23,14 +24,21 @@ const SearchBar: React.FC<{ onAdd: (padron: string) => void }> = ({ onAdd }) => 
   const [results, setResults] = useState<ContactStudent[]>([]);
   const [searching, setSearching] = useState(false);
 
+  const [searchError, setSearchError] = useState<string | null>(null);
+
   const search = useCallback(async (text: string) => {
     setQuery(text);
+    setSearchError(null);
     if (text.length < 2) { setResults([]); return; }
     setSearching(true);
     try {
+      console.log('[Contacts] searching:', text);
       const data = await contactsRepository.searchStudents(text);
+      console.log('[Contacts] results:', data);
       setResults(data);
-    } catch {
+    } catch (e: any) {
+      console.error('[Contacts] search error:', e);
+      setSearchError(String(e?.message ?? e));
       setResults([]);
     } finally {
       setSearching(false);
@@ -51,11 +59,18 @@ const SearchBar: React.FC<{ onAdd: (padron: string) => void }> = ({ onAdd }) => 
         />
         {searching && <ActivityIndicator size="small" color={lightModeColors.mainColor} style={{ marginRight: 4 }} />}
         {query.length > 0 && (
-          <TouchableOpacity onPress={() => { setQuery(''); setResults([]); }}>
+          <TouchableOpacity onPress={() => { setQuery(''); setResults([]); setSearchError(null); }}>
             <Icon name="close-circle" size={18} color={lightModeColors.darkGray} />
           </TouchableOpacity>
         )}
       </View>
+
+      {searchError && (
+        <Text style={{ color: 'red', fontSize: 12, marginTop: 4 }}>{searchError}</Text>
+      )}
+      {!searchError && query.length >= 2 && !searching && results.length === 0 && (
+        <Text style={{ color: lightModeColors.darkGray, fontSize: 12, marginTop: 4 }}>Sin resultados para "{query}"</Text>
+      )}
 
       {results.length > 0 && (
         <View style={styles.searchDropdown}>
@@ -66,8 +81,9 @@ const SearchBar: React.FC<{ onAdd: (padron: string) => void }> = ({ onAdd }) => 
                 <Text style={styles.searchResultPadron}>Padrón: {item.padron}</Text>
               </View>
               <TouchableOpacity
+                accessibilityLabel="agregar-contacto"
                 style={styles.addButton}
-                onPress={() => { onAdd(item.padron); setQuery(''); setResults([]); }}
+                onPress={() => { onAdd(item.padron); setQuery(''); setResults([]); setSearchError(null); }}
               >
                 <Icon name="account-plus" size={20} color="white" />
               </TouchableOpacity>
@@ -86,9 +102,9 @@ const ContactCard: React.FC<{
   onAccept: (id: number) => void;
   onRemove: (id: number) => void;
   onViewSubjects: (contact: Contact) => void;
-  isReceived: boolean;
-}> = ({ contact, onAccept, onRemove, onViewSubjects, isReceived }) => {
+}> = ({ contact, onAccept, onRemove, onViewSubjects }) => {
   const isPending = contact.status === 'P';
+  const isReceived = isPending && !contact.is_sender;
 
   return (
     <View style={styles.card}>
@@ -105,17 +121,17 @@ const ContactCard: React.FC<{
         )}
       </View>
       <View style={styles.cardActions}>
-        {isPending && isReceived && (
-          <TouchableOpacity style={styles.acceptBtn} onPress={() => onAccept(contact.id)}>
+        {isReceived && (
+          <TouchableOpacity accessibilityLabel="aceptar-contacto" style={styles.acceptBtn} onPress={() => onAccept(contact.id)}>
             <Icon name="check" size={20} color="white" />
           </TouchableOpacity>
         )}
         {!isPending && (
-          <TouchableOpacity style={styles.subjectsBtn} onPress={() => onViewSubjects(contact)}>
+          <TouchableOpacity accessibilityLabel="ver-materias" style={styles.subjectsBtn} onPress={() => onViewSubjects(contact)}>
             <Icon name="book-open-variant" size={20} color={lightModeColors.mainColor} />
           </TouchableOpacity>
         )}
-        <TouchableOpacity style={styles.removeBtn} onPress={() => onRemove(contact.id)}>
+        <TouchableOpacity accessibilityLabel="eliminar-contacto" style={styles.removeBtn} onPress={() => onRemove(contact.id)}>
           <Icon name="account-remove" size={20} color={lightModeColors.failed} />
         </TouchableOpacity>
       </View>
@@ -171,25 +187,22 @@ const ContactsScreen: React.FC<any> = () => {
     }
   };
 
-  const handleRemove = (id: number) => {
-    Alert.alert(
-      'Eliminar contacto',
-      '¿Querés eliminar este contacto?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar', style: 'destructive',
-          onPress: async () => {
-            try {
-              await contactsRepository.removeContact(id);
-              setContacts(prev => prev.filter(c => c.id !== id));
-            } catch {
-              Alert.alert('Error', 'No se pudo eliminar el contacto.');
-            }
-          },
-        },
-      ]
-    );
+  const handleRemove = async (id: number) => {
+    const confirmed = typeof window !== 'undefined'
+      ? window.confirm('¿Querés eliminar este contacto?')
+      : await new Promise<boolean>(resolve =>
+          Alert.alert('Eliminar contacto', '¿Querés eliminar este contacto?', [
+            { text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) },
+            { text: 'Eliminar', style: 'destructive', onPress: () => resolve(true) },
+          ])
+        );
+    if (!confirmed) return;
+    try {
+      await contactsRepository.removeContact(id);
+      setContacts(prev => prev.filter(c => c.id !== id));
+    } catch {
+      Alert.alert('Error', 'No se pudo eliminar el contacto.');
+    }
   };
 
   const handleViewSubjects = (contact: Contact) => {
@@ -226,7 +239,6 @@ const ContactsScreen: React.FC<any> = () => {
             onAccept={handleAccept}
             onRemove={handleRemove}
             onViewSubjects={handleViewSubjects}
-            isReceived={item.status === 'P'}
           />
         )}
         ListEmptyComponent={
@@ -276,7 +288,7 @@ export const ContactSubjectsScreen: React.FC<any> = ({ route }) => {
       ) : (
         <FlatList
           data={subjects}
-          keyExtractor={item => String(item.subject_siu_id)}
+          keyExtractor={item => String(item.semester_id)}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <View style={styles.subjectRow}>

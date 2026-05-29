@@ -10,6 +10,7 @@ export interface Contact {
   id: number;
   contact: ContactStudent;
   status: 'P' | 'A';
+  is_sender: boolean;
   created_at: string;
 }
 
