@@ -105,7 +105,7 @@ const CreateSemester = () => {
           }
         }
 
-        navigation.navigate('TeacherHome');
+        navigation.goBack();
       } else {
         Alert.alert(
           'Error',
