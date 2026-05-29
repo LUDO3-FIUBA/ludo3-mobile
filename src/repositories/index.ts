@@ -33,3 +33,4 @@ export { default as newsRepository } from './news';
 export { default as guaraniRepository } from './guarani';
 export { default as bedeliaRepository } from './bedelia';
 export { default as contactsRepository } from './contacts';
+export { default as studyGroupsRepository } from './studyGroups';

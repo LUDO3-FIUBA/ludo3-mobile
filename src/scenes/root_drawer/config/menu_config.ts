@@ -75,6 +75,7 @@ export const studentMenu: MenuItem[] = [
       { kind: 'direct', key: 'fiuba-plan', label: 'FIUBA Plan', icon: 'calendar-clock', iconOutline: 'calendar-clock-outline', route: 'FiubaPlan', scope: 'student' },
       { kind: 'direct', key: 'fiuba-map', label: 'Plan de Carrera', icon: 'map-legend', iconOutline: 'map-legend', route: 'FiubaMap', scope: 'student' },
       { kind: 'direct', key: 'contacts', label: 'Contactos', icon: 'account-group', iconOutline: 'account-group-outline', route: 'Contacts', scope: 'student' },
+      { kind: 'direct', key: 'study-groups', label: 'Grupos de estudio', icon: 'account-multiple', iconOutline: 'account-multiple-outline', route: 'StudyGroups', scope: 'student' },
     ],
   },
   {
@@ -204,9 +205,12 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
   { route: 'NewsDetail', title: 'Novedad' },
   { route: 'Notifications', title: 'Notificaciones' },
 
-  // Contact detail pages (no roleFilter — accessible to any authenticated user)
+  // Contact detail pages
   { route: 'ContactSubjects', title: 'Materias en curso' },
   { route: 'ContactSchedule', title: 'Comparar horarios' },
+  // Study group detail pages
+  { route: 'GroupSchedule', title: 'Horario del grupo' },
+  { route: 'GroupInvite', title: 'Invitar al grupo' },
 
   // Student-facing detail/sub-pages that used to be Stack-only on web
   { route: 'ViewSemester', title: 'Comisión', roleFilter: 'student' },
