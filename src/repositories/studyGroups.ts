@@ -26,12 +26,28 @@ export interface GroupBlock {
   end_time: string;
 }
 
+export interface GapMember {
+  padron: string;
+  full_name: string;
+}
+
+export interface RankedGap {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  free_count: number;
+  total_count: number;
+  free_members: GapMember[];
+  busy_members: GapMember[];
+  type: 'all' | 'majority' | 'minority';
+}
+
 export interface GroupSchedule {
   group_id: number;
   group_name: string;
   members: Array<{ padron: string; full_name: string; is_creator: boolean; block_count: number }>;
   blocks: GroupBlock[];
-  free_gaps: Array<{ day_of_week: number; start_time: string; end_time: string }>;
+  free_gaps: RankedGap[];
 }
 
 async function fetchGroups(): Promise<StudyGroup[]> {

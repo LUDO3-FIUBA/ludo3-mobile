@@ -136,12 +136,24 @@ test.describe('Grupos de estudio', () => {
     expect(sched.members.length).toBe(2);
     expect(Array.isArray(sched.blocks)).toBe(true);
     expect(Array.isArray(sched.free_gaps)).toBe(true);
-    // Both Fede (Mon/Wed 10-12, Tue/Thu 14-16) and José (Mon/Wed 12-14) have schedules
     expect(sched.blocks.length).toBeGreaterThan(0);
     expect(sched.free_gaps.length).toBeGreaterThan(0);
-    // Mon: Fede 10-12 + José 12-14 → gap 08-10
-    const monGaps = sched.free_gaps.filter((g: any) => g.day_of_week === 0);
-    expect(monGaps.some((g: any) => g.start_time === '08:00' && g.end_time === '10:00')).toBe(true);
+
+    // Each gap has the new ranked format
+    for (const g of sched.free_gaps) {
+      expect(g).toHaveProperty('free_count');
+      expect(g).toHaveProperty('total_count');
+      expect(g).toHaveProperty('free_members');
+      expect(g).toHaveProperty('busy_members');
+      expect(g).toHaveProperty('type');
+      expect(['all', 'majority', 'minority']).toContain(g.type);
+    }
+
+    // Mon: Fede 10-12 + José 12-14 → gap 08-10 (both free)
+    const monGaps = sched.free_gaps.filter((g: any) => g.day_of_week === 0 && g.start_time === '08:00');
+    expect(monGaps.length).toBeGreaterThan(0);
+    expect(monGaps[0].free_count).toBe(2);
+    expect(monGaps[0].busy_members.length).toBe(0);
   });
 
   test('grupo con 5 personas: Fede, José, Ana, Carlos, María', async () => {
@@ -181,16 +193,25 @@ test.describe('Grupos de estudio', () => {
     // Free gaps exist
     expect(sched.free_gaps.length).toBeGreaterThan(0);
 
-    // Verify specific gaps given schedules:
-    // Mon: Fede 10-12, José 12-14, Ana 08-10, María 10-12
-    //   Combined Mon busy: 08-10 (Ana), 10-12 (Fede+María), 12-14 (José) → no gap 08-14
-    //   Gap after: 14-22
-    const monGaps = sched.free_gaps.filter((g: any) => g.day_of_week === 0);
-    expect(monGaps.some((g: any) => g.start_time === '14:00' && g.end_time === '22:00')).toBe(true);
+    // Mon: Ana 08-10, Fede/María 10-12, José 12-14 → full coverage 08-14, all-free gap 14-22
+    const monAllFree = sched.free_gaps.filter((g: any) => g.day_of_week === 0 && g.type === 'all');
+    expect(monAllFree.some((g: any) => g.start_time === '14:00')).toBe(true);
 
-    // Tue: Fede 14-16, Carlos 10-12 → gaps 08-10, 12-14, 16-22
-    const tueGaps = sched.free_gaps.filter((g: any) => g.day_of_week === 1);
-    expect(tueGaps.some((g: any) => g.start_time === '12:00' && g.end_time === '14:00')).toBe(true);
+    // Tue: Fede 14-16, Carlos 10-12 → gap 12-14 is 'all' free (5/5)
+    const tueAllFree = sched.free_gaps.filter((g: any) => g.day_of_week === 1 && g.type === 'all');
+    expect(tueAllFree.some((g: any) => g.start_time === '12:00' && g.end_time === '14:00')).toBe(true);
+
+    // Gaps are sorted by free_count descending (all-free first)
+    for (let i = 1; i < sched.free_gaps.length; i++) {
+      expect(sched.free_gaps[i - 1].free_count).toBeGreaterThanOrEqual(sched.free_gaps[i].free_count);
+    }
+
+    // Each gap has ranked format with member lists
+    for (const g of sched.free_gaps) {
+      expect(g).toHaveProperty('free_count');
+      expect(g).toHaveProperty('busy_members');
+      expect(g.free_count + g.busy_members.length).toBe(g.total_count);
+    }
 
     // Each block has required fields
     for (const b of sched.blocks) {
@@ -198,9 +219,49 @@ test.describe('Grupos de estudio', () => {
       expect(b).toHaveProperty('full_name');
       expect(b).toHaveProperty('subject_name');
       expect(b).toHaveProperty('day_of_week');
-      expect(b).toHaveProperty('start_time');
-      expect(b).toHaveProperty('end_time');
     }
+
+    // Verify majority/minority gaps also appear (Mon 08-10 only Ana is busy → 4/5 free)
+    const monMaj = sched.free_gaps.filter((g: any) => g.day_of_week === 0 && g.start_time === '08:00');
+    expect(monMaj.length).toBeGreaterThan(0);
+    expect(monMaj[0].busy_members.some((m: any) => m.full_name.includes('Ana'))).toBe(true);
+  });
+
+  test('sin franjas para todos: muestra mayoría con quién está ocupado', async () => {
+    // Fede: Mon 10-12, Tue 14-16 | José: Mon 12-14 | Ana: Mon 08-10
+    // On Monday 08-10: only Ana is busy → 4/5 free (majority), Ana appears in busy_members
+    const tFede = await apiLogin(USERS.fede.dni, USERS.fede.pass);
+    const tJose = await apiLogin(USERS.jose.dni, USERS.jose.pass);
+    const tAna  = await apiLogin(USERS.ana.dni,  USERS.ana.pass);
+    await ensureContact(tFede, tJose, USERS.jose.padron);
+    await ensureContact(tFede, tAna,  USERS.ana.padron);
+
+    const group = await api('POST', '/api/study-groups/', tFede, { name: 'Grupo Mayoría Test' });
+    await api('POST', `/api/study-groups/${group.id}/invite/`, tFede, { padron: USERS.jose.padron });
+    await api('POST', `/api/study-groups/${group.id}/invite/`, tFede, { padron: USERS.ana.padron });
+    await api('POST', `/api/study-groups/${group.id}/accept/`, tJose);
+    await api('POST', `/api/study-groups/${group.id}/accept/`, tAna);
+
+    const sched = await api('GET', `/api/study-groups/${group.id}/schedule/`, tFede);
+
+    // Mon 08-10: Ana is busy, Fede+José free → majority gap (2/3)
+    const mon0810 = sched.free_gaps.find((g: any) => g.day_of_week === 0 && g.start_time === '08:00' && g.end_time === '10:00');
+    expect(mon0810).toBeTruthy();
+    expect(mon0810.free_count).toBe(2);
+    expect(mon0810.busy_members.some((m: any) => m.full_name.includes('Ana'))).toBe(true);
+    expect(mon0810.type).toBe('majority');
+
+    // Mon 14-22: all 3 free
+    const mon1422 = sched.free_gaps.find((g: any) => g.day_of_week === 0 && g.start_time === '14:00');
+    expect(mon1422).toBeTruthy();
+    expect(mon1422.free_count).toBe(3);
+    expect(mon1422.type).toBe('all');
+    expect(mon1422.busy_members.length).toBe(0);
+
+    // All-free gaps come before majority gaps (sorted by free_count desc)
+    const allFreeFirst = sched.free_gaps.findIndex((g: any) => g.type === 'all');
+    const firstMaj = sched.free_gaps.findIndex((g: any) => g.type !== 'all');
+    if (firstMaj >= 0) expect(allFreeFirst).toBeLessThan(firstMaj);
   });
 
   test('UI: crear grupo y ver pantalla de grupos', async ({ page }) => {
@@ -246,7 +307,7 @@ test.describe('Grupos de estudio', () => {
     // Click the schedule button
     await page.getByLabel('ver-horario-grupo').first().click();
     await expect(page.getByLabel('group-schedule-screen')).toBeVisible({ timeout: 8000 });
-    await expect(page.getByText(/Franjas libres para todos/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Mejores franjas para reunirse/i)).toBeVisible({ timeout: 5000 });
     // Two members with schedules — no empty state
     await expect(page.getByText(/Ningún miembro está cursando/)).not.toBeVisible();
     // At least one day section appears

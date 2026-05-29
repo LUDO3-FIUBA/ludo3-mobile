@@ -3,7 +3,7 @@ import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, View } f
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { lightModeColors } from '../../styles/colorPalette';
 import { studyGroupsRepository } from '../../repositories';
-import type { StudyGroup, GroupBlock, GroupSchedule } from '../../repositories/studyGroups';
+import type { StudyGroup, GroupBlock, GroupSchedule, RankedGap } from '../../repositories/studyGroups';
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -45,17 +45,39 @@ const GroupScheduleScreen: React.FC<any> = ({ route }) => {
       </View>
 
       <ScrollView contentContainerStyle={s.scroll}>
-        {/* Free gaps */}
+        {/* Free gaps — ranked */}
         {schedule.free_gaps.length > 0 && (
           <View style={s.gapsSection}>
-            <Text style={s.gapsTitle}>Franjas libres para todos</Text>
-            {schedule.free_gaps.map((g, i) => (
-              <View key={i} style={s.gapRow}>
-                <Icon name="clock-outline" size={14} color="#198754" style={{ marginRight: 6 }} />
-                <Text style={s.gapDay}>{DAYS[g.day_of_week]}</Text>
-                <Text style={s.gapTime}>{g.start_time}–{g.end_time}</Text>
-              </View>
-            ))}
+            <Text style={s.gapsTitle}>Mejores franjas para reunirse</Text>
+            {schedule.free_gaps.map((g: RankedGap, i) => {
+              const isAll = g.type === 'all';
+              const isMaj = g.type === 'majority';
+              const bg = isAll ? '#d1e7dd' : isMaj ? '#fff3cd' : '#f8d7da';
+              const color = isAll ? '#198754' : isMaj ? '#856404' : '#842029';
+              const borderColor = isAll ? '#198754' : isMaj ? '#ffc107' : '#dc3545';
+              return (
+                <View key={i} style={[s.gapCard, { backgroundColor: bg, borderLeftColor: borderColor }]}>
+                  <View style={s.gapHeader}>
+                    <Icon name="clock-outline" size={14} color={color} />
+                    <Text style={[s.gapDay, { color }]}>{DAYS[g.day_of_week]}</Text>
+                    <Text style={[s.gapTime, { color }]}>{g.start_time}–{g.end_time}</Text>
+                    <View style={[s.gapBadge, { backgroundColor: borderColor }]}>
+                      <Text style={s.gapBadgeText}>{g.free_count}/{g.total_count}</Text>
+                    </View>
+                  </View>
+                  {g.free_members.length > 0 && (
+                    <Text style={[s.gapMembers, { color: '#0f5132' }]}>
+                      ✓ {g.free_members.map(m => m.full_name.split(' ')[0]).join(', ')}
+                    </Text>
+                  )}
+                  {g.busy_members.length > 0 && (
+                    <Text style={[s.gapMembers, { color: '#842029' }]}>
+                      ✗ {g.busy_members.map(m => m.full_name.split(' ')[0]).join(', ')}
+                    </Text>
+                  )}
+                </View>
+              );
+            })}
           </View>
         )}
 
@@ -92,11 +114,15 @@ const s = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   dot: { width: 10, height: 10, borderRadius: 5 },
   legendName: { fontSize: 12, color: lightModeColors.darkGray },
-  gapsSection: { backgroundColor: '#d1e7dd', borderRadius: 10, padding: 12, marginBottom: 16, borderLeftWidth: 3, borderLeftColor: '#198754' },
-  gapsTitle: { fontSize: 13, fontWeight: '700', color: '#198754', marginBottom: 8, textTransform: 'uppercase' as const },
-  gapRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
-  gapDay: { fontSize: 13, fontWeight: '600' as const, color: '#198754', marginRight: 8 },
-  gapTime: { fontSize: 13, color: '#0f5132' },
+  gapsSection: { marginBottom: 16 },
+  gapsTitle: { fontSize: 13, fontWeight: '700', color: lightModeColors.darkGray, marginBottom: 8, textTransform: 'uppercase' as const },
+  gapCard: { borderRadius: 8, borderLeftWidth: 3, padding: 10, marginBottom: 6 },
+  gapHeader: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6, marginBottom: 4 },
+  gapDay: { fontSize: 13, fontWeight: '600' as const, marginRight: 2 },
+  gapTime: { fontSize: 13, flex: 1 },
+  gapBadge: { borderRadius: 10, paddingHorizontal: 6, paddingVertical: 2 },
+  gapBadgeText: { fontSize: 11, color: 'white', fontWeight: '700' as const },
+  gapMembers: { fontSize: 12, marginTop: 2 },
   daySection: { marginBottom: 16 },
   dayLabel: { fontSize: 14, fontWeight: '700', color: lightModeColors.darkGray, marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: 0.5 },
   block: { borderRadius: 8, borderLeftWidth: 3, paddingHorizontal: 10, paddingVertical: 6, marginBottom: 4, flexDirection: 'row', alignItems: 'center', gap: 8 },
