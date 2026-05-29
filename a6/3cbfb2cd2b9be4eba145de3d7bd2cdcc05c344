@@ -1,0 +1,29 @@
+src/repositories/contacts.ts
+  s_4d9056a3efbb15::t_60176d072f4c42 33
+  s_4d9056a3efbb15::t_2025c05098e77a 60
+e2e/setup-db.sh
+  s_4d9056a3efbb15::t_6f0393f93d6e68 100-144
+src/scenes/contacts/ScheduleComparisonScreen.tsx
+  s_4d9056a3efbb15::t_a5f6a6e279e55d 181-185
+  s_4d9056a3efbb15::t_291b9f475197c8 82
+  s_4d9056a3efbb15::t_11a5966af722e2 87
+  s_4d9056a3efbb15::t_cdce3d2959b7ce 127-139
+e2e/tests/contacts.spec.ts
+  s_4d9056a3efbb15::t_c6cf7c95c2dca8 358-359,361
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "a63cbfb2cd2b9be4eba145de3d7bd2cdcc05c344",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
