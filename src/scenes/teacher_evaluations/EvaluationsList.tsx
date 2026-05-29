@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, Button } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Button } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { Loading, RoundedButton } from '../../components';
 import { evaluations as style } from '../../styles';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -31,9 +32,16 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
   const { semester, evaluations: evaluationsFromParams } = route.params as EvaluationsRouteParams;
   const [evaluations, setEvaluations] = useState<TeacherEvaluation[]>(() => sortEvaluationsByStartDate(evaluationsFromParams ?? []));
   const navigation = useNavigation<any>();
-  const hasFocusedOnce = useRef(false);
+
+  const semesterForNavigation = semester
+    ? {
+        ...semester,
+        evaluations,
+      }
+    : semester;
 
   const [loading, setLoading] = useState(!evaluationsFromParams);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const setNavOptions = useCallback(() => {
     navigation.setOptions({
@@ -49,7 +57,8 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
     return focusUnsubscribe;
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
       const evaluationsData: TeacherEvaluation[] = await makeRequest(() => teacherEvaluationsRepository.fetchPresentSemesterEvaluations(semester.commission.id), navigation);
       setEvaluations(sortEvaluationsByStartDate(evaluationsData));
@@ -57,26 +66,26 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
     } catch (error) {
       setLoading(false);
       console.log('Error', error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No sabemos pero no pudimos buscar tus evaluaciones. ' +
-        'Volvé a intentar en unos minutos.',
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No sabemos pero no pudimos buscar tus evaluaciones. Volvé a intentar en unos minutos.' });
     }
-  };
+  }, [navigation, semester.commission.id]);
 
   useFocusEffect(
     useCallback(() => {
-      if (hasFocusedOnce.current) {
-        fetchData();
-      }
-
-      hasFocusedOnce.current = true;
-    }, [evaluationsFromParams, semester?.commission.id, navigation]),
+      fetchData();
+    }, [fetchData]),
   );
 
   return (
     <View style={{ flex: 1, height: '100%' }}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {loading && <Loading />}
       {!loading && (
         <FlatList
@@ -98,7 +107,7 @@ const EvaluationsList: React.FC<EvaluationsProps> = () => {
               onPress={() => {
                 navigation.navigate('SubmissionsList', {
                   evaluation: item,
-                  semester,
+                  semester: semesterForNavigation,
                 });
               }}
             >

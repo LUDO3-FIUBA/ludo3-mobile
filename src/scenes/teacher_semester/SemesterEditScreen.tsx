@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { ActivityIndicator, View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AlertDialog from '../../components/AlertDialog';
 import { useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { teacherSemestersRepository } from '../../repositories';
@@ -21,6 +22,7 @@ const SemesterEditScreen: React.FC = () => {
     const [calendarUrl, setCalendarUrl] = useState<string>(semesterData.calendarSourceUrl ?? '');
     const [syncing, setSyncing] = useState(false);
     const [syncResult, setSyncResult] = useState<{ ok: boolean; message: string } | null>(null);
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string; onConfirm?: () => void } | null>(null);
 
     const dataNotValid = (): boolean => {
         const parsedMinAttendance = parseFloat(minAttendance);
@@ -45,11 +47,9 @@ const SemesterEditScreen: React.FC = () => {
             );
 
             dispatch(modifySemesterDetails({ classesAmount: response.classesAmount, minimumAttendance: response.minimumAttendance }));
-            Alert.alert('Éxito', 'Cuatrimestre actualizado correctamente', [
-                { text: 'OK', onPress: () => navigation.navigate("SemesterCard") },
-            ]);
+            setAlertDialog({ title: 'Éxito', message: 'Cuatrimestre actualizado correctamente', onConfirm: () => navigation.navigate("SemesterCard") });
         } catch (error) {
-            Alert.alert('Error', 'Hubo un error al actualizar los datos del cuatrimestre. Por favor intente de nuevo.');
+            setAlertDialog({ title: 'Error', message: 'Hubo un error al actualizar los datos del cuatrimestre. Por favor intente de nuevo.' });
         }
     };
 
@@ -83,6 +83,14 @@ const SemesterEditScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
+            <AlertDialog
+                visible={alertDialog !== null}
+                title={alertDialog?.title ?? ''}
+                message={alertDialog?.message ?? ''}
+                mode="info"
+                confirmLabel="Aceptar"
+                onConfirm={() => { alertDialog?.onConfirm?.(); setAlertDialog(null); }}
+            />
             <Text style={styles.label}>Cantidad de Clases Totales</Text>
             <TextInput
                 style={styles.input}

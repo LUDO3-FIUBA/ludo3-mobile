@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { RoundedButton } from '../../components';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -25,6 +26,7 @@ const CreateSemester = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
 
   const navigation = useNavigation<any>()
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   // Commission Picker
   const [chosenCommission, setChosenCommission] = useState(null)
@@ -101,16 +103,17 @@ const CreateSemester = () => {
             await teacherSemestersRepository.setCalendarSourceUrl(response.id, calendarUrl.trim());
             await teacherSemestersRepository.syncCatedraCalendar(response.id);
           } catch {
-            Alert.alert('Aviso', 'El cuatrimestre se creó correctamente, pero no se pudo sincronizar el calendario. Podés intentarlo de nuevo desde "Editar cuatrimestre".');
+            setAlertDialog({ title: 'Aviso', message: 'El cuatrimestre se creó correctamente, pero no se pudo sincronizar el calendario. Podés intentarlo de nuevo desde "Editar cuatrimestre".' });
           }
         }
 
-        navigation.goBack();
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.reset({ index: 0, routes: [{ name: 'RootDrawer' }] });
+        }
       } else {
-        Alert.alert(
-          'Error',
-          'No se completaron todos los campos antes de enviar el formulario.'
-        );
+        setAlertDialog({ title: 'Error', message: 'No se completaron todos los campos antes de enviar el formulario.' });
       }
     } catch (error) {
 
@@ -119,6 +122,7 @@ const CreateSemester = () => {
 
 
   return (
+    <>
     <ScrollView style={styles.container}>
       <View style={{ marginBottom: 100 }}>
         <Text style={{ ...styles.label, marginTop: -5 }}>Comisión</Text>
@@ -243,6 +247,15 @@ const CreateSemester = () => {
         </View>
       </View>
     </ScrollView>
+    <AlertDialog
+      visible={alertDialog !== null}
+      title={alertDialog?.title ?? ''}
+      message={alertDialog?.message ?? ''}
+      mode="info"
+      confirmLabel="Aceptar"
+      onConfirm={() => setAlertDialog(null)}
+    />
+    </>
   );
 };
 

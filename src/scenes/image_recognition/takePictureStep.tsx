@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, SafeAreaView, Text, Alert } from 'react-native';
+import { View, SafeAreaView, Text } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { takePicture as style } from '../../styles';
@@ -18,6 +19,7 @@ interface TakePictureStepProps {
 const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propConfiguration = new TakePictureStepConfiguration() }) => {
   const [loading, setLoading] = useState(false);
   const [ignoreReadings, setIgnoreReadings] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
   const [configuration, setConfiguration] = useState<TakePictureStepConfiguration | null>(null);
 
   const navigation = useNavigation();
@@ -81,7 +83,7 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propCo
       await getConfiguration()?.onDataObtained(base64string, navigation, disableLoading);
     } catch (error) {
       setLoading(false);
-      Alert.alert('Hubo un error sacando la foto');
+      setAlertDialog({ title: 'Error', message: 'Hubo un error sacando la foto.' });
     }
   };
 
@@ -90,6 +92,14 @@ const TakePictureStep: React.FC<TakePictureStepProps> = ({ configuration: propCo
 
   return (
     <View style={style().view}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       <SafeAreaView style={style().view}>
         <Text style={style().text}>{config.description}</Text>
         {loading && <Loading />}

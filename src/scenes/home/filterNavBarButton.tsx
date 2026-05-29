@@ -1,5 +1,6 @@
-import React, { Dispatch, FC, SetStateAction } from 'react';
+import React, { Dispatch, FC, SetStateAction, useState } from 'react';
 import { TouchableOpacity, Alert, Platform } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { connectActionSheet } from '@expo/react-native-action-sheet';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { home as style } from '../../styles';
@@ -50,6 +51,7 @@ const showPrompt = (
 const FilterNavBarButton: FC<FilterNavBarButtonProps> = () => {
   const dispatch = useAppDispatch()
   const { showActionSheetWithOptions } = useActionSheet();
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const handlePress = () => {
     const options = ['por Año', 'por Nombre', 'Correlativas', 'Cancelar'];
@@ -78,7 +80,7 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = () => {
                   if (intYear >= 0 && intYear <= currentYear) {
                     dispatch(setFilterToYear(year))
                   } else {
-                    Alert.alert('Ese no es un año válido');
+                    setAlertDialog({ title: 'Aviso', message: 'Ese no es un año válido.' });
                   }
                 },
               },
@@ -143,9 +145,19 @@ const FilterNavBarButton: FC<FilterNavBarButtonProps> = () => {
   };
 
   return (
-    <TouchableOpacity style={style().filterButton} onPress={handlePress}>
-      <Icon style={style().filterButtonIcon} name="filter" />
-    </TouchableOpacity>
+    <>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <TouchableOpacity style={style().filterButton} onPress={handlePress}>
+        <Icon style={style().filterButtonIcon} name="filter" />
+      </TouchableOpacity>
+    </>
   );
 };
 

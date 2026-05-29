@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   View,
   LayoutChangeEvent,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import RNFS from 'react-native-fs';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { RoundedButton } from '../../components';
@@ -41,6 +41,7 @@ interface FinalExamQRRouteProps {
 const FinalExamQR: React.FC = () => {
   const [closing, setClosing] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const [qrSize, setQrSize] = useState(300);
 
@@ -65,16 +66,10 @@ const FinalExamQR: React.FC = () => {
         const path = (RNFS.CachesDirectoryPath + '/' + subjectNameWithDate + '.png')
         await RNFS.writeFile(path, data, 'base64');
         await CameraRoll.save(path, { type: 'photo', album: '/QrExams' });
-        Alert.alert('Éxito', 'QR guardado en la galería.');
+        setAlertDialog({ title: 'Éxito', message: 'QR guardado en la galería.' });
       } catch (error) {
         console.log("error", error);
-        Alert.alert(
-          'Te fallamos',
-          'No pudimos descargar el QR. ' +
-          'Usalo desde el teléfono o pedile al departamento que ' +
-          'te lo pase/imprima. Sino siempre podés volver a ' +
-          'intentar en unos minutos.'
-        );
+        setAlertDialog({ title: 'Te fallamos', message: 'No pudimos descargar el QR. Usalo desde el teléfono o pedile al departamento que te lo pase/imprima. Sino siempre podés volver a intentar en unos minutos.' });
       } finally {
         setDownloading(false);
       }
@@ -85,6 +80,14 @@ const FinalExamQR: React.FC = () => {
 
   return (
     <View style={style().view} onLayout={handleLayout}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       <QRCode
         value={qrValue}
         size={qrSize}
@@ -106,7 +109,7 @@ const FinalExamQR: React.FC = () => {
             onPress={async () => {
               const finalCurrentStatus = calculateFinalCurrentStatus(final)
               if (finalCurrentStatus === FinalStatus.SoonToStart) {
-                Alert.alert('Bajá esa ansiedad. Todavía ni empezó el final');
+                setAlertDialog({ title: 'Bajá esa ansiedad', message: 'Todavía ni empezó el final.' });
                 return;
               }
               setClosing(true);
@@ -117,12 +120,7 @@ const FinalExamQR: React.FC = () => {
               } catch (error) {
                 setClosing(false);
                 console.log("error", error);
-                Alert.alert(
-                  '¿Qué pasó?',
-                  'No sabemos pero no pudimos cerrar el examen. ' +
-                  'Volvé a intentar en un minuto o sacale a los alumnos ' +
-                  'el acceso al QR.'
-                );
+                setAlertDialog({ title: '¿Qué pasó?', message: 'No sabemos pero no pudimos cerrar el examen. Volvé a intentar en un minuto o sacale a los alumnos el acceso al QR.' });
               }
             }}
           />

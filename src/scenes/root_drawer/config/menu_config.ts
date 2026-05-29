@@ -143,6 +143,7 @@ export const adminMenu: MenuItem[] = [
     children: [
       { kind: 'direct', key: 'admin-departments', label: 'Departamentos', icon: 'office-building', iconOutline: 'office-building-outline', route: 'AdminDepartmentList', scope: 'shared' },
       { kind: 'direct', key: 'admin-commissions', label: 'Comisiones', icon: 'account-group', iconOutline: 'account-group-outline', route: 'AdminCommissionList', scope: 'shared' },
+      { kind: 'direct', key: 'admin-finals-approve', label: 'Finales para aprobar', icon: 'calendar-check', iconOutline: 'calendar-check-outline', route: 'AdminFinalsToApprove', scope: 'shared' },
       { kind: 'direct', key: 'admin-user-search', label: 'Buscar Usuarios', icon: 'account-search', iconOutline: 'account-search-outline', route: 'AdminUserSearch', scope: 'shared', superAdminOnly: true },
       { kind: 'direct', key: 'admin-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'AdminNewsList', scope: 'shared', superAdminOnly: true },
       { kind: 'direct', key: 'deptadmin-news', label: 'Novedades', icon: 'newspaper', iconOutline: 'newspaper-variant-outline', route: 'StudentNewsList', scope: 'shared', departmentAdminOnly: true },
@@ -201,6 +202,46 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
   { route: 'AdminNewsEdit', title: 'Editar Novedad', roleFilter: 'admin' },
   { route: 'NewsDetail', title: 'Novedad' },
   { route: 'Notifications', title: 'Notificaciones' },
+
+  // Student-facing detail/sub-pages that used to be Stack-only on web
+  { route: 'ViewSemester', title: 'Comisión', roleFilter: 'student' },
+  { route: 'MyAttendances', title: 'Mis asistencias', roleFilter: 'student' },
+  { route: 'MySubmissions', title: 'Mis entregas', roleFilter: 'student' },
+  { route: 'CorrelativeSubjects', title: 'Correlativas', roleFilter: 'student' },
+  { route: 'ViewEvaluations', title: 'Evaluaciones', roleFilter: 'student' },
+  { route: 'ViewEvaluationDetails', title: 'Evaluación', roleFilter: 'student' },
+  { route: 'AddEvaluationSubmission', title: 'Agregar entrega', roleFilter: 'student' },
+  { route: 'ViewFinalDetails', title: 'Final', roleFilter: 'student' },
+  { route: 'ViewClassDetails', title: 'Cursada', roleFilter: 'student' },
+  { route: 'Teachers', title: 'Cuerpo Docente', roleFilter: 'student' },
+  { route: 'Stats', title: 'Estadísticas', roleFilter: 'student' },
+
+  // Teacher cuatrimestre sub-pages
+  { route: 'SemesterCard', title: 'Cuatrimestre', roleFilter: 'teacher' },
+  { route: 'SemesterStudents', title: 'Alumnos del cuatrimestre', roleFilter: 'teacher' },
+  { route: 'SemesterEditScreen', title: 'Editar cuatrimestre', roleFilter: 'teacher' },
+  { route: 'EvaluationsList', title: 'Evaluaciones', roleFilter: 'teacher' },
+  { route: 'AddEvaluation', title: 'Agregar evaluación', roleFilter: 'teacher' },
+  { route: 'EditEvaluation', title: 'Editar evaluación', roleFilter: 'teacher' },
+  { route: 'SubmissionsList', title: 'Entregas', roleFilter: 'teacher' },
+  { route: 'TeacherSubmissionDetails', title: 'Detalle de entrega', roleFilter: 'teacher' },
+  { route: 'FinalsList', title: 'Finales', roleFilter: 'teacher' },
+  { route: 'AddFinal', title: 'Agregar final', roleFilter: 'teacher' },
+  { route: 'FinalExamSubmissions', title: 'Inscriptos al final', roleFilter: 'teacher' },
+  { route: 'TeacherStaff', title: 'Cuerpo Docente', roleFilter: 'teacher' },
+  { route: 'TeachersConfiguration', title: 'Configurar docentes', roleFilter: 'teacher' },
+  { route: 'AddTeachersConfigurationList', title: 'Agregar docente', roleFilter: 'teacher' },
+  { route: 'SemesterAttendances', title: 'Asistencias', roleFilter: 'teacher' },
+  { route: 'AttendanceDetails', title: 'Detalles de asistencia', roleFilter: 'teacher' },
+  { route: 'AddClassToSemester', title: 'Agregar clase', roleFilter: 'teacher' },
+  { route: 'TeacherStats', title: 'Estadísticas', roleFilter: 'teacher' },
+  { route: 'SendCommissionNotification', title: 'Enviar aviso', roleFilter: 'teacher' },
+  { route: 'SemesterNotificationHistory', title: 'Avisos enviados', roleFilter: 'teacher' },
+
+  // Forms detail screens
+  { route: 'DocumentForm', title: 'Formulario' },
+  { route: 'DigitalForm', title: 'Completar formulario' },
+  { route: 'FormDesigner', title: 'Nuevo formulario', roleFilter: 'admin' },
 ];
 
 // ─── Public API ───────────────────────────────────────────────────────────────

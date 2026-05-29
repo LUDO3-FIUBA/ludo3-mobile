@@ -1,57 +1,66 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { finalExamsRepository, usersRepository } from '../../repositories';
+import { guaraniRepository, usersRepository } from '../../repositories';
 
-// Served from public/fiuba-map/ — same origin, postMessage works, Playwright can inspect
 const FIUBA_MAP_URL = '/fiuba-map/index.html';
-const CARRERA_ID = 'informatica';
 
 const FiubaMapScreen: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [padron, setPadron] = useState<string | null>(null);
+  const [carreraId, setCarreraId] = useState<string | null>(null);
   const [materiasPayload, setMateriasPayload] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [networkReady, setNetworkReady] = useState(false);
   const [initSent, setInitSent] = useState(false);
+  // Stores the last carreraKey from FIUBA_MAP_NETWORK_READY, even if received before carreraId was known
+  const lastNetworkCarreraRef = useRef<string | null>(null);
 
   useEffect(() => {
     Promise.all([
       usersRepository.getInfo(),
-      finalExamsRepository.fetchApproved(),
-    ]).then(([user, exams]) => {
+      guaraniRepository.fetchPlanCarrera(),
+    ]).then(([user, plan]) => {
       setPadron(user.studentId ?? null);
-      const materias = exams
-        .filter((exam) => exam.grade !== null && exam.grade >= 4)
-        .map((exam) => ({ id: exam.subject.code, nota: exam.grade }));
-      setMateriasPayload(JSON.stringify(materias));
+      const carrera = plan.carreras.find((c) => c.fiuba_map_carrera_id);
+      setCarreraId(carrera?.fiuba_map_carrera_id ?? null);
+      setMateriasPayload(JSON.stringify(plan.materias_aprobadas));
+    }).catch((err) => {
+      console.warn('[FiubaMap] Failed to load plan from SIU:', err);
     });
   }, []);
 
-  // Listen for messages from the iframe
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
         if (data.type === 'FIUBA_MAP_READY') setMapReady(true);
-        if (data.type === 'FIUBA_MAP_NETWORK_READY' && data.carreraKey === CARRERA_ID) setNetworkReady(true);
+        if (data.type === 'FIUBA_MAP_NETWORK_READY') {
+          lastNetworkCarreraRef.current = data.carreraKey;
+          if (data.carreraKey === carreraId) setNetworkReady(true);
+        }
       } catch {}
     };
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, []);
+  }, [carreraId]);
 
-  // Step 1: map ready → send LUDO_INIT
+  // If FIUBA-Map already has the right carrera loaded (default), set networkReady as soon as carreraId is known
   useEffect(() => {
-    if (!mapReady || !padron || initSent || !iframeRef.current?.contentWindow) return;
+    if (carreraId && lastNetworkCarreraRef.current === carreraId) {
+      setNetworkReady(true);
+    }
+  }, [carreraId]);
+
+  useEffect(() => {
+    if (!mapReady || !padron || !carreraId || initSent || !iframeRef.current?.contentWindow) return;
     iframeRef.current.contentWindow.postMessage(
-      { type: 'LUDO_INIT', padron, carreraId: CARRERA_ID },
+      { type: 'LUDO_INIT', padron, carreraId },
       '*',
     );
     setInitSent(true);
-  }, [mapReady, padron]);
+  }, [mapReady, padron, carreraId]);
 
-  // Step 2: network ready → send materias + zoom
   useEffect(() => {
     if (!networkReady || !materiasPayload || !iframeRef.current?.contentWindow) return;
     iframeRef.current.contentWindow.postMessage(
@@ -73,9 +82,7 @@ const FiubaMapScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   iframe: {
     flex: 1,
     width: '100%',

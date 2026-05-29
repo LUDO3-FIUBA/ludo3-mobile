@@ -7,6 +7,7 @@ export interface Submission {
   submissionStatus?: 'APROBADO' | 'DESAPROBADO' | null;
   grader:  TeacherModel | null;
   downloadUrl?: string | null;
+  feedbackText?: string | null;
 }
 
 export interface SubmissionSnakeCase {
@@ -15,4 +16,5 @@ export interface SubmissionSnakeCase {
   submission_status?: 'APROBADO' | 'DESAPROBADO' | null;
   grader:  TeacherModel | null;
   download_url?: string | null;
+  feedback_text?: string | null;
 }

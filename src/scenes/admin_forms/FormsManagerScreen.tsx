@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
   Modal,
   StyleSheet,
   Platform,
@@ -24,16 +23,9 @@ import { FormAnswer } from '../../models/FormSubmission';
 import { lightModeColors } from '../../styles/colorPalette';
 import ManagerFormItem from './components/ManagerFormItem';
 
-function showMessage(title: string, message: string) {
-  if (Platform.OS === 'web') {
-    window.alert(`${title}\n\n${message}`);
-    return;
-  }
-  Alert.alert(title, message);
-}
-
 const FormsManagerScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
   const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedFormId, setExpandedFormId] = useState<number | null>(null);
@@ -58,7 +50,7 @@ const FormsManagerScreen: React.FC = () => {
       const data = await formsRepository.fetchForms();
       setForms(data);
     } catch {
-      showMessage('Error', 'No se pudieron cargar los formularios.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los formularios.' });
     } finally {
       setLoading(false);
     }
@@ -143,7 +135,7 @@ const FormsManagerScreen: React.FC = () => {
       setSubmissionsCache(prev => ({ ...prev, [form.form_id]: subs }));
       setFormDetailsCache(prev => ({ ...prev, [form.form_id]: detail }));
     } catch {
-      showMessage('Error', 'No se pudieron cargar las respuestas.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar las respuestas.' });
     } finally {
       setSubmissionsLoading(false);
     }
@@ -199,7 +191,7 @@ const FormsManagerScreen: React.FC = () => {
       setForms(formsData);
       setSubmissionsCache(prev => ({ ...prev, [formId]: subs }));
     } catch {
-      showMessage('Error', 'No se pudo eliminar la respuesta.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo eliminar la respuesta.' });
     } finally {
       setSubmissionToDelete(null);
     }
@@ -226,7 +218,7 @@ const FormsManagerScreen: React.FC = () => {
         setExpandedFormId(null);
       }
     } catch {
-      showMessage('Error', 'No se pudo eliminar el formulario.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo eliminar el formulario.' });
     } finally {
       setDeletingFormId(null);
       setFormToDelete(null);
@@ -258,9 +250,9 @@ const FormsManagerScreen: React.FC = () => {
     } catch (err: any) {
       const detail = err?.info?.detail ?? err?.info;
       if (typeof detail === 'string') {
-        showMessage('No se pudo actualizar', detail);
+        setAlertDialog({ title: 'No se pudo actualizar', message: detail });
       } else {
-        showMessage('Error', 'No se pudo actualizar el estado de la respuesta.');
+        setAlertDialog({ title: 'Error', message: 'No se pudo actualizar el estado de la respuesta.' });
       }
     } finally {
       setUpdatingStatusSubmissionId(null);
@@ -291,7 +283,7 @@ const FormsManagerScreen: React.FC = () => {
         return next;
       });
     } catch {
-      showMessage('Error', 'No se pudieron refrescar las respuestas.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron refrescar las respuestas.' });
     } finally {
       setRefreshingProcedureId(null);
     }
@@ -394,7 +386,7 @@ const FormsManagerScreen: React.FC = () => {
         });
       }
     } catch {
-      showMessage('Error', 'No se pudo exportar el Excel.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo exportar el Excel.' });
     } finally {
       setExportingFormId(null);
     }
@@ -423,7 +415,7 @@ const FormsManagerScreen: React.FC = () => {
       const presignedUrl = await formsRepository.getPresignedDocumentUrl(url);
       await Linking.openURL(presignedUrl);
     } catch {
-      showMessage('Error', 'No se pudo descargar el archivo adjunto.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo descargar el archivo adjunto.' });
     } finally {
       setDownloadingFieldId(null);
     }
@@ -433,7 +425,7 @@ const FormsManagerScreen: React.FC = () => {
     if (downloadingSubmissionId === submission.submission_id) return;
     const url = findAdjuntoUrl(submission, formId);
     if (!url) {
-      showMessage('Sin archivo', 'Esta respuesta no tiene un archivo adjunto.');
+      setAlertDialog({ title: 'Sin archivo', message: 'Esta respuesta no tiene un archivo adjunto.' });
       return;
     }
 
@@ -442,7 +434,7 @@ const FormsManagerScreen: React.FC = () => {
       const presignedUrl = await formsRepository.getPresignedDocumentUrl(url);
       await Linking.openURL(presignedUrl);
     } catch {
-      showMessage('Error', 'No se pudo descargar el archivo adjunto.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo descargar el archivo adjunto.' });
     } finally {
       setDownloadingSubmissionId(null);
     }
@@ -613,6 +605,15 @@ const FormsManagerScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
     </>
   );
 };

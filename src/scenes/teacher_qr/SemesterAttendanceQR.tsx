@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Alert, View, Text, TouchableOpacity, LayoutChangeEvent, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, LayoutChangeEvent, StyleSheet } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import RNFS from 'react-native-fs';
 import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { Loading, RoundedButton } from '../../components';
@@ -20,6 +21,7 @@ const SemesterAttendanceQR: React.FC = () => {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const [downloading, setDownloading] = useState<boolean>(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
   const [qrSize, setQrSize] = useState<number>(300);
   const [qrValue, setQrValue] = useState<string>('');
   const [mode, setMode] = useState<AttendanceMode>('qr');
@@ -50,10 +52,7 @@ const SemesterAttendanceQR: React.FC = () => {
       setQrValue(qrAttendanceString);
     } catch (error) {
       console.log("Error", error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No pudimos iniciar la sesión de asistencia. Volvé a intentar en unos minutos.',
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No pudimos iniciar la sesión de asistencia. Volvé a intentar en unos minutos.' });
     } finally {
       setLoading(false);
     }
@@ -67,13 +66,10 @@ const SemesterAttendanceQR: React.FC = () => {
         const path = `${RNFS.CachesDirectoryPath}/${semesterId}.png`;
         await RNFS.writeFile(path, data, 'base64');
         await CameraRoll.save(path, { type: 'photo', album: 'QrCodes' });
-        Alert.alert('Éxito', 'QR guardado en la galería.');
+        setAlertDialog({ title: 'Éxito', message: 'QR guardado en la galería.' });
       } catch (error) {
         console.log("error", error);
-        Alert.alert(
-          'Te fallamos',
-          'No pudimos descargar el QR. Usalo desde el teléfono o volvé a intentar en unos minutos.',
-        );
+        setAlertDialog({ title: 'Te fallamos', message: 'No pudimos descargar el QR. Usalo desde el teléfono o volvé a intentar en unos minutos.' });
       } finally {
         setDownloading(false);
       }
@@ -87,6 +83,14 @@ const SemesterAttendanceQR: React.FC = () => {
 
   return (
     <View style={[style().view, { padding: 16 }]} onLayout={handleLayout}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {loading && <Loading />}
 
       {!sessionStarted ? (
