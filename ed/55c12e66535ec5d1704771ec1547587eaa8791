@@ -1,0 +1,28 @@
+e2e/setup-db.sh
+  s_4d9056a3efbb15::t_2288c4564386c8 71-99
+e2e/tests/contacts.spec.ts
+  s_4d9056a3efbb15::t_53d9bef80cc305 297
+  s_4d9056a3efbb15::t_e64d8476fb86fd 356-357,359
+  s_4d9056a3efbb15::t_8b10f3ba673a20 298-306,310-311,315,328-333,335-346,348
+  s_4d9056a3efbb15::t_2852c1b4ca0239 369-386,388,391-396,398
+  s_4d9056a3efbb15::t_624412bec32504 307-309,312,314
+  s_4d9056a3efbb15::t_172fb74f0a3565 354-355,358,360-368,387,389-390,397,399-409
+  s_4d9056a3efbb15::t_a91221cc8f4fa0 63
+  s_4d9056a3efbb15::t_8d1e8c9a57134a 316-318,320-327
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "ed55c12e66535ec5d1704771ec1547587eaa8791",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
