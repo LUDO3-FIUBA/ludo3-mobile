@@ -238,4 +238,84 @@ test.describe('Contacts — red de contactos', () => {
     await expect(page.getByPlaceholder('Buscar por nombre o padrón...')).toBeVisible({ timeout: 5000 });
     await expect(page.getByText('Solicitud recibida')).toBeVisible({ timeout: 5000 });
   });
+
+  // ─── Schedule comparison ──────────────────────────────────────────────────
+
+  test('botón comparar horarios aparece en contacto aceptado', async ({ page }) => {
+    // Create accepted contact via API
+    const ctx = await playwrightRequest.newContext();
+    const loginResp = await ctx.post(`${BACKEND}/auth/login/`, { data: { dni: DNI, password: PASS } });
+    const { access } = await loginResp.json();
+    const createResp = await ctx.post(`${BACKEND}/api/contacts/`, {
+      data: { padron: JOSE_PADRON },
+      headers: { Authorization: `Bearer ${access}` },
+    });
+    const contact = await createResp.json();
+    const joseLogin = await ctx.post(`${BACKEND}/auth/login/`, { data: { dni: JOSE_DNI, password: JOSE_PASS } });
+    const { access: joseToken } = await joseLogin.json();
+    await ctx.post(`${BACKEND}/api/contacts/${contact.id}/accept/`, {
+      headers: { Authorization: `Bearer ${joseToken}` },
+    });
+    await ctx.dispose();
+
+    await loginAs(page, DNI, PASS);
+    await goToContacts(page);
+    await expect(page.getByLabel('ver-horarios')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('comparar horarios navega a la pantalla de comparación', async ({ page }) => {
+    // Create accepted contact via API
+    const ctx = await playwrightRequest.newContext();
+    const loginResp = await ctx.post(`${BACKEND}/auth/login/`, { data: { dni: DNI, password: PASS } });
+    const { access } = await loginResp.json();
+    const createResp = await ctx.post(`${BACKEND}/api/contacts/`, {
+      data: { padron: JOSE_PADRON },
+      headers: { Authorization: `Bearer ${access}` },
+    });
+    const contact = await createResp.json();
+    const joseLogin = await ctx.post(`${BACKEND}/auth/login/`, { data: { dni: JOSE_DNI, password: JOSE_PASS } });
+    const { access: joseToken } = await joseLogin.json();
+    await ctx.post(`${BACKEND}/api/contacts/${contact.id}/accept/`, {
+      headers: { Authorization: `Bearer ${joseToken}` },
+    });
+    await ctx.dispose();
+
+    const consoleErrors: string[] = [];
+    page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
+    page.on('pageerror', err => consoleErrors.push(err.message));
+
+    await loginAs(page, DNI, PASS);
+    await goToContacts(page);
+    await page.getByLabel('ver-horarios').click();
+    await page.waitForTimeout(3000);
+    console.log('JS ERRORS:', JSON.stringify(consoleErrors));
+    // Should land on schedule comparison screen
+    await expect(page.getByLabel('schedule-comparison-screen')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('endpoint schedule-comparison devuelve mine y theirs', async ({ request }) => {
+    // Create accepted contact via API
+    const loginResp = await request.post(`${BACKEND}/auth/login/`, { data: { dni: DNI, password: PASS } });
+    const { access } = await loginResp.json();
+    const createResp = await request.post(`${BACKEND}/api/contacts/`, {
+      data: { padron: JOSE_PADRON },
+      headers: { Authorization: `Bearer ${access}` },
+    });
+    const contact = await createResp.json();
+    const joseLogin = await request.post(`${BACKEND}/auth/login/`, { data: { dni: JOSE_DNI, password: JOSE_PASS } });
+    const { access: joseToken } = await joseLogin.json();
+    await request.post(`${BACKEND}/api/contacts/${contact.id}/accept/`, {
+      headers: { Authorization: `Bearer ${joseToken}` },
+    });
+
+    const resp = await request.get(`${BACKEND}/api/contacts/${contact.id}/schedule-comparison/`, {
+      headers: { Authorization: `Bearer ${access}` },
+    });
+    expect(resp.status()).toBe(200);
+    const data = await resp.json();
+    expect(data).toHaveProperty('mine');
+    expect(data).toHaveProperty('theirs');
+    expect(Array.isArray(data.mine)).toBe(true);
+    expect(Array.isArray(data.theirs)).toBe(true);
+  });
 });

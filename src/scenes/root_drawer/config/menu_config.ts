@@ -204,6 +204,10 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
   { route: 'NewsDetail', title: 'Novedad' },
   { route: 'Notifications', title: 'Notificaciones' },
 
+  // Contact detail pages (no roleFilter — accessible to any authenticated user)
+  { route: 'ContactSubjects', title: 'Materias en curso' },
+  { route: 'ContactSchedule', title: 'Comparar horarios' },
+
   // Student-facing detail/sub-pages that used to be Stack-only on web
   { route: 'ViewSemester', title: 'Comisión', roleFilter: 'student' },
   { route: 'MyAttendances', title: 'Mis asistencias', roleFilter: 'student' },

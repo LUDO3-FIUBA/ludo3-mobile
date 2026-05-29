@@ -59,7 +59,8 @@ import UsefulLinksScreen from '../useful_links';
 import ProfileScreen from '../my_account';
 import ChangePasswordScreen from '../password/change';
 import FiubaMapScreen from '../fiuba_map';
-import ContactsScreen from '../contacts';
+import ContactsScreen, { ContactSubjectsScreen } from '../contacts';
+import ScheduleComparisonScreen from '../contacts/ScheduleComparisonScreen';
 import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
 
 import {
@@ -136,6 +137,8 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   Map: MapScreen,
   FiubaMap: FiubaMapScreen,
   Contacts: ContactsScreen,
+  ContactSubjects: ContactSubjectsScreen,
+  ContactSchedule: ScheduleComparisonScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,

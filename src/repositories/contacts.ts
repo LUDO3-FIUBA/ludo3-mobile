@@ -14,10 +14,22 @@ export interface Contact {
   created_at: string;
 }
 
+export interface ScheduleBlock {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+}
+
 export interface ContactSubject {
   subject_name: string;
   subject_siu_id: number;
   semester_id: number;
+  schedules: ScheduleBlock[];
+}
+
+export interface ScheduleComparison {
+  mine: Array<{ subject_name: string } & ScheduleBlock>;
+  theirs: Array<{ subject_name: string } & ScheduleBlock>;
 }
 
 async function fetchContacts(): Promise<Contact[]> {
@@ -42,9 +54,14 @@ async function fetchContactSubjects(contactId: number): Promise<ContactSubject[]
   return Array.isArray(result) ? result as ContactSubject[] : [];
 }
 
+async function fetchScheduleComparison(contactId: number): Promise<ScheduleComparison> {
+  const result = await get(`api/contacts/${contactId}/schedule-comparison`) as any;
+  return { mine: result?.mine ?? [], theirs: result?.theirs ?? [] };
+}
+
 async function searchStudents(query: string): Promise<ContactStudent[]> {
   const result = await get(`api/students/search`, [{ key: 'q', value: query }]);
   return Array.isArray(result) ? result as ContactStudent[] : [];
 }
 
-export default { fetchContacts, sendRequest, acceptRequest, removeContact, fetchContactSubjects, searchStudents };
+export default { fetchContacts, sendRequest, acceptRequest, removeContact, fetchContactSubjects, fetchScheduleComparison, searchStudents };

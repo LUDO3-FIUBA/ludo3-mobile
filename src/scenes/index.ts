@@ -86,3 +86,4 @@ export { default as MyAccountScreen } from './my_account';
 export { default as UsefulLinksScreen } from './useful_links';
 export { default as FiubaMapScreen } from './fiuba_map';
 export { default as ContactsScreen, ContactSubjectsScreen } from './contacts';
+export { default as ScheduleComparisonScreen } from './contacts/ScheduleComparisonScreen';
