@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  DrawerActions,
   DrawerContentComponentProps,
   DrawerContentScrollView,
   createDrawerNavigator,
@@ -553,12 +554,18 @@ const RootDrawer = () => {
   const homeMenuItem = menuItems.find(i => i.kind === 'direct' && (i as DirectItem).route) as DirectItem | undefined;
 
   const onNotificationPress = async (item: UserNotification) => {
-    if (item.is_read) return;
     try {
-      await notificationsRepository.markNotificationAsRead(item.id);
-      setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+      if (!item.is_read) {
+        await notificationsRepository.markNotificationAsRead(item.id);
+        setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+      }
     } catch (e) {
       console.log('RootDrawer (Web): Failed marking notification as read', e);
+    }
+    const actionUrl = item.notification.action_url;
+    if (actionUrl) {
+      setShowNotificationsDropdown(false);
+      navigation.navigate('RootDrawer' as never, { screen: actionUrl } as never);
     }
   };
 

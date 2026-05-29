@@ -36,13 +36,32 @@ async function deleteAllContacts(dni: string, pass: string) {
   await ctx.dispose();
 }
 
+async function deleteAllNotifications(dni: string, pass: string) {
+  const ctx = await playwrightRequest.newContext();
+  const loginResp = await ctx.post(`${BACKEND}/auth/login/`, { data: { dni, password: pass } });
+  const { access } = await loginResp.json();
+  const listResp = await ctx.get(`${BACKEND}/api/notifications/my_notifications/`, {
+    headers: { Authorization: `Bearer ${access}` },
+  });
+  const notifs = await listResp.json();
+  for (const n of Array.isArray(notifs) ? notifs : []) {
+    await ctx.delete(`${BACKEND}/api/notifications/${n.id}/delete_for_me/`, {
+      headers: { Authorization: `Bearer ${access}` },
+    });
+  }
+  await ctx.dispose();
+}
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 test.describe.configure({ mode: 'serial' });
 
 test.describe('Contacts — red de contactos', () => {
   test.beforeEach(async () => {
-    await deleteAllContacts(DNI, PASS);
+    await Promise.all([
+      deleteAllContacts(DNI, PASS),
+      deleteAllNotifications(JOSE_DNI, JOSE_PASS),
+    ]);
   });
 
   test('pantalla de contactos carga correctamente', async ({ page }) => {
@@ -177,5 +196,46 @@ test.describe('Contacts — red de contactos', () => {
     // Accepted contact shows the subjects button, not the pending badge
     await expect(page.getByLabel('ver-materias')).toBeVisible();
     await expect(page.getByLabel('eliminar-contacto')).toBeVisible();
+  });
+
+  test('notificación en campana cuando llega una solicitud de contacto', async ({ page }) => {
+    // Fede sends request via API (José is the recipient)
+    const ctx = await playwrightRequest.newContext();
+    const loginResp = await ctx.post(`${BACKEND}/auth/login/`, { data: { dni: DNI, password: PASS } });
+    const { access } = await loginResp.json();
+    await ctx.post(`${BACKEND}/api/contacts/`, {
+      data: { padron: JOSE_PADRON },
+      headers: { Authorization: `Bearer ${access}` },
+    });
+    await ctx.dispose();
+
+    // José logs in and checks the notification bell
+    await loginAs(page, JOSE_DNI, JOSE_PASS);
+    // Click the bell to open notifications dropdown
+    await page.getByLabel('Mostrar notificaciones').click();
+    await expect(page.getByText('Nueva solicitud de contacto')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/te envió una solicitud de contacto/)).toBeVisible();
+  });
+
+  test('clickear la notificación de solicitud navega a Contactos', async ({ page }) => {
+    // Fede sends request via API
+    const ctx = await playwrightRequest.newContext();
+    const loginResp = await ctx.post(`${BACKEND}/auth/login/`, { data: { dni: DNI, password: PASS } });
+    const { access } = await loginResp.json();
+    await ctx.post(`${BACKEND}/api/contacts/`, {
+      data: { padron: JOSE_PADRON },
+      headers: { Authorization: `Bearer ${access}` },
+    });
+    await ctx.dispose();
+
+    // José logs in, opens notification, clicks it
+    await loginAs(page, JOSE_DNI, JOSE_PASS);
+    await page.getByLabel('Mostrar notificaciones').click();
+    await expect(page.getByText('Nueva solicitud de contacto')).toBeVisible({ timeout: 5000 });
+    await page.getByText('Nueva solicitud de contacto').click();
+
+    // Should navigate to Contacts screen
+    await expect(page.getByPlaceholder('Buscar por nombre o padrón...')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Solicitud recibida')).toBeVisible({ timeout: 5000 });
   });
 });
