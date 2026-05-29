@@ -1,0 +1,52 @@
+src/scenes/study_groups/GroupInviteScreen.tsx
+  s_4d9056a3efbb15::t_c938edaa6928e3 6-7
+  s_4d9056a3efbb15::t_4e452adb720a6d 1-5,8-79
+src/scenes/study_groups/GroupScheduleScreen.tsx
+  s_4d9056a3efbb15::t_0e27ce9d5d110e 1-4,7-110
+  s_4d9056a3efbb15::t_58a678abb09e8e 5-6
+src/repositories/studyGroups.ts
+  s_4d9056a3efbb15::t_71f90b6e22a962 1-62
+src/scenes/root_drawer/config/menu_config.ts
+  s_4d9056a3efbb15::t_0afddc5085fcf2 78
+  s_4d9056a3efbb15::t_709051beac9476 208,211-213
+src/scenes/root_drawer/index.web.tsx
+  s_4d9056a3efbb15::t_766dac43d63897 64-65
+  s_4d9056a3efbb15::t_bab5b48d2da080 144-145
+e2e/tests/study_groups.spec.ts
+  s_4d9056a3efbb15::t_fa377487b3b49c 221-222,226-228,231,233-234,246-253
+  s_4d9056a3efbb15::t_e273e746cd1986 230,232
+  s_4d9056a3efbb15::t_5e1ec06d33d75f 240,245
+  s_4d9056a3efbb15::t_3675b324d1c44d 244
+  s_4d9056a3efbb15::t_8df6d2361c02c8 1-105,117-120,122,124-220,223-225,229,235-239,241-243,254-255
+  s_4d9056a3efbb15::t_a2a31476d0f7a9 106-116,121,123
+App.tsx
+  s_4d9056a3efbb15::t_1152a58fef614a 111
+  s_4d9056a3efbb15::t_ef492459ece113 323-324
+  s_4d9056a3efbb15::t_25249abd75da53 161
+  s_4d9056a3efbb15::t_546dece5ad77e1 39-41
+  s_4d9056a3efbb15::t_14da9a125f3152 320
+src/repositories/index.ts
+  s_4d9056a3efbb15::t_64911cc3afec66 36
+src/scenes/study_groups/index.tsx
+  s_4d9056a3efbb15::t_b11041e3d9b8c4 73
+  s_4d9056a3efbb15::t_1f2970240fee63 1-8,11-72,74-156
+  s_4d9056a3efbb15::t_a93011b1b0d5b4 9-10
+src/scenes/index.ts
+  s_4d9056a3efbb15::t_64911cc3afec66 90-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2cac17259cfefb5c26228618a50eebf0d0068d31",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
