@@ -79,11 +79,12 @@ const ScheduleComparisonScreen: React.FC<any> = ({ route }) => {
   const [loading, setLoading] = useState(true);
   const [mine, setMine] = useState<Block[]>([]);
   const [theirs, setTheirs] = useState<Block[]>([]);
+  const [gaps, setGaps] = useState<ScheduleBlock[]>([]);
 
   useEffect(() => {
     if (!contact?.id) { setLoading(false); return; }
     contactsRepository.fetchScheduleComparison(contact.id)
-      .then(data => { setMine(data.mine); setTheirs(data.theirs); })
+      .then(data => { setMine(data.mine); setTheirs(data.theirs); setGaps(data.free_gaps); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [contact.id]);
@@ -122,6 +123,19 @@ const ScheduleComparisonScreen: React.FC<any> = ({ route }) => {
           )}
         </View>
       </View>
+
+      {gaps.length > 0 && (
+        <View style={styles.gapsSection}>
+          <Text style={styles.gapsSectionTitle}>Franjas libres en común</Text>
+          {gaps.map((g, i) => (
+            <View key={i} style={styles.gapRow}>
+              <Icon name="clock-outline" size={14} color="#198754" style={{ marginRight: 6 }} />
+              <Text style={styles.gapDay}>{DAYS[g.day_of_week]}</Text>
+              <Text style={styles.gapTime}>{g.start_time}–{g.end_time}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {activeDays.length === 0 ? (
         <View style={styles.empty}>
@@ -164,6 +178,11 @@ const styles = StyleSheet.create({
   blockTime: { fontSize: 12, color: lightModeColors.darkGray, minWidth: 90 },
   blockName: { flex: 1, fontSize: 13, color: '#000' },
   blockAlert: { marginLeft: 4 },
+  gapsSection: { margin: 12, padding: 12, backgroundColor: '#d1e7dd', borderRadius: 10, borderLeftWidth: 3, borderLeftColor: '#198754' },
+  gapsSectionTitle: { fontSize: 13, fontWeight: '700', color: '#198754', marginBottom: 8, textTransform: 'uppercase' as const, letterSpacing: 0.4 },
+  gapRow: { flexDirection: 'row' as const, alignItems: 'center' as const, marginBottom: 4 },
+  gapDay: { fontSize: 13, fontWeight: '600' as const, color: '#198754', width: 40 },
+  gapTime: { fontSize: 13, color: '#0f5132' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyText: { marginTop: 12, fontSize: 14, color: lightModeColors.darkGray, textAlign: 'center', padding: 20 },
 });

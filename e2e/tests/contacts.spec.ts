@@ -355,8 +355,10 @@ test.describe('Contacts — red de contactos', () => {
     // Fede (DNI=37247189) has active inscriptions WITH schedules loaded by setup-db.sh
     // mine (Fede's own blocks) must be non-empty — the request is from Fede's token
     expect(data.mine.length).toBeGreaterThan(0);
+    // José also has schedules (Lunes y Miércoles 12-14 created by setup-db.sh)
+    expect(data.theirs.length).toBeGreaterThan(0);
     // Each block must have the required fields
-    for (const block of data.mine) {
+    for (const block of [...data.mine, ...data.theirs]) {
       expect(block).toHaveProperty('subject_name');
       expect(block).toHaveProperty('day_of_week');
       expect(block).toHaveProperty('start_time');

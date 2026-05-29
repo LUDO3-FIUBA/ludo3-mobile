@@ -30,6 +30,7 @@ export interface ContactSubject {
 export interface ScheduleComparison {
   mine: Array<{ subject_name: string } & ScheduleBlock>;
   theirs: Array<{ subject_name: string } & ScheduleBlock>;
+  free_gaps: ScheduleBlock[];
 }
 
 async function fetchContacts(): Promise<Contact[]> {
@@ -56,7 +57,7 @@ async function fetchContactSubjects(contactId: number): Promise<ContactSubject[]
 
 async function fetchScheduleComparison(contactId: number): Promise<ScheduleComparison> {
   const result = await get(`api/contacts/${contactId}/schedule-comparison`) as any;
-  return { mine: result?.mine ?? [], theirs: result?.theirs ?? [] };
+  return { mine: result?.mine ?? [], theirs: result?.theirs ?? [], free_gaps: result?.free_gaps ?? [] };
 }
 
 async function searchStudents(query: string): Promise<ContactStudent[]> {

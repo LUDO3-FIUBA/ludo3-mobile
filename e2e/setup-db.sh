@@ -97,6 +97,51 @@ else:
     print(f'[setup-db] Created {created} schedule slots for Fede.')
 PYTHON
 
+echo "[setup-db] Adding commission inscriptions and schedules for José..."
+docker-compose -f "$BACKEND_DIR/docker-compose.yml" exec -T web python manage.py shell << 'PYTHON'
+from backend.models import Student, CommissionInscription, Commission, Semester, SemesterSchedule, Teacher
+from datetime import time, datetime, timezone
+
+jose = Student.objects.filter(user__dni='12345678').first()
+if not jose:
+    print('[setup-db] José not found, skipping.')
+else:
+    teacher = Teacher.objects.first()
+    if not teacher:
+        print('[setup-db] No teacher found, skipping José schedules.')
+    else:
+        # Create or get a commission for José (Bases de Datos, siu_id=9999)
+        comm, _ = Commission.objects.get_or_create(
+            siu_id=9999,
+            defaults={
+                'chief_teacher': teacher,
+                'subject_siu_id': 61,
+                'subject_name': 'Bases de Datos - Catedra 1',
+            }
+        )
+        # Create or get a semester
+        sem, _ = Semester.objects.get_or_create(
+            commission=comm,
+            year_moment='FS',
+            defaults={'start_date': datetime(2026, 3, 1, tzinfo=timezone.utc), 'classes_amount': 16}
+        )
+        # Enroll José with status='A'
+        insc, _ = CommissionInscription.objects.get_or_create(
+            student=jose, semester=sem,
+            defaults={'status': 'A'}
+        )
+        if insc.status != 'A':
+            insc.status = 'A'
+            insc.save()
+        # José: Lunes y Miércoles 12-14 (gap-friendly with Fede's 10-12 and 14-16)
+        created = 0
+        for day, start, end in [(0, time(12, 0), time(14, 0)), (2, time(12, 0), time(14, 0))]:
+            if not SemesterSchedule.objects.filter(semester=sem, day_of_week=day).exists():
+                SemesterSchedule.objects.create(semester=sem, day_of_week=day, start_time=start, end_time=end)
+                created += 1
+        print(f'[setup-db] Created {created} schedule slots for José (sem_id={sem.id}).')
+PYTHON
+
 echo "[setup-db] Creating SIU test user (Luca)..."
 docker-compose -f "$BACKEND_DIR/docker-compose.yml" exec -T web python manage.py shell << 'PYTHON'
 from backend.models import User, Student
