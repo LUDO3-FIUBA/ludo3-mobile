@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { lightModeColors } from '../../../styles/colorPalette';
 import User from '../../../models/User';
+import UserAvatar from '../../../components/UserAvatar';
 
 type Colors = typeof lightModeColors;
 
@@ -67,7 +68,7 @@ const HeaderRight: React.FC<Props> = ({
         accessibilityLabel="Mi perfil"
         disabled={!onUserPress}
       >
-        <Icon name="account-circle" size={32} color={colors.mainContrastColor} />
+        <UserAvatar photoUrl={user.profilePhoto} size={32} />
         {!!(user.firstName || user.lastName) && (
           <Text style={[styles.userName, { color: colors.mainContrastColor }]} numberOfLines={1}>
             {`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()}

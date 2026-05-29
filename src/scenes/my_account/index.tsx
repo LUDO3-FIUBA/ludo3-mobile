@@ -11,9 +11,12 @@ import {
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { RoundedButton } from '../../components';
+import * as ImagePicker from 'expo-image-picker';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { AlertDialog, RoundedButton, UserAvatar } from '../../components';
 import { usersRepository } from '../../repositories';
 import FormField from '../teacher_profile/FormField';
+import User from '../../models/User';
 
 const profileSchema = Yup.object().shape({
   linkedinUrl: Yup.string()
@@ -27,24 +30,84 @@ const profileSchema = Yup.object().shape({
 });
 
 const ProfileScreen: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [initialValues, setInitialValues] = useState({ linkedinUrl: '', githubUrl: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [removingPhoto, setRemovingPhoto] = useState(false);
+  const [confirmRemoveVisible, setConfirmRemoveVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     usersRepository
       .getInfo()
-      .then(user =>
+      .then(fetchedUser => {
+        setUser(fetchedUser);
         setInitialValues({
-          linkedinUrl: user.linkedinUrl ?? '',
-          githubUrl: user.githubUrl ?? '',
-        }),
-      )
+          linkedinUrl: fetchedUser.linkedinUrl ?? '',
+          githubUrl: fetchedUser.githubUrl ?? '',
+        });
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const pickAndUploadPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      setErrorMessage('Necesitamos acceso a tu galería para cambiar la foto.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    const ext = asset.uri.split('.').pop() ?? 'jpg';
+    setUploadingPhoto(true);
+    setSuccessMessage('');
+    setErrorMessage('');
+    try {
+      const updated = await usersRepository.uploadProfilePhoto({
+        uri: asset.uri,
+        type: asset.mimeType ?? `image/${ext}`,
+        name: asset.fileName ?? `profile.${ext}`,
+      });
+      setUser(updated);
+      setSuccessMessage('Foto de perfil actualizada.');
+    } catch {
+      setErrorMessage('No se pudo subir la foto. Intente de nuevo.');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    setRemovingPhoto(true);
+    setSuccessMessage('');
+    setErrorMessage('');
+    try {
+      await usersRepository.removeProfilePhoto();
+      setUser(prev => prev ? new User(
+        prev.dni, prev.firstName, prev.lastName, prev.email,
+        prev.studentId, prev.isTeacherFlag, prev.isStaffFlag,
+        prev.faceRegistered, prev.githubUrl, prev.isSuperuserFlag,
+        prev.departmentId, prev.linkedinUrl, prev.isBedeliaFlag, null,
+      ) : null);
+      setSuccessMessage('Foto de perfil eliminada.');
+    } catch {
+      setErrorMessage('No se pudo eliminar la foto. Intente de nuevo.');
+    } finally {
+      setRemovingPhoto(false);
+      setConfirmRemoveVisible(false);
+    }
+  };
 
   const handleSubmit = async (values: { linkedinUrl: string; githubUrl: string }) => {
     setSaving(true);
@@ -87,6 +150,7 @@ const ProfileScreen: React.FC = () => {
     : {};
 
   return (
+    <>
     <Formik
       initialValues={initialValues}
       validationSchema={profileSchema}
@@ -96,74 +160,111 @@ const ProfileScreen: React.FC = () => {
       {({ values, errors, touched, handleChange, handleBlur, handleSubmit: formikSubmit }) => (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
           <View style={webWidthStyle}>
-          <Text style={styles.description}>
-            Asociá tus perfiles profesionales (opcional). Otros miembros de la plataforma podrán verlos.
-          </Text>
 
-          <Text style={styles.sectionTitle}>LinkedIn</Text>
-          <FormField
-            label="URL de LinkedIn"
-            value={values.linkedinUrl}
-            onChangeText={handleChange('linkedinUrl')}
-            onBlur={handleBlur('linkedinUrl')}
-            placeholder="https://linkedin.com/in/tu-perfil"
-            keyboardType="url"
-            autoCapitalize="none"
-            autoCorrect={false}
-            error={touched.linkedinUrl ? errors.linkedinUrl : undefined}
-          />
-          {values.linkedinUrl && !errors.linkedinUrl ? (
-            <TouchableOpacity
-              style={styles.previewLink}
-              onPress={() => Linking.openURL(values.linkedinUrl)}
-            >
-              <Text style={[styles.previewLinkText, { color: '#0a66c2' }]}>Abrir en LinkedIn</Text>
-            </TouchableOpacity>
-          ) : null}
-
-          <Text style={styles.sectionTitle}>GitHub</Text>
-          <FormField
-            label="URL de GitHub"
-            value={values.githubUrl}
-            onChangeText={handleChange('githubUrl')}
-            onBlur={handleBlur('githubUrl')}
-            placeholder="https://github.com/tu-usuario"
-            keyboardType="url"
-            autoCapitalize="none"
-            autoCorrect={false}
-            error={touched.githubUrl ? errors.githubUrl : undefined}
-          />
-          {values.githubUrl && !errors.githubUrl ? (
-            <TouchableOpacity
-              style={styles.previewLink}
-              onPress={() => Linking.openURL(values.githubUrl)}
-            >
-              <Text style={[styles.previewLinkText, { color: '#0d1117' }]}>Abrir en GitHub</Text>
-            </TouchableOpacity>
-          ) : null}
-
-          {successMessage ? (
-            <View style={styles.successBanner}>
-              <Text style={styles.successText}>{successMessage}</Text>
+            {/* Profile photo */}
+            <Text style={styles.sectionTitle}>Foto de perfil</Text>
+            <View style={styles.photoSection}>
+              <TouchableOpacity onPress={pickAndUploadPhoto} disabled={uploadingPhoto || removingPhoto} style={styles.photoContainer}>
+                <UserAvatar photoUrl={user?.profilePhoto} size={100} />
+                <View style={styles.cameraOverlay}>
+                  {uploadingPhoto
+                    ? <ActivityIndicator size="small" color="#fff" />
+                    : <Icon name="camera" size={18} color="#fff" />}
+                </View>
+              </TouchableOpacity>
+              <Text style={styles.photoHint}>Tocá para cambiar tu foto</Text>
+              {user?.profilePhoto ? (
+                <TouchableOpacity
+                  style={styles.removePhotoBtn}
+                  onPress={() => setConfirmRemoveVisible(true)}
+                  disabled={uploadingPhoto || removingPhoto}
+                >
+                  <Icon name="delete-outline" size={14} color="#b42318" />
+                  <Text style={styles.removePhotoText}>Eliminar foto</Text>
+                </TouchableOpacity>
+              ) : null}
             </View>
-          ) : null}
 
-          {errorMessage ? (
-            <View style={styles.errorBanner}>
-              <Text style={styles.errorText}>{errorMessage}</Text>
-            </View>
-          ) : null}
+            <Text style={styles.description}>
+              Asociá tus perfiles profesionales (opcional). Otros miembros de la plataforma podrán verlos.
+            </Text>
 
-          <RoundedButton
-            text={saving ? 'Guardando...' : 'Guardar'}
-            enabled={!saving}
-            onPress={() => formikSubmit()}
-            style={{}}
-          />
+            <Text style={styles.sectionTitle}>LinkedIn</Text>
+            <FormField
+              label="URL de LinkedIn"
+              value={values.linkedinUrl}
+              onChangeText={handleChange('linkedinUrl')}
+              onBlur={handleBlur('linkedinUrl')}
+              placeholder="https://linkedin.com/in/tu-perfil"
+              keyboardType="url"
+              autoCapitalize="none"
+              autoCorrect={false}
+              error={touched.linkedinUrl ? errors.linkedinUrl : undefined}
+            />
+            {values.linkedinUrl && !errors.linkedinUrl ? (
+              <TouchableOpacity
+                style={styles.previewLink}
+                onPress={() => Linking.openURL(values.linkedinUrl)}
+              >
+                <Text style={[styles.previewLinkText, { color: '#0a66c2' }]}>Abrir en LinkedIn</Text>
+              </TouchableOpacity>
+            ) : null}
+
+            <Text style={styles.sectionTitle}>GitHub</Text>
+            <FormField
+              label="URL de GitHub"
+              value={values.githubUrl}
+              onChangeText={handleChange('githubUrl')}
+              onBlur={handleBlur('githubUrl')}
+              placeholder="https://github.com/tu-usuario"
+              keyboardType="url"
+              autoCapitalize="none"
+              autoCorrect={false}
+              error={touched.githubUrl ? errors.githubUrl : undefined}
+            />
+            {values.githubUrl && !errors.githubUrl ? (
+              <TouchableOpacity
+                style={styles.previewLink}
+                onPress={() => Linking.openURL(values.githubUrl)}
+              >
+                <Text style={[styles.previewLinkText, { color: '#0d1117' }]}>Abrir en GitHub</Text>
+              </TouchableOpacity>
+            ) : null}
+
+            {successMessage ? (
+              <View style={styles.successBanner}>
+                <Text style={styles.successText}>{successMessage}</Text>
+              </View>
+            ) : null}
+
+            {errorMessage ? (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
+
+            <RoundedButton
+              text={saving ? 'Guardando...' : 'Guardar'}
+              enabled={!saving}
+              onPress={() => formikSubmit()}
+              style={{}}
+            />
           </View>
         </ScrollView>
       )}
     </Formik>
+    <AlertDialog
+      visible={confirmRemoveVisible}
+      title="Eliminar foto de perfil"
+      message="¿Estás seguro de que querés eliminar tu foto de perfil? Esta acción no se puede deshacer."
+      confirmLabel="Eliminar"
+      cancelLabel="Cancelar"
+      destructive
+      loading={removingPhoto}
+      onConfirm={handleRemovePhoto}
+      onCancel={() => setConfirmRemoveVisible(false)}
+    />
+    </>
   );
 };
 
@@ -180,6 +281,47 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 40,
+  },
+  photoSection: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  photoContainer: {
+    position: 'relative',
+    width: 100,
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cameraOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#003f8a',
+    borderRadius: 14,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  photoHint: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#888',
+  },
+  removePhotoBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 6,
+    padding: 4,
+  },
+  removePhotoText: {
+    fontSize: 12,
+    color: '#b42318',
+    fontWeight: '600',
   },
   sectionTitle: {
     fontSize: 17,

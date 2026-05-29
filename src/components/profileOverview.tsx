@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { usersRepository } from '../repositories';
 import { User } from '../models';
 import { profileOverview as style } from '../styles';
 import { SessionManager } from '../managers';
 import { useNavigation } from '@react-navigation/native';
 import { makeRequest } from '../scenes/authenticatedComponent';
+import UserAvatar from './UserAvatar';
 
 
 export default function ProfileOverview() {
@@ -27,11 +27,12 @@ export default function ProfileOverview() {
         getUser();
     }, [isLoggedIn])
 
+    const s = style();
     return (
-        <View style={style().view}>
-            <Icon name='account-circle' style={style().icon} />
-            <Text style={style().text}>{user?.firstName}</Text>
-            <Text style={style().text}>{user?.lastName}</Text>
+        <View style={s.view}>
+            <UserAvatar photoUrl={user?.profilePhoto} size={80} />
+            <Text style={s.text}>{user?.firstName}</Text>
+            <Text style={s.text}>{user?.lastName}</Text>
         </View>
     )
 }
