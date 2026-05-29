@@ -1,0 +1,24 @@
+e2e/tests/contacts.spec.ts
+  s_4d9056a3efbb15::t_ca0511f2c9d5d4 534-535
+  s_4d9056a3efbb15::t_e84391e208d88b 412-533,536-545
+e2e/setup-db.sh
+  s_4d9056a3efbb15::t_69ee6bcb7f5dd9 145-186
+src/scenes/contacts/ScheduleComparisonScreen.tsx
+  s_4d9056a3efbb15::t_a9480b77e17c55 184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "8d1541331e34aa66b8eb12960a72ccf1e2def6fd",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
