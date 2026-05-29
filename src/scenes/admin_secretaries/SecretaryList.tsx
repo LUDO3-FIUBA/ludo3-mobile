@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { secretariesRepository } from '../../repositories';
 import Secretary from '../../models/Secretary';
 
@@ -21,13 +21,14 @@ const SecretaryList: React.FC<Props> = ({ isAdmin }) => {
   const navigation = useNavigation<any>();
   const [secretaries, setSecretaries] = useState<Secretary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const loadSecretaries = async () => {
     try {
       const data = await secretariesRepository.fetchAll();
       setSecretaries(data);
     } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar las secretarías.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar las secretarías.' });
     } finally {
       setLoading(false);
     }
@@ -54,77 +55,90 @@ const SecretaryList: React.FC<Props> = ({ isAdmin }) => {
     }
   }, [navigation, isAdmin]);
 
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
   const topLevel = secretaries.filter(s => s.parentSecretary === null);
-
-  if (topLevel.length === 0) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.emptyText}>No hay secretarías registradas.</Text>
-      </View>
-    );
-  }
 
   const navigateToDetail = (id: number) =>
     navigation.navigate('AdminSecretaryDetail', { secretaryId: id, isAdmin });
 
-  return (
-    <FlatList
-      data={topLevel}
-      keyExtractor={item => String(item.id)}
-      contentContainerStyle={styles.list}
-      renderItem={({ item }) => (
-        <View style={styles.group}>
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => navigateToDetail(item.id)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.itemContent}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              {item.location ? <Text style={styles.itemLocation}>{item.location}</Text> : null}
-            </View>
-            {isAdmin && (
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate('AdminSecretaryCreate', { parentId: item.id })
-                }
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                style={styles.addSubButton}
-              >
-                <MaterialIcon name="plus-box-outline" fontSize={22} color="#555" />
-              </TouchableOpacity>
-            )}
-            <MaterialIcon name="chevron-right" fontSize={20} color="#aaa" />
-          </TouchableOpacity>
-
-          {item.subsecretaries?.map(sub => (
+  let content: React.ReactNode;
+  if (loading) {
+    content = (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  } else if (topLevel.length === 0) {
+    content = (
+      <View style={styles.centered}>
+        <Text style={styles.emptyText}>No hay secretarías registradas.</Text>
+      </View>
+    );
+  } else {
+    content = (
+      <FlatList
+        data={topLevel}
+        keyExtractor={item => String(item.id)}
+        contentContainerStyle={styles.list}
+        renderItem={({ item }) => (
+          <View style={styles.group}>
             <TouchableOpacity
-              key={sub.id}
-              style={styles.subItem}
-              onPress={() => navigateToDetail(sub.id)}
+              style={styles.item}
+              onPress={() => navigateToDetail(item.id)}
               activeOpacity={0.7}
             >
-              <View style={styles.subIndent}>
-                <MaterialIcon name="subdirectory-arrow-right" fontSize={16} color="#bbb" />
-              </View>
               <View style={styles.itemContent}>
-                <Text style={styles.subName}>{sub.name}</Text>
-                {sub.location ? <Text style={styles.itemLocation}>{sub.location}</Text> : null}
+                <Text style={styles.itemName}>{item.name}</Text>
+                {item.location ? <Text style={styles.itemLocation}>{item.location}</Text> : null}
               </View>
-              <MaterialIcon name="chevron-right" fontSize={18} color="#aaa" />
+              {isAdmin && (
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('AdminSecretaryCreate', { parentId: item.id })
+                  }
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={styles.addSubButton}
+                >
+                  <MaterialIcon name="plus-box-outline" fontSize={22} color="#555" />
+                </TouchableOpacity>
+              )}
+              <MaterialIcon name="chevron-right" fontSize={20} color="#aaa" />
             </TouchableOpacity>
-          ))}
-        </View>
-      )}
-    />
+
+            {item.subsecretaries?.map(sub => (
+              <TouchableOpacity
+                key={sub.id}
+                style={styles.subItem}
+                onPress={() => navigateToDetail(sub.id)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.subIndent}>
+                  <MaterialIcon name="subdirectory-arrow-right" fontSize={16} color="#bbb" />
+                </View>
+                <View style={styles.itemContent}>
+                  <Text style={styles.subName}>{sub.name}</Text>
+                  {sub.location ? <Text style={styles.itemLocation}>{sub.location}</Text> : null}
+                </View>
+                <MaterialIcon name="chevron-right" fontSize={18} color="#aaa" />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      />
+    );
+  }
+
+  return (
+    <>
+      {content}
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+    </>
   );
 };
 

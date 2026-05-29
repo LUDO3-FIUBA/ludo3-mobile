@@ -31,7 +31,6 @@ import {
   // Forms screens
   FormsListScreen, DocumentFormScreen, DigitalFormScreen,
   TeacherFormsScreen, FormsManagerScreen, FormDesignerScreen,
-  OwnershipGroupsListScreen, OwnershipGroupEditorScreen,
   TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
   FiubaMapScreen,
 } from './src/scenes';
@@ -127,13 +126,10 @@ const webLinking = {
           AdminUserSearch: 'admin/usuarios',
           AdminNotificationList: 'admin/avisos',
           FormsManager: 'admin/tramites',
-          OwnershipGroupsList: 'admin/grupos-propiedad',
           AdminNewsList: 'admin/novedades',
           BedeliaClassroomChange: 'bedelia/cambio-aula',
           Map: 'mapa',
           Notifications: 'notificaciones',
-          ChangePassword: 'cambiar-password',
-          MyAccount: 'mi-cuenta',
         },
       },
       // Mobile-only Stack screens that aren't reachable through the web drawer
@@ -168,7 +164,9 @@ const WEB_DRAWER_EMBEDDED_ROUTES = new Set<string>([
   'CreateSemester', 'TeacherForms', 'AdminDepartmentList', 'AdminCommissionList',
   'AdminUserSearch', 'AdminNotificationList', 'FormsManager',
   'BedeliaClassroomChange', 'AdminDepartmentDetail', 'AdminDepartmentCreate',
-  'AdminDepartmentEdit', 'AdminCommissionCreate', 'AdminCommissionDetail',
+  'AdminDepartmentEdit', 'StudentSecretaryList', 'AdminSecretaryList',
+  'AdminSecretaryDetail', 'AdminSecretaryCreate', 'AdminSecretaryEdit',
+  'AdminCommissionCreate', 'AdminCommissionDetail',
   'AdminCommissionEdit', 'AdminUserDetail', 'AdminNotificationCreate',
   'Notifications', 'StudentNewsList', 'AdminNewsList', 'NewsDetail',
   'AdminNewsCreate', 'AdminNewsEdit', 'ChangePassword', 'MyAccount',
@@ -316,6 +314,7 @@ const App = () => {
               {!skipOnWeb('ApprovedSubjects') && <Stack.Screen name="ApprovedSubjects" component={ApprovedSubjectsScreen} options={{ headerShown: true, title: 'Materias aprobadas' }} />}
               {!skipOnWeb('PendingSubjects') && <Stack.Screen name="PendingSubjects" component={PendingSubjectsScreen} options={{ headerShown: true, title: 'Materias pendientes' }} />}
               {!skipOnWeb('StudentDepartmentList') && <Stack.Screen name="StudentDepartmentList" component={StudentDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />}
+              {!skipOnWeb('StudentSecretaryList') && <Stack.Screen name="StudentSecretaryList" component={StudentSecretaryListScreen} options={{ headerShown: true, title: 'Secretarías' }} />}
               {!skipOnWeb('FormsList') && !skipOnMobile('FormsList') && <Stack.Screen name="FormsList" component={FormsListScreen} options={{ headerShown: true, title: 'Trámites' }} />}
               {!skipOnWeb('StudentUsefulLinks') && <Stack.Screen name="StudentUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />}
               {!skipOnWeb('TeacherUsefulLinks') && <Stack.Screen name="TeacherUsefulLinks" component={UsefulLinksScreen} options={{ headerShown: true, title: 'Enlaces útiles' }} />}
@@ -335,6 +334,10 @@ const App = () => {
               {!skipOnWeb('AdminDepartmentDetail') && <Stack.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />}
               {!skipOnWeb('AdminDepartmentCreate') && <Stack.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ headerShown: true, title: 'Nuevo Departamento' }} />}
               {!skipOnWeb('AdminDepartmentEdit') && <Stack.Screen name="AdminDepartmentEdit" component={DepartmentForm} options={{ headerShown: true, title: 'Editar Departamento' }} />}
+              {!skipOnWeb('AdminSecretaryList') && <Stack.Screen name="AdminSecretaryList" component={AdminSecretaryListScreen} options={{ headerShown: true, title: 'Secretarías' }} />}
+              {!skipOnWeb('AdminSecretaryDetail') && <Stack.Screen name="AdminSecretaryDetail" component={SecretaryDetail} options={{ headerShown: true, title: 'Secretaría' }} />}
+              {!skipOnWeb('AdminSecretaryCreate') && <Stack.Screen name="AdminSecretaryCreate" component={SecretaryForm} options={{ headerShown: true, title: 'Nueva Secretaría' }} />}
+              {!skipOnWeb('AdminSecretaryEdit') && <Stack.Screen name="AdminSecretaryEdit" component={SecretaryForm} options={{ headerShown: true, title: 'Editar Secretaría' }} />}
               {!skipOnWeb('AdminCommissionCreate') && <Stack.Screen name="AdminCommissionCreate" component={CommissionForm} options={{ headerShown: true, title: 'Nueva Comisión' }} />}
               {!skipOnWeb('AdminCommissionDetail') && <Stack.Screen name="AdminCommissionDetail" component={CommissionDetail} options={{ headerShown: true, title: 'Comisión' }} />}
               {!skipOnWeb('AdminCommissionEdit') && <Stack.Screen name="AdminCommissionEdit" component={CommissionForm} options={{ headerShown: true, title: 'Editar Comisión' }} />}

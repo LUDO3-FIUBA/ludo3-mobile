@@ -467,7 +467,7 @@ const FormDesignerScreen: React.FC = () => {
       return;
     }
     if (!ownershipGroupId) {
-      Alert.alert('Error', 'Seleccioná un grupo de propiedad.');
+      setAlertDialog({ title: 'Error', message: 'Seleccioná un grupo de propiedad.' });
       return;
     }
     if (!isDigital && !documentUrl.trim() && !templateFile) {

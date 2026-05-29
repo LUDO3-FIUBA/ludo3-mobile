@@ -5,13 +5,13 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
   Switch,
   Platform,
 } from 'react-native';
 import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {RoundedButton, MaterialIcon} from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import {secretariesRepository, formsRepository, usersRepository} from '../../repositories';
 import Secretary from '../../models/Secretary';
 import FormOwnershipGroup from '../../models/FormOwnershipGroup';
@@ -45,10 +45,15 @@ const SecretaryDetail: React.FC = () => {
   const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
   const [pending, setPending] = useState<PendingMembership[]>([]);
   const [savingGroups, setSavingGroups] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<
+    {title: string; message: string; onConfirm: () => void} | null
+  >(null);
+
+  const listRoute = isAdmin ? 'AdminSecretaryList' : 'StudentSecretaryList';
 
   useEffect(() => {
     if (Platform.OS === 'web') {
-      const listRoute = isAdmin ? 'AdminSecretaryList' : 'StudentSecretaryList';
       navigation.setOptions({
         headerLeft: () => (
           <TouchableOpacity
@@ -60,7 +65,7 @@ const SecretaryDetail: React.FC = () => {
         ),
       });
     }
-  }, [navigation, isAdmin]);
+  }, [navigation, listRoute]);
 
   useEffect(() => {
     Promise.all([
@@ -72,7 +77,7 @@ const SecretaryDetail: React.FC = () => {
         setIsSuperAdmin(user.isSuperAdmin?.() ?? false);
         setIsTeacher(user.isTeacher() && !user.isAdmin());
       })
-      .catch(() => Alert.alert('Error', 'No se pudo cargar la secretaría.'))
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar la secretaría.' }))
       .finally(() => setLoading(false));
   }, [secretaryId]);
 
@@ -86,25 +91,18 @@ const SecretaryDetail: React.FC = () => {
   }, [secretary?.parentSecretary]);
 
   const handleDelete = () => {
-    Alert.alert(
-      'Eliminar secretaría',
-      `¿Estás seguro de que querés eliminar "${secretary?.name}"?`,
-      [
-        {text: 'Cancelar', style: 'cancel'},
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await secretariesRepository.deleteSecretary(secretaryId);
-              navigation.goBack();
-            } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar la secretaría.');
-            }
-          },
-        },
-      ],
-    );
+    setConfirmDialog({
+      title: 'Eliminar secretaría',
+      message: `¿Estás seguro de que querés eliminar "${secretary?.name}"?`,
+      onConfirm: async () => {
+        try {
+          await secretariesRepository.deleteSecretary(secretaryId);
+          navigation.navigate(listRoute);
+        } catch (error) {
+          setAlertDialog({ title: 'Error', message: 'No se pudo eliminar la secretaría.' });
+        }
+      },
+    });
   };
 
   const startEditingGroups = async () => {
@@ -119,7 +117,7 @@ const SecretaryDetail: React.FC = () => {
       setPending(current);
       setEditingGroups(true);
     } catch {
-      Alert.alert('Error', 'No se pudieron cargar los grupos de propiedad.');
+      setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los grupos de propiedad.' });
     }
   };
 
@@ -150,7 +148,7 @@ const SecretaryDetail: React.FC = () => {
       setEditingGroups(false);
     } catch (err: any) {
       const msg = err?.response?.data?.detail ?? 'No se pudieron guardar los grupos.';
-      Alert.alert('Error', msg);
+      setAlertDialog({ title: 'Error', message: msg });
     } finally {
       setSavingGroups(false);
     }
@@ -168,11 +166,20 @@ const SecretaryDetail: React.FC = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>Secretaría no encontrada.</Text>
+        <AlertDialog
+          visible={alertDialog !== null}
+          title={alertDialog?.title ?? ''}
+          message={alertDialog?.message ?? ''}
+          mode="info"
+          confirmLabel="Aceptar"
+          onConfirm={() => setAlertDialog(null)}
+        />
       </View>
     );
   }
 
   return (
+    <View style={{flex: 1}}>
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.name}>{secretary.name}</Text>
 
@@ -328,6 +335,26 @@ const SecretaryDetail: React.FC = () => {
         </View>
       )}
     </ScrollView>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      <AlertDialog
+        visible={confirmDialog !== null}
+        title={confirmDialog?.title ?? ''}
+        message={confirmDialog?.message ?? ''}
+        mode="confirm"
+        destructive
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
+        onCancel={() => setConfirmDialog(null)}
+      />
+    </View>
   );
 };
 

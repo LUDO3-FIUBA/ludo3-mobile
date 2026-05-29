@@ -5,7 +5,6 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import {useFocusEffect, useNavigation, useRoute, RouteProp} from '@react-navigation/native';
 import {RoundedButton, MaterialIcon} from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import {secretariesRepository, formsRepository, usersRepository} from '../../repositories';
 import Secretary from '../../models/Secretary';
 import FormOwnershipGroup from '../../models/FormOwnershipGroup';
@@ -52,6 +52,9 @@ const SecretaryForm: React.FC = () => {
   const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<PendingMembership[]>([]);
   const [showGroupPicker, setShowGroupPicker] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<
+    {title: string; message: string; onConfirm?: () => void} | null
+  >(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -130,7 +133,7 @@ const SecretaryForm: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'El nombre de la secretaría es obligatorio.');
+      setAlertDialog({ title: 'Error', message: 'El nombre de la secretaría es obligatorio.' });
       return;
     }
 
@@ -151,8 +154,11 @@ const SecretaryForm: React.FC = () => {
             selectedGroups.map(g => ({groupId: g.groupId, isEditor: g.isEditor})),
           );
         }
-        Alert.alert('Éxito', 'Secretaría actualizada correctamente.');
-        navigation.goBack();
+        setAlertDialog({
+          title: 'Éxito',
+          message: 'Secretaría actualizada correctamente.',
+          onConfirm: () => { setAlertDialog(null); navigation.navigate('AdminSecretaryList'); },
+        });
       } else {
         const created = await secretariesRepository.createSecretary(data);
         if (isSuperAdmin && selectedGroups.length > 0) {
@@ -161,14 +167,17 @@ const SecretaryForm: React.FC = () => {
             selectedGroups.map(g => ({groupId: g.groupId, isEditor: g.isEditor})),
           );
         }
-        Alert.alert('Éxito', 'Secretaría creada correctamente.');
-        navigation.navigate('AdminSecretaryList');
+        setAlertDialog({
+          title: 'Éxito',
+          message: 'Secretaría creada correctamente.',
+          onConfirm: () => { setAlertDialog(null); navigation.navigate('AdminSecretaryList'); },
+        });
       }
     } catch (error: any) {
       const msg =
         error?.response?.data?.detail ??
         'No se pudo guardar la secretaría. Intente de nuevo.';
-      Alert.alert('Error', msg);
+      setAlertDialog({ title: 'Error', message: msg });
     } finally {
       setSaving(false);
     }
@@ -347,6 +356,14 @@ const SecretaryForm: React.FC = () => {
           style={{}}
         />
       </ScrollView>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={alertDialog?.onConfirm ?? (() => setAlertDialog(null))}
+      />
     </KeyboardAvoidingView>
   );
 };
