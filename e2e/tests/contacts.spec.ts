@@ -140,4 +140,42 @@ test.describe('Contacts — red de contactos', () => {
     await expect(page.getByText('Solicitud enviada')).not.toBeVisible({ timeout: 5000 });
     await expect(page.getByText(/Todavía no tenés contactos/)).toBeVisible();
   });
+
+  test('flujo completo: fede envía → jose acepta → fede ve a jose como contacto', async ({ page }) => {
+    // Step 1: Fede sends request
+    await loginAs(page, DNI, PASS);
+    await goToContacts(page);
+    await page.getByPlaceholder('Buscar por nombre o padrón...').fill(JOSE_PADRON);
+    await expect(page.getByText('José Pérez')).toBeVisible({ timeout: 5000 });
+    await page.getByLabel('agregar-contacto').first().click();
+    await expect(page.getByText('Solicitud enviada')).toBeVisible({ timeout: 5000 });
+
+    // Step 2: José accepts via API (simulates him logging in separately)
+    const ctx = await playwrightRequest.newContext();
+    const joseLogin = await ctx.post(`${BACKEND}/auth/login/`, { data: { dni: JOSE_DNI, password: JOSE_PASS } });
+    const { access: joseToken } = await joseLogin.json();
+    const contactsResp = await ctx.get(`${BACKEND}/api/contacts/`, {
+      headers: { Authorization: `Bearer ${joseToken}` },
+    });
+    const contacts = await contactsResp.json();
+    const pending = contacts.find((c: any) => c.status === 'P');
+    await ctx.post(`${BACKEND}/api/contacts/${pending.id}/accept/`, {
+      headers: { Authorization: `Bearer ${joseToken}` },
+    });
+    await ctx.dispose();
+
+    // Step 3: Fede logs back in — clear cookies (session uses HTTP-only cookie) + localStorage
+    await page.context().clearCookies();
+    await page.evaluate(() => localStorage.clear());
+    await page.reload({ waitUntil: 'networkidle' });
+    await loginAs(page, DNI, PASS);
+    await goToContacts(page);
+
+    await expect(page.getByText('José Pérez')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Solicitud enviada')).not.toBeVisible();
+    await expect(page.getByText('Solicitud recibida')).not.toBeVisible();
+    // Accepted contact shows the subjects button, not the pending badge
+    await expect(page.getByLabel('ver-materias')).toBeVisible();
+    await expect(page.getByLabel('eliminar-contacto')).toBeVisible();
+  });
 });
