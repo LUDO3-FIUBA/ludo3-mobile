@@ -4,6 +4,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { lightModeColors } from '../../../styles/colorPalette';
 import User from '../../../models/User';
 import UserAvatar from '../../../components/UserAvatar';
+import { useAppSelector } from '../../../redux/hooks';
+import { selectCurrentUserProfilePhoto } from '../../../redux/reducers/currentUserSlice';
 
 type Colors = typeof lightModeColors;
 
@@ -27,7 +29,10 @@ const HeaderRight: React.FC<Props> = ({
   colors,
   user,
   onUserPress,
-}) => (
+}) => {
+  const storedPhoto = useAppSelector(selectCurrentUserProfilePhoto);
+  const photoUrl = storedPhoto !== undefined ? storedPhoto : user?.profilePhoto;
+  return (
   <View style={styles.container}>
     {canToggle && (
       <View style={styles.roleToggle}>
@@ -68,7 +73,7 @@ const HeaderRight: React.FC<Props> = ({
         accessibilityLabel="Mi perfil"
         disabled={!onUserPress}
       >
-        <UserAvatar photoUrl={user.profilePhoto} size={32} />
+        <UserAvatar photoUrl={photoUrl} size={32} />
         {!!(user.firstName || user.lastName) && (
           <Text style={[styles.userName, { color: colors.mainContrastColor }]} numberOfLines={1}>
             {`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()}
@@ -77,7 +82,8 @@ const HeaderRight: React.FC<Props> = ({
       </TouchableOpacity>
     )}
   </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   container: { flexDirection: 'row', alignItems: 'center', marginRight: 16 },

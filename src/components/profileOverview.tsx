@@ -7,12 +7,16 @@ import { SessionManager } from '../managers';
 import { useNavigation } from '@react-navigation/native';
 import { makeRequest } from '../scenes/authenticatedComponent';
 import UserAvatar from './UserAvatar';
+import { useAppSelector } from '../redux/hooks';
+import { selectCurrentUserProfilePhoto } from '../redux/reducers/currentUserSlice';
 
 
 export default function ProfileOverview() {
     const [user, setUser] = useState<User | null>(null);
     const isLoggedIn = SessionManager.getInstance()?.isLoggedIn();
     const navigation = useNavigation();
+    const storedPhoto = useAppSelector(selectCurrentUserProfilePhoto);
+    const photoUrl = storedPhoto !== undefined ? storedPhoto : user?.profilePhoto;
 
     useEffect(() => {
         async function getUser() {
@@ -30,7 +34,7 @@ export default function ProfileOverview() {
     const s = style();
     return (
         <View style={s.view}>
-            <UserAvatar photoUrl={user?.profilePhoto} size={80} />
+            <UserAvatar photoUrl={photoUrl} size={80} />
             <Text style={s.text}>{user?.firstName}</Text>
             <Text style={s.text}>{user?.lastName}</Text>
         </View>

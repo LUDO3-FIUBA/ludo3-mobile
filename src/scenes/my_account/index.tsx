@@ -17,6 +17,8 @@ import { AlertDialog, RoundedButton, UserAvatar } from '../../components';
 import { usersRepository } from '../../repositories';
 import FormField from '../teacher_profile/FormField';
 import User from '../../models/User';
+import { useAppDispatch } from '../../redux/hooks';
+import { setProfilePhoto } from '../../redux/reducers/currentUserSlice';
 
 const profileSchema = Yup.object().shape({
   linkedinUrl: Yup.string()
@@ -30,6 +32,7 @@ const profileSchema = Yup.object().shape({
 });
 
 const ProfileScreen: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [user, setUser] = useState<User | null>(null);
   const [initialValues, setInitialValues] = useState({ linkedinUrl: '', githubUrl: '' });
   const [loading, setLoading] = useState(true);
@@ -45,6 +48,7 @@ const ProfileScreen: React.FC = () => {
       .getInfo()
       .then(fetchedUser => {
         setUser(fetchedUser);
+        dispatch(setProfilePhoto(fetchedUser.profilePhoto));
         setInitialValues({
           linkedinUrl: fetchedUser.linkedinUrl ?? '',
           githubUrl: fetchedUser.githubUrl ?? '',
@@ -52,7 +56,7 @@ const ProfileScreen: React.FC = () => {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [dispatch]);
 
   const pickAndUploadPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -80,6 +84,7 @@ const ProfileScreen: React.FC = () => {
         name: asset.fileName ?? `profile.${ext}`,
       });
       setUser(updated);
+      dispatch(setProfilePhoto(updated.profilePhoto));
       setSuccessMessage('Foto de perfil actualizada.');
     } catch {
       setErrorMessage('No se pudo subir la foto. Intente de nuevo.');
@@ -100,6 +105,7 @@ const ProfileScreen: React.FC = () => {
         prev.faceRegistered, prev.githubUrl, prev.isSuperuserFlag,
         prev.departmentId, prev.linkedinUrl, prev.isBedeliaFlag, null,
       ) : null);
+      dispatch(setProfilePhoto(null));
       setSuccessMessage('Foto de perfil eliminada.');
     } catch {
       setErrorMessage('No se pudo eliminar la foto. Intente de nuevo.');
