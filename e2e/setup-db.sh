@@ -20,12 +20,12 @@ EMAIL = 'fede.est@gmail.com'
 PADRON = '94557'
 PASSWORD = 'soydeferro'
 
-# Create or get user
+# Create or get user — always force test password (initdata/fixtures may overwrite it)
 user, created = User.objects.get_or_create(dni=DNI, defaults={'email': EMAIL, 'username': ''})
-if created or not user.has_usable_password():
+if created or not user.check_password(PASSWORD):
     user.set_password(PASSWORD)
     user.save()
-    print(f'[setup-db] Created user DNI={DNI}')
+    print(f'[setup-db] {"Created" if created else "Reset password for"} user DNI={DNI}')
 else:
     print(f'[setup-db] User DNI={DNI} already exists')
 

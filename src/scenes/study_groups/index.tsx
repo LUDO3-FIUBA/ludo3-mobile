@@ -17,11 +17,43 @@ const StudyGroupsScreen: React.FC<any> = () => {
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
 
-  const load = useCallback(async () => {
-    try { setGroups(await studyGroupsRepository.fetchGroups()); }
-    catch { Alert.alert('Error', 'No se pudieron cargar los grupos.'); }
-    finally { setLoading(false); }
-  }, []);
+const load = useCallback(async () => {
+  try {
+    console.log('LOADING GROUPS...');
+
+    const groups = await studyGroupsRepository.fetchGroups();
+
+    console.log('GROUPS RESPONSE');
+    console.log(JSON.stringify(groups, null, 2));
+
+    if (Array.isArray(groups)) {
+      console.log('GROUP COUNT', groups.length);
+
+      groups.forEach(g => {
+        console.log(
+          `GROUP ${g.id} | ${g.name} | status=${g.my_status} | creator=${g.is_creator}`
+        );
+      });
+
+      const pending = groups.filter(g => g.my_status === 'P');
+
+      console.log('PENDING GROUPS');
+      console.log(JSON.stringify(pending, null, 2));
+    } else {
+      console.log('GROUPS IS NOT AN ARRAY');
+      console.log(typeof groups);
+    }
+
+    setGroups(groups);
+  } catch (e) {
+    console.log('ERROR LOADING GROUPS');
+    console.log(e);
+
+    Alert.alert('Error', 'No se pudieron cargar los grupos.');
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   const onRefresh = useCallback(async () => { setRefreshing(true); await load(); setRefreshing(false); }, [load]);
   useEffect(() => { load(); }, [load]);
@@ -35,14 +67,27 @@ const StudyGroupsScreen: React.FC<any> = () => {
       setCreating(false);
     } catch { Alert.alert('Error', 'No se pudo crear el grupo.'); }
   };
+const handleAccept = async (groupId: number) => {
+  try {
+    console.log('ACCEPTING GROUP', groupId);
 
-  const handleAccept = async (groupId: number) => {
-    try {
-      await studyGroupsRepository.acceptInvitation(groupId);
-      setGroups(prev => prev.map(g => g.id === groupId ? { ...g, my_status: 'A' } : g));
-    } catch { Alert.alert('Error', 'No se pudo aceptar.'); }
-  };
+    const response = await studyGroupsRepository.acceptInvitation(groupId);
 
+    console.log('ACCEPT RESPONSE');
+    console.log(response);
+
+    setGroups(prev =>
+      prev.map(g =>
+        g.id === groupId
+          ? { ...g, my_status: 'A' }
+          : g
+      )
+    );
+  } catch (e) {
+    console.log('ACCEPT ERROR', e);
+    Alert.alert('Error', 'No se pudo aceptar.');
+  }
+};
   const handleLeave = (groupId: number) => {
     const confirm = typeof window !== 'undefined'
       ? window.confirm('¿Abandonar este grupo?')
