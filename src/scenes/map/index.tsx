@@ -100,13 +100,6 @@ export default function MapScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.buildingPickerRow}>
-        <BuildingPicker
-          buildings={allBuildings}
-          currentBuildingId={currentBuildingId}
-          onSelect={handleBuildingSelect}
-        />
-      </View>
       {currentFloor ? (
         <>
           <FloorMap
@@ -123,6 +116,7 @@ export default function MapScreen() {
             onChange={handleChange}
             onSelect={handleSelect}
             onClear={handleClear}
+            topOffset={62}
           />
           <ZoomControls
             onZoomIn={() => transformHandle.stepZoom(1.25)}
@@ -142,6 +136,15 @@ export default function MapScreen() {
           </Text>
         </View>
       )}
+      {/* Building toggle floats above the search bar so it never overlaps it
+          and the map canvas can use the full screen height. */}
+      <View pointerEvents="box-none" style={styles.buildingPickerOverlay}>
+        <BuildingPicker
+          buildings={allBuildings}
+          currentBuildingId={currentBuildingId}
+          onSelect={handleBuildingSelect}
+        />
+      </View>
     </View>
   );
 }
@@ -150,13 +153,14 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  buildingPickerRow: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+  buildingPickerOverlay: {
+    position: 'absolute',
+    // Sits above the search bar (which is pushed down via topOffset).
+    top: 12,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: lightModeColors.lightGray,
+    zIndex: 5,
   },
   canvas: {
     flex: 1,
