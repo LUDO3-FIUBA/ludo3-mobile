@@ -1,0 +1,28 @@
+.npmrc
+  ai_agent 1-2
+e2e/setup-db.sh
+  s_4d9056a3efbb15::t_0ca7fe2dcdace8 23,25,28
+src/scenes/study_groups/index.tsx
+  h_a97313da363eeb 22-51,70-72,74,76-77,79-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "a3cc6e8a6c2d41c455eef8353fb17725e3c320e9",
+  "prompts": {},
+  "humans": {
+    "h_a97313da363eeb": {
+      "author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  },
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
