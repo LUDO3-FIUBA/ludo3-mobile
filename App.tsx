@@ -6,7 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, AttendanceLocationSubmitScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, AttendanceLocationSubmitScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, ViewCatedraDetailsScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   ChangePasswordScreen,
   ForgotPasswordRequestScreen,
@@ -370,6 +370,13 @@ const App = () => {
                 <Stack.Screen
                   name="ViewClassDetails"
                   component={ViewClassDetailsScreen}
+                  options={{ headerShown: true, title: "Cursada" }}
+                />
+              )}
+              {!skipOnWeb('ViewCatedraDetails') && (
+                <Stack.Screen
+                  name="ViewCatedraDetails"
+                  component={ViewCatedraDetailsScreen}
                   options={{ headerShown: true, title: "Cursada" }}
                 />
               )}

@@ -17,6 +17,7 @@ const CreateSemester = () => {
   const commissions = useAppSelector(selectTeacherCommissions)
   const [numClasses, setNumClasses] = useState('');
   const [minAttendance, setMinAttendance] = useState('');
+  const [calendarUrl, setCalendarUrl] = useState('');
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false)
@@ -62,6 +63,7 @@ const CreateSemester = () => {
       setYearMoment('FS');
       setNumClasses('');
       setMinAttendance('');
+      setCalendarUrl('');
       setStartDate(null);
       setStartTime(null);
     }, [])
@@ -95,6 +97,15 @@ const CreateSemester = () => {
         console.log("About to create semester");
         const response = await teacherSemestersRepository.createSemester(chosenCommission, yearMoment, combinedStartDateAndTime, numberClasses, mininumAttendance)
         console.log("Response", response);
+
+        if (calendarUrl.trim()) {
+          try {
+            await teacherSemestersRepository.setCalendarSourceUrl(response.id, calendarUrl.trim());
+            await teacherSemestersRepository.syncCatedraCalendar(response.id);
+          } catch {
+            setAlertDialog({ title: 'Aviso', message: 'El cuatrimestre se creó correctamente, pero no se pudo sincronizar el calendario. Podés intentarlo de nuevo desde "Editar cuatrimestre".' });
+          }
+        }
 
         if (navigation.canGoBack()) {
           navigation.goBack();
@@ -211,6 +222,20 @@ const CreateSemester = () => {
           onChangeText={handleMinAttendanceChange}
           placeholder="Ingrese el porcentaje"
         />
+        <Text style={{ ...styles.label, marginTop: 15 }}>Calendario de cátedra (opcional)</Text>
+        <Text style={styles.subLabel}>
+          Pegá el link de tu Google Sheets publicado. Los alumnos verán el tema de cada clase en su calendario.
+        </Text>
+        <TextInput
+          style={styles.input}
+          value={calendarUrl}
+          onChangeText={setCalendarUrl}
+          placeholder="https://docs.google.com/spreadsheets/d/..."
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+        />
+
         <View
           style={{ marginTop: 15 }}
         >
