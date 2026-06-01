@@ -11,7 +11,7 @@ import {
 import AlertDialog from '../../components/AlertDialog';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import { MaterialIcon, RoundedButton, TeacherSearch } from '../../components';
+import { MaterialIcon, RoundedButton, TeacherSearch, RecipientSelector } from '../../components';
 import { formsRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import FormDetail from '../../models/FormDetail';
@@ -41,7 +41,23 @@ const DocumentFormScreen: React.FC = () => {
   const [fileError, setFileError] = useState<string | null>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<TeacherModelSnakeCase | null>(null);
   const [teacherError, setTeacherError] = useState<string | null>(null);
+  const [recipientEntityType, setRecipientEntityType] = useState<string | null>(null);
+  const [recipientEntityId, setRecipientEntityId] = useState<number | null>(null);
+  const [recipientError, setRecipientError] = useState<string | null>(null);
   const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          style={{ marginLeft: 16, padding: 4 }}
+          onPress={() => navigation.navigate('FormsList')}
+        >
+          <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   useEffect(() => {
     formsRepository
@@ -99,14 +115,24 @@ const DocumentFormScreen: React.FC = () => {
     }
     setTeacherError(null);
 
+    const members = form.ownership_group.members ?? [];
+    if (members.length > 1 && (recipientEntityType === null || recipientEntityId === null)) {
+      setRecipientError('Debés seleccionar un destinatario para enviar este formulario.');
+      return;
+    }
+    setRecipientError(null);
+
+    const recipientType = members.length > 1 ? recipientEntityType : null;
+    const recipientId = members.length > 1 ? recipientEntityId : null;
+
     setSubmitting(true);
     setFileError(null);
     setSubmitStatus(null);
     try {
-      await formsRepository.submitDocumentForm(formId, pickedFile, selectedTeacher?.id);
+      await formsRepository.submitDocumentForm(formId, pickedFile, selectedTeacher?.id, recipientType, recipientId);
       setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
       setTimeout(() => {
-        navigation.goBack();
+        navigation.navigate('FormsList');
       }, 2000);
     } catch {
       setSubmitStatus({
@@ -188,6 +214,23 @@ const DocumentFormScreen: React.FC = () => {
                 if (t) setTeacherError(null);
               }}
               error={teacherError}
+            />
+          </>
+        )}
+
+        {(form.ownership_group.members ?? []).length > 1 && (
+          <>
+            <View style={styles.divider} />
+            <RecipientSelector
+              members={form.ownership_group.members}
+              selectedEntityType={recipientEntityType}
+              selectedEntityId={recipientEntityId}
+              onSelect={(entityType, entityId) => {
+                setRecipientEntityType(entityType);
+                setRecipientEntityId(entityId);
+                setRecipientError(null);
+              }}
+              error={recipientError}
             />
           </>
         )}

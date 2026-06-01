@@ -1,16 +1,13 @@
-export interface OwnershipGroupMembership {
-  groupId: number;
-  groupName: string;
-  isEditor: boolean;
-}
+import { OwnershipGroupMembership } from './Department';
 
-export default interface Department {
+export default interface Secretary {
   id: number;
   name: string;
+  parentSecretary: number | null;
   location: string;
   schedule: string;
   contactInfo: string;
-  procedures: string;
+  subsecretaries: Secretary[];
   ownershipGroups: OwnershipGroupMembership[];
   createdAt: string;
   updatedAt: string;

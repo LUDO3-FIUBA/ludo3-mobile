@@ -24,6 +24,7 @@ export { default as notificationsRepository } from './notifications';
 export type { Notification, UserNotification } from './notifications';
 export { default as academicCalendarRepository } from './academicCalendar';
 export { default as departmentsRepository } from './departments';
+export { default as secretariesRepository } from './secretaries';
 export { default as adminCommissionsRepository } from './adminCommissions';
 export { default as adminFinalsRepository } from './adminFinals';
 export { default as adminUsersRepository } from './adminUsers';
