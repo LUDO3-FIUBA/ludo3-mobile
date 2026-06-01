@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,18 +9,16 @@ import {
   Switch,
   Platform,
 } from 'react-native';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { RoundedButton, MaterialIcon } from '../../components';
+import {useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {RoundedButton, MaterialIcon} from '../../components';
 import AlertDialog from '../../components/AlertDialog';
-import { departmentsRepository } from '../../repositories';
-import { formsRepository } from '../../repositories';
-import { usersRepository } from '../../repositories';
-import Department, { OwnershipGroupMembership } from '../../models/Department';
+import {secretariesRepository, formsRepository, usersRepository} from '../../repositories';
+import Secretary from '../../models/Secretary';
 import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 
-type DepartmentDetailRouteParams = {
-  DepartmentDetail: {
-    departmentId: number;
+type SecretaryDetailRouteParams = {
+  AdminSecretaryDetail: {
+    secretaryId: number;
     isAdmin: boolean;
   };
 };
@@ -31,38 +29,31 @@ interface PendingMembership {
   isEditor: boolean;
 }
 
-const DepartmentDetail: React.FC = () => {
+const SecretaryDetail: React.FC = () => {
   const navigation = useNavigation<any>();
-  const route = useRoute<RouteProp<DepartmentDetailRouteParams, 'DepartmentDetail'>>();
-  const { departmentId, isAdmin } = route.params;
+  const route =
+    useRoute<RouteProp<SecretaryDetailRouteParams, 'AdminSecretaryDetail'>>();
+  const {secretaryId, isAdmin} = route.params;
 
-  const [department, setDepartment] = useState<Department | null>(null);
+  const [secretary, setSecretary] = useState<Secretary | null>(null);
+  const [parentName, setParentName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isTeacher, setIsTeacher] = useState(false);
 
   const [editingGroups, setEditingGroups] = useState(false);
   const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
   const [pending, setPending] = useState<PendingMembership[]>([]);
   const [savingGroups, setSavingGroups] = useState(false);
-  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null); 
-  const [confirmDialog, setConfirmDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<
+    {title: string; message: string; onConfirm: () => void} | null
+  >(null);
 
-  useEffect(() => {
-    Promise.all([
-      departmentsRepository.fetchOne(departmentId),
-      usersRepository.getInfo(),
-    ])
-      .then(([dept, user]) => {
-        setDepartment(dept);
-        setIsSuperAdmin(user.isSuperAdmin?.() ?? false);
-      })
-      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar el departamento.' }))
-      .finally(() => setLoading(false));
-  }, [departmentId]);
+  const listRoute = isAdmin ? 'AdminSecretaryList' : 'StudentSecretaryList';
 
   useEffect(() => {
     if (Platform.OS === 'web') {
-      const listRoute = isAdmin ? 'AdminDepartmentList' : 'StudentDepartmentList';
       navigation.setOptions({
         headerLeft: () => (
           <TouchableOpacity
@@ -74,18 +65,41 @@ const DepartmentDetail: React.FC = () => {
         ),
       });
     }
-  }, [navigation, isAdmin]);
+  }, [navigation, listRoute]);
+
+  useEffect(() => {
+    Promise.all([
+      secretariesRepository.fetchOne(secretaryId),
+      usersRepository.getInfo(),
+    ])
+      .then(([sec, user]) => {
+        setSecretary(sec);
+        setIsSuperAdmin(user.isSuperAdmin?.() ?? false);
+        setIsTeacher(user.isTeacher() && !user.isAdmin());
+      })
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar la secretaría.' }))
+      .finally(() => setLoading(false));
+  }, [secretaryId]);
+
+  useEffect(() => {
+    if (secretary?.parentSecretary != null) {
+      secretariesRepository
+        .fetchOne(secretary.parentSecretary)
+        .then(parent => setParentName(parent.name))
+        .catch(() => {});
+    }
+  }, [secretary?.parentSecretary]);
 
   const handleDelete = () => {
     setConfirmDialog({
-      title: 'Eliminar departamento',
-      message: `¿Estás seguro de que querés eliminar "${department?.name}"?`,
+      title: 'Eliminar secretaría',
+      message: `¿Estás seguro de que querés eliminar "${secretary?.name}"?`,
       onConfirm: async () => {
         try {
-          await departmentsRepository.deleteDepartment(departmentId);
-          navigation.goBack();
+          await secretariesRepository.deleteSecretary(secretaryId);
+          navigation.navigate(listRoute);
         } catch (error) {
-          setAlertDialog({ title: 'Error', message: 'No se pudo eliminar el departamento.' });
+          setAlertDialog({ title: 'Error', message: 'No se pudo eliminar la secretaría.' });
         }
       },
     });
@@ -95,7 +109,7 @@ const DepartmentDetail: React.FC = () => {
     try {
       const groups = await formsRepository.fetchOwnershipGroups();
       setAllGroups(groups);
-      const current: PendingMembership[] = (department?.ownershipGroups ?? []).map(m => ({
+      const current: PendingMembership[] = (secretary?.ownershipGroups ?? []).map(m => ({
         groupId: m.groupId,
         groupName: m.groupName,
         isEditor: m.isEditor,
@@ -113,24 +127,24 @@ const DepartmentDetail: React.FC = () => {
       if (exists) {
         return prev.filter(p => p.groupId !== group.id);
       }
-      return [...prev, { groupId: group.id, groupName: group.name, isEditor: false }];
+      return [...prev, {groupId: group.id, groupName: group.name, isEditor: false}];
     });
   };
 
   const toggleEditor = (groupId: number) => {
     setPending(prev =>
-      prev.map(p => (p.groupId === groupId ? { ...p, isEditor: !p.isEditor } : p)),
+      prev.map(p => (p.groupId === groupId ? {...p, isEditor: !p.isEditor} : p)),
     );
   };
 
   const saveGroupMemberships = async () => {
     setSavingGroups(true);
     try {
-      const updated = await departmentsRepository.updateMemberships(
-        departmentId,
-        pending.map(p => ({ groupId: p.groupId, isEditor: p.isEditor })),
+      const updated = await secretariesRepository.updateMemberships(
+        secretaryId,
+        pending.map(p => ({groupId: p.groupId, isEditor: p.isEditor})),
       );
-      setDepartment(updated);
+      setSecretary(updated);
       setEditingGroups(false);
     } catch (err: any) {
       const msg = err?.response?.data?.detail ?? 'No se pudieron guardar los grupos.';
@@ -148,36 +162,74 @@ const DepartmentDetail: React.FC = () => {
     );
   }
 
-  if (!department) {
+  if (!secretary) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>Departamento no encontrado.</Text>
+        <Text style={styles.errorText}>Secretaría no encontrada.</Text>
+        <AlertDialog
+          visible={alertDialog !== null}
+          title={alertDialog?.title ?? ''}
+          message={alertDialog?.message ?? ''}
+          mode="info"
+          confirmLabel="Aceptar"
+          onConfirm={() => setAlertDialog(null)}
+        />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.name}>{department.name}</Text>
+    <View style={{flex: 1}}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.name}>{secretary.name}</Text>
 
-        {department.location ? (
-          <Section title="Ubicación">
-            <Text style={styles.bodyText}>{department.location}</Text>
-          </Section>
-        ) : null}
+      {secretary.parentSecretary != null && (
+        <Section title="Subsecretaría de">
+          <Text style={styles.bodyText}>{parentName ?? '...'}</Text>
+        </Section>
+      )}
 
-        {department.schedule ? (
-          <Section title="Horario de atención">
-            <Text style={styles.bodyText}>{department.schedule}</Text>
-          </Section>
-        ) : null}
+      {secretary.location ? (
+        <Section title="Ubicación">
+          <Text style={styles.bodyText}>{secretary.location}</Text>
+        </Section>
+      ) : null}
 
-        {department.contactInfo ? (
-          <Section title="Información de contacto">
-            <Text style={styles.bodyText}>{department.contactInfo}</Text>
-          </Section>
-        ) : null}
+      {secretary.schedule ? (
+        <Section title="Horario de atención">
+          <Text style={styles.bodyText}>{secretary.schedule}</Text>
+        </Section>
+      ) : null}
+
+      {secretary.contactInfo ? (
+        <Section title="Información de contacto">
+          <Text style={styles.bodyText}>{secretary.contactInfo}</Text>
+        </Section>
+      ) : null}
+
+      {secretary.subsecretaries && secretary.subsecretaries.length > 0 ? (
+        <Section title="Subsecretarías">
+          {secretary.subsecretaries.map(sub => (
+            <TouchableOpacity
+              key={sub.id}
+              style={styles.subItem}
+              onPress={() =>
+                navigation.navigate('AdminSecretaryDetail', {
+                  secretaryId: sub.id,
+                  isAdmin,
+                })
+              }>
+              <View style={styles.subItemContent}>
+                <Text style={styles.subItemName}>{sub.name}</Text>
+                {sub.location ? (
+                  <Text style={styles.subItemLocation}>{sub.location}</Text>
+                ) : null}
+              </View>
+              <Text style={styles.subItemArrow}>›</Text>
+            </TouchableOpacity>
+          ))}
+        </Section>
+      ) : null}
 
       {/* Ownership groups section */}
       <View style={styles.section}>
@@ -191,20 +243,31 @@ const DepartmentDetail: React.FC = () => {
         </View>
 
         {!editingGroups ? (
-          department.ownershipGroups && department.ownershipGroups.length > 0 ? (
-            department.ownershipGroups.map(g => (
-              <TouchableOpacity
-                key={g.groupId}
-                style={styles.groupItem}
-                onPress={() => navigation.navigate('FormsManager')}
-              >
-                <View style={styles.groupItemContent}>
-                  <Text style={styles.groupItemName}>{g.groupName}</Text>
-                  <Text style={styles.groupItemRole}>{g.isEditor ? 'Editor' : 'Lector'}</Text>
-                </View>
-                <Text style={styles.groupItemArrow}>›</Text>
-              </TouchableOpacity>
-            ))
+          secretary.ownershipGroups && secretary.ownershipGroups.length > 0 ? (
+            <>
+              {secretary.ownershipGroups.map(g => {
+                const onPress = isAdmin
+                  ? () => navigation.navigate('FormsManager')
+                  : isTeacher
+                  ? undefined
+                  : () => navigation.navigate('FormsList');
+                const Wrapper = onPress ? TouchableOpacity : View;
+                return (
+                  <Wrapper
+                    key={g.groupId}
+                    style={styles.groupItem}
+                    onPress={onPress}>
+                    <View style={styles.groupItemContent}>
+                      <Text style={styles.groupItemName}>{g.groupName}</Text>
+                      <Text style={styles.groupItemRole}>
+                        {g.isEditor ? 'Editor' : 'Lector'}
+                      </Text>
+                    </View>
+                    {onPress ? <Text style={styles.groupItemArrow}>›</Text> : null}
+                  </Wrapper>
+                );
+              })}
+            </>
           ) : (
             <Text style={styles.emptyText}>Sin grupos asignados</Text>
           )
@@ -217,10 +280,11 @@ const DepartmentDetail: React.FC = () => {
                 <View key={g.id} style={styles.groupEditRow}>
                   <TouchableOpacity
                     style={styles.groupEditCheckbox}
-                    onPress={() => toggleGroup(g)}
-                  >
+                    onPress={() => toggleGroup(g)}>
                     <MaterialIcon
-                      name={isSelected ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                      name={
+                        isSelected ? 'checkbox-marked' : 'checkbox-blank-outline'
+                      }
                       fontSize={22}
                       color={isSelected ? '#1a56db' : '#aaa'}
                     />
@@ -232,7 +296,7 @@ const DepartmentDetail: React.FC = () => {
                       <Switch
                         value={membership.isEditor}
                         onValueChange={() => toggleEditor(g.id)}
-                        trackColor={{ true: '#1a56db' }}
+                        trackColor={{true: '#1a56db'}}
                       />
                     </View>
                   )}
@@ -248,8 +312,7 @@ const DepartmentDetail: React.FC = () => {
               />
               <TouchableOpacity
                 onPress={() => setEditingGroups(false)}
-                style={styles.cancelButton}
-              >
+                style={styles.cancelButton}>
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
@@ -257,21 +320,21 @@ const DepartmentDetail: React.FC = () => {
         )}
       </View>
 
-        {isAdmin && (
-          <View style={styles.adminActions}>
-            <RoundedButton
-              text="Editar"
-              onPress={() =>
-                navigation.navigate('AdminDepartmentEdit', { department })
-              }
-              style={{}}
-            />
-            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-              <Text style={styles.deleteButtonText}>Eliminar</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </ScrollView>
+      {isAdmin && (
+        <View style={styles.adminActions}>
+          <RoundedButton
+            text="Editar"
+            onPress={() =>
+              navigation.navigate('AdminSecretaryEdit', {secretary})
+            }
+            style={{}}
+          />
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Eliminar</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </ScrollView>
       <AlertDialog
         visible={alertDialog !== null}
         title={alertDialog?.title ?? ''}
@@ -285,6 +348,7 @@ const DepartmentDetail: React.FC = () => {
         title={confirmDialog?.title ?? ''}
         message={confirmDialog?.message ?? ''}
         mode="confirm"
+        destructive
         confirmLabel="Eliminar"
         cancelLabel="Cancelar"
         onConfirm={() => { confirmDialog?.onConfirm(); setConfirmDialog(null); }}
@@ -294,7 +358,10 @@ const DepartmentDetail: React.FC = () => {
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+const Section: React.FC<{title: string; children: React.ReactNode}> = ({
+  title,
+  children,
+}) => (
   <View style={styles.section}>
     <Text style={styles.sectionTitle}>{title}</Text>
     {children}
@@ -348,6 +415,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#222',
     lineHeight: 22,
+  },
+  subItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  subItemContent: {
+    flex: 1,
+  },
+  subItemName: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#111',
+  },
+  subItemLocation: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 2,
+  },
+  subItemArrow: {
+    fontSize: 20,
+    color: '#aaa',
+    marginLeft: 8,
   },
   editGroupsButton: {
     paddingHorizontal: 10,
@@ -432,6 +524,12 @@ const styles = StyleSheet.create({
   adminActions: {
     marginTop: 8,
   },
+  addSubButton: {
+    marginTop: 8,
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
   deleteButton: {
     alignItems: 'center',
     padding: 12,
@@ -447,4 +545,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DepartmentDetail;
+export default SecretaryDetail;

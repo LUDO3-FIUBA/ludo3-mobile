@@ -1,18 +1,30 @@
-import { test, expect } from '@playwright/test';
+import {test, expect} from '@playwright/test';
 import * as net from 'net';
-import { loginAndWait, goToFiubaMap as navToFiubaMap } from './helpers';
-const SIU_HOST = '172.25.90.12';
-const SIU_PORT = 8080;
+import {loginAndWait, goToFiubaMap as navToFiubaMap, BACKEND, DNI, PASS} from './helpers';
+import {SIU_HOST, SIU_PORT} from './test-config';
 
 function isSiuReachable(): Promise<boolean> {
   return new Promise(resolve => {
     const socket = new net.Socket();
     socket.setTimeout(3000);
-    socket.on('connect', () => { socket.destroy(); resolve(true); });
-    socket.on('timeout', () => { socket.destroy(); resolve(false); });
+    socket.on('connect', () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve(false);
+    });
     socket.on('error', () => resolve(false));
     socket.connect(SIU_PORT, SIU_HOST);
   });
+}
+
+async function openFiubaMapEntry(page) {
+  // FIUBA Map lives under Académico → Plan de Carrera (route /app/plan-de-carrera).
+  await page.getByLabel('Académico').click();
+  await page.waitForTimeout(300);
+  await page.getByLabel(/Plan de [Cc]arrera/).click();
 }
 
 async function goToFiubaMap(page) {
@@ -23,90 +35,141 @@ async function goToFiubaMap(page) {
 let siuReachable = false;
 
 test.describe('FIUBA Map — integration with Ludo', () => {
-  test.beforeAll(async () => { siuReachable = await isSiuReachable(); });
-  test.beforeEach(() => { test.skip(!siuReachable, 'SIU unavailable — connect to FIUBA VPN'); });
+  test.beforeAll(async ({ request }) => {
+    const tcpOk = await isSiuReachable();
+    if (!tcpOk) return;
+    try {
+      const loginResp = await request.post(`${BACKEND}/auth/login/`, {
+        data: { dni: DNI, password: PASS },
+      });
+      const token = (await loginResp.json()).access ?? '';
+      if (!token) return;
+      // Verify the SIU service itself is responding — TCP reachable but 503 means service is down
+      const healthResp = await request.get(`${BACKEND}/api/guarani/plan-carrera/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      siuReachable = healthResp.status() === 200;
+    } catch {
+      siuReachable = false;
+    }
+  });
+  test.beforeEach(() => {
+    test.skip(!siuReachable, 'SIU Guaraní unavailable (VPN required or service down)');
+  });
 
   // ── Carga del bundle local ─────────────────────────────────────────────────
 
-  test('iframe loads local bundle (not fede.dm)', async ({ page }) => {
+  test('iframe loads local bundle (not fede.dm)', async ({page}) => {
     await loginAndWait(page);
     await page.getByLabel('Académico').click();
     await page.waitForTimeout(300);
     await page.getByLabel('Plan de Carrera').click();
-    await expect(page.locator('iframe[src="/fiuba-map/index.html"]')).toBeVisible({ timeout: 8000 });
+    await expect(
+      page.locator('iframe[src="/fiuba-map/index.html"]'),
+    ).toBeVisible({timeout: 8000});
   });
 
   // ── Padron input oculto ────────────────────────────────────────────────────
 
-  test('padron input is NOT visible — Ludo manages auth', async ({ page }) => {
+  test('padron input is NOT visible — Ludo manages auth', async ({page}) => {
     const iframe = await goToFiubaMap(page);
-    await expect(iframe.getByPlaceholder(/padr/i)).not.toBeVisible({ timeout: 3000 });
+    await expect(iframe.getByPlaceholder(/padr/i)).not.toBeVisible({
+      timeout: 3000,
+    });
   });
 
   // ── Carrera correcta cargada ───────────────────────────────────────────────
 
-  test('Informática career loads (not default plan)', async ({ page }) => {
+  test('Informática career loads (not default plan)', async ({page}) => {
     const iframe = await goToFiubaMap(page);
-    await expect(iframe.getByText(/Informática|Informatica/i).first()).toBeVisible({ timeout: 8000 });
+    await expect(
+      iframe.getByText(/Informática|Informatica/i).first(),
+    ).toBeVisible({timeout: 8000});
   });
 
-  test('career dropdown is visible so user can switch', async ({ page }) => {
+  test('career dropdown is visible so user can switch', async ({page}) => {
     const iframe = await goToFiubaMap(page);
-    await expect(iframe.getByText(/Informática|Sistemas|Civil/i).first()).toBeVisible({ timeout: 8000 });
+    await expect(
+      iframe.getByText(/Informática|Sistemas|Civil/i).first(),
+    ).toBeVisible({timeout: 8000});
   });
 
   // ── Materias aprobadas ─────────────────────────────────────────────────────
 
-  test('approved subjects are marked — nodes have aprobada=true in network', async ({ page }) => {
+  test('approved subjects are marked — nodes have aprobada=true in network', async ({
+    page,
+  }) => {
     const iframe = await goToFiubaMap(page);
     // Check via window.__ludoNetwork that nodes were approved by injection
-    const approvedCount = await page.frames().find(f => f.url().includes('fiuba-map'))?.evaluate(() => {
-      const net = (window as any).__ludoNetwork;
-      if (!net) return 0;
-      return net.body.data.nodes.get({ filter: (n: any) => n.group === 'Aprobadas' }).length;
-    }) ?? 0;
+    const approvedCount =
+      (await page
+        .frames()
+        .find(f => f.url().includes('fiuba-map'))
+        ?.evaluate(() => {
+          const net = (window as any).__ludoNetwork;
+          if (!net) return 0;
+          return net.body.data.nodes.get({
+            filter: (n: any) => n.group === 'Aprobadas',
+          }).length;
+        })) ?? 0;
     expect(approvedCount).toBeGreaterThan(0);
   });
 
-  test('at least 5 subjects approved matching test user DB data', async ({ page }) => {
+  test('at least 5 subjects approved matching test user DB data', async ({
+    page,
+  }) => {
     const iframe = await goToFiubaMap(page);
-    const approvedCount = await page.frames().find(f => f.url().includes('fiuba-map'))?.evaluate(() => {
-      const net = (window as any).__ludoNetwork;
-      if (!net) return 0;
-      return net.body.data.nodes.get({ filter: (n: any) => n.group === 'Aprobadas' }).length;
-    }) ?? 0;
+    const approvedCount =
+      (await page
+        .frames()
+        .find(f => f.url().includes('fiuba-map'))
+        ?.evaluate(() => {
+          const net = (window as any).__ludoNetwork;
+          if (!net) return 0;
+          return net.body.data.nodes.get({
+            filter: (n: any) => n.group === 'Aprobadas',
+          }).length;
+        })) ?? 0;
     expect(approvedCount).toBeGreaterThanOrEqual(5);
   });
 
   // ── Notas ──────────────────────────────────────────────────────────────────
 
-  test('grades are set correctly on approved nodes (4-10)', async ({ page }) => {
+  test('grades are set correctly on approved nodes (4-10)', async ({page}) => {
     await goToFiubaMap(page);
-    const approvedWithGrades = await page.frames().find(f => f.url().includes('fiuba-map'))?.evaluate(() => {
-      const net = (window as any).__ludoNetwork;
-      if (!net) return 0;
-      return net.body.data.nodes.get({ filter: (n: any) => n.nota >= 4 && n.nota <= 10 }).length;
-    }) ?? 0;
+    const approvedWithGrades =
+      (await page
+        .frames()
+        .find(f => f.url().includes('fiuba-map'))
+        ?.evaluate(() => {
+          const net = (window as any).__ludoNetwork;
+          if (!net) return 0;
+          return net.body.data.nodes.get({
+            filter: (n: any) => n.nota >= 4 && n.nota <= 10,
+          }).length;
+        })) ?? 0;
     expect(approvedWithGrades).toBeGreaterThan(0);
   });
 
-  test('clicking an approved node shows grade badge in panel', async ({ page }) => {
+  test('clicking an approved node shows grade badge in panel', async ({
+    page,
+  }) => {
     const iframe = await goToFiubaMap(page);
     const canvas = iframe.locator('canvas').first();
     const box = await canvas.boundingBox();
     if (!box) return;
     // Click center-left area where approved nodes should be after zoom
-    await canvas.click({ position: { x: box.width * 0.25, y: box.height * 0.5 } });
+    await canvas.click({position: {x: box.width * 0.25, y: box.height * 0.5}});
     await page.waitForTimeout(800);
     // If a node is selected, MateriaStatus shows a grade badge
     await expect(iframe.locator('text=/Nota: [0-9]/').first())
-      .toBeVisible({ timeout: 3000 })
+      .toBeVisible({timeout: 3000})
       .catch(() => {}); // node click may miss — not a hard failure
   });
 
   // ── Zoom ───────────────────────────────────────────────────────────────────
 
-  test('zoom controls are visible inside iframe', async ({ page }) => {
+  test('zoom controls are visible inside iframe', async ({page}) => {
     const iframe = await goToFiubaMap(page);
     // ZoomControls renders TouchableOpacity buttons — in web they are role=button
     const buttons = iframe.getByRole('button');
@@ -114,10 +177,10 @@ test.describe('FIUBA Map — integration with Ludo', () => {
     expect(count).toBeGreaterThan(0); // at least zoom buttons exist
   });
 
-  test('zoom in changes the map canvas', async ({ page }) => {
+  test('zoom in changes the map canvas', async ({page}) => {
     const iframe = await goToFiubaMap(page);
     const canvas = iframe.locator('canvas').first();
-    await expect(canvas).toBeVisible({ timeout: 8000 });
+    await expect(canvas).toBeVisible({timeout: 8000});
     // The canvas exists and the graph is rendered — zoom interaction confirmed by canvas presence
     const box = await canvas.boundingBox();
     expect(box).toBeTruthy();
@@ -126,7 +189,7 @@ test.describe('FIUBA Map — integration with Ludo', () => {
 
   // ── Search dentro del iframe ───────────────────────────────────────────────
 
-  test('padron input field does not exist in DOM at all', async ({ page }) => {
+  test('padron input field does not exist in DOM at all', async ({page}) => {
     const iframe = await goToFiubaMap(page);
     // isLudoMode=true removes PadronInput from render — element should not exist
     const count = await iframe.locator('input[placeholder*="adr"]').count();

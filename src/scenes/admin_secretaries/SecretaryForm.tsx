@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,18 +10,12 @@ import {
   TouchableOpacity,
   Switch,
 } from 'react-native';
-import { useFocusEffect, useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { RoundedButton, MaterialIcon } from '../../components';
-import { departmentsRepository, formsRepository, usersRepository } from '../../repositories';
+import {useFocusEffect, useNavigation, useRoute, RouteProp} from '@react-navigation/native';
+import {RoundedButton, MaterialIcon} from '../../components';
 import AlertDialog from '../../components/AlertDialog';
-import Department from '../../models/Department';
+import {secretariesRepository, formsRepository, usersRepository} from '../../repositories';
+import Secretary from '../../models/Secretary';
 import FormOwnershipGroup from '../../models/FormOwnershipGroup';
-
-type DepartmentFormRouteParams = {
-  DepartmentForm: {
-    department?: Department;
-  };
-};
 
 interface PendingMembership {
   groupId: number;
@@ -29,30 +23,60 @@ interface PendingMembership {
   isEditor: boolean;
 }
 
-const DepartmentForm: React.FC = () => {
+type SecretaryFormRouteParams = {
+  SecretaryForm: {
+    secretary?: Secretary;
+    parentId?: number;
+  };
+};
+
+const SecretaryForm: React.FC = () => {
   const navigation = useNavigation<any>();
-  const route = useRoute<RouteProp<DepartmentFormRouteParams, 'DepartmentForm'>>();
-  const existing = route.params?.department;
+  const route =
+    useRoute<RouteProp<SecretaryFormRouteParams, 'SecretaryForm'>>();
+  const existing = route.params?.secretary;
+  const paramParentId = route.params?.parentId ?? null;
 
   const [name, setName] = useState(existing?.name ?? '');
   const [location, setLocation] = useState(existing?.location ?? '');
   const [schedule, setSchedule] = useState(existing?.schedule ?? '');
   const [contactInfo, setContactInfo] = useState(existing?.contactInfo ?? '');
+  const [parentSecretary, setParentSecretary] = useState<number | null>(
+    existing?.parentSecretary ?? paramParentId,
+  );
+  const [topLevelOptions, setTopLevelOptions] = useState<Secretary[]>([]);
+  const [showParentPicker, setShowParentPicker] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [alertDialog, setAlertDialog] = useState<{title: string; message: string; onConfirm?: () => void} | null>(null);
 
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<PendingMembership[]>([]);
   const [showGroupPicker, setShowGroupPicker] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<
+    {title: string; message: string; onConfirm?: () => void} | null
+  >(null);
 
   useFocusEffect(
     useCallback(() => {
-      const currentExisting = route.params?.department;
+      const currentExisting = route.params?.secretary;
+      const currentParentId = route.params?.parentId ?? null;
       setName(currentExisting?.name ?? '');
       setLocation(currentExisting?.location ?? '');
       setSchedule(currentExisting?.schedule ?? '');
       setContactInfo(currentExisting?.contactInfo ?? '');
+      setParentSecretary(currentExisting?.parentSecretary ?? currentParentId);
+      setShowParentPicker(false);
+
+      secretariesRepository
+        .fetchAll()
+        .then(data =>
+          setTopLevelOptions(
+            data.filter(
+              s => s.parentSecretary === null && s.id !== currentExisting?.id,
+            ),
+          ),
+        )
+        .catch(() => {});
 
       Promise.all([
         usersRepository.getInfo(),
@@ -75,12 +99,15 @@ const DepartmentForm: React.FC = () => {
   );
 
   useEffect(() => {
-    const title = existing ? 'Editar Departamento' : 'Nuevo Departamento';
+    const title = existing
+      ? existing.parentSecretary != null ? 'Editar Subsecretaría' : 'Editar Secretaría'
+      : paramParentId != null ? 'Nueva Subsecretaría' : 'Nueva Secretaría';
+
     const options: Record<string, any> = { title };
     if (Platform.OS === 'web') {
       options.headerLeft = () => (
         <TouchableOpacity
-          onPress={() => navigation.navigate('AdminDepartmentList')}
+          onPress={() => navigation.navigate('AdminSecretaryList')}
           style={styles.backButton}
         >
           <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
@@ -88,72 +115,152 @@ const DepartmentForm: React.FC = () => {
       );
     }
     navigation.setOptions(options);
-  }, [navigation, existing]);
+  }, [navigation, existing, paramParentId]);
 
   const toggleGroup = (group: FormOwnershipGroup) => {
     setSelectedGroups(prev => {
       const exists = prev.find(p => p.groupId === group.id);
       if (exists) return prev.filter(p => p.groupId !== group.id);
-      return [...prev, { groupId: group.id, groupName: group.name, isEditor: false }];
+      return [...prev, {groupId: group.id, groupName: group.name, isEditor: false}];
     });
   };
 
   const toggleEditor = (groupId: number) => {
     setSelectedGroups(prev =>
-      prev.map(p => (p.groupId === groupId ? { ...p, isEditor: !p.isEditor } : p)),
+      prev.map(p => (p.groupId === groupId ? {...p, isEditor: !p.isEditor} : p)),
     );
   };
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      setAlertDialog({ title: 'Error', message: 'El nombre del departamento es obligatorio.' });
+      setAlertDialog({ title: 'Error', message: 'El nombre de la secretaría es obligatorio.' });
       return;
     }
 
     setSaving(true);
     try {
-      const data = { name: name.trim(), location, schedule, contactInfo };
+      const data: Partial<Secretary> = {
+        name: name.trim(),
+        location,
+        schedule,
+        contactInfo,
+        parentSecretary,
+      };
       if (existing) {
-        await departmentsRepository.updateDepartment(existing.id, data);
+        await secretariesRepository.updateSecretary(existing.id, data);
         if (isSuperAdmin) {
-          await departmentsRepository.updateMemberships(
+          await secretariesRepository.updateMemberships(
             existing.id,
-            selectedGroups.map(g => ({ groupId: g.groupId, isEditor: g.isEditor })),
+            selectedGroups.map(g => ({groupId: g.groupId, isEditor: g.isEditor})),
           );
         }
-        setAlertDialog({ title: 'Éxito', message: 'Departamento actualizado correctamente.' });
-        navigation.goBack();
+        setAlertDialog({
+          title: 'Éxito',
+          message: 'Secretaría actualizada correctamente.',
+          onConfirm: () => { setAlertDialog(null); navigation.navigate('AdminSecretaryList'); },
+        });
       } else {
-        const created = await departmentsRepository.createDepartment(data);
+        const created = await secretariesRepository.createSecretary(data);
         if (isSuperAdmin && selectedGroups.length > 0) {
-          await departmentsRepository.updateMemberships(
+          await secretariesRepository.updateMemberships(
             created.id,
-            selectedGroups.map(g => ({ groupId: g.groupId, isEditor: g.isEditor })),
+            selectedGroups.map(g => ({groupId: g.groupId, isEditor: g.isEditor})),
           );
         }
-        setAlertDialog({ title: 'Éxito', message: 'Departamento creado correctamente.'});
-        navigation.navigate('AdminDepartmentList');
+        setAlertDialog({
+          title: 'Éxito',
+          message: 'Secretaría creada correctamente.',
+          onConfirm: () => { setAlertDialog(null); navigation.navigate('AdminSecretaryList'); },
+        });
       }
     } catch (error: any) {
-      const msg = error?.response?.data?.detail ?? 'No se pudo guardar el departamento. Intente de nuevo.';
+      const msg =
+        error?.response?.data?.detail ??
+        'No se pudo guardar la secretaría. Intente de nuevo.';
       setAlertDialog({ title: 'Error', message: msg });
     } finally {
       setSaving(false);
     }
   };
 
+  const selectedParentName =
+    parentSecretary != null
+      ? (topLevelOptions.find(s => s.id === parentSecretary)?.name ?? '...')
+      : 'Secretaría principal (sin dependencia)';
+
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      style={{flex: 1}}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}>
         <Field
           label="Nombre *"
           value={name}
           onChangeText={setName}
-          placeholder="Ej: Departamento de Computación"
+          placeholder="Ej: Secretaría Académica"
         />
+
+        <View style={styles.fieldContainer}>
+          <Text style={styles.label}>Secretaría a la que depende</Text>
+          <TouchableOpacity
+            style={styles.pickerButton}
+            onPress={() => setShowParentPicker(prev => !prev)}
+            activeOpacity={0.7}>
+            <Text style={styles.pickerText} numberOfLines={1}>
+              {selectedParentName}
+            </Text>
+            <MaterialIcon
+              name={showParentPicker ? 'chevron-up' : 'chevron-down'}
+              fontSize={18}
+              color="#555"
+            />
+          </TouchableOpacity>
+          {showParentPicker && (
+            <View style={styles.pickerDropdown}>
+              <TouchableOpacity
+                style={[
+                  styles.pickerOption,
+                  parentSecretary === null && styles.pickerOptionSelected,
+                ]}
+                onPress={() => {
+                  setParentSecretary(null);
+                  setShowParentPicker(false);
+                }}>
+                <Text
+                  style={[
+                    styles.pickerOptionText,
+                    parentSecretary === null && styles.pickerOptionTextSelected,
+                  ]}>
+                  Secretaría principal (sin dependencia)
+                </Text>
+              </TouchableOpacity>
+              {topLevelOptions.map(s => (
+                <TouchableOpacity
+                  key={s.id}
+                  style={[
+                    styles.pickerOption,
+                    parentSecretary === s.id && styles.pickerOptionSelected,
+                  ]}
+                  onPress={() => {
+                    setParentSecretary(s.id);
+                    setShowParentPicker(false);
+                  }}>
+                  <Text
+                    style={[
+                      styles.pickerOptionText,
+                      parentSecretary === s.id &&
+                        styles.pickerOptionTextSelected,
+                    ]}>
+                    {s.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
         <Field
           label="Ubicación"
           value={location}
@@ -172,7 +279,7 @@ const DepartmentForm: React.FC = () => {
           label="Información de contacto"
           value={contactInfo}
           onChangeText={setContactInfo}
-          placeholder="Ej: departamento@fi.uba.ar | (011) 5285-0000"
+          placeholder="Ej: secretaria@fi.uba.ar | (011) 5285-0000"
           multiline
           numberOfLines={3}
         />
@@ -182,8 +289,7 @@ const DepartmentForm: React.FC = () => {
             <TouchableOpacity
               style={styles.groupPickerHeader}
               onPress={() => setShowGroupPicker(prev => !prev)}
-              activeOpacity={0.7}
-            >
+              activeOpacity={0.7}>
               <Text style={styles.label}>Grupos de propiedad</Text>
               <MaterialIcon
                 name={showGroupPicker ? 'chevron-up' : 'chevron-down'}
@@ -210,10 +316,13 @@ const DepartmentForm: React.FC = () => {
                       <View key={g.id} style={styles.groupEditRow}>
                         <TouchableOpacity
                           style={styles.groupEditCheckbox}
-                          onPress={() => toggleGroup(g)}
-                        >
+                          onPress={() => toggleGroup(g)}>
                           <MaterialIcon
-                            name={isSelected ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                            name={
+                              isSelected
+                                ? 'checkbox-marked'
+                                : 'checkbox-blank-outline'
+                            }
                             fontSize={22}
                             color={isSelected ? '#1a56db' : '#aaa'}
                           />
@@ -225,7 +334,7 @@ const DepartmentForm: React.FC = () => {
                             <Switch
                               value={membership.isEditor}
                               onValueChange={() => toggleEditor(g.id)}
-                              trackColor={{ true: '#1a56db' }}
+                              trackColor={{true: '#1a56db'}}
                             />
                           </View>
                         )}
@@ -239,7 +348,9 @@ const DepartmentForm: React.FC = () => {
         )}
 
         <RoundedButton
-          text={saving ? 'Guardando...' : existing ? 'Guardar cambios' : 'Crear departamento'}
+          text={
+            saving ? 'Guardando...' : existing ? 'Guardar cambios' : 'Crear'
+          }
           enabled={!saving}
           onPress={handleSubmit}
           style={{}}
@@ -320,6 +431,46 @@ const styles = StyleSheet.create({
     minHeight: 80,
     paddingTop: 10,
   },
+  pickerButton: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  pickerText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#111',
+  },
+  pickerDropdown: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginTop: 4,
+    overflow: 'hidden',
+  },
+  pickerOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#eee',
+  },
+  pickerOptionSelected: {
+    backgroundColor: '#f0f7ff',
+  },
+  pickerOptionText: {
+    fontSize: 15,
+    color: '#333',
+  },
+  pickerOptionTextSelected: {
+    color: '#1a56db',
+    fontWeight: '600',
+  },
   backButton: {
     marginLeft: 16,
     padding: 4,
@@ -379,4 +530,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DepartmentForm;
+export default SecretaryForm;

@@ -27,6 +27,7 @@ export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
 export { default as ViewFinalDetailsScreen } from './view_final_details';
 export { default as ViewClassDetailsScreen } from './view_class_details';
+export { default as ViewCatedraDetailsScreen } from './view_catedra_details';
 export { default as AddEvaluationSubmissionScreen } from './view_evaluation_details/AddEvaluationSubmission';
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
@@ -74,6 +75,7 @@ export { default as TeacherFormsScreen } from './teacher_forms/TeacherFormsScree
 // Forms — Admin screens
 export { default as FormsManagerScreen } from './admin_forms/FormsManagerScreen';
 export { default as FormDesignerScreen } from './admin_forms/FormDesignerScreen';
+export { default as OwnershipGroupEditorScreen } from './admin_forms/OwnershipGroupEditor';
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
 export { default as StudentIdentityViewerScreen } from './student_identity_viewer';
@@ -85,3 +87,8 @@ export { default as AdminProceduresManagerScreen } from './admin_procedures';
 export { default as MyAccountScreen } from './my_account';
 export { default as UsefulLinksScreen } from './useful_links';
 export { default as FiubaMapScreen } from './fiuba_map';
+
+// Admin Secretaries screens
+export { default as SecretaryListScreen } from './admin_secretaries/SecretaryList';
+export { default as SecretaryDetailScreen } from './admin_secretaries/SecretaryDetail';
+export { default as SecretaryFormScreen } from './admin_secretaries/SecretaryForm';

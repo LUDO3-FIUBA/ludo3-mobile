@@ -92,6 +92,7 @@ export function getInfo(): Promise<User> {
         json.linkedin_url ?? '',
         json.is_bedelia === true,
         json.profile_photo ?? null,
+        json.secretary_id ?? null,
       ),
     ),
   );

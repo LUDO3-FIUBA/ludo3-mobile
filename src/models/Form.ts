@@ -1,4 +1,4 @@
-import FormProcedureType from './FormProcedureType';
+import FormOwnershipGroup from './FormOwnershipGroup';
 
 export interface FormTypeSummary {
   id: number;
@@ -10,7 +10,7 @@ export default interface Form {
   form_name: string;
   form_description: string;
   form_information?: string | null;
-  form_procedure: FormProcedureType;
+  ownership_group: FormOwnershipGroup;
   form_type: FormTypeSummary;
   requires_teacher_validation: boolean;
   created_at: string;

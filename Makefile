@@ -1,5 +1,9 @@
 .PHONY: up-android up-ios prebuild start
 
+test:
+	cd e2e/tests && npm run test
+.PHONY: test
+
 up-android:
 	npx expo run:android
 

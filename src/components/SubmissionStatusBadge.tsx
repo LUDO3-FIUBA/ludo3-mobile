@@ -17,6 +17,7 @@ const SubmissionStatusBadge: React.FC<Props> = ({ value }) => {
   const meta = STATUS_META[value] ?? { label: value, color: '#555', bg: '#eee' };
   return (
     <View style={[styles.badge, { backgroundColor: meta.bg, borderColor: meta.color }]}>
+      <Text style={styles.chipComment}> Estado: </Text>
       <Text style={[styles.text, { color: meta.color }]}>{meta.label}</Text>
     </View>
   );
@@ -28,9 +29,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
-    borderWidth: 1,
+    flexDirection: 'row'
   },
   text: { fontSize: 11, fontWeight: '700' },
+  chipComment: { fontSize: 12, color: '#64748b' },
 });
 
 export default SubmissionStatusBadge;

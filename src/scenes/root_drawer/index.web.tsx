@@ -49,8 +49,12 @@ import NotificationForm from '../admin_notifications/NotificationForm';
 import NotificationsScreen from '../notifications';
 import StudentCredentialScreen from '../student_credential';
 import FormsListScreen from '../forms/FormsListScreen';
+import DigitalFormScreen from '../forms/DigitalFormScreen';
+import DocumentFormScreen from '../forms/DocumentFormScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
+import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
+import OwnershipGroupEditorScreen from '../admin_forms/OwnershipGroupEditor';
 import NewsList from '../news/NewsList';
 import NewsDetail from '../news/NewsDetail';
 import NewsForm from '../news/NewsForm';
@@ -60,6 +64,9 @@ import ProfileScreen from '../my_account';
 import ChangePasswordScreen from '../password/change';
 import FiubaMapScreen from '../fiuba_map';
 import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
+import SecretaryList from '../admin_secretaries/SecretaryList';
+import SecretaryDetail from '../admin_secretaries/SecretaryDetail';
+import SecretaryForm from '../admin_secretaries/SecretaryForm';
 
 import {
   resolveMenu, canToggleRole,
@@ -106,9 +113,6 @@ import TeacherStatsScreen from '../teacher_stats';
 import TeacherSemesterCardScreen from '../teacher_semester/SemesterCard';
 import TeacherSendCommissionNotificationScreen from '../teacher_notifications/SendCommissionNotification';
 import TeacherSemesterNotificationHistoryScreen from '../teacher_notifications/SemesterNotificationHistory';
-import DocumentFormScreen from '../forms/DocumentFormScreen';
-import DigitalFormScreen from '../forms/DigitalFormScreen';
-import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
 
 type WebViewStyle = ViewStyle & { transition?: string };
 
@@ -122,6 +126,8 @@ const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
 const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
 const StudentNewsListScreen = () => <NewsList isAdmin={false} />;
 const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
+const StudentSecretaryListScreen = () => <SecretaryList isAdmin={false} />;
+const AdminSecretaryListScreen = () => <SecretaryList isAdmin={true} />;
 
 const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   Home: HomeScreen,
@@ -132,6 +138,8 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentCredential: StudentCredentialScreen,
   StudentStats: StatsScreen,
   FormsList: FormsListScreen,
+  DigitalForm: DigitalFormScreen,
+  DocumentForm: DocumentFormScreen,
   Map: MapScreen,
   FiubaMap: FiubaMapScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
@@ -143,6 +151,8 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserSearch: UserSearch,
   AdminNotificationList: NotificationList,
   FormsManager: FormsManagerScreen,
+  FormDesigner: FormDesignerScreen,
+  OwnershipGroupEditor: OwnershipGroupEditorScreen,
   BedeliaClassroomChange: BedeliaClassroomChangeForm,
   AdminDepartmentDetail: DepartmentDetail,
   AdminDepartmentCreate: DepartmentForm,
@@ -160,6 +170,11 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminNewsEdit: NewsForm,
   StudentUsefulLinks: UsefulLinksScreen,
   TeacherUsefulLinks: UsefulLinksScreen,
+  StudentSecretaryList: StudentSecretaryListScreen,
+  AdminSecretaryList: AdminSecretaryListScreen,
+  AdminSecretaryDetail: SecretaryDetail,
+  AdminSecretaryCreate: SecretaryForm,
+  AdminSecretaryEdit: SecretaryForm,
   MyAccount: ProfileScreen,
   ChangePassword: ChangePasswordScreen,
   FiubaPlan: FiubaPlanScreen,

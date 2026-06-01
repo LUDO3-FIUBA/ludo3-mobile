@@ -1,9 +1,7 @@
 import { test, expect } from '@playwright/test';
 import * as net from 'net';
 import { BASE, BACKEND, DNI, PASS, loginAndWait, goToFiubaMap } from './helpers';
-
-const SIU_HOST = '172.25.90.12';
-const SIU_PORT = 8080;
+import { SIU_HOST, SIU_PORT } from './test-config';
 const EXPECTED_CAREER = 'informatica-2020';
 const EXPECTED_SUBJECTS = ['AMII', 'FDP', 'PDP', 'INGSOFTI', 'PYE'];
 const MIN_SUBJECTS = 20;
@@ -26,14 +24,20 @@ test.describe('SIU Guaraní — real integration (VPN required)', () => {
   test.beforeAll(async ({ request }) => {
     siuReachable = await isSiuReachable();
     if (!siuReachable) return;
-    const resp = await request.post(`${BACKEND}/auth/login/`, {
+    const loginResp = await request.post(`${BACKEND}/auth/login/`, {
       data: { dni: DNI, password: PASS },
     });
-    accessToken = (await resp.json()).access ?? '';
+    accessToken = (await loginResp.json()).access ?? '';
+    if (!accessToken) { siuReachable = false; return; }
+    // Verify the SIU service itself is responding — TCP reachable but 503 means service is down
+    const healthResp = await request.get(`${BACKEND}/api/guarani/plan-carrera/`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    siuReachable = healthResp.status() === 200;
   });
 
   test.beforeEach(() => {
-    test.skip(!siuReachable, 'SIU Guaraní unavailable — connect to FIUBA VPN');
+    test.skip(!siuReachable, 'SIU Guaraní unavailable (VPN required or service down)');
   });
 
   // ── Backend API ────────────────────────────────────────────────────────────
