@@ -12,8 +12,9 @@ import {
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { RoundedButton } from '../../components';
-import { usersRepository } from '../../repositories';
+import { usersRepository, careersRepository } from '../../repositories';
 import FormField from '../teacher_profile/FormField';
+import { Career } from '../../models/Career';
 
 const profileSchema = Yup.object().shape({
   linkedinUrl: Yup.string()
@@ -32,6 +33,8 @@ const ProfileScreen: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [careers, setCareers] = useState<Career[]>([]);
+  const [careersLoading, setCareersLoading] = useState(true);
 
   useEffect(() => {
     usersRepository
@@ -44,6 +47,14 @@ const ProfileScreen: React.FC = () => {
       )
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    careersRepository
+      .getCareers()
+      .then(setCareers)
+      .catch(() => {})
+      .finally(() => setCareersLoading(false));
   }, []);
 
   const handleSubmit = async (values: { linkedinUrl: string; githubUrl: string }) => {
@@ -96,11 +107,36 @@ const ProfileScreen: React.FC = () => {
       {({ values, errors, touched, handleChange, handleBlur, handleSubmit: formikSubmit }) => (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
           <View style={webWidthStyle}>
+          <Text style={styles.sectionTitle}>Carreras</Text>
+          {careersLoading ? (
+            <ActivityIndicator size="small" style={{ marginBottom: 16 }} />
+          ) : careers.length === 0 ? (
+            <Text style={styles.description}>No se encontraron carreras asociadas.</Text>
+          ) : (
+            careers.map(career => (
+              <View key={career.id} style={styles.careerCard}>
+                <Text style={styles.careerName}>{career.name}</Text>
+                {career.plan ? (
+                  <Text style={styles.careerDetail}>Plan: {career.plan}</Text>
+                ) : null}
+                {career.enrollment_date ? (
+                  <Text style={styles.careerDetail}>Ingreso: {career.enrollment_date}</Text>
+                ) : null}
+                {career.graduation_date ? (
+                  <Text style={styles.careerDetail}>Egreso: {career.graduation_date}</Text>
+                ) : null}
+              </View>
+            ))
+          )}
+
+          <View style={styles.divider} />
+
+          <Text style={styles.sectionTitle}>Redes sociales</Text>
           <Text style={styles.description}>
             Asociá tus perfiles profesionales (opcional). Otros miembros de la plataforma podrán verlos.
           </Text>
 
-          <Text style={styles.sectionTitle}>LinkedIn</Text>
+          <Text style={styles.subsectionTitle}>LinkedIn</Text>
           <FormField
             label="URL de LinkedIn"
             value={values.linkedinUrl}
@@ -121,7 +157,7 @@ const ProfileScreen: React.FC = () => {
             </TouchableOpacity>
           ) : null}
 
-          <Text style={styles.sectionTitle}>GitHub</Text>
+          <Text style={styles.subsectionTitle}>GitHub</Text>
           <FormField
             label="URL de GitHub"
             value={values.githubUrl}
@@ -225,6 +261,36 @@ const styles = StyleSheet.create({
     color: '#721c24',
     fontSize: 14,
     fontWeight: '500',
+  },
+  careerCard: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: '#007aff',
+  },
+  careerName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#222',
+    marginBottom: 4,
+  },
+  careerDetail: {
+    fontSize: 13,
+    color: '#555',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#dcdcdc',
+    marginVertical: 20,
+  },
+  subsectionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 6,
+    marginTop: 10,
   },
 });
 
