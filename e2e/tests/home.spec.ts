@@ -30,11 +30,14 @@ test.describe('Home screen', () => {
     // Third "Ver más" is for Materias aprobadas
     await links.nth(2).click();
     await expect(page.locator('text=/Materias aprobadas/').first()).toBeVisible({ timeout: 8000 });
-    await expect(page.getByText('66.20').or(page.getByText('66.70')).first()).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText('61.03').first()).toBeVisible({ timeout: 8000 });
   });
 
   test('shows approved subject data from DB', async ({ page }) => {
-    await expect(page.getByText('66.20')).toBeVisible({ timeout: 8000 });
-    await expect(page.getByText('Organización de Computadoras')).toBeVisible({ timeout: 5000 });
+    // Home only renders the first 3 approved finals (slice(0, 3)); the
+    // backend returns 66.20 / 66.70 / 66.02 first, so assert on one of
+    // those. 61.03 is exercised by the "Ver más" navigation test above.
+    await expect(page.getByText('66.02').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText('Laboratorio').first()).toBeVisible({ timeout: 5000 });
   });
 });

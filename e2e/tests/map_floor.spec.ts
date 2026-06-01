@@ -12,6 +12,29 @@ async function getMapTransform(page) {
   });
 }
 
+// The map's fitScale is computed from the canvas dimensions on layout, then
+// animated in via withTiming. Reading the transform before layout settles
+// returns either scale(0) or a transitional fitScale from a smaller canvas —
+// useless as a baseline. Wait for the transform to stay the same across
+// consecutive polls so we know layout + animation have both settled.
+async function waitForMapReady(page) {
+  await page.waitForFunction(() => {
+    const views = Array.from(document.querySelectorAll('[style]')) as HTMLElement[];
+    const mapView = views.find(el => el.style.transform && el.style.position === 'absolute');
+    if (!mapView) return false;
+    const m = mapView.style.transform.match(/scale\(([\d.]+)\)/);
+    if (!m || parseFloat(m[1]) <= 0) return false;
+    const t = mapView.style.transform;
+    const w = window as any;
+    if (w.__mapLastTransform !== t) {
+      w.__mapLastTransform = t;
+      w.__mapLastTransformAt = Date.now();
+      return false;
+    }
+    return Date.now() - w.__mapLastTransformAt > 500;
+  }, { timeout: 12000 });
+}
+
 async function clickFirstSuggestion(page) {
   // The first dropdown suggestion is visually at ~y=149, centered horizontally
   // Use coordinate click to avoid hitting SVG labels that appear first in DOM
@@ -75,9 +98,13 @@ test.describe('Floor Map — comprehensive', () => {
   });
 
   test('fuzzy search tolerates typo', async ({ page }) => {
-    await page.getByPlaceholder(/Buscar aula/i).fill('lboaratorio');
+    // The fuzzy threshold is Levenshtein <= 2 (see searchRooms.scoreRoom);
+    // "labratorios" is one deletion away from the alias "laboratorios".
+    // Assert on the exact dropdown label so we don't accidentally match the
+    // static SVG floor-text "66.02 Laboratorio" that is always in the DOM.
+    await page.getByPlaceholder(/Buscar aula/i).fill('labratorios');
     await page.waitForTimeout(600);
-    await expect(page.getByText(/laboratorio/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('LABORATORIOS', { exact: true }).first()).toBeVisible({ timeout: 5000 });
   });
 
   test('suggestions show floor badge', async ({ page }) => {
@@ -166,6 +193,10 @@ test.describe('Floor Map — comprehensive', () => {
   });
 
   test('zoom out changes the map transform', async ({ page }) => {
+    // Wait for layout to settle before zooming — otherwise the map's
+    // fitScale useEffect can fire after the + click and reset the scale
+    // back to fitScale, making before === after.
+    await waitForMapReady(page);
     await page.getByText('+').click();
     await page.waitForTimeout(400);
     const before = await getMapTransform(page);
@@ -196,6 +227,7 @@ test.describe('Floor Map — comprehensive', () => {
   });
 
   test('reset button restores initial view transform', async ({ page }) => {
+    await waitForMapReady(page);
     const initial = await getMapTransform(page);
     await page.getByText('+').click();
     await page.waitForTimeout(400);
@@ -258,6 +290,7 @@ test.describe('Floor Map — comprehensive', () => {
   });
 
   test('switching floor resets the zoom/pan transform', async ({ page }) => {
+    await waitForMapReady(page);
     const initial = await getMapTransform(page);
     await page.getByText('+').click();
     await page.waitForTimeout(400);

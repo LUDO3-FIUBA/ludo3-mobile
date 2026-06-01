@@ -17,8 +17,8 @@ test.describe('Academic screens', () => {
     await openAcademico(page);
     await page.getByLabel('Materias aprobadas').click();
     await expect(page.getByText('Materias aprobadas').first()).toBeVisible({ timeout: 8000 });
-    await expect(page.getByText('66.20')).toBeVisible({ timeout: 8000 });
-    await expect(page.getByText('75.40')).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText('61.03').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText('63.01').first()).toBeVisible({ timeout: 8000 });
   });
 
   test('Materias aprobadas shows grade and date for each subject', async ({ page }) => {

@@ -1,14 +1,15 @@
 #!/bin/bash
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
 
-PLAYWRIGHT_CLI="$(dirname "$0")/node_modules/.bin/playwright"
+LOCAL_CLI="$SCRIPT_DIR/node_modules/playwright/cli.js"
 
-if [ ! -f "$PLAYWRIGHT_CLI" ]; then
+if [ ! -f "$LOCAL_CLI" ]; then
   echo "Playwright no encontrado. Instalando dependencias..."
-  cd "$(dirname "$0")" && npm install
+  npm install
 fi
 
 # Setup test DB user (idempotent — safe to run every time)
-bash "$(dirname "$0")/setup-db.sh"
+bash "$SCRIPT_DIR/scripts/setup-db.sh"
 
-node "$PLAYWRIGHT_CLI" test --config playwright.config.ts "$@"
+node "$LOCAL_CLI" test --config playwright.config.ts "$@"

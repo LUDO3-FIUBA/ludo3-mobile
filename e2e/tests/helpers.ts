@@ -1,16 +1,17 @@
 import { Page, expect } from '@playwright/test';
+import { BASE, BACKEND, DNI, PASS } from './test-config';
+export { BASE, BACKEND, DNI, PASS };
 
-export const BASE = 'http://localhost:8081';
-export const BACKEND = 'http://localhost:8007';
-export const DNI = '43990892';
-export const PASS = 'testpass';
-
-export async function loginAndWait(page: Page) {
+export async function login(page: Page, dni: string, password: string) {
   await page.goto(BASE);
   await page.waitForLoadState('networkidle');
-  await page.getByPlaceholder('DNI').fill(DNI);
-  await page.getByPlaceholder('Contraseña').fill(PASS);
+  await page.getByPlaceholder('DNI').fill(dni);
+  await page.getByPlaceholder('Contraseña').fill(password);
   await page.getByText('Ingresar').click();
+}
+
+export async function loginAndWait(page: Page) {
+  await login(page, DNI, PASS);
   await page.waitForURL(/app/, { timeout: 10000 });
   await page.waitForTimeout(300);
 }
@@ -45,7 +46,7 @@ export async function goToFiubaMap(page: Page) {
       { timeout: 20000 },
     ).catch(() => {}); // if SIU has < 10 subjects, fall through to fixed wait
   }
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(500).catch(() => {}); // page may have closed if SIU data never loaded
   return iframe;
 }
 
