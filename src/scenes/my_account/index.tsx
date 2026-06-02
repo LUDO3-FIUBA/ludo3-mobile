@@ -107,6 +107,7 @@ const ProfileScreen: React.FC = () => {
         prev.studentId, prev.isTeacherFlag, prev.isStaffFlag,
         prev.faceRegistered, prev.githubUrl, prev.isSuperuserFlag,
         prev.departmentId, prev.linkedinUrl, prev.isBedeliaFlag, null,
+        prev.secretaryId,
       ) : null);
       dispatch(setProfilePhoto(null));
       setSuccessMessage('Foto de perfil eliminada.');
