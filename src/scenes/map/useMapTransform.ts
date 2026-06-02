@@ -15,12 +15,15 @@ const SCALE_MAX = 8;
 const ANIM_DURATION = 300;
 
 export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW: number, svgH: number) {
-  const fitScale = Math.min(
-    canvasWidth / svgW,
-    canvasHeight / svgH
-  );
-  const fitTx = (canvasWidth - svgW * fitScale) / 2;
-  const fitTy = (canvasHeight - svgH * fitScale) / 2;
+  // Guard against zero/unset dimensions (e.g. before a floor's SVG viewBox is
+  // available, or a building with no floors). Dividing by 0 would yield an
+  // Infinity scale and NaN translations, which crash the native view.
+  const hasDims = canvasWidth > 0 && canvasHeight > 0 && svgW > 0 && svgH > 0;
+  const fitScale = hasDims
+    ? Math.min(canvasWidth / svgW, canvasHeight / svgH)
+    : 1;
+  const fitTx = hasDims ? (canvasWidth - svgW * fitScale) / 2 : 0;
+  const fitTy = hasDims ? (canvasHeight - svgH * fitScale) / 2 : 0;
 
   const scaleMin = useSharedValue(fitScale);
   const scale = useSharedValue(fitScale);
@@ -108,19 +111,38 @@ export function useMapTransform(canvasWidth: number, canvasHeight: number, svgW:
   // React Native scales from the element's center, not (0,0).
   // tx/ty represent the desired rendered top-left position, so we must offset
   // the CSS translateX/Y to compensate: actualTx = tx - svgW*(1-s)/2.
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: tx.value - svgW * (1 - scale.value) / 2 },
-      { translateY: ty.value - svgH * (1 - scale.value) / 2 },
-      { scale: scale.value },
-    ],
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    'worklet';
+    const s = Number.isFinite(scale.value) ? scale.value : 1;
+    const x = Number.isFinite(tx.value) ? tx.value : 0;
+    const y = Number.isFinite(ty.value) ? ty.value : 0;
+    return {
+      transform: [
+        { translateX: x - svgW * (1 - s) / 2 },
+        { translateY: y - svgH * (1 - s) / 2 },
+        { scale: s },
+      ],
+    };
+  });
 
   useEffect(() => {
     scaleMin.value = fitScale;
-    scale.value = withTiming(fitScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-    tx.value = withTiming(fitTx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
-    ty.value = withTiming(fitTy, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    // If the shared values were previously poisoned with a non-finite number
+    // (e.g. dims were 0 → division by zero), withTiming would interpolate *from*
+    // Infinity and yield NaN forever. Snap directly to recover in that case.
+    const poisoned =
+      !Number.isFinite(scale.value) ||
+      !Number.isFinite(tx.value) ||
+      !Number.isFinite(ty.value);
+    if (poisoned) {
+      scale.value = fitScale;
+      tx.value = fitTx;
+      ty.value = fitTy;
+    } else {
+      scale.value = withTiming(fitScale, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+      tx.value = withTiming(fitTx, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+      ty.value = withTiming(fitTy, { duration: ANIM_DURATION, easing: Easing.out(Easing.cubic) });
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasWidth, canvasHeight, svgW, svgH]);
 
