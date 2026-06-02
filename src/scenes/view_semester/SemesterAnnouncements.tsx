@@ -39,11 +39,19 @@ const SemesterAnnouncements: React.FC = () => {
 
     const load = useCallback(async (isRefresh = false) => {
         if (!isRefresh) setLoading(true);
+
+        if (!semesterId) {
+             setNotifications([]);
+             setAlertDialog({ title: 'Error', message: 'No se encontró el cuatrimestre.' });
+             setLoading(false);
+             setRefreshing(false);
+             return;
+         }
+
         try {
             const data = await notificationsRepository.fetchStudentSemesterNotifications(semesterId);
             const sorted = [...data].sort(
-                (a, b) =>
-                    new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+                (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
             );
             setNotifications(sorted);
         } catch {
@@ -72,7 +80,7 @@ const SemesterAnnouncements: React.FC = () => {
             <MaterialIcon name="bullhorn-outline" fontSize={48} color="gray" />
             <Text style={styles.emptyTitle}>No hay anuncios</Text>
             <Text style={styles.emptyText}>
-                Cuando tu catedra publique anuncios, van a aparecer aca.
+                Cuando tu cátedra publique anuncios, van a aparecer acá.
             </Text>
         </View>
     ) : (
