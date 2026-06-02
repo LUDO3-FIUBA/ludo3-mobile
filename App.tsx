@@ -33,6 +33,12 @@ import {
   TeacherFormsScreen, FormsManagerScreen, FormDesignerScreen,
   TeacherSendCommissionNotificationScreen, TeacherSemesterNotificationHistoryScreen,
   FiubaMapScreen,
+  ContactsScreen,
+  ContactSubjectsScreen,
+  ScheduleComparisonScreen,
+  StudyGroupsScreen,
+  GroupInviteScreen,
+  GroupScheduleScreen,
 } from './src/scenes';
 import StudentIdentityViewerScreen from './src/scenes/student_identity_viewer';
 import ScanQR from './src/scenes/home/subsections/HomeOptions/ScanQR';
@@ -106,6 +112,8 @@ const webLinking = {
           StudentDepartmentList: 'departamentos',
           FormsList: 'tramites',
           FiubaMap: 'plan-de-carrera',
+          Contacts: 'contactos',
+          StudyGroups: 'grupos-estudio',
           ScanQR: 'escanear-qr',
           VerifyIdentity: 'verificar-identidad',
           StudentCredential: 'mi-credencial',
@@ -161,6 +169,8 @@ const WEB_DRAWER_EMBEDDED_ROUTES = new Set<string>([
   'StudentCredential', 'StudentStats', 'CurrentCommissionInscriptions',
   'ApprovedSubjects', 'PendingSubjects', 'StudentDepartmentList', 'FormsList',
   'StudentUsefulLinks', 'TeacherUsefulLinks', 'Map', 'FiubaPlan', 'FiubaMap',
+  'Contacts', 'ContactSubjects', 'ContactSchedule',
+  'StudyGroups', 'GroupSchedule', 'GroupInvite',
   'CreateSemester', 'TeacherForms', 'AdminDepartmentList', 'AdminCommissionList',
   'AdminUserSearch', 'AdminNotificationList', 'FormsManager',
   'BedeliaClassroomChange', 'AdminDepartmentDetail', 'AdminDepartmentCreate',
@@ -321,6 +331,12 @@ const App = () => {
               {!skipOnWeb('Map') && <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: true, title: 'Mapa' }} />}
               {!skipOnWeb('FiubaPlan') && <Stack.Screen name="FiubaPlan" component={FiubaPlanScreen} options={{ headerShown: true, title: 'FIUBA Plan' }} />}
               {!skipOnWeb('FiubaMap') && <Stack.Screen name="FiubaMap" component={FiubaMapScreen} options={{ headerShown: true, title: 'Plan de Carrera' }} />}
+              {!skipOnWeb('Contacts') && <Stack.Screen name="Contacts" component={ContactsScreen} options={{ headerShown: true, title: 'Contactos' }} />}
+              {!skipOnWeb('StudyGroups') && <Stack.Screen name="StudyGroups" component={StudyGroupsScreen} options={{ headerShown: true, title: 'Grupos de estudio' }} />}
+              <Stack.Screen name="ContactSubjects" component={ContactSubjectsScreen} options={{ headerShown: true, title: 'Materias en curso' }} />
+              <Stack.Screen name="ContactSchedule" component={ScheduleComparisonScreen} options={{ headerShown: true, title: 'Comparar horarios' }} />
+              <Stack.Screen name="GroupInvite" component={GroupInviteScreen} options={{ headerShown: true, title: 'Invitar al grupo' }} />
+              <Stack.Screen name="GroupSchedule" component={GroupScheduleScreen} options={{ headerShown: true, title: 'Horario del grupo' }} />
               {!skipOnWeb('CreateSemester') && <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />}
               {!skipOnWeb('TeacherForms') && <Stack.Screen name="TeacherForms" component={TeacherFormsScreen} options={{ headerShown: true, title: 'Validación de trámites' }} />}
               {!skipOnWeb('AdminDepartmentList') && <Stack.Screen name="AdminDepartmentList" component={AdminDepartmentListScreen} options={{ headerShown: true, title: 'Departamentos' }} />}

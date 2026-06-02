@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  DrawerActions,
   DrawerContentComponentProps,
   DrawerContentScrollView,
   createDrawerNavigator,
@@ -63,6 +64,10 @@ import UsefulLinksScreen from '../useful_links';
 import ProfileScreen from '../my_account';
 import ChangePasswordScreen from '../password/change';
 import FiubaMapScreen from '../fiuba_map';
+import ContactsScreen, { ContactSubjectsScreen } from '../contacts';
+import ScheduleComparisonScreen from '../contacts/ScheduleComparisonScreen';
+import StudyGroupsScreen from '../study_groups';
+import GroupScheduleScreen from '../study_groups/GroupScheduleScreen';
 import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
 import SecretaryList from '../admin_secretaries/SecretaryList';
 import SecretaryDetail from '../admin_secretaries/SecretaryDetail';
@@ -142,6 +147,11 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   DocumentForm: DocumentFormScreen,
   Map: MapScreen,
   FiubaMap: FiubaMapScreen,
+  Contacts: ContactsScreen,
+  ContactSubjects: ContactSubjectsScreen,
+  ContactSchedule: ScheduleComparisonScreen,
+  StudyGroups: StudyGroupsScreen,
+  GroupSchedule: GroupScheduleScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,
@@ -571,12 +581,18 @@ const RootDrawer = () => {
   const homeMenuItem = menuItems.find(i => i.kind === 'direct' && (i as DirectItem).route) as DirectItem | undefined;
 
   const onNotificationPress = async (item: UserNotification) => {
-    if (item.is_read) return;
     try {
-      await notificationsRepository.markNotificationAsRead(item.id);
-      setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+      if (!item.is_read) {
+        await notificationsRepository.markNotificationAsRead(item.id);
+        setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+      }
     } catch (e) {
       console.log('RootDrawer (Web): Failed marking notification as read', e);
+    }
+    const actionUrl = item.notification.action_url;
+    if (actionUrl) {
+      setShowNotificationsDropdown(false);
+      navigation.navigate('RootDrawer' as never, { screen: actionUrl } as never);
     }
   };
 
