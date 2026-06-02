@@ -110,10 +110,18 @@ async function fetchSemesterNotifications(semesterId: number): Promise<TeacherSe
     return response as TeacherSentNotification[];
 }
 
+async function fetchStudentSemesterNotifications(semesterId: number): Promise<Notification[]> {
+    const response = await authenticatedRepository.get(
+        `${domainUrl}/semester/${semesterId}`,
+    );
+    return response as Notification[];
+}
+
 export default {
     fetchMyNotifications,
     markNotificationAsRead,
     deleteNotification,
     sendCommissionNotification,
     fetchSemesterNotifications,
+    fetchStudentSemesterNotifications,
 };

@@ -649,6 +649,7 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
   {route: 'DigitalForm', title: 'Formulario digital'},
   {route: 'DocumentForm', title: 'Formulario documento'},
   {route: 'NewsDetail', title: 'Novedad'},
+  {route: 'SemesterAnnouncements', title: 'Anuncios', roleFilter: 'student'},
   {route: 'Notifications', title: 'Notificaciones'},
 ];
 

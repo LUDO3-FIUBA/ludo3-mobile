@@ -14,14 +14,13 @@ const ViewSemesterScreen: React.FC<any> = ({ route }) => {
 
   const listItems = [
     {
-      name: "Ver mis asistencias",
+      name: "Ver anuncios",
       onPress: () => {
-        navigation.navigate('MyAttendances', {
+        navigation.navigate('SemesterAnnouncements', {
           semesterId: semester.id,
-          maxAbsences: semester.max_absences,
         });
       },
-      materialIcon: <MaterialIcon name="calendar-check" fontSize={24} />
+      materialIcon: <MaterialIcon name="bullhorn" fontSize={24} />
     },
     {
       name: "Ver mis entregas",
@@ -33,7 +32,7 @@ const ViewSemesterScreen: React.FC<any> = ({ route }) => {
       materialIcon: <MaterialIcon name="file-document" fontSize={24} />
     },
     {
-      name: "Ver Evaluaciones",
+      name: "Ver evaluaciones",
       onPress: () => {
         navigation.navigate('ViewEvaluations', {
           semester_id: semester.id,
@@ -42,7 +41,17 @@ const ViewSemesterScreen: React.FC<any> = ({ route }) => {
       materialIcon: <MaterialIcon name="note-multiple" fontSize={24} />
     },
     {
-      name: "Cuerpo Docente",
+      name: "Ver mis asistencias",
+      onPress: () => {
+        navigation.navigate('MyAttendances', {
+          semesterId: semester.id,
+          maxAbsences: semester.max_absences,
+        });
+      },
+      materialIcon: <MaterialIcon name="calendar-check" fontSize={24} />
+    },
+    {
+      name: "Cuerpo docente",
       onPress: () => {
         navigation.navigate('Teachers', {
           commissionId: commission.id, // Used to get the staff teachers
@@ -52,7 +61,7 @@ const ViewSemesterScreen: React.FC<any> = ({ route }) => {
       materialIcon: <MaterialIcon name="account-group" fontSize={24} />
     },
     {
-      name: "Ver Correlativas",
+      name: "Ver correlativas",
       onPress: () => {
         navigation.navigate('CorrelativeSubjects', {
           id: semester.commission.subject_siu_id,
@@ -60,6 +69,7 @@ const ViewSemesterScreen: React.FC<any> = ({ route }) => {
       },
       materialIcon: <MaterialIcon name="graph-outline" fontSize={24} />
     },
+    
   ]
 
   return (
