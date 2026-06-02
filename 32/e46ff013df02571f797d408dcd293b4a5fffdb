@@ -1,0 +1,155 @@
+src/scenes/teacher_evaluations/EditEvaluation.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 87
+e2e/tests/auth.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 2-3,10
+src/models/Career.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-8
+src/models/TeacherSemester.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 15,19-26,28
+src/repositories/secretaries.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-52
+src/scenes/admin_departments/DepartmentForm.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1,10-11,13-15,18,26-31,44-106,115,118-125,127-135,137-139,179-239,323-378
+src/scenes/forms/DigitalFormScreen.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 16,39-51,61-63,67-77,88,158-164,171-173,183-184,187-193,197,273-284
+e2e/tests/home.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 33,37-41
+src/scenes/forms/DocumentFormScreen.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 14,44-46,49-61,118-127,132,135,221-233
+src/scenes/forms/FormsListScreen.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1,11,15,20,64,78-99,166,168,229-233
+src/scenes/admin_forms/components/ManagerFormItem.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 16,29-31,80-81,94-101,158-178,221-222,246-255,257,281-293,298-342,555-572
+src/scenes/view_catedra_details/index.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-217
+src/scenes/view_evaluation_details/AddEvaluationSubmission.web.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 46-49,90
+e2e/tests/helpers.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 2-3,5,8-9,11-14,49
+src/repositories/careers.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-14
+src/repositories/departments.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 2-3,41-52
+e2e/tests/siu_integration.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 4,27,30-36,40
+src/models/CatedraCalendarEntry.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-17
+src/scenes/admin_secretaries/SecretaryList.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-213
+src/scenes/admin_forms/FormsManagerScreen.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 17-19,21,32-33,40-41,56-60,62-63,99-112,116-133,136,139,141-143,145-151,220,222,226,245-248,250,267-287,322-324,327,504-505,507-514,527,529,533-557,559-573,575,585,594-595,616-628
+e2e/tests/menu.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 12-15,24-28,40,63-64,67-70
+App.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 9,51-53,77-78,130-131,152-161,177-179,327-328,347,353-356,392-398,588,595,602
+e2e/tests/academic.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 20-21
+e2e/tests/test-config.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-43
+src/scenes/teacher_semester/SemesterEditScreen.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 2-3,22-24,66-83,112-126,128-159,189-213
+e2e/scripts/seed_test_data.py
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-118
+e2e/tests/fiuba_map_integration.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1,3-4,10-17,23-29,38-58,62,67-69,74,76-78,83,85-87,90,92-94,99-101,104-114,118-120,122-132,138,140-150,154-156,162,166,172,180,183,192
+src/scenes/admin_departments/DepartmentDetail.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 9-10,13,16-19,28-33,41-48,51-58,63-78,94-142,182-258,334-339,352-431,444-446
+package.json
+  s_4d9056a3efbb15::t_43a9625fce1c82 26,38,41,46,54-55,58,77
+src/models/User.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 11,31,42,73-76,99
+src/components/MarkdownEditor.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 140,174,226,238-239
+Makefile
+  s_4d9056a3efbb15::t_43a9625fce1c82 3-6
+src/scenes/calendar/DayView.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 46-63,78-82,98-108,199-220
+src/components/RecipientSelector.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-97
+src/components/OwnershipGroupAccordionList.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-139
+src/repositories/evaluations.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1,49,54-56,58,71
+src/repositories/teacherSemesters.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 91-98,106-108
+src/models/FormOwnershipGroup.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-33
+e2e/tests/user.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 3,10-15,24-30,34,39,44,52-54
+e2e/scripts/run-tests.sh
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-26
+e2e/run-tests.sh
+  s_4d9056a3efbb15::t_43a9625fce1c82 2-3,5,7,9,13,15
+e2e/README.md
+  s_4d9056a3efbb15::t_43a9625fce1c82 8-10,13-16,29-42,46,55-90,92-94,101-119
+src/scenes/admin_secretaries/SecretaryForm.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-533
+src/components/index.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 31-32,38
+src/models/FormDetail.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1,36-39,45
+src/scenes/admin_secretaries/SecretaryDetail.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-548
+src/scenes/teacher_semester/CreateSemester.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 20,66,101-114,225-238
+src/repositories/users.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 92
+src/scenes/my_account/index.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 15,17,36-37,52-59,110-134,139,160,265-293
+src/models/Form.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1,13
+src/scenes/admin_forms/OwnershipGroupEditor.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-442
+src/scenes/root_drawer/index.web.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 52-53,56-57,71-73,133-134,145-146,163-164,182-186
+src/models/FormSubmission.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 36-38
+src/components/SubmissionStatusBadge.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 20,32,35
+src/scenes/calendar/index.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 7,11,32-33,51-52,61,72-79,83-84,119-126,198,241,251-266,272-282,308-310,312-314
+src/models/Secretary.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-14
+src/scenes/teacher_evaluations/AddEvaluation.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 46
+src/scenes/admin_forms/FormDesignerScreen.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 1,11,15,19,22-23,63-65,73,96-106,117-165,175,180,182-187,202,312-352,451-459,469-470,495,532-536,595-619,621-623,625-673,1053-1187,1201,1331-1351,1374-1541
+e2e/scripts/setup-db.sh
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-50
+e2e/tests/map_floor.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 15-37,101-105,107,196-199,230,293
+e2e/tests/navigation.spec.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 3,10-19,36-37
+app.json
+  s_4d9056a3efbb15::t_43a9625fce1c82 56-57
+src/models/Department.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-6,14
+src/repositories/forms.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 2,25-26,29-53,65-66,68-73,81-82,87-88,103-104,108-109,238-243
+e2e/test-user.env
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-44
+src/scenes/teacher_evaluations/EvaluationForm.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 74
+src/scenes/root_drawer/index.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 32-37,250-256,303
+src/repositories/catedraCalendarRepository.ts
+  s_4d9056a3efbb15::t_43a9625fce1c82 1-17
+src/scenes/calendar/AgendaItem.tsx
+  s_4d9056a3efbb15::t_43a9625fce1c82 37-45,94-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "32e46ff013df02571f797d408dcd293b4a5fffdb",
+  "prompts": {},
+  "sessions": {
+    "s_4d9056a3efbb15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "282dedd0-f1fd-47fd-9265-660ba1eda0eb",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
