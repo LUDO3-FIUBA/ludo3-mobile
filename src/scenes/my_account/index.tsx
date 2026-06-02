@@ -73,7 +73,7 @@ const ProfileScreen: React.FC = () => {
       aspect: [1, 1],
       quality: 0.8,
     });
-    if (result.canceled || !result.assets[0]) return;
+    if (result.canceled || !result.assets?.[0]) return;
 
     const asset = result.assets[0];
     const ext = asset.uri.split('.').pop() ?? 'jpg';
