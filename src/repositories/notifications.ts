@@ -19,6 +19,7 @@ export interface Notification {
     image?: string | null;
     sender_name?: string | null;
     semester_info?: SemesterInfo | null;
+    action_url?: string | null;
 }
 
 export interface UserNotification {

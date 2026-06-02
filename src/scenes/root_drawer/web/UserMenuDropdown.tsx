@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Pressable, Modal, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { lightModeColors } from '../../../styles/colorPalette';
 import User from '../../../models/User';
+import UserAvatar from '../../../components/UserAvatar';
+import { useAppSelector } from '../../../redux/hooks';
+import { selectCurrentUserProfilePhoto } from '../../../redux/reducers/currentUserSlice';
 
 type Props = {
   visible: boolean;
@@ -13,12 +15,14 @@ type Props = {
 
 const UserMenuDropdown: React.FC<Props> = ({ visible, user, onClose, onLogout }) => {
   const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+  const storedPhoto = useAppSelector(selectCurrentUserProfilePhoto);
+  const photoUrl = storedPhoto !== undefined ? storedPhoto : user.profilePhoto;
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose}>
         <Pressable style={styles.dropdown} onPress={() => {}}>
           <View style={styles.header}>
-            <Icon name="account-circle" size={36} color={lightModeColors.institutional} />
+            <UserAvatar photoUrl={photoUrl} size={36} />
             <View style={styles.headerText}>
               {!!fullName && <Text style={styles.name} numberOfLines={1}>{fullName}</Text>}
               {!!user.email && <Text style={styles.email} numberOfLines={1}>{user.email}</Text>}

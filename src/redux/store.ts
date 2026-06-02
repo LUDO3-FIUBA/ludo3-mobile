@@ -4,6 +4,7 @@ import counterSlice from './reducers/counterSlice';
 import teacherSemesterSlice from './reducers/teacherSemesterSlice';
 import teacherStaffSlice from './reducers/teacherStaffSlice';
 import teacherUserDataSlice from './reducers/teacherUserDataSlice';
+import currentUserSlice from './reducers/currentUserSlice';
 
 const rootReducer = {
   counter: counterSlice,
@@ -11,6 +12,7 @@ const rootReducer = {
   teacherSemester: teacherSemesterSlice,
   teacherStaff: teacherStaffSlice,
   teacherUserData: teacherUserDataSlice,
+  currentUser: currentUserSlice,
 };
 
 const store = configureStore({

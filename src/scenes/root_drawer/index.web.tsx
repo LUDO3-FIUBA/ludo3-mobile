@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  DrawerActions,
   DrawerContentComponentProps,
   DrawerContentScrollView,
   createDrawerNavigator,
@@ -24,6 +25,7 @@ import notificationsRepository, { UserNotification } from '../../repositories/no
 import User from '../../models/User';
 import { useAppDispatch } from '../../redux/hooks';
 import { fetchUserDataAsync } from '../../redux/reducers/teacherUserDataSlice';
+import { setProfilePhoto } from '../../redux/reducers/currentUserSlice';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 // Screens
@@ -62,6 +64,10 @@ import UsefulLinksScreen from '../useful_links';
 import ProfileScreen from '../my_account';
 import ChangePasswordScreen from '../password/change';
 import FiubaMapScreen from '../fiuba_map';
+import ContactsScreen, { ContactSubjectsScreen } from '../contacts';
+import ScheduleComparisonScreen from '../contacts/ScheduleComparisonScreen';
+import StudyGroupsScreen from '../study_groups';
+import GroupScheduleScreen from '../study_groups/GroupScheduleScreen';
 import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
 import SecretaryList from '../admin_secretaries/SecretaryList';
 import SecretaryDetail from '../admin_secretaries/SecretaryDetail';
@@ -142,6 +148,11 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   DocumentForm: DocumentFormScreen,
   Map: MapScreen,
   FiubaMap: FiubaMapScreen,
+  Contacts: ContactsScreen,
+  ContactSubjects: ContactSubjectsScreen,
+  ContactSchedule: ScheduleComparisonScreen,
+  StudyGroups: StudyGroupsScreen,
+  GroupSchedule: GroupScheduleScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,
@@ -540,11 +551,15 @@ const RootDrawer = () => {
         }
         const fetchedUser = await usersRepository.getInfo();
         setUser(fetchedUser);
+        dispatch(setProfilePhoto(fetchedUser.profilePhoto));
         dispatch(fetchUserDataAsync(fetchedUser));
         setActiveRole(fetchedUser.isTeacher() && !fetchedUser.isStudent() ? 'teacher' : 'student');
       } catch (e) {
         console.log('RootDrawer (Web): Failed to fetch user', e);
-        setUser(new User('', '', '', '', undefined, false, false, false));
+        // Without a valid profile there's no role, so no drawer screens get
+        // registered and initialRouteName would dangle (crash). Bounce to
+        // Landing instead of mounting a broken navigator.
+        navigation.replace('Landing');
       } finally {
         setLoading(false);
       }
@@ -568,12 +583,18 @@ const RootDrawer = () => {
   const homeMenuItem = menuItems.find(i => i.kind === 'direct' && (i as DirectItem).route) as DirectItem | undefined;
 
   const onNotificationPress = async (item: UserNotification) => {
-    if (item.is_read) return;
     try {
-      await notificationsRepository.markNotificationAsRead(item.id);
-      setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+      if (!item.is_read) {
+        await notificationsRepository.markNotificationAsRead(item.id);
+        setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+      }
     } catch (e) {
       console.log('RootDrawer (Web): Failed marking notification as read', e);
+    }
+    const actionUrl = item.notification.action_url;
+    if (actionUrl) {
+      setShowNotificationsDropdown(false);
+      navigation.navigate('RootDrawer' as never, { screen: actionUrl } as never);
     }
   };
 
@@ -613,10 +634,21 @@ const RootDrawer = () => {
 
   const menuScreens = buildMenuScreens(user);
 
+  // The routes that actually become Drawer.Screens below. initialRouteName must
+  // be one of these, or React Navigation throws ("Couldn't find a screen named
+  // ... to use as initialRouteName").
+  const registeredMenuRoutes = Array.from(menuScreens.entries())
+    .filter(([route, { condition }]) => condition && WEB_SCREEN_COMPONENTS[route])
+    .map(([route]) => route);
+  const initialRoute =
+    homeMenuItem && registeredMenuRoutes.includes(homeMenuItem.route)
+      ? homeMenuItem.route
+      : registeredMenuRoutes[0];
+
   return (
     <>
       <Drawer.Navigator
-        initialRouteName={homeMenuItem?.route}
+        initialRouteName={initialRoute}
         // Default 'firstRoute' makes goBack jump to the first registered
         // Drawer.Screen (which is the first menu item, e.g. MyAccount), instead
         // of the previously focused screen. 'history' tracks actual visits.

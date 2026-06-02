@@ -33,5 +33,8 @@ export { default as adminNotificationsRepository } from './adminNotifications';
 export { default as newsRepository } from './news';
 export { default as guaraniRepository } from './guarani';
 export { default as bedeliaRepository } from './bedelia';
+export { default as contactsRepository } from './contacts';
+export { default as studyGroupsRepository } from './studyGroups';
+
 export { default as catedraCalendarRepository } from './catedraCalendarRepository';
 export { default as careersRepository } from './careers';

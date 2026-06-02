@@ -16,6 +16,7 @@ import notificationsRepository, { UserNotification } from '../../repositories/no
 import User from '../../models/User';
 import { useAppDispatch } from '../../redux/hooks';
 import { fetchUserDataAsync } from '../../redux/reducers/teacherUserDataSlice';
+import { setProfilePhoto } from '../../redux/reducers/currentUserSlice';
 import { darkModeColors, lightModeColors } from '../../styles/colorPalette';
 import HomeScreen from '../home';
 import CalendarScreen from '../calendar';
@@ -100,6 +101,7 @@ const RootDrawer = () => {
       try {
         const fetchedUser = await usersRepository.getInfo();
         setUser(fetchedUser);
+        dispatch(setProfilePhoto(fetchedUser.profilePhoto));
         dispatch(fetchUserDataAsync(fetchedUser));
         if (fetchedUser.isTeacher() && !fetchedUser.isStudent()) setActiveRole('teacher');
       } catch (e) {

@@ -88,6 +88,12 @@ export { default as AdminProceduresManagerScreen } from './admin_procedures';
 export { default as MyAccountScreen } from './my_account';
 export { default as UsefulLinksScreen } from './useful_links';
 export { default as FiubaMapScreen } from './fiuba_map';
+export { default as ContactsScreen, ContactSubjectsScreen } from './contacts';
+export { default as ScheduleComparisonScreen } from './contacts/ScheduleComparisonScreen';
+export { default as StudyGroupsScreen } from './study_groups';
+export { default as GroupInviteScreen } from './study_groups/GroupInviteScreen';
+export { default as GroupScheduleScreen } from './study_groups/GroupScheduleScreen';
+
 
 // Admin Secretaries screens
 export { default as SecretaryListScreen } from './admin_secretaries/SecretaryList';
