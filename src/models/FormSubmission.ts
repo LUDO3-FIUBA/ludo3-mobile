@@ -33,4 +33,7 @@ export default interface FormSubmission {
   teacher_last_name: string | null;
   teacher_status: TeacherValidationStatusValue | null;
   teacher_comment: string | null;
+  recipient_entity_type: 'department' | 'secretary' | null;
+  recipient_entity_id: number | null;
+  recipient_name: string | null;
 }

@@ -1,6 +1,6 @@
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
-import { get, post, put, deleteMethod } from './authenticatedRepository';
-import Department from '../models/Department';
+import { get, post, put, deleteMethod, patch } from './authenticatedRepository';
+import Department, { OwnershipGroupMembership } from '../models/Department';
 
 const BASE_URL = 'api/departments';
 
@@ -38,4 +38,15 @@ export async function deleteDepartment(id: number): Promise<void> {
   await deleteMethod(`${BASE_URL}/${id}`, {});
 }
 
-export default { fetchAll, fetchOne, createDepartment, updateDepartment, deleteDepartment };
+export async function updateMemberships(
+  id: number,
+  groups: { groupId: number; isEditor: boolean }[],
+): Promise<Department> {
+  const payload = {
+    groups: groups.map(g => ({ group_id: g.groupId, is_editor: g.isEditor })),
+  };
+  const result = await patch(`${BASE_URL}/${id}/ownership-groups`, payload);
+  return convertSnakeToCamelCase(result) as Department;
+}
+
+export default { fetchAll, fetchOne, createDepartment, updateDepartment, deleteDepartment, updateMemberships };

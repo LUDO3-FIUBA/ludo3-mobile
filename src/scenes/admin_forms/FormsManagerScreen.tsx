@@ -14,9 +14,11 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import * as XLSX from 'xlsx';
-import { AlertDialog, MaterialIcon, ProcedureTypesAccordionList, PROCEDURE_CONFIG } from '../../components';
-import { formsRepository } from '../../repositories';
+import { AlertDialog, MaterialIcon, OwnershipGroupAccordionList } from '../../components';
+import { formsRepository, usersRepository } from '../../repositories';
+import User from '../../models/User';
 import Form from '../../models/Form';
+import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 import FormSubmission, { FormSubmissionStatusValue } from '../../models/FormSubmission';
 import FormDetail from '../../models/FormDetail';
 import { FormAnswer } from '../../models/FormSubmission';
@@ -27,12 +29,16 @@ const FormsManagerScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
   const [forms, setForms] = useState<Form[]>([]);
+  const [ownershipGroups, setOwnershipGroups] = useState<FormOwnershipGroup[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedFormId, setExpandedFormId] = useState<number | null>(null);
   const [submissionsCache, setSubmissionsCache] = useState<Record<number, FormSubmission[]>>({});
   const [formDetailsCache, setFormDetailsCache] = useState<Record<number, FormDetail>>({});
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
+  const [groupToDelete, setGroupToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [deletingGroup, setDeletingGroup] = useState(false);
   const [refreshingProcedureId, setRefreshingProcedureId] = useState<number | null>(null);
   const [exportingFormId, setExportingFormId] = useState<number | null>(null);
   const [downloadingSubmissionId, setDownloadingSubmissionId] = useState<number | null>(null);
@@ -47,8 +53,14 @@ const FormsManagerScreen: React.FC = () => {
 
   const loadForms = useCallback(async () => {
     try {
-      const data = await formsRepository.fetchForms();
+      const [data, groups, user] = await Promise.all([
+        formsRepository.fetchForms(),
+        formsRepository.fetchOwnershipGroups(),
+        usersRepository.getInfo(),
+      ]);
       setForms(data);
+      setOwnershipGroups(groups);
+      setCurrentUser(user);
     } catch {
       setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los formularios.' });
     } finally {
@@ -84,38 +96,59 @@ const FormsManagerScreen: React.FC = () => {
     });
   }, [forms]);
 
+  // Set of group IDs where the current admin is an editor (from annotated list response).
+  const editorGroupIds = useMemo(() => {
+    const ids = new Set<number>();
+    ownershipGroups.forEach(g => {
+      // is_editor=true → editor; is_editor=undefined (super admin) → treat as editor.
+      if (g.is_editor !== false) ids.add(g.id);
+    });
+    return ids;
+  }, [ownershipGroups]);
+
+  const isAnyGroupEditor = editorGroupIds.size > 0;
+  const isSuperAdmin = currentUser?.isSuperAdmin?.() ?? false;
+  const canCreateForms = (currentUser?.isAdmin?.() ?? false);
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          style={{ marginRight: 16 }}
-          onPress={() => navigation.navigate('FormDesigner')}
-        >
-          <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {isSuperAdmin && (
+            <TouchableOpacity
+              style={{ marginRight: 12 }}
+              onPress={() => navigation.navigate('OwnershipGroupEditor')}
+            >
+              <MaterialIcon name="folder-account-outline" fontSize={24} color={lightModeColors.mainContrastColor} />
+            </TouchableOpacity>
+          )}
+          {canCreateForms && (
+            <TouchableOpacity
+              style={{ marginRight: 16 }}
+              onPress={() => navigation.navigate('FormDesigner')}
+            >
+              <MaterialIcon name="plus" fontSize={24} color={lightModeColors.mainContrastColor} />
+            </TouchableOpacity>
+          )}
+        </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, isAnyGroupEditor, isSuperAdmin, canCreateForms]);
 
   const sections = useMemo(() => {
-    const configuredOrder = Object.keys(PROCEDURE_CONFIG);
-    const map = new Map<number, { procedure: Form['form_procedure']; forms: Form[] }>();
+    const formsMap = new Map<number, Form[]>();
     forms.forEach(form => {
-      const proc = form.form_procedure;
-      if (!map.has(proc.id)) map.set(proc.id, { procedure: proc, forms: [] });
-      map.get(proc.id)!.forms.push(form);
+      const gId = form.ownership_group.id;
+      if (!formsMap.has(gId)) formsMap.set(gId, []);
+      formsMap.get(gId)!.push(form);
     });
-    return Array.from(map.values()).sort((a, b) => {
-      const aIndex = configuredOrder.indexOf(a.procedure.value);
-      const bIndex = configuredOrder.indexOf(b.procedure.value);
-
-      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-      if (aIndex !== -1) return -1;
-      if (bIndex !== -1) return 1;
-
-      return a.procedure.value.localeCompare(b.procedure.value);
-    });
-  }, [forms]);
+    return ownershipGroups
+      .map(group => ({
+        ownership_group: { id: group.id, name: group.name },
+        forms: formsMap.get(group.id) ?? [],
+      }))
+      .sort((a, b) => a.ownership_group.name.localeCompare(b.ownership_group.name));
+  }, [forms, ownershipGroups]);
 
   const toggleForm = async (form: Form) => {
     if (expandedFormId === form.form_id) {
@@ -184,11 +217,13 @@ const FormsManagerScreen: React.FC = () => {
     const { submission, formId } = submissionToDelete;
     try {
       await formsRepository.deleteSubmission(submission.submission_id);
-      const [formsData, subs] = await Promise.all([
+      const [formsData, groups, subs] = await Promise.all([
         formsRepository.fetchForms(),
+        formsRepository.fetchOwnershipGroups(),
         formsRepository.fetchFormSubmissions(formId),
       ]);
       setForms(formsData);
+      setOwnershipGroups(groups);
       setSubmissionsCache(prev => ({ ...prev, [formId]: subs }));
     } catch {
       setAlertDialog({ title: 'Error', message: 'No se pudo eliminar la respuesta.' });
@@ -207,8 +242,12 @@ const FormsManagerScreen: React.FC = () => {
     setDeletingFormId(form.form_id);
     try {
       await formsRepository.deleteForm(form.form_id);
-      const formsData = await formsRepository.fetchForms();
+      const [formsData, groups] = await Promise.all([
+        formsRepository.fetchForms(),
+        formsRepository.fetchOwnershipGroups(),
+      ]);
       setForms(formsData);
+      setOwnershipGroups(groups);
       setSubmissionsCache(prev => {
         const next = { ...prev };
         delete next[form.form_id];
@@ -222,6 +261,27 @@ const FormsManagerScreen: React.FC = () => {
     } finally {
       setDeletingFormId(null);
       setFormToDelete(null);
+    }
+  };
+
+  const confirmDeleteGroup = async () => {
+    if (!groupToDelete) return;
+    setDeletingGroup(true);
+    try {
+      await formsRepository.deleteOwnershipGroup(groupToDelete.id);
+      const [formsData, groups] = await Promise.all([
+        formsRepository.fetchForms(),
+        formsRepository.fetchOwnershipGroups(),
+      ]);
+      setForms(formsData);
+      setOwnershipGroups(groups);
+    } catch (err: any) {
+      const detail = err?.info?.detail ?? err?.info;
+      const msg = typeof detail === 'string' ? detail : 'No se pudo eliminar el grupo.';
+      showMessage('Error', msg);
+    } finally {
+      setDeletingGroup(false);
+      setGroupToDelete(null);
     }
   };
 
@@ -259,12 +319,12 @@ const FormsManagerScreen: React.FC = () => {
     }
   };
 
-  const handleRefreshProcedure = async (procedureId: number, procedureForms: Form[]) => {
-    if (refreshingProcedureId === procedureId || procedureForms.length === 0) return;
-    setRefreshingProcedureId(procedureId);
+  const handleRefreshProcedure = async (groupId: number, groupForms: Form[]) => {
+    if (refreshingProcedureId === groupId || groupForms.length === 0) return;
+    setRefreshingProcedureId(groupId);
     try {
       const results = await Promise.all(
-        procedureForms.map(async form => {
+        groupForms.map(async form => {
           const [subs, detail] = await Promise.all([
             formsRepository.fetchFormSubmissions(form.form_id),
             formsRepository.fetchFormDetail(form.form_id),
@@ -441,11 +501,17 @@ const FormsManagerScreen: React.FC = () => {
   };
 
   const daysSince = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const date = new Date(dateStr);
+    const diff = Date.now() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'hoy';
-    if (days === 1) return 'hace 1 día';
-    return `hace ${days} días`;
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const dateLabel = date.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const timeLabel = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    const ago = days === 0
+      ? hours === 0 ? 'hace menos de 1 hora' : `hace ${hours} h`
+      : days === 1 ? 'hace 1 día'
+      : `hace ${days} días`;
+    return `${dateLabel} ${timeLabel} · ${ago}`;
   };
 
   if (loading) {
@@ -458,29 +524,55 @@ const FormsManagerScreen: React.FC = () => {
 
   return (
     <>
-      <ProcedureTypesAccordionList
+      <OwnershipGroupAccordionList
         sections={sections.map(section => ({
-          procedure: section.procedure,
+          ownership_group: section.ownership_group,
           items: section.forms,
         }))}
         emptyText="Sin formularios."
-        renderSectionAction={(section, config) => (
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation();
-              handleRefreshProcedure(section.procedure.id, section.items);
-            }}
-            disabled={refreshingProcedureId === section.procedure.id}
-            style={{ marginRight: 6 }}
-          >
-            {refreshingProcedureId === section.procedure.id ? (
-              <ActivityIndicator size="small" color={config.color} />
-            ) : (
-              <MaterialIcon name="refresh" fontSize={22} color={config.color} />
+        renderSectionAction={section => (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+            {isSuperAdmin && (
+              <>
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    navigation.navigate('OwnershipGroupEditor', { groupId: section.ownership_group.id });
+                  }}
+                  style={{ padding: 4 }}
+                  hitSlop={4}
+                >
+                  <MaterialIcon name="pencil-outline" fontSize={20} color="#757575" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    setGroupToDelete(section.ownership_group);
+                  }}
+                  style={{ padding: 4 }}
+                  hitSlop={4}
+                >
+                  <MaterialIcon name="delete-outline" fontSize={20} color="#D32F2F" />
+                </TouchableOpacity>
+              </>
             )}
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                handleRefreshProcedure(section.ownership_group.id, section.items);
+              }}
+              disabled={refreshingProcedureId === section.ownership_group.id}
+              style={{ padding: 4 }}
+            >
+              {refreshingProcedureId === section.ownership_group.id ? (
+                <ActivityIndicator size="small" color="#757575" />
+              ) : (
+                <MaterialIcon name="refresh" fontSize={20} color="#757575" />
+              )}
+            </TouchableOpacity>
+          </View>
         )}
-        renderItems={(items, section, config) =>
+        renderItems={(items, _section) =>
           items.map(item => {
             const isFormExpanded = expandedFormId === item.form_id;
             const submissions = submissionsCache[item.form_id] ?? [];
@@ -490,7 +582,7 @@ const FormsManagerScreen: React.FC = () => {
               <ManagerFormItem
                 key={item.form_id}
                 form={item}
-                color={config.color}
+                color="#757575"
                 isExpanded={isFormExpanded}
                 submissions={submissions}
                 submissionsLoading={submissionsLoading}
@@ -499,6 +591,8 @@ const FormsManagerScreen: React.FC = () => {
                 isDeleting={deletingFormId === item.form_id}
                 isExporting={exportingFormId === item.form_id}
                 downloadingSubmissionId={downloadingSubmissionId}
+                canEdit={editorGroupIds.has(item.ownership_group.id)}
+                currentUser={currentUser}
                 onToggle={() => toggleForm(item)}
                 onEdit={() => navigation.navigate('FormDesigner', { formId: item.form_id })}
                 onDelete={() => handleDeleteForm(item)}
@@ -517,6 +611,21 @@ const FormsManagerScreen: React.FC = () => {
             );
           })
         }
+      />
+
+      <AlertDialog
+        visible={!!groupToDelete}
+        title="Eliminar grupo"
+        message={
+          groupToDelete
+            ? `¿Estás seguro de eliminar el grupo "${groupToDelete.name}"? Solo se puede eliminar si no tiene formularios asociados.`
+            : ''
+        }
+        destructive
+        loading={deletingGroup}
+        confirmLabel="Eliminar"
+        onConfirm={confirmDeleteGroup}
+        onCancel={() => setGroupToDelete(null)}
       />
 
       <AlertDialog

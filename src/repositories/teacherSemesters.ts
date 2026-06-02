@@ -88,6 +88,14 @@ export async function updateSemesterDetails(commissionId: number, yearMoment: st
   return convertSnakeToCamelCase(updatedSemester)
 }
 
+export async function setCalendarSourceUrl(semesterId: number, url: string): Promise<{ calendar_source_url: string }> {
+  return put(`api/teacher/semesters/${semesterId}/set_calendar_url`, { url }) as Promise<{ calendar_source_url: string }>;
+}
+
+export async function syncCatedraCalendar(semesterId: number): Promise<{ synced: number }> {
+  return post(`api/teacher/semesters/${semesterId}/sync_calendar`, {}) as Promise<{ synced: number }>;
+}
+
 export default {
   fetchPresentSemesterFromCommissionId,
   createSemester,
@@ -95,5 +103,7 @@ export default {
   addStudentToSemester,
   updatedPresentStateToStudent,
   updateSemesterDetails,
-  removePresentStateFromStudent
+  removePresentStateFromStudent,
+  setCalendarSourceUrl,
+  syncCatedraCalendar,
 };

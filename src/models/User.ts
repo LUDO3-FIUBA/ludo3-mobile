@@ -8,6 +8,7 @@ export default class User {
   readonly isStaffFlag: boolean;
   readonly isSuperuserFlag: boolean;
   readonly departmentId: number | null;
+  readonly secretaryId: number | null;
   readonly faceRegistered: boolean;
   readonly githubUrl: string;
   readonly linkedinUrl: string;
@@ -27,6 +28,7 @@ export default class User {
     departmentId: number | null = null,
     linkedinUrl: string = '',
     isBedeliaFlag: boolean = false,
+    secretaryId: number | null = null,
   ) {
     this.dni = dni;
     this.firstName = firstName;
@@ -37,6 +39,7 @@ export default class User {
     this.isStaffFlag = isStaffFlag;
     this.isSuperuserFlag = isSuperuserFlag;
     this.departmentId = departmentId;
+    this.secretaryId = secretaryId;
     this.faceRegistered = faceRegistered;
     this.githubUrl = githubUrl;
     this.linkedinUrl = linkedinUrl;
@@ -67,6 +70,10 @@ export default class User {
     return this.isStaffFlag && !this.isSuperuserFlag && this.departmentId !== null;
   }
 
+  isSecretaryAdmin(): boolean {
+    return this.isStaffFlag && !this.isSuperuserFlag && this.secretaryId !== null;
+  }
+
   isBedelia(): boolean {
     return this.isStaffFlag && !this.isSuperuserFlag && this.isBedeliaFlag;
   }
@@ -89,6 +96,7 @@ export default class User {
       isStaffFlag: this.isStaffFlag,
       isSuperuserFlag: this.isSuperuserFlag,
       departmentId: this.departmentId,
+      secretaryId: this.secretaryId,
       faceRegistered: this.faceRegistered,
       githubUrl: this.githubUrl,
       linkedinUrl: this.linkedinUrl,
