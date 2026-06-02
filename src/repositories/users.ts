@@ -153,6 +153,7 @@ export async function uploadProfilePhoto(image: ProfilePhotoPayload): Promise<Us
     json.linkedin_url ?? '',
     json.is_bedelia === true,
     json.profile_photo ?? null,
+    json.secretary_id ?? null,
   );
 }
 
