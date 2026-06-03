@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import DocumentPicker from 'react-native-document-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { SubmissionFileValue, validateSubmissionFile } from './filePicker.shared';
 
 type FilePickerProps = {
@@ -24,24 +24,33 @@ const FilePicker: React.FC<FilePickerProps> = ({
     }
 
     try {
-      const res = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.pdf, DocumentPicker.types.images],
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+        multiple: false,
       });
 
-      const { uri, name, type, size } = res as any;
-      const errorMessage = validateSubmissionFile({ name, type, size });
+      if (result.canceled) {
+        return;
+      }
+
+      const asset = result.assets[0];
+      const file = {
+        uri: asset.uri,
+        name: asset.name,
+        type: asset.mimeType ?? 'application/octet-stream',
+        size: asset.size,
+      };
+
+      const errorMessage = validateSubmissionFile(file);
 
       if (errorMessage) {
         Alert.alert('Archivo no válido', errorMessage);
         return;
       }
 
-      onChange({ uri, name, type, size });
+      onChange(file);
     } catch (error: any) {
-      if (DocumentPicker.isCancel && DocumentPicker.isCancel(error)) {
-        return;
-      }
-
       console.error('Error picking file', error);
       Alert.alert('Error', 'No se pudo seleccionar el archivo.');
     }
