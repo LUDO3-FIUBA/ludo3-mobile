@@ -135,14 +135,13 @@ const ProfileScreen: React.FC = () => {
       const linkedinUrl = values.linkedinUrl ?? '';
       const githubUrl = values.githubUrl ?? '';
 
-      const ops: Promise<void>[] = [];
-      if (linkedinUrl !== initialValues.linkedinUrl) {
-        ops.push(usersRepository.updateLinkedinUrl(linkedinUrl));
+      const updates: { linkedin_url?: string; github_url?: string } = {};
+      if (linkedinUrl !== initialValues.linkedinUrl) updates.linkedin_url = linkedinUrl;
+      if (githubUrl !== initialValues.githubUrl) updates.github_url = githubUrl;
+
+      if (Object.keys(updates).length > 0) {
+        await usersRepository.updateProfile(updates);
       }
-      if (githubUrl !== initialValues.githubUrl) {
-        ops.push(usersRepository.updateGithubUrl(githubUrl));
-      }
-      await Promise.all(ops);
 
       setInitialValues({ linkedinUrl, githubUrl });
       setSuccessMessage('Perfil actualizado correctamente.');
@@ -249,12 +248,6 @@ const ProfileScreen: React.FC = () => {
             </TouchableOpacity>
           ) : null}
 
-          {successMessage ? (
-            <View style={styles.successBanner}>
-              <Text style={styles.successText}>{successMessage}</Text>
-            </View>
-          ) : null}
-
             {/* Profile photo */}
             <Text style={styles.sectionTitle}>Foto de perfil</Text>
             <View style={styles.photoSection}>
@@ -278,52 +271,6 @@ const ProfileScreen: React.FC = () => {
                 </TouchableOpacity>
               ) : null}
             </View>
-
-            <Text style={styles.description}>
-              Asociá tus perfiles profesionales (opcional). Otros miembros de la plataforma podrán verlos.
-            </Text>
-
-            <Text style={styles.sectionTitle}>LinkedIn</Text>
-            <FormField
-              label="URL de LinkedIn"
-              value={values.linkedinUrl}
-              onChangeText={handleChange('linkedinUrl')}
-              onBlur={handleBlur('linkedinUrl')}
-              placeholder="https://linkedin.com/in/tu-perfil"
-              keyboardType="url"
-              autoCapitalize="none"
-              autoCorrect={false}
-              error={touched.linkedinUrl ? errors.linkedinUrl : undefined}
-            />
-            {values.linkedinUrl && !errors.linkedinUrl ? (
-              <TouchableOpacity
-                style={styles.previewLink}
-                onPress={() => Linking.openURL(values.linkedinUrl)}
-              >
-                <Text style={[styles.previewLinkText, { color: '#0a66c2' }]}>Abrir en LinkedIn</Text>
-              </TouchableOpacity>
-            ) : null}
-
-            <Text style={styles.sectionTitle}>GitHub</Text>
-            <FormField
-              label="URL de GitHub"
-              value={values.githubUrl}
-              onChangeText={handleChange('githubUrl')}
-              onBlur={handleBlur('githubUrl')}
-              placeholder="https://github.com/tu-usuario"
-              keyboardType="url"
-              autoCapitalize="none"
-              autoCorrect={false}
-              error={touched.githubUrl ? errors.githubUrl : undefined}
-            />
-            {values.githubUrl && !errors.githubUrl ? (
-              <TouchableOpacity
-                style={styles.previewLink}
-                onPress={() => Linking.openURL(values.githubUrl)}
-              >
-                <Text style={[styles.previewLinkText, { color: '#0d1117' }]}>Abrir en GitHub</Text>
-              </TouchableOpacity>
-            ) : null}
 
             {successMessage ? (
               <View style={styles.successBanner}>

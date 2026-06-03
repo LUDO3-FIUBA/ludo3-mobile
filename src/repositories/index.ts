@@ -38,3 +38,4 @@ export { default as studyGroupsRepository } from './studyGroups';
 
 export { default as catedraCalendarRepository } from './catedraCalendarRepository';
 export { default as careersRepository } from './careers';
+export { default as teachersRepository } from './teachers';
