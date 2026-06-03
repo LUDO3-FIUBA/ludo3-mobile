@@ -91,6 +91,7 @@ import FiubaPlanScreen from '../fiuba_plan';
 import ViewSemesterScreen from '../view_semester';
 import MyAttendancesScreen from '../view_semester/MyAttendances';
 import MySubmissionsScreen from '../view_semester/MySubmissions';
+import SemesterAnnouncementsScreen from '../view_semester/SemesterAnnouncements';
 import CorrelativeSubjects from '../correlative_subjects';
 import ViewEvaluationsScreen from '../view_evaluations';
 import ViewEvaluationDetailsScreen from '../view_evaluation_details';
@@ -193,6 +194,7 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   ViewSemester: ViewSemesterScreen,
   MyAttendances: MyAttendancesScreen,
   MySubmissions: MySubmissionsScreen,
+  SemesterAnnouncements: SemesterAnnouncementsScreen,
   CorrelativeSubjects: CorrelativeSubjects,
   ViewEvaluations: ViewEvaluationsScreen,
   ViewEvaluationDetails: ViewEvaluationDetailsScreen,

@@ -6,7 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import {
   SplashScreen, LandingScreen, PreRegisterScreen, PreRegisterPasswordScreen, TakePictureStepScreen, PreRegisterLastInstructionsScreen,
-  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, AttendanceLocationSubmitScreen, MySubmissionsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, ViewCatedraDetailsScreen, TeachersScreen, StatsScreen,
+  RootDrawer, CorrelativeSubjects, ViewSemesterScreen, MyAttendancesScreen, AttendanceLocationSubmitScreen, MySubmissionsScreen, SemesterAnnouncementsScreen, ViewEvaluationsScreen, ViewEvaluationDetailsScreen, AddEvaluationSubmissionScreen, ViewFinalDetailsScreen, ViewClassDetailsScreen, ViewCatedraDetailsScreen, TeachersScreen, StatsScreen,
   GoogleRegisterScreen,
   ChangePasswordScreen,
   ForgotPasswordRequestScreen,
@@ -164,6 +164,7 @@ const skipOnMobile = (name: string): boolean =>
 // shadow the drawer one.
 const WEB_DRAWER_EMBEDDED_ROUTES = new Set<string>([
   'ViewSemester', 'MyAttendances', 'MySubmissions', 'CorrelativeSubjects',
+  'SemesterAnnouncements',
   'ViewEvaluations', 'ViewEvaluationDetails', 'AddEvaluationSubmission',
   'ViewFinalDetails', 'ViewClassDetails', 'Teachers', 'Stats',
   'StudentCredential', 'StudentStats', 'CurrentCommissionInscriptions',
@@ -287,6 +288,14 @@ const App = () => {
                   name="MySubmissions"
                   component={MySubmissionsScreen}
                   options={{ headerShown: true, title: 'Mis entregas' }}
+                />
+              )}
+
+              {!skipOnWeb('SemesterAnnouncements') && (
+                <Stack.Screen
+                  name="SemesterAnnouncements"
+                  component={SemesterAnnouncementsScreen}
+                  options={{ headerShown: true, title: 'Anuncios' }}
                 />
               )}
 
