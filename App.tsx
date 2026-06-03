@@ -36,6 +36,8 @@ import {
   ContactsScreen,
   ContactSubjectsScreen,
   ScheduleComparisonScreen,
+  ContactDetailScreen,
+  TeacherProfileScreen,
   StudyGroupsScreen,
   GroupInviteScreen,
   GroupScheduleScreen,
@@ -170,7 +172,7 @@ const WEB_DRAWER_EMBEDDED_ROUTES = new Set<string>([
   'StudentCredential', 'StudentStats', 'CurrentCommissionInscriptions',
   'ApprovedSubjects', 'PendingSubjects', 'StudentDepartmentList', 'FormsList',
   'StudentUsefulLinks', 'TeacherUsefulLinks', 'Map', 'FiubaPlan', 'FiubaMap',
-  'Contacts', 'ContactSubjects', 'ContactSchedule',
+  'Contacts', 'ContactSubjects', 'ContactSchedule', 'ContactDetail',
   'StudyGroups', 'GroupSchedule', 'GroupInvite',
   'CreateSemester', 'TeacherForms', 'AdminDepartmentList', 'AdminCommissionList',
   'AdminUserSearch', 'AdminNotificationList', 'FormsManager',
@@ -344,6 +346,8 @@ const App = () => {
               {!skipOnWeb('StudyGroups') && <Stack.Screen name="StudyGroups" component={StudyGroupsScreen} options={{ headerShown: true, title: 'Grupos de estudio' }} />}
               <Stack.Screen name="ContactSubjects" component={ContactSubjectsScreen} options={{ headerShown: true, title: 'Materias en curso' }} />
               <Stack.Screen name="ContactSchedule" component={ScheduleComparisonScreen} options={{ headerShown: true, title: 'Comparar horarios' }} />
+              <Stack.Screen name="ContactDetail" component={ContactDetailScreen} options={{ headerShown: true, title: 'Perfil del contacto' }} />
+              <Stack.Screen name="TeacherProfile" component={TeacherProfileScreen} options={{ headerShown: true, title: 'Perfil del docente' }} />
               <Stack.Screen name="GroupInvite" component={GroupInviteScreen} options={{ headerShown: true, title: 'Invitar al grupo' }} />
               <Stack.Screen name="GroupSchedule" component={GroupScheduleScreen} options={{ headerShown: true, title: 'Horario del grupo' }} />
               {!skipOnWeb('CreateSemester') && <Stack.Screen name="CreateSemester" component={CreateSemester} options={{ headerShown: true, title: 'Crear cuatrimestre' }} />}

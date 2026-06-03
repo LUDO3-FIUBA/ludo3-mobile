@@ -103,7 +103,8 @@ const ContactCard: React.FC<{
   onRemove: (id: number) => void;
   onViewSubjects: (contact: Contact) => void;
   onViewSchedule: (contact: Contact) => void;
-}> = ({ contact, onAccept, onRemove, onViewSubjects, onViewSchedule }) => {
+  onViewProfile: (contact: Contact) => void;
+}> = ({ contact, onAccept, onRemove, onViewSubjects, onViewSchedule, onViewProfile }) => {
   const isPending = contact.status === 'P';
   const isReceived = isPending && !contact.is_sender;
 
@@ -125,6 +126,11 @@ const ContactCard: React.FC<{
         {isReceived && (
           <TouchableOpacity accessibilityLabel="aceptar-contacto" style={styles.acceptBtn} onPress={() => onAccept(contact.id)}>
             <Icon name="check" size={20} color="white" />
+          </TouchableOpacity>
+        )}
+        {!isPending && (
+          <TouchableOpacity accessibilityLabel="ver-perfil" style={styles.subjectsBtn} onPress={() => onViewProfile(contact)}>
+            <Icon name="account-details" size={20} color={lightModeColors.mainColor} />
           </TouchableOpacity>
         )}
         {!isPending && (
@@ -219,6 +225,10 @@ const ContactsScreen: React.FC<any> = () => {
     navigation.navigate('ContactSchedule' as never, { contact } as never);
   };
 
+  const handleViewProfile = (contact: Contact) => {
+    navigation.navigate('ContactDetail' as never, { contact } as never);
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -250,6 +260,7 @@ const ContactsScreen: React.FC<any> = () => {
             onRemove={handleRemove}
             onViewSubjects={handleViewSubjects}
             onViewSchedule={handleViewSchedule}
+            onViewProfile={handleViewProfile}
           />
         )}
         ListEmptyComponent={

@@ -106,6 +106,10 @@ export function updateLinkedinUrl(url: string): Promise<void> {
   return patch(`${domainUrl}/me`, { linkedin_url: url }).then(() => Promise.resolve());
 }
 
+export function updateProfile(updates: { github_url?: string; linkedin_url?: string }): Promise<void> {
+  return patch(`${domainUrl}/me`, updates).then(() => Promise.resolve());
+}
+
 export function removeProfilePhoto(): Promise<void> {
   return patch(`${domainUrl}/me`, { profile_photo: null }).then(() => Promise.resolve());
 }
@@ -169,6 +173,7 @@ export default {
   getInfo,
   updateGithubUrl,
   updateLinkedinUrl,
+  updateProfile,
   uploadProfilePhoto,
   removeProfilePhoto,
   IdentityFail,

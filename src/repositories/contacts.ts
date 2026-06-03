@@ -4,6 +4,9 @@ export interface ContactStudent {
   padron: string;
   full_name: string;
   email: string;
+  linkedin_url?: string;
+  github_url?: string;
+  profile_photo?: string | null;
 }
 
 export interface Contact {

@@ -1,6 +1,6 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, ToastAndroid, TouchableOpacity, Linking } from 'react-native';
+import { SafeAreaView, View, Text, TextInput, FlatList, Image, StyleSheet, ToastAndroid, TouchableOpacity } from 'react-native';
 import { lightModeColors } from '../../styles/colorPalette';
 import { Teacher, TeacherTuple, ChiefTeacher } from '../../models';
 import { commissionsRepository } from '../../repositories';
@@ -9,26 +9,24 @@ import AlertDialog from '../../components/AlertDialog';
 const UserIcon = require('./img/usericon.jpg');
 
 
-const ChiefCard = ({ first_name, last_name, email, github_url }: ChiefTeacher) => {
+const ChiefCard = ({ chief, onViewProfile }: { chief: ChiefTeacher; onViewProfile: (id: number, role: string) => void }) => {
   return (
     <View style={styles.leaderCardContainer}>
       <Image source={UserIcon} style={styles.leaderImage} />
       <View style={styles.leaderInfoContainer}>
-        <Text style={styles.leaderName}>{first_name} {last_name}</Text>
+        <Text style={styles.leaderName}>{chief.first_name} {chief.last_name}</Text>
         <Text style={styles.leaderRole}>Profesor Titular</Text>
-        <CopyableEmailText email={email} />
-        {github_url ? (
-          <TouchableOpacity onPress={() => Linking.openURL(github_url)}>
-            <Text style={styles.githubLink}>GitHub</Text>
-          </TouchableOpacity>
-        ) : null}
+        <CopyableEmailText email={chief.email} />
+        <TouchableOpacity onPress={() => onViewProfile(chief.id, 'Profesor Titular')}>
+          <Text style={styles.githubLink}>Ver perfil</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
 
-const TeacherCard = ({ teacher, role}: { teacher: Teacher, role: string }) => {
+const TeacherCard = ({ teacher, role, onViewProfile }: { teacher: Teacher; role: string; onViewProfile: (id: number, role: string) => void }) => {
   return (
     <View style={styles.cardContainer}>
       <Image source={UserIcon} style={styles.image} />
@@ -36,11 +34,9 @@ const TeacherCard = ({ teacher, role}: { teacher: Teacher, role: string }) => {
         <Text style={styles.name}>{teacher.first_name + ' ' + teacher.last_name} </Text>
         <Text style={styles.role}>{role}</Text>
         <CopyableEmailText email={teacher.email} />
-        {teacher.github_url ? (
-          <TouchableOpacity onPress={() => Linking.openURL(teacher.github_url!)}>
-            <Text style={styles.githubLink}>GitHub</Text>
-          </TouchableOpacity>
-        ) : null}
+        <TouchableOpacity onPress={() => onViewProfile(teacher.id, role)}>
+          <Text style={styles.githubLink}>Ver perfil</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -90,7 +86,11 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
     });
     return focusUnsubscribe;
   }, [])
-  
+
+  const handleViewProfile = (teacherUserId: number, role: string) => {
+    (navigation as any).navigate('TeacherProfile', { teacherUserId, role });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <AlertDialog
@@ -101,13 +101,15 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
         confirmLabel="Aceptar"
         onConfirm={() => setAlertDialog(null)}
       />
-      {chiefTeacher && <ChiefCard {...chiefTeacher} />}
+      {chiefTeacher && <ChiefCard chief={chiefTeacher} onViewProfile={handleViewProfile} />}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Cuerpo docente</Text>
       </View>
       <FlatList
         data={staffTeachers}
-        renderItem={({ item }) => <TeacherCard teacher={item.teacher} role={item.role} />}
+        renderItem={({ item }) => (
+          <TeacherCard teacher={item.teacher} role={item.role} onViewProfile={handleViewProfile} />
+        )}
         keyExtractor={item => item.teacher.dni}
         style={styles.list}
         ListEmptyComponent={() => <Text style={styles.emptyStaffTeachersList}>No hay docentes auxiliares</Text>}
