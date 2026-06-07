@@ -8,4 +8,5 @@ export default interface AdminNotification {
   sendEmail: boolean;
   image: string | null;
   recipientCount: number;
+  department: { id: number; name: string } | null;
 }
