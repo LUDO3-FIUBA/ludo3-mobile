@@ -73,6 +73,12 @@ const NotificationList: React.FC = () => {
                         )}
                     </View>
                     <Text style={styles.itemMessage} numberOfLines={2}>{item.message}</Text>
+                    {item.department && (
+                        <View style={styles.departmentChip}>
+                            <MaterialIcon name="office-building" fontSize={12} color="#1e40af" />
+                            <Text style={styles.departmentChipText}>{item.department.name}</Text>
+                        </View>
+                    )}
                     <View style={styles.itemFooter}>
                         <Text style={styles.itemMeta}>
                             {new Date(item.createdAt).toLocaleString()}
@@ -172,6 +178,22 @@ const styles = StyleSheet.create({
     recipientCount: {
         fontSize: 12,
         color: '#6b7280',
+        fontWeight: '600',
+    },
+    departmentChip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        gap: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        backgroundColor: '#dbeafe',
+        borderRadius: 12,
+        marginBottom: 8,
+    },
+    departmentChipText: {
+        fontSize: 11,
+        color: '#1e40af',
         fontWeight: '600',
     },
 });

@@ -12,6 +12,7 @@ export default interface News {
   tag: string;
   tagLabel: string;
   tagColor: string;
+  department?: { id: number; name: string } | null;
   createdAt: string;
   updatedAt: string;
 }

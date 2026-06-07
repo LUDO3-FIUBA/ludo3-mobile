@@ -83,8 +83,15 @@ const NewsDetail: React.FC = () => {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <ImageComponent uri={post.image} imageStyle={styles.picture} expandOnPress />
 
-      <View style={[styles.tagChip, { backgroundColor: post.tagColor }]}>
-        <Text style={styles.tagChipText}>{post.tagLabel}</Text>
+      <View style={styles.tagRow}>
+        <View style={[styles.tagChip, { backgroundColor: post.tagColor }]}>
+          <Text style={styles.tagChipText}>{post.tagLabel}</Text>
+        </View>
+        {post.department && (
+          <View style={styles.deptChip}>
+            <Text style={styles.deptChipText}>Depto {post.department.name}</Text>
+          </View>
+        )}
       </View>
 
       <Text style={styles.title}>{post.title}</Text>
@@ -160,15 +167,30 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
   },
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 8,
+  },
   tagChip: {
-    alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    marginBottom: 8,
   },
   tagChipText: {
     color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  deptChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#dbeafe',
+  },
+  deptChipText: {
+    color: '#1e40af',
     fontSize: 12,
     fontWeight: '600',
   },

@@ -23,6 +23,7 @@ export interface NewsPayload {
   description?: string;
   tag: string;
   image?: NewsImagePayload | null;
+  departmentId?: number | null;
 }
 
 export async function fetchAll(): Promise<News[]> {
@@ -46,6 +47,9 @@ async function buildFormData(payload: NewsPayload): Promise<FormData> {
   formData.append('tag', payload.tag);
   if (payload.description !== undefined) {
     formData.append('description', payload.description);
+  }
+  if (payload.departmentId !== undefined && payload.departmentId !== null) {
+    formData.append('department_id', String(payload.departmentId));
   }
   if (payload.image) {
     if (Platform.OS === 'web') {

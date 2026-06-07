@@ -85,8 +85,15 @@ const NewsList: React.FC<Props> = ({ isAdmin }) => {
         >
           <ImageComponent uri={item.image} imageStyle={styles.thumbnail} />
           <View style={styles.itemContent}>
-            <View style={[styles.tagChip, { backgroundColor: item.tagColor }]}>
-              <Text style={styles.tagChipText}>{item.tagLabel}</Text>
+            <View style={styles.tagRow}>
+              <View style={[styles.tagChip, { backgroundColor: item.tagColor }]}>
+                <Text style={styles.tagChipText}>{item.tagLabel}</Text>
+              </View>
+              {item.department && (
+                <View style={styles.deptChip}>
+                  <Text style={styles.deptChipText}>Depto {item.department.name}</Text>
+                </View>
+              )}
             </View>
             <Text style={styles.itemTitle}>{item.title}</Text>
             {item.description ? (
@@ -147,15 +154,30 @@ const styles = StyleSheet.create({
   itemContent: {
     padding: 14,
   },
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 6,
+  },
   tagChip: {
-    alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    marginBottom: 6,
   },
   tagChipText: {
     color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  deptChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: '#dbeafe',
+  },
+  deptChipText: {
+    color: '#1e40af',
     fontSize: 12,
     fontWeight: '600',
   },
