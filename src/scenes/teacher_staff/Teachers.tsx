@@ -79,7 +79,7 @@ const TeachersScreen = ({ route }: TeachersScreenProps) => {
       ),
     };
     navigation.setOptions(navOptions);
-  }, [commissionId, navigation, staffTeachers])
+  }, [commissionId, navigation, staffTeachers, isActualUserChiefTeacher])
 
 
   const fetchData = useCallback(async () => {

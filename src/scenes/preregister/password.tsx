@@ -13,7 +13,8 @@ interface Props {
 }
 
 const PreRegisterPasswordScreen: FunctionComponent<Props> = ({ navigation, route }) => {
-  const { dni, padron } = route.params;
+  const { role = 'student', dni, padron, legajo, email, firstName, lastName } = route.params ?? {};
+  const isTeacher = role === 'teacher';
   const [password, setPassword] = useState('');
   const [registering, setRegistering] = useState(false);
   const [blockingError, setBlockingError] = useState<{ title: string; message: string } | null>(null);
@@ -35,6 +36,28 @@ const PreRegisterPasswordScreen: FunctionComponent<Props> = ({ navigation, route
       ).toObject(),
       title: 'Pre-registro',
     });
+  };
+
+  const registerTeacher = async () => {
+    setRegistering(true);
+    try {
+      await authenticationRepository.preregisterTeacher(dni, legajo, email, firstName, lastName, password);
+      navigation.navigate('PreRegisterDone');
+    } catch (error: any) {
+      if (error instanceof authenticationRepository.InvalidDNI) {
+        setBlockingError({
+          title: 'DNI ya registrado',
+          message: 'Chequeá haberlo ingresado correctamente. De ser correcto, contactate con Admisión para resetear la cuenta asociada a este DNI.',
+        });
+      } else {
+        setBlockingError({
+          title: 'Error inesperado',
+          message: 'Hubo un error inesperado. Intentá nuevamente en unos minutos.',
+        });
+      }
+    } finally {
+      setRegistering(false);
+    }
   };
 
   const registerWithoutFace = async () => {
@@ -72,37 +95,47 @@ const PreRegisterPasswordScreen: FunctionComponent<Props> = ({ navigation, route
                 Contraseña
               </Text>
             </View>
-            <Text style={[style().text, { fontSize: 14, marginBottom: 12, opacity: 0.8 }]}>
-              Ingresá la misma contraseña que usás en el SIU Guaraní
-            </Text>
+            {!isTeacher && (
+              <Text style={[style().text, { fontSize: 14, marginBottom: 12, opacity: 0.8 }]}>
+                Ingresá la misma contraseña que usás en el SIU Guaraní
+              </Text>
+            )}
             <PasswordInput
               value={password}
               onChangeText={setPassword}
-              placeholder="Contraseña del SIU Guaraní"
+              placeholder={isTeacher ? 'Elegí una contraseña' : 'Contraseña del SIU Guaraní'}
               editable={!registering}
             />
             <RoundedButton
-              text={registering ? 'Registrando...' : 'Siguiente'}
+              text={
+                registering
+                  ? 'Registrando...'
+                  : isTeacher
+                    ? 'Registrarme'
+                    : 'Siguiente'
+              }
               enabled={passwordValid && !registering}
               style={style().button}
-              onPress={goToFaceCapture}
+              onPress={isTeacher ? registerTeacher : goToFaceCapture}
             />
-            <TouchableOpacity
-              disabled={!passwordValid || registering}
-              onPress={() => setShowSkipConfirm(true)}
-              style={{ alignItems: 'center', marginTop: 12, padding: 10 }}
-            >
-              <Text
-                style={{
-                  color: passwordValid && !registering ? '#4a90e2' : '#9aa0a6',
-                  fontSize: 15,
-                  fontWeight: '600',
-                  textDecorationLine: 'underline',
-                }}
+            {!isTeacher && (
+              <TouchableOpacity
+                disabled={!passwordValid || registering}
+                onPress={() => setShowSkipConfirm(true)}
+                style={{ alignItems: 'center', marginTop: 12, padding: 10 }}
               >
-                Continuar sin foto
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  style={{
+                    color: passwordValid && !registering ? '#4a90e2' : '#9aa0a6',
+                    fontSize: 15,
+                    fontWeight: '600',
+                    textDecorationLine: 'underline',
+                  }}
+                >
+                  Continuar sin foto
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </KeyboardAwareScrollView>
       </SafeAreaView>
