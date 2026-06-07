@@ -104,6 +104,35 @@ export function preregister(
   });
 }
 
+export function preregisterTeacher(
+  dni: string,
+  legajo: string,
+  email: string,
+  firstName: string,
+  lastName: string,
+  password: string,
+): Promise<object> {
+  const body = {
+    dni,
+    legajo,
+    email,
+    first_name: firstName,
+    last_name: lastName,
+    password,
+    is_student: false,
+    is_teacher: true,
+  };
+  return publicPost(`${authUrl}/users`, body).catch(error => {
+    if (
+      error instanceof StatusCodeError &&
+      error.fieldErrorIsBecauseOf('dni', 'unique')
+    ) {
+      return Promise.reject(new InvalidDNI());
+    }
+    return Promise.reject(error);
+  });
+}
+
 export function login(dni: string, password: string): Promise<object> {
   return publicPost(`${authUrl}/login`, {dni, password}).catch(
     (error: StatusCodeError) => {
@@ -247,6 +276,7 @@ export function getErrorMessage(
 
 export default {
   preregister,
+  preregisterTeacher,
   login,
   refresh,
   changePassword,
