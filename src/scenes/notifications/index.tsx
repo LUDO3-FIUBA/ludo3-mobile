@@ -196,6 +196,13 @@ const NotificationsScreen: React.FC = () => {
                                             : ''}
                                     </Text>
                                 </View>
+                            ) : item.notification.department ? (
+                                <View style={styles.contextRow}>
+                                    <MaterialIcon name="office-building" fontSize={13} color="#1e40af" />
+                                    <Text style={[styles.contextText, { color: '#1e40af', fontWeight: '600' }]} numberOfLines={1}>
+                                        Depto {item.notification.department.name}
+                                    </Text>
+                                </View>
                             ) : (
                                 <View style={styles.contextRow}>
                                     <MaterialIcon name="bullhorn" fontSize={13} color="#6b7280" />

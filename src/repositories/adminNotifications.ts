@@ -25,6 +25,7 @@ export interface CreateNotificationPayload {
     sendEmail: boolean;
     recipientGroups: string[];
     image?: { uri: string; type: string; name: string } | null;
+    departmentId?: number | null;
 }
 
 export async function createNotification(payload: CreateNotificationPayload): Promise<AdminNotification> {
@@ -40,6 +41,10 @@ export async function createNotification(payload: CreateNotificationPayload): Pr
 
     if (payload.image) {
         formData.append('image', payload.image as any);
+    }
+
+    if (payload.departmentId !== undefined && payload.departmentId !== null) {
+        formData.append('department_id', String(payload.departmentId));
     }
 
     const response = await fetch(`${baseUrl}/${BASE_URL}/`, {

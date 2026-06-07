@@ -20,6 +20,7 @@ export interface Notification {
     sender_name?: string | null;
     semester_info?: SemesterInfo | null;
     action_url?: string | null;
+    department?: { id: number; name: string } | null;
 }
 
 export interface UserNotification {
