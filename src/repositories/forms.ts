@@ -1,5 +1,5 @@
 import { get, post, postMultipart, putMultipart, deleteMethod, put, patch } from './authenticatedRepository';
-import FormProcedureType from '../models/FormProcedureType';
+import FormOwnershipGroup, { EligibleEntity, FormOwnershipGroupDetail, OwnershipMemberInput } from '../models/FormOwnershipGroup';
 import Form from '../models/Form';
 import FormDetail from '../models/FormDetail';
 import FormSubmission, { FormSubmissionStatusValue, TeacherValidationStatusValue } from '../models/FormSubmission';
@@ -22,12 +22,35 @@ export async function fetchFormTypes(): Promise<{ id: number; value: string }[]>
   return (await get(`${BASE}/form-types`)) as { id: number; value: string }[];
 }
 
-export async function fetchProcedureTypes(): Promise<FormProcedureType[]> {
-  return (await get(`${BASE}/form-procedure-types`)) as FormProcedureType[];
+export async function fetchOwnershipGroups(): Promise<FormOwnershipGroup[]> {
+  return (await get(`${BASE}/ownership-groups`)) as FormOwnershipGroup[];
 }
 
-export async function fetchForms(procedureId?: number): Promise<Form[]> {
-  const params = procedureId ? [{ key: 'procedure_id', value: procedureId }] : [];
+export async function fetchOwnershipGroup(id: number): Promise<FormOwnershipGroupDetail> {
+  return (await get(`${BASE}/ownership-groups/${id}`)) as FormOwnershipGroupDetail;
+}
+
+export async function fetchEligibleEntities(): Promise<EligibleEntity[]> {
+  return (await get(`${BASE}/ownership-groups/eligible-entities`)) as EligibleEntity[];
+}
+
+export async function createOwnershipGroup(
+  name: string,
+  members?: OwnershipMemberInput[],
+): Promise<FormOwnershipGroup> {
+  return (await post(`${BASE}/ownership-groups`, { name, members: members ?? [] })) as FormOwnershipGroup;
+}
+
+export async function updateOwnershipGroup(id: number, name: string, members: OwnershipMemberInput[]): Promise<FormOwnershipGroup> {
+  return (await put(`${BASE}/ownership-groups/${id}`, { name, members })) as FormOwnershipGroup;
+}
+
+export async function deleteOwnershipGroup(id: number): Promise<void> {
+  await deleteMethod(`${BASE}/ownership-groups/${id}`, {});
+}
+
+export async function fetchForms(groupId?: number): Promise<Form[]> {
+  const params = groupId ? [{ key: 'group_id', value: groupId }] : [];
   return (await get(`${BASE}/forms`, params)) as Form[];
 }
 
@@ -39,8 +62,15 @@ export async function submitDigitalForm(
   formId: number,
   answers: { field_id: number; answer_value: string | null }[],
   teacherId?: number,
+  recipientEntityType?: string | null,
+  recipientEntityId?: number | null,
 ): Promise<void> {
-  await post(`${BASE}/forms/${formId}/submissions`, { answers, teacher_id: teacherId });
+  await post(`${BASE}/forms/${formId}/submissions`, {
+    answers,
+    teacher_id: teacherId,
+    recipient_entity_type: recipientEntityType ?? undefined,
+    recipient_entity_id: recipientEntityId ?? undefined,
+  });
 }
 
 export async function submitDigitalFormWithAdjunto(
@@ -48,10 +78,14 @@ export async function submitDigitalFormWithAdjunto(
   answers: { field_id: number; answer_value: string | null }[],
   adjuntoFile: LocalFile,
   teacherId?: number,
+  recipientEntityType?: string | null,
+  recipientEntityId?: number | null,
 ): Promise<void> {
   const fd = new FormData();
   fd.append('answers', JSON.stringify(answers));
   if (teacherId !== undefined) fd.append('teacher_id', String(teacherId));
+  if (recipientEntityType != null) fd.append('recipient_entity_type', recipientEntityType);
+  if (recipientEntityId != null) fd.append('recipient_entity_id', String(recipientEntityId));
   if (adjuntoFile.file) {
     // Web (Expo web / browser): use the native browser File object.
     fd.append('file', adjuntoFile.file, adjuntoFile.name);
@@ -66,9 +100,13 @@ export async function submitDocumentForm(
   formId: number,
   file: LocalFile,
   teacherId?: number,
+  recipientEntityType?: string | null,
+  recipientEntityId?: number | null,
 ): Promise<FormSubmission> {
   const fd = new FormData();
   if (teacherId !== undefined) fd.append('teacher_id', String(teacherId));
+  if (recipientEntityType != null) fd.append('recipient_entity_type', recipientEntityType);
+  if (recipientEntityId != null) fd.append('recipient_entity_id', String(recipientEntityId));
   if (file.file) {
     // Web (Expo web / browser): expo-document-picker returns a native File object.
     // FormData.append accepts File directly and builds the correct multipart body.
@@ -197,7 +235,12 @@ export async function updateTeacherSubmissionStatus(
 
 export default {
   fetchFormTypes,
-  fetchProcedureTypes,
+  fetchOwnershipGroups,
+  fetchOwnershipGroup,
+  fetchEligibleEntities,
+  createOwnershipGroup,
+  updateOwnershipGroup,
+  deleteOwnershipGroup,
   fetchForms,
   fetchFormDetail,
   submitDigitalForm,

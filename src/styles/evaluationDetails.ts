@@ -57,6 +57,10 @@ export const evaluationDetailsSharedStyles = StyleSheet.create({
   iconMargin: {
     marginRight: 10,
   },
+  filenameContainer: {
+    flex: 1,
+    marginRight: 8,
+  },
   lateText: {
     color: '#E67E22',
   },
@@ -76,6 +80,12 @@ export const evaluationDetailsSharedStyles = StyleSheet.create({
     color: '#333',
     lineHeight: 22,
   },
+  submissionTextSingleLine: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 22,
+    flexShrink: 1,
+  },
   linkText: {
     color: lightModeColors.institutional,
     textDecorationLine: 'underline',
@@ -85,6 +95,9 @@ export const evaluationDetailsSharedStyles = StyleSheet.create({
     fontSize: 15,
     color: 'gray',
     fontStyle: 'italic',
+  },
+  downloadButton: {
+    paddingHorizontal: 6,
   },
   sectionTitle: {
     fontWeight: 'bold',
@@ -150,6 +163,21 @@ export const evaluationDetailsScreenStyles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     backgroundColor: 'white',
+  },
+  editTextButton: {
+    color: lightModeColors.institutional,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+  },
+  emptySubmissionText: {
+    fontSize: 15,
+    color: 'gray',
+    fontStyle: 'italic',
+  },
+  submissionMarkdownBody: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 22,
   },
   saveButton: {
     backgroundColor: lightModeColors.institutional,

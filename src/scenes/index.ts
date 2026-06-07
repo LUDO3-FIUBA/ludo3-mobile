@@ -18,6 +18,7 @@ export { default as ViewSemesterScreen } from './view_semester';
 export { default as MyAttendancesScreen } from './view_semester/MyAttendances';
 export { default as AttendanceLocationSubmitScreen } from './view_semester/AttendanceLocationSubmit';
 export { default as MySubmissionsScreen } from './view_semester/MySubmissions';
+export { default as SemesterAnnouncementsScreen } from './view_semester/SemesterAnnouncements';
 export { default as RootDrawer } from './root_drawer';
 export { default as NotificationsScreen } from './notifications';
 export { default as CorrelativeSubjects } from './correlative_subjects';
@@ -27,6 +28,7 @@ export { default as ViewEvaluationsScreen } from './view_evaluations';
 export { default as ViewEvaluationDetailsScreen } from './view_evaluation_details';
 export { default as ViewFinalDetailsScreen } from './view_final_details';
 export { default as ViewClassDetailsScreen } from './view_class_details';
+export { default as ViewCatedraDetailsScreen } from './view_catedra_details';
 export { default as AddEvaluationSubmissionScreen } from './view_evaluation_details/AddEvaluationSubmission';
 export { default as TeachersScreen } from './teachers';
 export { default as StatsScreen } from './stats';
@@ -74,6 +76,7 @@ export { default as TeacherFormsScreen } from './teacher_forms/TeacherFormsScree
 // Forms — Admin screens
 export { default as FormsManagerScreen } from './admin_forms/FormsManagerScreen';
 export { default as FormDesignerScreen } from './admin_forms/FormDesignerScreen';
+export { default as OwnershipGroupEditorScreen } from './admin_forms/OwnershipGroupEditor';
 // Student identity screens
 export { default as StudentCredentialScreen } from './student_credential';
 export { default as StudentIdentityViewerScreen } from './student_identity_viewer';
@@ -84,3 +87,17 @@ export { default as TeacherProceduresValidationScreen } from './teacher_procedur
 export { default as AdminProceduresManagerScreen } from './admin_procedures';
 export { default as MyAccountScreen } from './my_account';
 export { default as UsefulLinksScreen } from './useful_links';
+export { default as FiubaMapScreen } from './fiuba_map';
+export { default as ContactsScreen, ContactSubjectsScreen } from './contacts';
+export { default as ScheduleComparisonScreen } from './contacts/ScheduleComparisonScreen';
+export { default as ContactDetailScreen } from './contacts/ContactDetailScreen';
+export { default as TeacherProfileScreen } from './teachers/TeacherProfileScreen';
+export { default as StudyGroupsScreen } from './study_groups';
+export { default as GroupInviteScreen } from './study_groups/GroupInviteScreen';
+export { default as GroupScheduleScreen } from './study_groups/GroupScheduleScreen';
+
+
+// Admin Secretaries screens
+export { default as SecretaryListScreen } from './admin_secretaries/SecretaryList';
+export { default as SecretaryDetailScreen } from './admin_secretaries/SecretaryDetail';
+export { default as SecretaryFormScreen } from './admin_secretaries/SecretaryForm';

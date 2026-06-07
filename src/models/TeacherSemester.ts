@@ -12,16 +12,18 @@ export interface TeacherSemester {
   classesAmount: number;
   minimumAttendance: number;
   attendanceQrsCount?: number;
+  calendarSourceUrl?: string | null;
 }
 
 export interface TeacherSemesterSnakeCase {
-  id:                 number;
-  year_moment:        string;
-  start_date:         Date;
-  commission:         TeacherCommission;
-  evaluations:        TeacherEvaluationSnakeCase[];
-  students:           TeacherStudentSnakeCase[];
-  classes_amount:     number;
-  minimum_attendance: number;
+  id:                   number;
+  year_moment:          string;
+  start_date:           Date;
+  commission:           TeacherCommission;
+  evaluations:          TeacherEvaluationSnakeCase[];
+  students:             TeacherStudentSnakeCase[];
+  classes_amount:       number;
+  minimum_attendance:   number;
   attendance_qrs_count?: number;
+  calendar_source_url?: string | null;
 }

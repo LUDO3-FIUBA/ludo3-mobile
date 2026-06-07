@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  DrawerActions,
   DrawerContentComponentProps,
   DrawerContentScrollView,
   createDrawerNavigator,
 } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import {
   Platform,
   StyleSheet,
@@ -16,7 +17,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Loading, ProfileOverview } from '../../components';
+import { Loading } from '../../components';
 import { SessionManager } from '../../managers';
 import { lightModeColors } from '../../styles/colorPalette';
 import { usersRepository } from '../../repositories';
@@ -24,6 +25,7 @@ import notificationsRepository, { UserNotification } from '../../repositories/no
 import User from '../../models/User';
 import { useAppDispatch } from '../../redux/hooks';
 import { fetchUserDataAsync } from '../../redux/reducers/teacherUserDataSlice';
+import { setProfilePhoto } from '../../redux/reducers/currentUserSlice';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 // Screens
@@ -48,18 +50,75 @@ import NotificationForm from '../admin_notifications/NotificationForm';
 import NotificationsScreen from '../notifications';
 import StudentCredentialScreen from '../student_credential';
 import FormsListScreen from '../forms/FormsListScreen';
+import DigitalFormScreen from '../forms/DigitalFormScreen';
+import DocumentFormScreen from '../forms/DocumentFormScreen';
 import TeacherFormsScreen from '../teacher_forms/TeacherFormsScreen';
 import FormsManagerScreen from '../admin_forms/FormsManagerScreen';
+import FormDesignerScreen from '../admin_forms/FormDesignerScreen';
+import OwnershipGroupEditorScreen from '../admin_forms/OwnershipGroupEditor';
+import NewsList from '../news/NewsList';
+import NewsDetail from '../news/NewsDetail';
+import NewsForm from '../news/NewsForm';
+import MapScreen from '../map';
+import UsefulLinksScreen from '../useful_links';
+import ProfileScreen from '../my_account';
+import ChangePasswordScreen from '../password/change';
+import FiubaMapScreen from '../fiuba_map';
+import ContactsScreen, { ContactSubjectsScreen } from '../contacts';
+import ScheduleComparisonScreen from '../contacts/ScheduleComparisonScreen';
+import StudyGroupsScreen from '../study_groups';
+import GroupScheduleScreen from '../study_groups/GroupScheduleScreen';
+import BedeliaClassroomChangeForm from '../bedelia/ClassroomChangeForm';
+import SecretaryList from '../admin_secretaries/SecretaryList';
+import SecretaryDetail from '../admin_secretaries/SecretaryDetail';
+import SecretaryForm from '../admin_secretaries/SecretaryForm';
 
 import {
   resolveMenu, canToggleRole,
   MenuItem, SubmenuItem, DirectItem,
-  studentMenu, teacherMenu, adminMenu,
+  studentMenu, teacherMenu, adminMenu, bedeliaMenu,
   hiddenWebRoutes,
 } from './config/menu_config';
 import NotificationsDropdown from './shared/NotificationsDropdown';
 import HeaderRight from './shared/HeaderRight';
 import ToastCard from './shared/ToastCard';
+import UserMenuDropdown from './web/UserMenuDropdown';
+import FiubaPlanScreen from '../fiuba_plan';
+
+// Detail / sub-page screens that used to be Stack-only on web.
+// IMPORTANT: import directly from each scene to avoid a circular dependency
+// with the scenes barrel (which re-exports RootDrawer).
+import ViewSemesterScreen from '../view_semester';
+import MyAttendancesScreen from '../view_semester/MyAttendances';
+import MySubmissionsScreen from '../view_semester/MySubmissions';
+import SemesterAnnouncementsScreen from '../view_semester/SemesterAnnouncements';
+import CorrelativeSubjects from '../correlative_subjects';
+import ViewEvaluationsScreen from '../view_evaluations';
+import ViewEvaluationDetailsScreen from '../view_evaluation_details';
+import AddEvaluationSubmissionScreen from '../view_evaluation_details/AddEvaluationSubmission';
+import ViewFinalDetailsScreen from '../view_final_details';
+import ViewClassDetailsScreen from '../view_class_details';
+import TeachersScreen from '../teachers';
+import TeacherSemesterStudentsScreen from '../teacher_semester/SemesterStudents';
+import TeacherSemesterEditScreen from '../teacher_semester/SemesterEditScreen';
+import TeacherEvaluationsListScreen from '../teacher_evaluations/EvaluationsList';
+import TeacherAddEvaluationScreen from '../teacher_evaluations/AddEvaluation';
+import TeacherEditEvaluationScreen from '../teacher_evaluations/EditEvaluation';
+import TeacherSubmissionsListScreen from '../teacher_evaluations/SubmissionsList';
+import TeacherSubmissionDetailsScreen from '../teacher_evaluations/SubmissionDetails';
+import TeacherFinalsListScreen from '../teacher_finals/FinalsList';
+import TeacherAddFinalScreen from '../teacher_finals/AddFinal';
+import TeacherFinalExamSubmissionsScreen from '../teacher_finals/FinalExamSubmissions';
+import TeacherStaffScreen from '../teacher_staff/Teachers';
+import TeacherStaffConfigurationScreen from '../teacher_staff/TeachersConfiguration';
+import TeacherAddStaffScreen from '../teacher_staff/AddTeachersConfigurationList';
+import TeacherSemesterAttendancesScreen from '../teacher_attendances/SemesterAttendances';
+import TeacherAttendanceDetailsScreen from '../teacher_attendances/AttendanceDetails';
+import TeacherAddClassToSemesterScreen from '../teacher_attendances/AddClassToSemester';
+import TeacherStatsScreen from '../teacher_stats';
+import TeacherSemesterCardScreen from '../teacher_semester/SemesterCard';
+import TeacherSendCommissionNotificationScreen from '../teacher_notifications/SendCommissionNotification';
+import TeacherSemesterNotificationHistoryScreen from '../teacher_notifications/SemesterNotificationHistory';
 
 type WebViewStyle = ViewStyle & { transition?: string };
 
@@ -71,6 +130,10 @@ const Drawer = createDrawerNavigator();
 
 const StudentDepartmentListScreen = () => <DepartmentList isAdmin={false} />;
 const AdminDepartmentListScreen = () => <DepartmentList isAdmin={true} />;
+const StudentNewsListScreen = () => <NewsList isAdmin={false} />;
+const AdminNewsListScreen = () => <NewsList isAdmin={true} />;
+const StudentSecretaryListScreen = () => <SecretaryList isAdmin={false} />;
+const AdminSecretaryListScreen = () => <SecretaryList isAdmin={true} />;
 
 const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   Home: HomeScreen,
@@ -81,6 +144,15 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   StudentCredential: StudentCredentialScreen,
   StudentStats: StatsScreen,
   FormsList: FormsListScreen,
+  DigitalForm: DigitalFormScreen,
+  DocumentForm: DocumentFormScreen,
+  Map: MapScreen,
+  FiubaMap: FiubaMapScreen,
+  Contacts: ContactsScreen,
+  ContactSubjects: ContactSubjectsScreen,
+  ContactSchedule: ScheduleComparisonScreen,
+  StudyGroups: StudyGroupsScreen,
+  GroupSchedule: GroupScheduleScreen,
   StudentDepartmentList: StudentDepartmentListScreen,
   TeacherHome: TeacherHomeScreen,
   CreateSemester: CreateSemester,
@@ -90,6 +162,9 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserSearch: UserSearch,
   AdminNotificationList: NotificationList,
   FormsManager: FormsManagerScreen,
+  FormDesigner: FormDesignerScreen,
+  OwnershipGroupEditor: OwnershipGroupEditorScreen,
+  BedeliaClassroomChange: BedeliaClassroomChangeForm,
   AdminDepartmentDetail: DepartmentDetail,
   AdminDepartmentCreate: DepartmentForm,
   AdminDepartmentEdit: DepartmentForm,
@@ -99,9 +174,112 @@ const WEB_SCREEN_COMPONENTS: Record<string, React.ComponentType<any>> = {
   AdminUserDetail: UserDetail,
   AdminNotificationCreate: NotificationForm,
   Notifications: NotificationsScreen,
+  StudentNewsList: StudentNewsListScreen,
+  AdminNewsList: AdminNewsListScreen,
+  NewsDetail: NewsDetail,
+  AdminNewsCreate: NewsForm,
+  AdminNewsEdit: NewsForm,
+  StudentUsefulLinks: UsefulLinksScreen,
+  TeacherUsefulLinks: UsefulLinksScreen,
+  StudentSecretaryList: StudentSecretaryListScreen,
+  AdminSecretaryList: AdminSecretaryListScreen,
+  AdminSecretaryDetail: SecretaryDetail,
+  AdminSecretaryCreate: SecretaryForm,
+  AdminSecretaryEdit: SecretaryForm,
+  MyAccount: ProfileScreen,
+  ChangePassword: ChangePasswordScreen,
+  FiubaPlan: FiubaPlanScreen,
+
+  // Student detail / sub-pages
+  ViewSemester: ViewSemesterScreen,
+  MyAttendances: MyAttendancesScreen,
+  MySubmissions: MySubmissionsScreen,
+  SemesterAnnouncements: SemesterAnnouncementsScreen,
+  CorrelativeSubjects: CorrelativeSubjects,
+  ViewEvaluations: ViewEvaluationsScreen,
+  ViewEvaluationDetails: ViewEvaluationDetailsScreen,
+  AddEvaluationSubmission: AddEvaluationSubmissionScreen,
+  ViewFinalDetails: ViewFinalDetailsScreen,
+  ViewClassDetails: ViewClassDetailsScreen,
+  Teachers: TeachersScreen,
+  Stats: StatsScreen,
+
+  // Teacher cuatrimestre sub-pages
+  SemesterCard: TeacherSemesterCardScreen,
+  SemesterStudents: TeacherSemesterStudentsScreen,
+  SemesterEditScreen: TeacherSemesterEditScreen,
+  EvaluationsList: TeacherEvaluationsListScreen,
+  AddEvaluation: TeacherAddEvaluationScreen,
+  EditEvaluation: TeacherEditEvaluationScreen,
+  SubmissionsList: TeacherSubmissionsListScreen,
+  TeacherSubmissionDetails: TeacherSubmissionDetailsScreen,
+  FinalsList: TeacherFinalsListScreen,
+  AddFinal: TeacherAddFinalScreen,
+  FinalExamSubmissions: TeacherFinalExamSubmissionsScreen,
+  TeacherStaff: TeacherStaffScreen,
+  TeachersConfiguration: TeacherStaffConfigurationScreen,
+  AddTeachersConfigurationList: TeacherAddStaffScreen,
+  SemesterAttendances: TeacherSemesterAttendancesScreen,
+  AttendanceDetails: TeacherAttendanceDetailsScreen,
+  AddClassToSemester: TeacherAddClassToSemesterScreen,
+  TeacherStats: TeacherStatsScreen,
+  SendCommissionNotification: TeacherSendCommissionNotificationScreen,
+  SemesterNotificationHistory: TeacherSemesterNotificationHistoryScreen,
+
+  // Forms detail screens
+  DocumentForm: DocumentFormScreen,
+  DigitalForm: DigitalFormScreen,
+  FormDesigner: FormDesignerScreen,
 };
 
 const HIDDEN_OPTIONS = { drawerLabel: () => null, drawerItemStyle: { display: 'none' as const } };
+
+// Every route that's reachable directly from the side menu (top-level item or
+// any submenu child). Used to decide which screens are "roots" and therefore
+// must NOT show a back arrow even if the drawer happens to remember a
+// previously-focused screen.
+function collectMenuRoutes(menu: MenuItem[]): string[] {
+  const routes: string[] = [];
+  for (const item of menu) {
+    if (item.kind === 'direct' && item.route) routes.push(item.route);
+    else if (item.kind === 'submenu') {
+      for (const child of item.children) if (child.route) routes.push(child.route);
+    }
+  }
+  return routes;
+}
+const ALL_MENU_ROUTES = new Set<string>([
+  ...collectMenuRoutes(studentMenu),
+  ...collectMenuRoutes(teacherMenu),
+  ...collectMenuRoutes(adminMenu),
+  ...collectMenuRoutes(bedeliaMenu),
+]);
+
+// Routes that on mobile are Stack screens (and therefore show a back arrow).
+// On web they live inside the drawer, so we replicate the back arrow only for
+// these — drawer-menu items don't get one, matching mobile behavior.
+const BACK_ENABLED_ROUTES = new Set<string>(
+  hiddenWebRoutes.map(r => r.route).filter(r => !ALL_MENU_ROUTES.has(r)),
+);
+
+function HeaderBackButton() {
+  const navigation = useNavigation<any>();
+  const route = useRoute();
+  // No back arrow for drawer-root screens; keep a spacer so the screen title
+  // doesn't end up flush against the side drawer.
+  if (!BACK_ENABLED_ROUTES.has(route.name) || !navigation.canGoBack()) {
+    return <View style={styles.headerLeftSpacer} />;
+  }
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.goBack()}
+      style={styles.headerBackButton}
+      accessibilityLabel="Volver"
+    >
+      <Icon name="arrow-left" size={24} color={lightModeColors.mainContrastColor} />
+    </TouchableOpacity>
+  );
+}
 
 function buildMenuScreens(user: User): Map<string, { title: string; condition: boolean }> {
   const result = new Map<string, { title: string; condition: boolean }>();
@@ -119,7 +297,8 @@ function buildMenuScreens(user: User): Map<string, { title: string; condition: b
 
   add(studentMenu, user.isStudent());
   add(teacherMenu, user.isTeacher());
-  add(adminMenu, user.isAdmin());
+  add(adminMenu, user.isAdmin() && !(user.isBedelia?.() ?? false));
+  add(bedeliaMenu, user.isBedelia?.() ?? false);
 
   return result;
 }
@@ -150,7 +329,7 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       if (item.kind === 'submenu') {
         const hasActive = item.children.some(c => c.route === activeRoute);
         if (hasActive) {
-          setOpenSubmenus(prev => new Set([...prev, item.key]));
+          setOpenSubmenus(new Set([item.key]));
           return;
         }
       }
@@ -164,15 +343,16 @@ function WebDrawerContent(props: WebDrawerContentProps) {
       navigation.reset({ index: 0, routes: [{ name: 'Landing' }] });
       return;
     }
-    if (item.route) navigation.navigate(item.route as never);
+    if (item.route) {
+      // Drawer menu items are navigation roots — reset the drawer history so
+      // the back arrow on sub-pages doesn't surface unrelated screens the user
+      // previously visited (e.g. MyAccount opened via the header user icon).
+      navigation.reset({ index: 0, routes: [{ name: item.route as never }] });
+    }
   };
 
   const handleSubmenuToggle = (key: string) => {
-    setOpenSubmenus(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      return next;
-    });
+    setOpenSubmenus(prev => prev.has(key) ? new Set() : new Set([key]));
   };
 
   const itemColor = () => {
@@ -184,22 +364,22 @@ function WebDrawerContent(props: WebDrawerContentProps) {
 
   return (
     <View style={{ flex: 1 }}>
-      <DrawerContentScrollView {...drawerProps} scrollEnabled={false} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
-        {/* Toggle button */}
-        <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image source={LudoIcon} style={styles.logoImage} />
-            {expanded && (
-              <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 10, color: lightModeColors.institutional, letterSpacing: 1 }}>LUDO</Text>
-            )}
-          </View>
+      {/* Header — outside the scroll view so it stays visible when the menu is tall */}
+      <View style={expanded ? styles.toggleButtonContainer : styles.toggleButtonContainerCollapsed}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image source={LudoIcon} style={styles.logoImage} />
           {expanded && (
-            <TouchableOpacity onPress={() => onSetExpanded(false)} style={styles.iconBox} accessibilityLabel="Colapsar menú">
-              <Icon name="close" size={24} color={lightModeColors.darkGray} />
-            </TouchableOpacity>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 10, color: lightModeColors.institutional, letterSpacing: 1 }}>LUDO</Text>
           )}
         </View>
+        {expanded && (
+          <TouchableOpacity onPress={() => onSetExpanded(false)} style={styles.iconBox} accessibilityLabel="Colapsar menú">
+            <Icon name="close" size={24} color={lightModeColors.darkGray} />
+          </TouchableOpacity>
+        )}
+      </View>
 
+      <DrawerContentScrollView {...drawerProps} style={styles.drawerScroll} contentContainerStyle={{ paddingTop: 0 }}>
         {/* Expand arrow — only when collapsed */}
         {!expanded && (
           <>
@@ -210,95 +390,88 @@ function WebDrawerContent(props: WebDrawerContentProps) {
           </>
         )}
 
-        {/* Profile overview — only when expanded */}
-      {expanded && (
-        <View style={styles.profileSection}>
-          <ProfileOverview />
-        </View>
-      )}
+        {/* Menu items */}
+        <View style={styles.menuList}>
+          {menuItems.map(item => {
+            const accentColor = itemColor();
 
-      {/* Menu items */}
-      <View style={styles.menuList}>
-        {menuItems.map(item => {
-          const accentColor = itemColor();
+            if (item.kind === 'direct') {
+              const active = isActive(item.route);
+              return (
+                <TouchableOpacity
+                  key={item.key}
+                  // @ts-expect-error — title is a valid HTML attribute on web for native tooltips
+                  title={expanded ? undefined : item.label}
+                  onPress={() => handleDirectPress(item)}
+                  accessibilityLabel={item.label}
+                  style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, active && { backgroundColor: `${accentColor}18` }]}
+                >
+                  <View style={styles.iconBox}>
+                    <Icon name={active ? item.icon : item.iconOutline} size={20} color={active ? accentColor : lightModeColors.darkGray} />
+                  </View>
+                  {expanded && (
+                    <Text style={[styles.menuLabel, { color: active ? accentColor : lightModeColors.darkGray }]}>{item.label}</Text>
+                  )}
+                </TouchableOpacity>
+              );
+            }
 
-          if (item.kind === 'direct') {
-            const active = isActive(item.route);
+            // Submenu
+            const submenuItem = item as SubmenuItem;
+            const isOpen = openSubmenus.has(item.key);
+            const hasActiveChild = submenuItem.children.some(c => isActive(c.route));
+            const headerColor = hasActiveChild ? accentColor : lightModeColors.darkGray;
+
             return (
-              <TouchableOpacity
-                key={item.key}
-                // @ts-expect-error — title is a valid HTML attribute on web for native tooltips
-                title={expanded ? undefined : item.label}
-                onPress={() => handleDirectPress(item)}
-                accessibilityLabel={item.label}
-                style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, active && { backgroundColor: `${accentColor}18` }]}
-              >
-                <View style={styles.iconBox}>
-                  <Icon name={active ? item.icon : item.iconOutline} size={20} color={active ? accentColor : lightModeColors.darkGray} />
-                </View>
-                {expanded && (
-                  <Text style={[styles.menuLabel, { color: active ? accentColor : lightModeColors.darkGray }]}>{item.label}</Text>
+              <View key={item.key} style={expanded && { alignSelf: 'stretch' }}>
+                <TouchableOpacity
+                  // @ts-ignore
+                  title={expanded ? undefined : item.label}
+                  onPress={() => {
+                    if (!expanded) {
+                      onSetExpanded(true);
+                      setOpenSubmenus(new Set([item.key]));
+                    } else {
+                      handleSubmenuToggle(item.key);
+                    }
+                  }}
+                  accessibilityLabel={item.label}
+                  style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, hasActiveChild && !expanded && { backgroundColor: `${accentColor}18` }]}
+                >
+                  <View style={styles.iconBox}>
+                    <Icon name={hasActiveChild ? item.icon : item.iconOutline} size={20} color={headerColor} />
+                  </View>
+                  {expanded && (
+                    <>
+                      <Text style={[styles.menuLabel, { color: headerColor, flex: 1 }]}>{item.label}</Text>
+                      <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={lightModeColors.darkGray} />
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                {expanded && isOpen && (
+                  <View style={styles.submenuList}>
+                    {submenuItem.children.map(child => {
+                      const childAccent = itemColor();
+                      const childActive = isActive(child.route);
+                      return (
+                        <TouchableOpacity
+                          key={child.key}
+                          onPress={() => handleDirectPress(child)}
+                          accessibilityLabel={child.label}
+                          style={[styles.submenuRow, childActive && { backgroundColor: `${childAccent}18` }]}
+                        >
+                          <Icon name={childActive ? child.icon : child.iconOutline} size={18} color={childActive ? childAccent : lightModeColors.darkGray} style={styles.submenuIcon} />
+                          <Text style={[styles.submenuLabel, { color: childActive ? childAccent : lightModeColors.darkGray }]}>{child.label}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 )}
-              </TouchableOpacity>
+              </View>
             );
-          }
-
-          // Submenu
-          const submenuItem = item as SubmenuItem;
-          const isOpen = openSubmenus.has(item.key);
-          const hasActiveChild = submenuItem.children.some(c => isActive(c.route));
-          const headerColor = hasActiveChild ? accentColor : lightModeColors.darkGray;
-
-          return (
-            <View key={item.key} style={expanded && { alignSelf: 'stretch' }}>
-              <TouchableOpacity
-                // @ts-ignore
-                title={expanded ? undefined : item.label}
-                onPress={() => {
-                if (!expanded) {
-                  onSetExpanded(true);
-                  setOpenSubmenus(prev => new Set([...prev, item.key]));
-                } else {
-                  handleSubmenuToggle(item.key);
-                }
-              }}
-                accessibilityLabel={item.label}
-                style={[styles.menuRow, expanded && { alignSelf: 'stretch' }, hasActiveChild && !expanded && { backgroundColor: `${accentColor}18` }]}
-              >
-                <View style={styles.iconBox}>
-                  <Icon name={hasActiveChild ? item.icon : item.iconOutline} size={20} color={headerColor} />
-                </View>
-                {expanded && (
-                  <>
-                    <Text style={[styles.menuLabel, { color: headerColor, flex: 1 }]}>{item.label}</Text>
-                    <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={16} color={lightModeColors.darkGray} />
-                  </>
-                )}
-              </TouchableOpacity>
-
-              {expanded && isOpen && (
-                <View style={styles.submenuList}>
-                  {submenuItem.children.map(child => {
-                    const childAccent = itemColor();
-                    const childActive = isActive(child.route);
-                    return (
-                      <TouchableOpacity
-                        key={child.key}
-                        onPress={() => handleDirectPress(child)}
-                        accessibilityLabel={child.label}
-                        style={[styles.submenuRow, childActive && { backgroundColor: `${childAccent}18` }]}
-                      >
-                        <Icon name={childActive ? child.icon : child.iconOutline} size={18} color={childActive ? childAccent : lightModeColors.darkGray} style={styles.submenuIcon} />
-                        <Text style={[styles.submenuLabel, { color: childActive ? childAccent : lightModeColors.darkGray }]}>{child.label}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              )}
-            </View>
-          );
-        })}
-      </View>
+          })}
+        </View>
       </DrawerContentScrollView>
     </View>
   );
@@ -317,6 +490,7 @@ const RootDrawer = () => {
   const [expanded, setExpanded] = useState(false);
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastNotification, setToastNotification] = useState<UserNotification | null>(null);
   const hasLoadedNotificationsRef = useRef(false);
@@ -363,13 +537,29 @@ const RootDrawer = () => {
   useEffect(() => {
     async function fetchUser() {
       try {
+        // On a browser reload, deep linking bypasses Splash, so the in-memory
+        // access token is gone. Hydrate from the httpOnly cookie before making
+        // any authenticated request; if it fails, the session is expired and we
+        // send the user to Landing.
+        const sessionManager = SessionManager.getInstance();
+        if (!sessionManager.getAuthToken()) {
+          const ok = await sessionManager.getCredentials();
+          if (!ok) {
+            navigation.replace('Landing');
+            return;
+          }
+        }
         const fetchedUser = await usersRepository.getInfo();
         setUser(fetchedUser);
+        dispatch(setProfilePhoto(fetchedUser.profilePhoto));
         dispatch(fetchUserDataAsync(fetchedUser));
         setActiveRole(fetchedUser.isTeacher() && !fetchedUser.isStudent() ? 'teacher' : 'student');
       } catch (e) {
         console.log('RootDrawer (Web): Failed to fetch user', e);
-        setUser(new User('', '', '', '', undefined, false, false, false));
+        // Without a valid profile there's no role, so no drawer screens get
+        // registered and initialRouteName would dangle (crash). Bounce to
+        // Landing instead of mounting a broken navigator.
+        navigation.replace('Landing');
       } finally {
         setLoading(false);
       }
@@ -390,14 +580,21 @@ const RootDrawer = () => {
 
   const canToggle = canToggleRole(user);
   const menuItems = resolveMenu(user, activeRole);
+  const homeMenuItem = menuItems.find(i => i.kind === 'direct' && (i as DirectItem).route) as DirectItem | undefined;
 
   const onNotificationPress = async (item: UserNotification) => {
-    if (item.is_read) return;
     try {
-      await notificationsRepository.markNotificationAsRead(item.id);
-      setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+      if (!item.is_read) {
+        await notificationsRepository.markNotificationAsRead(item.id);
+        setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+      }
     } catch (e) {
       console.log('RootDrawer (Web): Failed marking notification as read', e);
+    }
+    const actionUrl = item.notification.action_url;
+    if (actionUrl) {
+      setShowNotificationsDropdown(false);
+      navigation.navigate('RootDrawer' as never, { screen: actionUrl } as never);
     }
   };
 
@@ -415,7 +612,13 @@ const RootDrawer = () => {
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleString();
   };
 
-  const headerRight = () => (
+  const handleLogout = async () => {
+    await GoogleSignin.signOut();
+    await SessionManager.getInstance()?.clearCredentials();
+    navigation.reset({ index: 0, routes: [{ name: 'Landing' }] });
+  };
+
+  const HeaderRightInDrawer = () => (
     <HeaderRight
       canToggle={canToggle}
       activeRole={activeRole}
@@ -423,23 +626,42 @@ const RootDrawer = () => {
       unreadCount={unreadCount}
       onBellPress={() => setShowNotificationsDropdown(true)}
       colors={lightModeColors}
+      user={user}
+      onUserPress={() => setShowUserDropdown(true)}
     />
   );
+  const headerRight = () => <HeaderRightInDrawer />;
 
   const menuScreens = buildMenuScreens(user);
+
+  // The routes that actually become Drawer.Screens below. initialRouteName must
+  // be one of these, or React Navigation throws ("Couldn't find a screen named
+  // ... to use as initialRouteName").
+  const registeredMenuRoutes = Array.from(menuScreens.entries())
+    .filter(([route, { condition }]) => condition && WEB_SCREEN_COMPONENTS[route])
+    .map(([route]) => route);
+  const initialRoute =
+    homeMenuItem && registeredMenuRoutes.includes(homeMenuItem.route)
+      ? homeMenuItem.route
+      : registeredMenuRoutes[0];
 
   return (
     <>
       <Drawer.Navigator
+        initialRouteName={initialRoute}
+        // Default 'firstRoute' makes goBack jump to the first registered
+        // Drawer.Screen (which is the first menu item, e.g. MyAccount), instead
+        // of the previously focused screen. 'history' tracks actual visits.
+        backBehavior="history"
         screenOptions={{
           drawerType: 'permanent',
-          drawerStyle: { 
-            width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH, 
-            borderRightWidth: 1, 
+          drawerStyle: {
+            width: expanded ? SIDEBAR_WIDTH : RAIL_WIDTH,
+            borderRightWidth: 1,
             borderRightColor: lightModeColors.lightGray,
             ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } as WebViewStyle : {})
           },
-          headerLeft: () => null,
+          headerLeft: () => <HeaderBackButton />,
           headerRight,
           headerTintColor: lightModeColors.mainContrastColor,
           headerStyle: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray },
@@ -496,6 +718,13 @@ const RootDrawer = () => {
         onSeeAll={() => { setShowNotificationsDropdown(false); navigation.navigate('Notifications'); }}
         formatDate={formatDate}
       />
+
+      <UserMenuDropdown
+        visible={showUserDropdown}
+        user={user}
+        onClose={() => setShowUserDropdown(false)}
+        onLogout={handleLogout}
+      />
     </>
   );
 };
@@ -513,7 +742,6 @@ const styles = StyleSheet.create({
   toggleButton: { padding: 12, margin: 4 },
   logoImage: { width: 40, height: 40 },
   iconBox: { width: 45, height: 45, padding: 12, margin: 2, alignItems: 'center', justifyContent: 'center' },
-  profileSection: { borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray, marginBottom: 8 },
   expandArrowButton: { alignSelf: 'center', width: 45, height: 45, alignItems: 'center', justifyContent: 'center', borderRadius: 8, marginVertical: 4 },
   menuSeparator: { height: 1, backgroundColor: lightModeColors.lightGray, marginHorizontal: 8, marginBottom: 8 },
   menuList: { paddingHorizontal: 4, minWidth: 50, alignItems: 'center' },
@@ -533,6 +761,8 @@ const styles = StyleSheet.create({
   teacherActiveBorder: { borderLeftWidth: 2, borderLeftColor: lightModeColors.teacherAccent },
   teacherPill: { backgroundColor: lightModeColors.teacherAccent, borderRadius: 6, paddingHorizontal: 5, paddingVertical: 1, marginLeft: 6 },
   teacherPillText: { color: '#fff', fontSize: 10, fontWeight: '700' },
+  headerBackButton: { paddingVertical: 4, paddingHorizontal: 12, marginLeft: 4 },
+  headerLeftSpacer: { width: 16 },
 });
 
 export default RootDrawer;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -6,18 +6,18 @@ import {
   Modal,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   StyleSheet,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import AlertDialog from '../../components/AlertDialog';
 import {
   MaterialIcon,
-  ProcedureTypesAccordionList,
+  OwnershipGroupAccordionList,
   SubmissionStatusBadge,
 } from '../../components';
 import { formsRepository } from '../../repositories';
 import Form from '../../models/Form';
-import FormProcedureType from '../../models/FormProcedureType';
+import FormOwnershipGroup from '../../models/FormOwnershipGroup';
 import FormSubmission, { TeacherValidationStatusValue } from '../../models/FormSubmission';
 import FormItem from './components/FormItem';
 
@@ -61,7 +61,7 @@ const badgeStyles = StyleSheet.create({
 });
 
 interface Section {
-  procedure: FormProcedureType;
+  ownership_group: FormOwnershipGroup;
   forms: Form[];
 }
 
@@ -73,21 +73,30 @@ const FormsListScreen: React.FC = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [history, setHistory] = useState<FormSubmission[]>([]);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
-  useEffect(() => {
-    Promise.all([formsRepository.fetchProcedureTypes(), formsRepository.fetchForms()])
-      .then(([procedureTypes, forms]) => {
-        setAllForms(forms);
-        setSections(
-          procedureTypes.map(proc => ({
-            procedure: proc,
-            forms: forms.filter(f => f.form_procedure.id === proc.id),
-          })),
-        );
-      })
-      .catch(() => Alert.alert('Error', 'No se pudieron cargar los trámites.'))
-      .finally(() => setLoading(false));
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      formsRepository.fetchForms()
+        .then(forms => {
+          setAllForms(forms);
+          const groupMap = new Map<number, { ownership_group: FormOwnershipGroup; forms: Form[] }>();
+          forms.forEach(f => {
+            const g = f.ownership_group;
+            if (!groupMap.has(g.id)) groupMap.set(g.id, { ownership_group: g, forms: [] });
+            groupMap.get(g.id)!.forms.push(f);
+          });
+          setSections(
+            Array.from(groupMap.values()).sort((a, b) =>
+              a.ownership_group.name.localeCompare(b.ownership_group.name),
+            ),
+          );
+        })
+        .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudieron cargar los trámites.' }))
+        .finally(() => setLoading(false));
+    }, []),
+  );
 
   const formById = React.useMemo(() => {
     const map = new Map<number, Form>();
@@ -112,7 +121,7 @@ const FormsListScreen: React.FC = () => {
         .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime());
       setHistory(merged);
     } catch {
-      Alert.alert('Error', 'No se pudo cargar el historial.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo cargar el historial.' });
     } finally {
       setHistoryLoading(false);
     }
@@ -139,6 +148,14 @@ const FormsListScreen: React.FC = () => {
 
   return (
     <>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       <View style={styles.toolbar}>
         <TouchableOpacity style={styles.historyBtn} onPress={openHistory}>
           <MaterialIcon name="history" fontSize={16} color="#455A64" />
@@ -146,9 +163,9 @@ const FormsListScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <ProcedureTypesAccordionList
+      <OwnershipGroupAccordionList
         sections={sections.map(section => ({
-          procedure: section.procedure,
+          ownership_group: section.ownership_group,
           items: section.forms,
         }))}
         renderItems={items =>
@@ -209,6 +226,11 @@ const FormsListScreen: React.FC = () => {
                         <Text style={styles.rowDate}>{formatDate(submission.submitted_at)}</Text>
                       </View>
                       <View>
+                        {!!submission.recipient_name && (
+                          <Text style={styles.rowTeacher}>
+                            Destinatario: {submission.recipient_name}
+                          </Text>
+                        )}
                         <View style={styles.badgesLeft}>
                         {requiresTeacher && (
                           <View style={styles.rowAlignLeft}>

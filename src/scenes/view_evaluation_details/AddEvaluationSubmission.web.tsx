@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { RoundedButton } from '../../components';
+import { FilePicker, RoundedButton } from '../../components';
+import type { SubmissionFileValue } from '../../components';
 import { Evaluation } from '../../models';
 import { evaluationsRepository } from '../../repositories';
 import { makeRequest } from '../authenticatedComponent';
@@ -26,6 +27,8 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
   const [submissionText, setSubmissionText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submissionFile, setSubmissionFile] = useState<SubmissionFileValue | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string; onConfirm?: () => void } | null>(null);
   const requiresIdentity = evaluation.requires_identity === true;
 
   const submitWithoutIdentity = async () => {
@@ -33,19 +36,25 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
 
     try {
       await makeRequest(
-        () => evaluationsRepository.submitEvaluation(`${evaluation.id}`, submissionText),
+        () => evaluationsRepository.submitEvaluation(`${evaluation.id}`, submissionText, submissionFile || undefined),
         navigation,
       );
 
-      setSubmitting(false);
-      window.alert('Entrega realizada con éxito.');
-      navigation.popToTop();
+      setAlertDialog({
+        title: 'Éxito',
+        message: 'Entrega realizada con éxito.',
+        onConfirm: () => navigation.reset({
+          index: 0,
+          routes: [{ name: 'ViewEvaluationDetails', params: { evaluation } }],
+        }),
+      });
     } catch (error) {
       console.log('Error', error);
-      Alert.alert(
-        'Error',
-        'Hubo un error, no pudimos registrar la entrega del examen. Por favor intenta nuevamente.',
-      );
+      setAlertDialog({
+        title: 'Error',
+        message: 'Hubo un error, no pudimos registrar la entrega del examen. Por favor intenta nuevamente.',
+      });
+    } finally {
       setSubmitting(false);
     }
   };
@@ -71,7 +80,16 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => { const onConfirm = alertDialog?.onConfirm; setAlertDialog(null); onConfirm?.(); }}
+      />
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.card}>
         <Text style={styles.title}>Agregar entrega</Text>
         <Text style={styles.subtitle}>{evaluation.evaluation_name}</Text>
@@ -88,6 +106,9 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
           editable={!submitting}
           maxLength={1500}
         />
+        <Text style={styles.label}>Archivo adjunto (opcional)</Text>
+        <Text style={styles.hint}>PDF máximo 5 MB — Imágenes máximo 2 MB</Text>
+        <FilePicker value={submissionFile} onChange={setSubmissionFile} />
         <RoundedButton
           text={submitting ? 'Enviando...' : 'Enviar entrega'}
           enabled={!submitting}
@@ -95,6 +116,7 @@ const AddEvaluationSubmissionScreen: React.FC = () => {
         />
       </View>
     </ScrollView>
+    </>
   );
 };
 
@@ -133,6 +155,11 @@ const styles = StyleSheet.create({
     minHeight: 140,
     color: '#111',
     backgroundColor: '#fafafa',
+  },
+  hint: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginBottom: 6,
   },
 });
 

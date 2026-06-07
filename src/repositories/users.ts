@@ -2,6 +2,8 @@ import {get, post, patch} from './authenticatedRepository';
 import {StatusCodeError} from '../networking';
 import User from '../models/User';
 import {Platform} from 'react-native';
+import SessionManager from '../managers/sessionManager';
+import {baseUrl} from '../networking';
 
 const domainUrl = 'auth/users';
 
@@ -88,6 +90,9 @@ export function getInfo(): Promise<User> {
         json.is_superuser === true,
         json.department_id ?? null,
         json.linkedin_url ?? '',
+        json.is_bedelia === true,
+        json.profile_photo ?? null,
+        json.secretary_id ?? null,
       ),
     ),
   );
@@ -99,6 +104,61 @@ export function updateGithubUrl(url: string): Promise<void> {
 
 export function updateLinkedinUrl(url: string): Promise<void> {
   return patch(`${domainUrl}/me`, { linkedin_url: url }).then(() => Promise.resolve());
+}
+
+export function updateProfile(updates: { github_url?: string; linkedin_url?: string }): Promise<void> {
+  return patch(`${domainUrl}/me`, updates).then(() => Promise.resolve());
+}
+
+export function removeProfilePhoto(): Promise<void> {
+  return patch(`${domainUrl}/me`, { profile_photo: null }).then(() => Promise.resolve());
+}
+
+export interface ProfilePhotoPayload {
+  uri: string;
+  type: string;
+  name: string;
+}
+
+export async function uploadProfilePhoto(image: ProfilePhotoPayload): Promise<User> {
+  const token = SessionManager.getInstance()?.getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+
+  const formData = new FormData();
+  if (Platform.OS === 'web') {
+    const res = await fetch(image.uri);
+    const blob = await res.blob();
+    formData.append('image', new File([blob], image.name, { type: image.type }));
+  } else {
+    formData.append('image', image as any);
+  }
+
+  const response = await fetch(`${baseUrl}/${domainUrl}/upload_profile_photo/`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+
+  const json = await response.json();
+  if (!response.ok) throw new Error(JSON.stringify(json));
+
+  return new User(
+    json.dni,
+    json.first_name,
+    json.last_name,
+    json.email,
+    json.is_student ? json.file : null,
+    json.is_teacher || false,
+    json.is_staff || false,
+    json.face_registered === true,
+    json.github_url ?? '',
+    json.is_superuser === true,
+    json.department_id ?? null,
+    json.linkedin_url ?? '',
+    json.is_bedelia === true,
+    json.profile_photo ?? null,
+    json.secretary_id ?? null,
+  );
 }
 
 export function sendPushToken(token: string) {
@@ -113,6 +173,9 @@ export default {
   getInfo,
   updateGithubUrl,
   updateLinkedinUrl,
+  updateProfile,
+  uploadProfilePhoto,
+  removeProfilePhoto,
   IdentityFail,
   FaceRegistrationPending,
   InvalidImage,

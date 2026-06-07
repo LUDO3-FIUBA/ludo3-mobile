@@ -10,6 +10,7 @@ const domainUrl = 'api/teacher/evaluations';
 async function create(
   semester: TeacherSemester,
   evaluationName: string,
+  description: string,
   startDate: Date,
   finishDate: Date,
   minimumPassingGrade: string | null,
@@ -21,6 +22,7 @@ async function create(
   const evaluationToBeCreated: CreatedEvaluationSnakeCase = {
     semester_id: semester.id,
     evaluation_name: evaluationName,
+    description,
     is_graded: true,
     passing_grade: minimumPassingGrade === null ? null : +minimumPassingGrade,
     start_date: startDate,
@@ -38,6 +40,7 @@ async function create(
 async function update(
   evaluationId: number,
   evaluationName: string,
+  description: string,
   startDate: Date,
   finishDate: Date,
   minimumPassingGrade: string | null,
@@ -49,6 +52,7 @@ async function update(
   const body = {
     evaluation_id: evaluationId,
     evaluation_name: evaluationName,
+    description,
     is_graded: true,
     passing_grade: minimumPassingGrade === null ? null : +minimumPassingGrade,
     start_date: startDate,

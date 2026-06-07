@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   Text,
   View,
   TouchableOpacity,
   TextInput,
   ScrollView,
+  StyleSheet,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Loading, RoundedButton } from '../../components';
+import { Loading, MaterialIcon, RoundedButton } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import moment from 'moment';
 import { teacherFinalsRepository } from '../../repositories';
 import combineDateAndTime from '../../utils/combineDateAndTime';
+import { useAppSelector } from '../../redux/hooks';
+import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
+import { TeacherCommission } from '../../models/TeacherCommission';
 
 
 interface Props {
@@ -38,12 +42,60 @@ const AddFinal: React.FC<Props> = () => {
   const [showFinishDatePicker, setShowFinishDatePicker] = useState(false);
   const [showFinishTimePicker, setShowFinishTimePicker] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const navigation = useNavigation();
   const route = useRoute();
 
   const subjectId: number = (route.params as AddFinalRouteParams).subjectId
   const subjectName: string = (route.params as AddFinalRouteParams).subjectName
+
+  const semesterData = useAppSelector(selectSemesterData);
+  const currentCommissionId = semesterData?.commission.id;
+
+  const [shareableCommissions, setShareableCommissions] = useState<TeacherCommission[]>([]);
+  const [selectedCommissionIds, setSelectedCommissionIds] = useState<Set<number>>(new Set());
+  const [loadingCommissions, setLoadingCommissions] = useState(true);
+
+  useEffect(() => {
+    if (currentCommissionId === undefined) return;
+    setSelectedCommissionIds(prev => {
+      if (prev.has(currentCommissionId)) return prev;
+      const next = new Set(prev);
+      next.add(currentCommissionId);
+      return next;
+    });
+  }, [currentCommissionId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    teacherFinalsRepository.fetchShareableCommissions(subjectId)
+      .then(commissions => {
+        if (cancelled) return;
+        setShareableCommissions(commissions);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        Alert.alert(
+          'Te fallamos',
+          'No pudimos cargar las comisiones para compartir. Vas a poder crear el final solo en esta comisión.',
+        );
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingCommissions(false);
+      });
+    return () => { cancelled = true; };
+  }, [subjectId]);
+
+  const toggleCommission = (commissionId: number) => {
+    if (commissionId === currentCommissionId) return;
+    setSelectedCommissionIds(prev => {
+      const next = new Set(prev);
+      if (next.has(commissionId)) next.delete(commissionId);
+      else next.add(commissionId);
+      return next;
+    });
+  };
 
   const onStartDateChange = (event: any, selectedDate: any) => {
     setShowStartDatePicker(false);
@@ -85,6 +137,7 @@ const AddFinal: React.FC<Props> = () => {
 
   const [finalName, setFinalName] = useState('')
   return (
+    <>
     <ScrollView style={style().containerView}>
       <View style={{ marginBottom: 100 }}>
         <View style={style().dateButtonInputs}>
@@ -236,34 +289,70 @@ const AddFinal: React.FC<Props> = () => {
         </TouchableOpacity>
         <Text style={{ color: 'grey', fontSize: 12, marginTop: 3, marginBottom: 20 }}> Los horarios están restringidos a intervalos de 30 minutos</Text>
 
+        <View style={style().dateButtonInputs}>
+          <Text style={{ ...style().text, color: 'black', marginTop: 10 }}>
+            Comisiones que comparten este final
+          </Text>
+        </View>
+        {loadingCommissions ? (
+          <Loading />
+        ) : (
+          <View style={styles.commissionsList}>
+            {shareableCommissions.length === 0 && currentCommissionId === undefined && (
+              <Text style={{ color: 'grey', fontSize: 12, marginTop: 3 }}>
+                No hay otras comisiones del mismo semestre donde seas jefe de cátedra para esta materia.
+              </Text>
+            )}
+            {shareableCommissions.map(commission => {
+              const isCurrent = commission.id === currentCommissionId;
+              const selected = selectedCommissionIds.has(commission.id);
+              return (
+                <TouchableOpacity
+                  key={commission.id}
+                  style={styles.commissionRow}
+                  onPress={() => toggleCommission(commission.id)}
+                  disabled={isCurrent}
+                >
+                  <MaterialIcon
+                    name={selected ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                    fontSize={22}
+                    color={isCurrent ? 'gray' : 'black'}
+                  />
+                  <Text style={{ marginLeft: 8, color: isCurrent ? 'gray' : 'black' }}>
+                    Comisión {commission.siuId ?? commission.id}{isCurrent ? ' — esta comisión' : ''}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+            <Text style={{ color: 'grey', fontSize: 12, marginTop: 3, marginBottom: 10 }}>
+              La comisión actual no se puede desmarcar.
+            </Text>
+          </View>
+        )}
+
         <RoundedButton
           text="Agregar instancia de final"
           style={style().button}
-          enabled={finalName !== null && finalName !== '' && startDate !== null && finishDate !== null && startTime !== null && finishTime !== null && !creating}
+          enabled={finalName !== null && finalName !== '' && startDate !== null && finishDate !== null && startTime !== null && finishTime !== null && selectedCommissionIds.size > 0 && !creating}
           onPress={() => {
             if (startDate && finishDate && startTime && finishTime) {
               if (isFinishAfterStart(startDate, startTime, finishDate, finishTime)) {
                 setCreating(true);
 
                 const startFullDate = combineDateAndTime(startDate, startTime);
-                const finishFullDate = combineDateAndTime(finishDate, finishTime);
 
-                // TODO: resolve this, endpoint not working from backend
-                teacherFinalsRepository.createFinal(subjectId, subjectName, startFullDate)
+                teacherFinalsRepository
+                  .createFinal(subjectId, subjectName, startFullDate, Array.from(selectedCommissionIds))
                   .then(() => {
                     setCreating(false);
                     navigation.goBack();
                   })
                   .catch((error: any) => {
                     setCreating(false);
-                    Alert.alert(
-                      'Te fallamos',
-                      'No pudimos crear este final. ' +
-                      'Volvé a intentar en unos minutos.',
-                    );
+                    setAlertDialog({ title: 'Te fallamos', message: 'No pudimos crear este final. Volvé a intentar en unos minutos.' });
                   });
               } else {
-                Alert.alert('Error', 'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.');
+                setAlertDialog({ title: 'Error', message: 'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.' });
               }
             } else {
               throw ('Date or Time is null');
@@ -273,8 +362,28 @@ const AddFinal: React.FC<Props> = () => {
         {creating && <Loading />}
       </View>
     </ScrollView>
+    <AlertDialog
+      visible={alertDialog !== null}
+      title={alertDialog?.title ?? ''}
+      message={alertDialog?.message ?? ''}
+      mode="info"
+      confirmLabel="Aceptar"
+      onConfirm={() => setAlertDialog(null)}
+    />
+    </>
   );
 };
+
+const styles = StyleSheet.create({
+  commissionsList: {
+    marginTop: 8,
+  },
+  commissionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+});
 
 
 export default AddFinal;

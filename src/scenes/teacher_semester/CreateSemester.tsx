@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { RoundedButton } from '../../components';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -16,6 +17,7 @@ const CreateSemester = () => {
   const commissions = useAppSelector(selectTeacherCommissions)
   const [numClasses, setNumClasses] = useState('');
   const [minAttendance, setMinAttendance] = useState('');
+  const [calendarUrl, setCalendarUrl] = useState('');
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false)
@@ -24,6 +26,7 @@ const CreateSemester = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
 
   const navigation = useNavigation<any>()
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   // Commission Picker
   const [chosenCommission, setChosenCommission] = useState(null)
@@ -60,6 +63,7 @@ const CreateSemester = () => {
       setYearMoment('FS');
       setNumClasses('');
       setMinAttendance('');
+      setCalendarUrl('');
       setStartDate(null);
       setStartTime(null);
     }, [])
@@ -94,12 +98,22 @@ const CreateSemester = () => {
         const response = await teacherSemestersRepository.createSemester(chosenCommission, yearMoment, combinedStartDateAndTime, numberClasses, mininumAttendance)
         console.log("Response", response);
 
-        navigation.navigate('TeacherHome');
+        if (calendarUrl.trim()) {
+          try {
+            await teacherSemestersRepository.setCalendarSourceUrl(response.id, calendarUrl.trim());
+            await teacherSemestersRepository.syncCatedraCalendar(response.id);
+          } catch {
+            setAlertDialog({ title: 'Aviso', message: 'El cuatrimestre se creó correctamente, pero no se pudo sincronizar el calendario. Podés intentarlo de nuevo desde "Editar cuatrimestre".' });
+          }
+        }
+
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.reset({ index: 0, routes: [{ name: 'RootDrawer' }] });
+        }
       } else {
-        Alert.alert(
-          'Error',
-          'No se completaron todos los campos antes de enviar el formulario.'
-        );
+        setAlertDialog({ title: 'Error', message: 'No se completaron todos los campos antes de enviar el formulario.' });
       }
     } catch (error) {
 
@@ -108,6 +122,7 @@ const CreateSemester = () => {
 
 
   return (
+    <>
     <ScrollView style={styles.container}>
       <View style={{ marginBottom: 100 }}>
         <Text style={{ ...styles.label, marginTop: -5 }}>Comisión</Text>
@@ -207,6 +222,20 @@ const CreateSemester = () => {
           onChangeText={handleMinAttendanceChange}
           placeholder="Ingrese el porcentaje"
         />
+        <Text style={{ ...styles.label, marginTop: 15 }}>Calendario de cátedra (opcional)</Text>
+        <Text style={styles.subLabel}>
+          Pegá el link de tu Google Sheets publicado. Los alumnos verán el tema de cada clase en su calendario.
+        </Text>
+        <TextInput
+          style={styles.input}
+          value={calendarUrl}
+          onChangeText={setCalendarUrl}
+          placeholder="https://docs.google.com/spreadsheets/d/..."
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+        />
+
         <View
           style={{ marginTop: 15 }}
         >
@@ -218,6 +247,15 @@ const CreateSemester = () => {
         </View>
       </View>
     </ScrollView>
+    <AlertDialog
+      visible={alertDialog !== null}
+      title={alertDialog?.title ?? ''}
+      message={alertDialog?.message ?? ''}
+      mode="info"
+      confirmLabel="Aceptar"
+      onConfirm={() => setAlertDialog(null)}
+    />
+    </>
   );
 };
 

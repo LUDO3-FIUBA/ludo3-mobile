@@ -10,6 +10,9 @@ import {
   MaterialIcon,
   SubmissionDateRow,
   SubmissionTextCard,
+  FeedbackCard,
+  EvaluationDescriptionCard,
+  SubmissionFileCard,
 } from '../../components';
 import { Evaluation, EvaluationSubmission, Teacher } from '../../models';
 import { evaluationsRepository } from '../../repositories';
@@ -111,7 +114,13 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
         <SubmissionDateRow dateText={evaluationSubmission?.created_at ? createdAtDate : '–'} isLate={isLate} lateByText={lateByText} />
       </View>
 
+      <EvaluationDescriptionCard markdownText={(detailedEvaluation as any)?.description} />
       <SubmissionTextCard submissionText={evaluationSubmission?.submission_text} />
+      <SubmissionFileCard
+        submissionFile={evaluationSubmission?.submission_file}
+        originalFilename={evaluationSubmission?.original_filename}
+        downloadUrl={evaluationSubmission?.download_url}
+      />
 
       <EvaluationResultCard
         progress={circleProgress}
@@ -120,6 +129,8 @@ const EvaluationDetailsScreen = ({ route }: { route: any }) => {
         isNumericEvaluation={isNumericEvaluation}
         passingGrade={detailedEvaluation.passing_grade}
       />
+
+      <FeedbackCard feedbackText={evaluationSubmission?.feedback_text} />
 
       {evaluationStatus !== EvaluationStatus.NOT_TAKEN &&
         <GraderUpdatedCard

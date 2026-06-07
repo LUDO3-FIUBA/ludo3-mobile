@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Alert, TextInput, Modal, Button, Text } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, TextInput, Modal, Button, Text } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { modifyStudentsOfASemester, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { teacherSemestersRepository, teacherStudentsRepository } from '../../rep
 import { TeacherStudent } from '../../models/TeacherStudent';
 import { AddedStudentToSemester } from '../../models/AddedStudentToSemester';
 import SquaredButton from '../../components/SquaredButton';
+import AlertDialog from '../../components/AlertDialog';
 import { lightModeColors } from '../../styles/colorPalette';
 import { MaterialIcon } from '../../components';
 
@@ -18,6 +19,7 @@ export function SemesterStudentsHeaderRight({ }: Props) {
   const [studentPadron, setStudentPadron] = useState<string>('');
   const [student, setStudent] = useState<TeacherStudent | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
   const dispatch = useAppDispatch()
   const navigation = useNavigation();
 
@@ -34,14 +36,14 @@ export function SemesterStudentsHeaderRight({ }: Props) {
         // Check that student is not already part of the semester
         const foundStudentByPadron = semesterData.students.find(actual => actual.padron === studentPadron)
         if (foundStudentByPadron) {
-          Alert.alert('Ocurrió un error', `${foundStudentByPadron.firstName} ${foundStudentByPadron.lastName} con padrón ${foundStudentByPadron.padron} ya es parte del cuatrimestre actual.`)
+          setAlertDialog({ title: 'Ocurrió un error', message: `${foundStudentByPadron.firstName} ${foundStudentByPadron.lastName} con padrón ${foundStudentByPadron.padron} ya es parte del cuatrimestre actual.` });
         } else {
           const studentData: TeacherStudent = await teacherStudentsRepository.getStudentByPadron(studentPadron);
           setStudent(studentData);
           setConfirmVisible(true);
         }
       } catch (error) {
-        Alert.alert('Padrón no existente', `No pudimos encontrar al alumno de padrón ${studentPadron}`);
+        setAlertDialog({ title: 'Padrón no existente', message: `No pudimos encontrar al alumno de padrón ${studentPadron}` });
       }
     }
   };
@@ -53,9 +55,9 @@ export function SemesterStudentsHeaderRight({ }: Props) {
         const addedStudentToSemester: AddedStudentToSemester = await teacherSemestersRepository.addStudentToSemester(student.id, semesterData.id)
         console.log("Added students to semester", addedStudentToSemester);
         dispatch(modifyStudentsOfASemester(addedStudentToSemester.semester.students))
-        Alert.alert('Éxito', 'Estudiante agregado exitosamente');
+        setAlertDialog({ title: 'Éxito', message: 'Estudiante agregado exitosamente' });
       } catch (error) {
-        Alert.alert('Error', 'An error occurred while adding the student');
+        setAlertDialog({ title: 'Error', message: 'An error occurred while adding the student' });
       }
     }
   };
@@ -68,6 +70,14 @@ export function SemesterStudentsHeaderRight({ }: Props) {
 
   return (
     <View style={styles.navButtonsContainer}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       <TouchableOpacity style={styles.navButton} onPress={openAddStudentPrompt}>
         <MaterialIcon name="plus" fontSize={24} color='gray' />
       </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,18 +7,20 @@ import {
   TouchableOpacity,
   Switch,
   Modal,
-  Alert,
   ActivityIndicator,
+  Platform,
   StyleSheet,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
+import AlertDialog from '../../components/AlertDialog';
 import { MaterialIcon, ReorderableFieldList, RoundedButton } from '../../components';
-import { formsRepository } from '../../repositories';
+import { formsRepository, usersRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import { StatusCodeError } from '../../networking';
-import FormProcedureType from '../../models/FormProcedureType';
+import FormOwnershipGroup, { EligibleEntity, EntityType, FormOwnershipGroupDetail, GroupMember, OwnershipMemberInput } from '../../models/FormOwnershipGroup';
+import User from '../../models/User';
 import { lightModeColors } from '../../styles/colorPalette';
 
 interface FieldOption {
@@ -58,7 +60,9 @@ const FormDesignerScreen: React.FC = () => {
   const isEditing = typeof editingFormId === 'number';
 
   const [loadingConfig, setLoadingConfig] = useState(true);
-  const [procedureTypes, setProcedureTypes] = useState<FormProcedureType[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [ownershipGroups, setOwnershipGroups] = useState<FormOwnershipGroup[]>([]);
+  const [ownershipGroupDetailKey, setOwnershipGroupDetailKey] = useState(0);
   const [formTypes, setFormTypes] = useState<{ id: number; value: string }[]>([]);
   const [fieldTypes, setFieldTypes] = useState<{ id: number; value: string }[]>([]);
   const [catalogs, setCatalogs] = useState<{ catalog_id: number; catalog_name: string }[]>([]);
@@ -66,13 +70,14 @@ const FormDesignerScreen: React.FC = () => {
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formInformation, setFormInformation] = useState('');
-  const [procedureId, setProcedureId] = useState<number | null>(null);
+  const [ownershipGroupId, setOwnershipGroupId] = useState<number | null>(null);
   const [isDigital, setIsDigital] = useState(true);
   const [requiresTeacherValidation, setRequiresTeacherValidation] = useState(false);
   const [documentUrl, setDocumentUrl] = useState('');
   const [templateFile, setTemplateFile] = useState<LocalFile | null>(null);
   const [fields, setFields] = useState<DesignerField[]>([]);
 
+  const [alertDialog, setAlertDialog] = useState<{title: string; message: string} | null>(null);
   const [saving, setSaving] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
   const [fieldModal, setFieldModal] = useState(false);
@@ -88,6 +93,17 @@ const FormDesignerScreen: React.FC = () => {
   const [modalOptValue, setModalOptValue] = useState('');
   const [modalOptLabel, setModalOptLabel] = useState('');
 
+  const [groupModalVisible, setGroupModalVisible] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupError, setNewGroupError] = useState<string | null>(null);
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [eligibleEntities, setEligibleEntities] = useState<EligibleEntity[]>([]);
+  const [loadingEntities, setLoadingEntities] = useState(false);
+  const [selectedMembers, setSelectedMembers] = useState<OwnershipMemberInput[]>([]);
+
+  const [selectedGroupDetail, setSelectedGroupDetail] = useState<FormOwnershipGroupDetail | null>(null);
+  const [loadingGroupDetail, setLoadingGroupDetail] = useState(false);
+
   const [catalogModalVisible, setCatalogModalVisible] = useState(false);
   const [creatingCatalog, setCreatingCatalog] = useState(false);
   const [newCatalogName, setNewCatalogName] = useState('');
@@ -99,6 +115,55 @@ const FormDesignerScreen: React.FC = () => {
   const [catalogError, setCatalogError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('FormsManager')}
+            style={styles.backButton}
+          >
+            <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [navigation]);
+
+  useEffect(() => {
+    if (ownershipGroupId === null) {
+      setSelectedGroupDetail(null);
+      return;
+    }
+    setLoadingGroupDetail(true);
+    formsRepository.fetchOwnershipGroup(ownershipGroupId)
+      .then(setSelectedGroupDetail)
+      .catch(() => setSelectedGroupDetail(null))
+      .finally(() => setLoadingGroupDetail(false));
+  }, [ownershipGroupId, ownershipGroupDetailKey]);
+
+  const isEditingRef = React.useRef(isEditing);
+  isEditingRef.current = isEditing;
+
+  // Re-fetch groups and detail on focus so edits from OwnershipGroupEditor are reflected.
+  // Also reset form data on focus when creating (not editing) — the drawer keeps this
+  // component mounted, so state from a previous creation session persists otherwise.
+  useFocusEffect(useCallback(() => {
+    formsRepository.fetchOwnershipGroups().then(setOwnershipGroups).catch(() => {});
+    setOwnershipGroupDetailKey(k => k + 1);
+    if (!isEditingRef.current) {
+      setFormName('');
+      setFormDescription('');
+      setFormInformation('');
+      setRequiresTeacherValidation(false);
+      setIsDigital(true);
+      setDocumentUrl('');
+      setTemplateFile(null);
+      setFields([]);
+      setSubmitStatus(null);
+    }
+  }, []));
+
+  useEffect(() => {
     if (fieldTypes.length > 0 && modalTypeId === null) {
       setModalTypeId(fieldTypes[0].id);
       setModalTypeValue(fieldTypes[0].value);
@@ -107,15 +172,19 @@ const FormDesignerScreen: React.FC = () => {
 
   useEffect(() => {
     Promise.all([
-      formsRepository.fetchProcedureTypes(),
+      formsRepository.fetchOwnershipGroups(),
       formsRepository.fetchFormTypes(),
       formsRepository.fetchFieldTypes(),
       formsRepository.fetchCatalogs().catch(() => []),
       isEditing ? formsRepository.fetchFormDetail(editingFormId) : Promise.resolve(null),
+      usersRepository.getInfo(),
     ])
-      .then(([procs, types, fts, cats, existingForm]) => {
-        setProcedureTypes(procs);
-        if (procs.length > 0 && !isEditing) setProcedureId(procs[0].id);
+      .then(([groups, types, fts, cats, existingForm, user]) => {
+        setCurrentUser(user);
+        setOwnershipGroups(groups);
+        const isSuperAdmin = user?.isSuperAdmin?.() ?? false;
+        const editorGroups = isSuperAdmin ? groups : groups.filter(g => g.is_editor === true);
+        if (editorGroups.length > 0 && !isEditing) setOwnershipGroupId(editorGroups[0].id);
         setFormTypes(types);
         const digital = types.find(t => t.value === 'Digital');
         if (digital && !isEditing) setIsDigital(true);
@@ -130,7 +199,7 @@ const FormDesignerScreen: React.FC = () => {
           setFormName(existingForm.form_name);
           setFormDescription(existingForm.form_description);
           setFormInformation(existingForm.form_information ?? '');
-          setProcedureId(existingForm.form_procedure.id);
+          setOwnershipGroupId(existingForm.ownership_group.id);
           setRequiresTeacherValidation(existingForm.requires_teacher_validation ?? false);
 
           const editingDigital = existingForm.form_type.value === 'Digital';
@@ -156,7 +225,7 @@ const FormDesignerScreen: React.FC = () => {
           }
         }
       })
-      .catch(() => Alert.alert('Error', 'No se pudo cargar la configuración del formulario.'))
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar la configuración del formulario.' }))
       .finally(() => setLoadingConfig(false));
   }, [isEditing, editingFormId]);
 
@@ -202,11 +271,11 @@ const FormDesignerScreen: React.FC = () => {
     }
     setModalLabelError(null);
     if (modalTypeValue === 'options' && modalOptions.length === 0) {
-      Alert.alert('Error', 'Los campos de tipo opciones deben tener al menos una opción.');
+      setAlertDialog({ title: 'Error', message: 'Los campos de tipo opciones deben tener al menos una opción.' });
       return;
     }
     if (modalTypeValue === 'catalog' && !modalCatalogId) {
-      Alert.alert('Error', 'Los campos de tipo catálogo deben tener un catálogo seleccionado.');
+      setAlertDialog({ title: 'Error', message: 'Los campos de tipo catálogo deben tener un catálogo seleccionado.' });
       return;
     }
     const updated: DesignerField = {
@@ -238,6 +307,47 @@ const FormDesignerScreen: React.FC = () => {
       next.splice(to, 0, moved);
       return next;
     });
+  };
+
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim()) {
+      setNewGroupError('El nombre del grupo es obligatorio.');
+      return;
+    }
+    if (isSuperAdmin && selectedMembers.length > 0 && !selectedMembers.some(m => m.is_editor)) {
+      setNewGroupError('Al menos un miembro debe tener rol de editor.');
+      return;
+    }
+    setCreatingGroup(true);
+    setNewGroupError(null);
+    try {
+      const created = await formsRepository.createOwnershipGroup(newGroupName.trim(), selectedMembers);
+      setOwnershipGroups(prev => [...prev, { ...created, is_editor: true }]);
+      setOwnershipGroupId(created.id);
+      setGroupModalVisible(false);
+      setNewGroupName('');
+      setSelectedMembers([]);
+    } catch (err) {
+      setNewGroupError(extractApiError(err));
+    } finally {
+      setCreatingGroup(false);
+    }
+  };
+
+  const toggleMember = (entity: EligibleEntity) => {
+    const key = `${entity.entity_type}:${entity.entity_id}`;
+    setSelectedMembers(prev => {
+      const exists = prev.find(m => `${m.entity_type}:${m.entity_id}` === key);
+      if (exists) return prev.filter(m => `${m.entity_type}:${m.entity_id}` !== key);
+      return [...prev, { entity_type: entity.entity_type, entity_id: entity.entity_id, is_editor: false }];
+    });
+  };
+
+  const toggleEditor = (entity: EligibleEntity) => {
+    const key = `${entity.entity_type}:${entity.entity_id}`;
+    setSelectedMembers(prev =>
+      prev.map(m => `${m.entity_type}:${m.entity_id}` === key ? { ...m, is_editor: !m.is_editor } : m),
+    );
   };
 
   const resetCatalogModal = () => {
@@ -334,29 +444,38 @@ const FormDesignerScreen: React.FC = () => {
       });
       setDocumentUrl('');
     } catch {
-      Alert.alert('Error', 'No se pudo seleccionar el archivo.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo seleccionar el archivo.' });
     }
   };
 
+  const isSuperAdmin = currentUser?.isSuperAdmin?.() ?? false;
+  const selectableGroups = isSuperAdmin
+    ? ownershipGroups
+    : ownershipGroups.filter(g => g.is_editor === true);
+  const userEntityType: EntityType | null = currentUser?.departmentId
+    ? 'department'
+    : currentUser?.secretaryId ? 'secretary' : null;
+  const userEntityId: number | null = currentUser?.departmentId ?? currentUser?.secretaryId ?? null;
+
   const handleSave = async () => {
     if (!formName.trim()) {
-      Alert.alert('Error', 'El título del formulario es obligatorio.');
+      setAlertDialog({ title: 'Error', message: 'El título del formulario es obligatorio.' });
       return;
     }
     if (!formDescription.trim()) {
-      Alert.alert('Error', 'La descripción es obligatoria.');
+      setAlertDialog({ title: 'Error', message: 'La descripción es obligatoria.' });
       return;
     }
-    if (!procedureId) {
-      Alert.alert('Error', 'Seleccioná un tipo de trámite.');
+    if (!ownershipGroupId) {
+      setAlertDialog({ title: 'Error', message: 'Seleccioná un grupo de propiedad.' });
       return;
     }
     if (!isDigital && !documentUrl.trim() && !templateFile) {
-      Alert.alert('Error', 'Subí un archivo o indicá una URL para el documento.');
+      setAlertDialog({ title: 'Error', message: 'Subí un archivo o indicá una URL para el documento.' });
       return;
     }
     if (isDigital && fields.length === 0) {
-      Alert.alert('Error', 'Un formulario Digital debe tener al menos un campo.');
+      setAlertDialog({ title: 'Error', message: 'Un formulario Digital debe tener al menos un campo.' });
       return;
     }
 
@@ -365,7 +484,7 @@ const FormDesignerScreen: React.FC = () => {
     const formTypeId = isDigital ? digitalTypeId : documentTypeId;
 
     if (!formTypeId) {
-      Alert.alert('Error', 'No se pudo determinar el tipo de formulario.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo determinar el tipo de formulario.' });
       return;
     }
 
@@ -373,7 +492,7 @@ const FormDesignerScreen: React.FC = () => {
       form_name: formName.trim(),
       form_description: formDescription.trim(),
       form_information: formInformation.trim() || null,
-      form_procedure_id: procedureId,
+      ownership_group_id: ownershipGroupId,
       form_type_id: formTypeId,
       requires_teacher_validation: requiresTeacherValidation,
     };
@@ -410,7 +529,11 @@ const FormDesignerScreen: React.FC = () => {
         message: isEditing ? 'Formulario actualizado correctamente.' : 'Formulario guardado correctamente.',
       });
       setTimeout(() => {
-        navigation.goBack();
+        if (Platform.OS === 'web') {
+          navigation.navigate('FormsManager');
+        } else {
+          navigation.goBack();
+        }
       }, 2000);
     } catch (err) {
       setSubmitStatus({ type: 'error', message: extractApiError(err) });
@@ -469,17 +592,85 @@ const FormDesignerScreen: React.FC = () => {
             textAlignVertical="top"
           />
 
-          <Text style={styles.label}>Tipo de trámite *</Text>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={procedureId}
-              onValueChange={v => setProcedureId(Number(v))}
+          <View style={styles.groupHeader}>
+            <Text style={styles.label}>Grupo de propiedad *</Text>
+            <TouchableOpacity
+              style={styles.createGroupBtn}
+              onPress={() => {
+                setNewGroupName('');
+                setNewGroupError(null);
+                // Pre-populate the user's own entity as editor for non-superadmins.
+                setSelectedMembers([]);
+                setGroupModalVisible(true);
+                setLoadingEntities(true);
+                formsRepository.fetchEligibleEntities()
+                  .then(entities => {
+                    setEligibleEntities(entities);
+                    if (!isSuperAdmin) {
+                      setSelectedMembers(entities.map(e => ({
+                        entity_type: e.entity_type,
+                        entity_id: e.entity_id,
+                        is_editor: e.entity_type === userEntityType && e.entity_id === userEntityId,
+                      })));
+                    }
+                  })
+                  .catch(() => setNewGroupError('No se pudieron cargar las entidades disponibles.'))
+                  .finally(() => setLoadingEntities(false));
+              }}
             >
-              {procedureTypes.map(pt => (
-                <Picker.Item key={pt.id} label={pt.value} value={pt.id} />
-              ))}
-            </Picker>
+              <MaterialIcon name="plus" fontSize={14} color={lightModeColors.institutional} />
+              <Text style={styles.createGroupText}>Crear nuevo</Text>
+            </TouchableOpacity>
           </View>
+          {selectableGroups.length === 0 ? (
+            <Text style={styles.emptyFields}>
+              No hay grupos disponibles. Creá uno con el botón "Crear nuevo".
+            </Text>
+          ) : (
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={ownershipGroupId}
+                onValueChange={v => setOwnershipGroupId(Number(v))}
+              >
+                {selectableGroups.map(group => (
+                  <Picker.Item key={group.id} label={group.name} value={group.id} />
+                ))}
+              </Picker>
+            </View>
+          )}
+
+          {ownershipGroupId !== null && (
+            <View style={styles.groupDetailCard}>
+              <Text style={styles.groupDetailTitle}>Miembros del grupo</Text>
+              {loadingGroupDetail ? (
+                <ActivityIndicator size="small" color={lightModeColors.institutional} style={{ marginVertical: 4 }} />
+              ) : !selectedGroupDetail || selectedGroupDetail.members.length === 0 ? (
+                <Text style={styles.groupDetailEmpty}>Sin miembros asignados.</Text>
+              ) : (
+                selectedGroupDetail.members.map((m: GroupMember) => {
+                  const isSubsecretary = m.entity_type === 'secretary' && !!m.parent_secretary_name;
+                  const typeLabel = m.entity_type === 'department'
+                    ? 'Departamento'
+                    : isSubsecretary
+                      ? `Subsecretaría · ${m.parent_secretary_name}`
+                      : 'Secretaría';
+                  return (
+                    <View key={`${m.entity_type}:${m.entity_id}`} style={styles.groupMemberRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.groupMemberName}>{m.name}</Text>
+                        <Text style={styles.groupMemberType}>{typeLabel}</Text>
+                      </View>
+                      {m.is_editor && (
+                        <View style={styles.editorBadge}>
+                          <Text style={styles.editorBadgeText}>Editor</Text>
+                        </View>
+                      )}
+                    </View>
+                  );
+                })
+              )}
+            </View>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -858,11 +1049,156 @@ const FormDesignerScreen: React.FC = () => {
           </ScrollView>
         </View>
       </Modal>
+
+      <Modal
+        visible={groupModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setGroupModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <ScrollView contentContainerStyle={[styles.modalCard, { paddingBottom: 32 }]} keyboardShouldPersistTaps="handled">
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Nuevo grupo de propiedad</Text>
+              <TouchableOpacity onPress={() => setGroupModalVisible(false)}>
+                <MaterialIcon name="close" fontSize={22} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.label}>Nombre *</Text>
+            <TextInput
+              style={styles.input}
+              value={newGroupName}
+              onChangeText={text => {
+                setNewGroupName(text);
+                if (newGroupError) setNewGroupError(null);
+              }}
+              placeholder="ej: Departamento de Alumnos"
+              placeholderTextColor="#aaa"
+              maxLength={100}
+            />
+
+            <View style={styles.membersHeader}>
+              <Text style={styles.label}>Miembros</Text>
+              {selectedMembers.length > 0 && (
+                <Text style={styles.membersCount}>
+                  {selectedMembers.length} seleccionado{selectedMembers.length !== 1 ? 's' : ''}
+                </Text>
+              )}
+            </View>
+
+            {isSuperAdmin ? (
+              <View style={styles.editorWarningBanner}>
+                <MaterialIcon name="alert-circle" fontSize={15} color="#92400E" />
+                <Text style={styles.editorWarningText}>
+                  Al menos un miembro debe tener rol de <Text style={styles.editorWarningBold}>Editor</Text> para poder guardar.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.readOnlyBanner}>
+                <MaterialIcon name="information" fontSize={15} color="#1e40af" />
+                <Text style={styles.readOnlyBannerText}>
+                  Los miembros se asignan automáticamente según tu perfil.
+                </Text>
+              </View>
+            )}
+
+            {loadingEntities ? (
+              <ActivityIndicator size="small" style={{ marginVertical: 8 }} />
+            ) : eligibleEntities.length === 0 ? (
+              <Text style={styles.emptyFields}>No hay departamentos ni secretarías disponibles.</Text>
+            ) : (
+              eligibleEntities.map(entity => {
+                const key = `${entity.entity_type}:${entity.entity_id}`;
+                const member = selectedMembers.find(m => `${m.entity_type}:${m.entity_id}` === key);
+                const isSelected = !!member;
+                const isSubsecretary = entity.entity_type === 'secretary' && !!entity.parent_secretary_name;
+                const isLocked = !isSuperAdmin;
+                return (
+                  <View key={key} style={[styles.entityRow, isSelected && styles.entityRowSelected]}>
+                    <TouchableOpacity
+                      style={styles.entityRowMain}
+                      onPress={isLocked ? undefined : () => toggleMember(entity)}
+                      activeOpacity={isLocked ? 1 : 0.7}
+                    >
+                      <View style={[styles.entityCheckbox, isSelected && styles.entityCheckboxChecked]}>
+                        {isSelected && <MaterialIcon name="check" fontSize={14} color="white" />}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.entityName}>{entity.name}</Text>
+                        <Text style={styles.entityType}>
+                          {entity.entity_type === 'department'
+                            ? 'Departamento'
+                            : isSubsecretary
+                              ? `Subsecretaría · depende de ${entity.parent_secretary_name}`
+                              : 'Secretaría'}
+                        </Text>
+                      </View>
+                      {isLocked && (
+                        <MaterialIcon name="lock" fontSize={14} color="#6d28d9" />
+                      )}
+                    </TouchableOpacity>
+                    {isSelected && (
+                      isLocked ? (
+                        <View style={[styles.entityEditorRow, { opacity: 0.6 }]}>
+                          <View style={[styles.entityEditorCheckbox, styles.entityEditorCheckboxChecked]}>
+                            <MaterialIcon name="check" fontSize={13} color="white" />
+                          </View>
+                          <Text style={[styles.entityEditorLabel, styles.entityEditorLabelActive]}>
+                            Editor
+                          </Text>
+                        </View>
+                      ) : (
+                        <TouchableOpacity style={styles.entityEditorRow} onPress={() => toggleEditor(entity)} activeOpacity={0.7}>
+                          <View style={[styles.entityEditorCheckbox, member.is_editor && styles.entityEditorCheckboxChecked]}>
+                            {member.is_editor && <MaterialIcon name="check" fontSize={13} color="white" />}
+                          </View>
+                          <Text style={[styles.entityEditorLabel, member.is_editor && styles.entityEditorLabelActive]}>
+                            Editor
+                          </Text>
+                        </TouchableOpacity>
+                      )
+                    )}
+                  </View>
+                );
+              })
+            )}
+
+            {newGroupError ? (
+              <View style={[styles.statusCard, styles.statusCardError]}>
+                <Text style={[styles.statusText, styles.statusTextError]}>{newGroupError}</Text>
+              </View>
+            ) : null}
+
+            <View style={styles.buttonWrapper}>
+              <RoundedButton
+                text={creatingGroup ? 'Creando...' : 'Crear grupo'}
+                enabled={!creatingGroup}
+                onPress={handleCreateGroup}
+              />
+              {creatingGroup ? (
+                <View pointerEvents="none" style={styles.buttonSpinnerOverlay}>
+                  <ActivityIndicator color="white" />
+                </View>
+              ) : null}
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
     </>
   );
 };
 
 const styles = StyleSheet.create({
+  backButton: { marginLeft: 16, padding: 4 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   container: { padding: 16, gap: 16 },
   section: {
@@ -992,6 +1328,27 @@ const styles = StyleSheet.create({
   },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   modalTitle: { fontSize: 18, fontWeight: '700', color: '#222' },
+  groupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  createGroupBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: lightModeColors.institutional,
+    borderStyle: 'dashed',
+  },
+  createGroupText: {
+    color: lightModeColors.institutional,
+    fontWeight: '600',
+    fontSize: 12,
+  },
   catalogHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1013,6 +1370,175 @@ const styles = StyleSheet.create({
     color: lightModeColors.institutional,
     fontWeight: '600',
     fontSize: 12,
+  },
+  groupDetailCard: {
+    backgroundColor: '#F0F4FF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#C7D7F5',
+    padding: 10,
+    gap: 6,
+  },
+  groupDetailTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: lightModeColors.institutional,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  groupDetailEmpty: {
+    fontSize: 12,
+    color: '#aaa',
+    fontStyle: 'italic',
+  },
+  groupMemberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 5,
+    paddingHorizontal: 6,
+    backgroundColor: 'white',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E2EAF8',
+  },
+  groupMemberName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#222',
+  },
+  groupMemberType: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 1,
+  },
+  editorBadge: {
+    backgroundColor: '#D1FAE5',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: '#6EE7B7',
+  },
+  editorBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#065F46',
+  },
+  membersHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  membersCount: {
+    fontSize: 12,
+    color: lightModeColors.institutional,
+    fontWeight: '600',
+  },
+  editorWarningBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  editorWarningText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#78350F',
+    lineHeight: 17,
+  },
+  editorWarningBold: {
+    fontWeight: '700',
+    color: '#92400E',
+  },
+  readOnlyBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: '#DBEAFE',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  readOnlyBannerText: { flex: 1, fontSize: 12, color: '#1e3a8a', lineHeight: 17 },
+  entityRow: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    backgroundColor: '#fafafa',
+    overflow: 'hidden',
+  },
+  entityRowSelected: {
+    borderColor: lightModeColors.institutional,
+    backgroundColor: '#EEF3FB',
+  },
+  entityRowMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 10,
+  },
+  entityCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+  },
+  entityCheckboxChecked: {
+    backgroundColor: lightModeColors.institutional,
+    borderColor: lightModeColors.institutional,
+  },
+  entityName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#222',
+  },
+  entityType: {
+    fontSize: 11,
+    color: '#888',
+    marginTop: 1,
+  },
+  entityEditorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingBottom: 8,
+    paddingTop: 2,
+    borderTopWidth: 1,
+    borderTopColor: '#d0dff5',
+  },
+  entityEditorCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#059669',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+  },
+  entityEditorCheckboxChecked: {
+    backgroundColor: '#059669',
+    borderColor: '#059669',
+  },
+  entityEditorLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  entityEditorLabelActive: {
+    color: '#059669',
   },
   templatePicker: {
     flexDirection: 'row',

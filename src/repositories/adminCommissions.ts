@@ -5,13 +5,17 @@ import AdminCommission from '../models/AdminCommission';
 const BASE_URL = 'api/admin/commissions';
 
 function toSnakeCase(data: Partial<AdminCommission>): object {
-  return {
+  const payload: any = {
     subject_siu_id: data.subjectSiuId,
     subject_name: data.subjectName,
     chief_teacher: data.chiefTeacher?.id,
     siu_id: data.siuId,
     chief_teacher_grader_weight: data.chiefTeacherGraderWeight ?? 5.0,
   };
+  if (data.department !== undefined) {
+    payload.department = data.department;
+  }
+  return payload;
 }
 
 export async function fetchAll(): Promise<AdminCommission[]> {

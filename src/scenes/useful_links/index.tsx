@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialIcon } from '../../components';
 import { getUsefulLinksStyles } from '../../styles/usefulLinks';
 
@@ -34,6 +34,13 @@ const LINKS: UsefulLink[] = [
     color: '#ff9900',
   },
   {
+    title: 'Programas de asignaturas',
+    description: 'Planificaciones y programas de cada asignatura',
+    url: 'https://sites.google.com/fi.uba.ar/academica/docentes/planificaciones?authuser=0',
+    icon: 'book-open-page-variant',
+    color: '#0f766e',
+  },
+  {
     title: 'SIU Guaraní',
     description: 'Gestión académica: inscripciones, trámites y certificados',
     url: 'https://guaraniautogestion.fi.uba.ar/g3w/acceso/login?ref=http://guaraniautogestion.fi.uba.ar/g3w/inicio_alumno/',
@@ -64,12 +71,16 @@ const hexToRgba = (hex: string, alpha: number) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+const webContentStyle = Platform.OS === 'web'
+  ? { maxWidth: 720, width: '100%' as any, alignSelf: 'center' as const }
+  : {};
+
 const UsefulLinksScreen = () => {
   const styles = getUsefulLinksStyles();
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, webContentStyle]} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <MaterialIcon name="link-variant" fontSize={24} color="#111827" />
           <Text style={styles.headerTitle}>Enlaces Útiles</Text>

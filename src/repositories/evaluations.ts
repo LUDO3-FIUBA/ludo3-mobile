@@ -1,4 +1,4 @@
-import { get, post } from './authenticatedRepository';
+import { get, postMultipart } from './authenticatedRepository';
 import { Evaluation, EvaluationSubmission } from '../models';
 
 const domainUrl = 'api/evaluations';
@@ -46,12 +46,29 @@ async function fetchMySubmissions(semester_id: string): Promise<EvaluationSubmis
 
 
 
-async function submitEvaluation(evaluationId: string, submissionText: string = ''): Promise<EvaluationSubmission> {
-    // TODO: error handling like in finalExamsRepository.submitExam
-    return await post(`${domainUrl}/submissions/submit_evaluation`, {
-        evaluation: evaluationId,
-        submission_text: submissionText,
-    }) as EvaluationSubmission
+export async function submitEvaluation(
+    evaluationId: string,
+    submissionText: string = '',
+    submissionFile?: { uri?: string; name: string; type?: string; size?: number },
+): Promise<EvaluationSubmission> {
+    const form = new FormData();
+    form.append('evaluation', evaluationId);
+    form.append('submission_text', submissionText);
+
+    if (submissionFile) {
+        if ((submissionFile as any).uri) {
+            const f: any = submissionFile as any;
+            form.append('submission_file', {
+                uri: f.uri,
+                name: f.name,
+                type: f.type || 'application/octet-stream',
+            } as any);
+        } else {
+            form.append('submission_file', submissionFile as any);
+        }
+    }
+
+    return await postMultipart(`${domainUrl}/submissions/submit_evaluation`, form) as EvaluationSubmission;
 }
 
 function convertJsonToEvaluationsList(json: any): Evaluation[] {

@@ -1,8 +1,9 @@
-import { View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
-import React from 'react'
+import { View, TouchableOpacity, StyleSheet } from 'react-native'
+import React, { useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { TeacherTuple } from '../../models/TeacherTuple';
 import { MaterialIcon } from '../../components';
+import AlertDialog from '../../components/AlertDialog';
 import { useAppDispatch } from '../../redux/hooks';
 import { fetchAllTeachers } from '../../redux/reducers/teacherStaffSlice';
 
@@ -14,6 +15,7 @@ interface Props {
 export default function TeachersHeaderRight({ staffTeachers, commissionId }: Props) {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const saveOpacityStyle = {
     ...styles.navButton,
@@ -40,16 +42,21 @@ export default function TeachersHeaderRight({ staffTeachers, commissionId }: Pro
       }
     } catch (error) {
       console.error('Error fetching all teachers', error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No pudimos cargar el listado de docentes. Volvé a intentar en unos minutos.',
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No pudimos cargar el listado de docentes. Volvé a intentar en unos minutos.' });
     }
   }
 
 
   return (
     <View style={styles.iconsContainer}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       <TouchableOpacity
         style={saveOpacityStyle}
         onPress={() => addNewTeacherToCommission()}>

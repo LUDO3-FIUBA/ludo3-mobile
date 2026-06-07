@@ -1,9 +1,10 @@
 // src/scenes/teacher_evaluations/EvaluationForm.tsx
 import React, { useEffect, useState } from 'react';
-import { Alert, Text, View, TouchableOpacity, TextInput, ScrollView, Switch, Platform } from 'react-native';
+import { Text, View, TouchableOpacity, TextInput, ScrollView, Switch } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import moment from 'moment';
-import { Loading, RoundedButton } from '../../components';
+import { Loading, MarkdownEditor, RoundedButton } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { TeacherSemester } from '../../models/TeacherSemester';
@@ -12,6 +13,7 @@ import { teacherEvaluationsRepository } from '../../repositories';
 
 export type EvaluationFormValues = {
   evaluationName: string;
+  description: string;
   minimumPassingGrade: string | null;
   startDate: Date | null;
   startTime: Date | null;
@@ -69,6 +71,7 @@ export default function EvaluationForm({
   const pickerPlaceholderTextStyle = { color: placeholderColor };
 
   const [evaluationName, setEvaluationName] = useState(initialValues.evaluationName);
+  const [description, setDescription] = useState(initialValues.description ?? '');
   const [minimumPassingGrade, setMinimumPassingGrade] = useState(initialValues.minimumPassingGrade);
 
   const [startDate, setStartDate] = useState<Date | null>(initialValues.startDate);
@@ -99,6 +102,7 @@ export default function EvaluationForm({
   const [evaluationsItems, setEvaluationsItems] = useState<Array<{ label: string; value: string }>>([]);
   const [openEvaluationsDropdown, setOpenEvaluationsDropdown] = useState(false);
   const [loadingEvaluations, setLoadingEvaluations] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const handleMinimumPassingGradeChange = (text: string) => {
     const onlyDigits = text.replace(/[^0-9]/g, '');
@@ -179,7 +183,7 @@ export default function EvaluationForm({
       }));
       setEvaluationsItems(items);
     } catch (error) {
-      showErrorAlert('No pudimos cargar las evaluaciones. Volvé a intentar en unos minutos.');
+      setAlertDialog({ title: 'Error', message: 'No pudimos cargar las evaluaciones. Volvé a intentar en unos minutos.' });
     } finally {
       setLoadingEvaluations(false);
     }
@@ -213,25 +217,17 @@ export default function EvaluationForm({
     (!isMakeUp || !!parentEvaluation) &&
     !submitting;
 
-  const showErrorAlert = (message: string) => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.alert(message);
-      return;
-    }
-
-    Alert.alert('Error', message);
-  };
-
   const submit = async () => {
     if (!startDate || !startTime || !finishDate || !finishTime) return;
 
     if (!isFinishAfterStart(startDate, startTime, finishDate, finishTime)) {
-      showErrorAlert('La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.');
+      setAlertDialog({ title: 'Error', message: 'La fecha y hora de finalización no pueden ser anteriores a la fecha y hora de inicio.' });
       return;
     }
 
     await onSubmit({
       evaluationName,
+      description,
       minimumPassingGrade,
       startDate,
       startTime,
@@ -246,7 +242,8 @@ export default function EvaluationForm({
   };
 
   return (
-    <ScrollView style={style().containerView} nestedScrollEnabled>
+    <>
+    <ScrollView style={style().containerView} nestedScrollEnabled keyboardShouldPersistTaps="always" keyboardDismissMode="on-drag">
       <View style={{ marginBottom: 100 }}>
         <View style={style().dateButtonInputs}>
           <Text style={{ ...style().text, color: 'black' }}>
@@ -266,6 +263,13 @@ export default function EvaluationForm({
           value={evaluationName}
           placeholder="Por ejemplo: Primer Parcial"
           placeholderTextColor={placeholderColor}
+        />
+
+        <MarkdownEditor
+          label="Enunciado"
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Escriba un enunciado aquí (opcional)."
         />
 
         <View
@@ -533,5 +537,14 @@ export default function EvaluationForm({
         {submitting && <Loading />}
       </View>
     </ScrollView>
+    <AlertDialog
+      visible={alertDialog !== null}
+      title={alertDialog?.title ?? ''}
+      message={alertDialog?.message ?? ''}
+      mode="info"
+      confirmLabel="Aceptar"
+      onConfirm={() => setAlertDialog(null)}
+    />
+    </>
   );
 }

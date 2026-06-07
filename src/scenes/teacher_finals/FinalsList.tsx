@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, Alert, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { Loading } from '../../components';
 import { getStyleSheet as style } from '../../styles';
 import { teacherFinalsRepository } from '../../repositories';
@@ -21,6 +22,7 @@ interface FinalsListRouteParams {
 const FinalsList: React.FC = () => {
   const [hasDoneFirstLoad, setHasDoneFirstLoad] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [myFinals, setMyFinals] = useState<TeacherFinal[]>([]);
   const [otherTeachersFinals, setOtherTeachersFinals] = useState<TeacherFinal[]>([]);
@@ -65,11 +67,7 @@ const FinalsList: React.FC = () => {
       setMyFinals(myFinals);
       setOtherTeachersFinals(otherTeachersFinals);
     } catch (error) {
-      Alert.alert(
-        'Te fallamos',
-        'No pudimos encontrar los finales de esta materia. ' +
-        'Volvé a intentar en unos minutos.',
-      );
+      setAlertDialog({ title: 'Te fallamos', message: 'No pudimos encontrar los finales de esta materia. Volvé a intentar en unos minutos.' });
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -79,6 +77,14 @@ const FinalsList: React.FC = () => {
 
   return (
     <View style={styles.view}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       {(loading || !hasDoneFirstLoad) && <Loading />}
       {hasDoneFirstLoad && !loading && !myFinals.length && !otherTeachersFinals.length && (
         <View style={styles.emptyEvaluationsContainer}>

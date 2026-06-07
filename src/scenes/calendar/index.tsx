@@ -4,10 +4,11 @@ import { DateData, MarkedDates } from 'react-native-calendars/src/types';
 import { CommissionInscription, Evaluation, FinalExam } from '../../models';
 import { SemesterSchedule } from '../../models/Semester';
 import AcademicCalendarEvent from '../../models/AcademicCalendarEvent';
+import CatedraCalendarEntry from '../../models/CatedraCalendarEntry';
 import { calendar as style } from '../../styles';
 import { lightModeColors } from '../../styles/colorPalette';
 import AgendaItem from './AgendaItem';
-import { academicCalendarRepository, commissionInscriptionsRepository, evaluationsRepository, finalExamsRepository } from '../../repositories';
+import { academicCalendarRepository, catedraCalendarRepository, commissionInscriptionsRepository, evaluationsRepository, finalExamsRepository } from '../../repositories';
 import ViewModeToggle from './ViewModeToggle';
 import MonthView from './MonthView';
 import WeekView from './WeekView';
@@ -28,7 +29,8 @@ export type CalendarEvent =
   | { type: 'evaluation'; data: Evaluation }
   | { type: 'final'; data: FinalExam }
   | { type: 'class'; data: ClassOccurrence }
-  | { type: 'institutional'; data: AcademicCalendarEvent };
+  | { type: 'institutional'; data: AcademicCalendarEvent }
+  | { type: 'catedra'; data: CatedraCalendarEntry; classOccurrence?: ClassOccurrence; inscription?: CommissionInscription };
 
 export interface AgendaSection {
   title: string;
@@ -46,6 +48,8 @@ const EVAL_DOT          = { key: 'evaluation',   color: EVAL_COLOR,          sel
 const FINAL_DOT         = { key: 'final',        color: FINAL_COLOR,         selectedDotColor: 'white' };
 const CLASS_DOT         = { key: 'class',        color: CLASS_COLOR,         selectedDotColor: 'white' };
 const INSTITUTIONAL_DOT = { key: 'institutional', color: INSTITUTIONAL_COLOR, selectedDotColor: 'white' };
+// catedra reutiliza el dot de clase — son el mismo concepto, enriquecido
+const CATEDRA_DOT       = CLASS_DOT;
 
 const CalendarScreen = () => {
   const navigation = useNavigation<any>();
@@ -54,6 +58,7 @@ const CalendarScreen = () => {
   const [finals, setFinals]                     = useState<FinalExam[]>([]);
   const [inscriptions, setInscriptions]         = useState<CommissionInscription[]>([]);
   const [institutionalEvents, setInstitutional] = useState<AcademicCalendarEvent[]>([]);
+  const [catedraEntries, setCatedraEntries]     = useState<CatedraCalendarEntry[]>([]);
   const [showInstitutional, setShowInstitutional] = useState(true);
   const [viewMode, setViewMode]                 = useState<ViewMode>('month');
   const [selectedDate, setSelectedDate]         = useState<string>(
@@ -63,13 +68,20 @@ const CalendarScreen = () => {
   useEffect(() => {
     evaluationsRepository.fetchMisExamenes().then(setEvaluations).catch(() => {});
     finalExamsRepository.fetchPending().then(setFinals).catch(() => {});
-    commissionInscriptionsRepository.fetchCurrentInscriptions().then(setInscriptions).catch(() => {});
     academicCalendarRepository.fetchEvents(new Date().getFullYear()).then(setInstitutional).catch(() => {});
+    commissionInscriptionsRepository.fetchCurrentInscriptions().then(inscrs => {
+      setInscriptions(inscrs);
+      // Fetchear el calendario de cátedra de cada semestre inscripto
+      const semesterIds = [...new Set(inscrs.map(i => i.semester.id))];
+      Promise.all(
+        semesterIds.map(id => catedraCalendarRepository.fetchBySemester(id).catch(() => [] as CatedraCalendarEntry[]))
+      ).then(results => setCatedraEntries(results.flat()));
+    }).catch(() => {});
   }, []);
 
   const calendarItems: AgendaSection[] = useMemo(
-    () => getAgendaItems(evaluations, finals, inscriptions, showInstitutional ? institutionalEvents : []),
-    [evaluations, finals, inscriptions, institutionalEvents, showInstitutional],
+    () => getAgendaItems(evaluations, finals, inscriptions, catedraEntries, showInstitutional ? institutionalEvents : []),
+    [evaluations, finals, inscriptions, catedraEntries, institutionalEvents, showInstitutional],
   );
 
   const marks: MarkedDates = useMemo(() => {
@@ -103,6 +115,14 @@ const CalendarScreen = () => {
     } else if (event.type === 'class') {
       navigation.navigate('ViewClassDetails', {
         classOccurrence: { ...event.data, date: event.data.date.toISOString() },
+      });
+    } else if (event.type === 'catedra') {
+      navigation.navigate('ViewCatedraDetails', {
+        entry: event.data,
+        classOccurrence: event.classOccurrence
+          ? { ...event.classOccurrence, date: event.classOccurrence.date.toISOString() }
+          : undefined,
+        inscription: event.inscription,
       });
     }
   }, [navigation]);
@@ -175,6 +195,7 @@ export function getEventDate(event: CalendarEvent): string {
     return (typeof d === 'string' ? d : (d as Date).toISOString()).split('T')[0];
   }
   if (event.type === 'institutional') return event.data.start_date;
+  if (event.type === 'catedra') return event.data.date;
   return event.data.date.toISOString().split('T')[0];
 }
 
@@ -217,6 +238,7 @@ function getAgendaItems(
   evaluations: Evaluation[],
   finals: FinalExam[],
   inscriptions: CommissionInscription[],
+  catedraEntries: CatedraCalendarEntry[],
   institutionalEvents: AcademicCalendarEvent[],
 ): AgendaSection[] {
   const today = new Date();
@@ -226,12 +248,38 @@ function getAgendaItems(
 
   const classOccurrences = generateClassOccurrences(inscriptions, today, sixMonthsOut);
 
+  // Semestres que tienen al menos un entry de cátedra cargado
+  const semestersWithCatedra = new Set(catedraEntries.map(e => e.semester_id));
+
+  // Mapa semesterId → inscription para enriquecer catedra entries sin classOccurrence
+  const inscriptionBySemester = new Map<number, CommissionInscription>();
+  for (const insc of inscriptions) {
+    inscriptionBySemester.set(insc.semester.id, insc);
+  }
+
+  // Mapa (semesterId, 'YYYY-MM-DD') → ClassOccurrence para enriquecer catedra entries
+  const occurrenceMap = new Map<string, ClassOccurrence>();
+  for (const occ of classOccurrences) {
+    const key = `${occ.semesterId}:${occ.date.toISOString().split('T')[0]}`;
+    occurrenceMap.set(key, occ);
+  }
+
   const events: CalendarEvent[] = [
     ...evaluations.map<CalendarEvent>(data => ({ type: 'evaluation', data })),
     ...finals
       .filter(f => new Date(f.date) >= today)
       .map<CalendarEvent>(data => ({ type: 'final', data })),
-    ...classOccurrences.map<CalendarEvent>(data => ({ type: 'class', data })),
+    // Catedra entries reemplazan los class genéricos para ese semestre
+    ...catedraEntries.map<CalendarEvent>(data => ({
+      type: 'catedra',
+      data,
+      classOccurrence: occurrenceMap.get(`${data.semester_id}:${data.date}`),
+      inscription: inscriptionBySemester.get(data.semester_id),
+    })),
+    // Class occurrences solo para semestres SIN calendario de cátedra
+    ...classOccurrences
+      .filter(occ => !semestersWithCatedra.has(occ.semesterId))
+      .map<CalendarEvent>(data => ({ type: 'class', data })),
     ...institutionalEvents.map<CalendarEvent>(data => ({ type: 'institutional', data })),
   ];
 
@@ -257,13 +305,13 @@ function getMarkedDates(sections: AgendaSection[], institutionalEvents: Academic
   const marked: MarkedDates = {};
 
   sections.forEach(s => {
-    const hasEval  = s.data.some(e => e.type === 'evaluation');
-    const hasFinal = s.data.some(e => e.type === 'final');
-    const hasClass = s.data.some(e => e.type === 'class');
+    const hasEval    = s.data.some(e => e.type === 'evaluation');
+    const hasFinal   = s.data.some(e => e.type === 'final');
+    const hasClass   = s.data.some(e => e.type === 'class' || e.type === 'catedra');
     const dots = [
-      ...(hasEval  ? [EVAL_DOT]  : []),
-      ...(hasFinal ? [FINAL_DOT] : []),
-      ...(hasClass ? [CLASS_DOT] : []),
+      ...(hasEval  ? [EVAL_DOT]    : []),
+      ...(hasFinal ? [FINAL_DOT]   : []),
+      ...(hasClass ? [CATEDRA_DOT] : []),
     ];
     marked[s.title] = { dots };
   });

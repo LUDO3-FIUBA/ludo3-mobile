@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import AlertDialog from '../../components/AlertDialog';
 import {
     ActivityIndicator,
-    Alert,
     FlatList,
     Modal,
     RefreshControl,
@@ -30,6 +30,7 @@ const NotificationsScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+    const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
     const isMountedRef = useRef(true);
 
     const unreadCount = useMemo(
@@ -89,7 +90,7 @@ const NotificationsScreen: React.FC = () => {
             await notificationsRepository.deleteNotification(item.id);
             setNotifications((prev) => prev.filter((n) => n.id !== item.id));
         } catch {
-            Alert.alert('Error', 'No se pudo eliminar la notificación.');
+            setAlertDialog({ title: 'Error', message: 'No se pudo eliminar la notificación.' });
         }
     };
 
@@ -103,6 +104,14 @@ const NotificationsScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
+            <AlertDialog
+                visible={alertDialog !== null}
+                title={alertDialog?.title ?? ''}
+                message={alertDialog?.message ?? ''}
+                mode="info"
+                confirmLabel="Aceptar"
+                onConfirm={() => setAlertDialog(null)}
+            />
             <View style={styles.summaryBar}>
                 <Text style={styles.summaryText}>
                     {notifications.length === 0

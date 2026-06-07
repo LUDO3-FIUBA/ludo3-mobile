@@ -7,13 +7,13 @@ import {
   Switch,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   StyleSheet,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import { RoundedButton, MaterialIcon, TeacherSearch } from '../../components';
+import { RoundedButton, MaterialIcon, TeacherSearch, RecipientSelector } from '../../components';
 import { formsRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import FormDetail, { FormField } from '../../models/FormDetail';
@@ -36,6 +36,19 @@ const DigitalFormScreen: React.FC = () => {
   const route = useRoute();
   const { formId } = route.params as RouteParams;
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          style={{ marginLeft: 16, padding: 4 }}
+          onPress={() => navigation.navigate('FormsList')}
+        >
+          <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
   const [form, setForm] = useState<FormDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<AnswerMap>({});
@@ -45,8 +58,23 @@ const DigitalFormScreen: React.FC = () => {
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus | null>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<TeacherModelSnakeCase | null>(null);
   const [teacherError, setTeacherError] = useState<string | null>(null);
+  const [recipientEntityType, setRecipientEntityType] = useState<string | null>(null);
+  const [recipientEntityId, setRecipientEntityId] = useState<number | null>(null);
+  const [recipientError, setRecipientError] = useState<string | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
+    setForm(null);
+    setLoading(true);
+    setAnswers({});
+    setFileAnswers({});
+    setFieldErrors({});
+    setSubmitStatus(null);
+    setSelectedTeacher(null);
+    setTeacherError(null);
+    setRecipientEntityType(null);
+    setRecipientEntityId(null);
+    setRecipientError(null);
     formsRepository
       .fetchFormDetail(formId)
       .then(detail => {
@@ -55,9 +83,9 @@ const DigitalFormScreen: React.FC = () => {
         detail.fields.forEach(f => (initial[f.form_field_id] = null));
         setAnswers(initial);
       })
-      .catch(() => Alert.alert('Error', 'No se pudo cargar el formulario.'))
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar el formulario.' }))
       .finally(() => setLoading(false));
-  }, []);
+  }, [formId]);
 
   const setAnswer = (fieldId: number, value: string | null) => {
     setAnswers(prev => ({ ...prev, [fieldId]: value }));
@@ -127,11 +155,21 @@ const DigitalFormScreen: React.FC = () => {
     }
     setTeacherError(null);
 
+    const members = form.ownership_group.members ?? [];
+    if (members.length > 1 && (recipientEntityType === null || recipientEntityId === null)) {
+      setRecipientError('Debés seleccionar un destinatario para enviar este formulario.');
+      return;
+    }
+    setRecipientError(null);
+
     const adjuntoField = form.fields.find(f => f.form_field_type.value === 'adjunto');
     const adjuntoFile = adjuntoField ? fileAnswers[adjuntoField.form_field_id] ?? null : null;
     const nonAdjuntoAnswers = form.fields
       .filter(f => f.form_field_type.value !== 'adjunto')
       .map(f => ({ field_id: f.form_field_id, answer_value: answers[f.form_field_id] ?? null }));
+
+    const recipientType = members.length > 1 ? recipientEntityType : null;
+    const recipientId = members.length > 1 ? recipientEntityId : null;
 
     setSubmitting(true);
     setSubmitStatus(null);
@@ -142,13 +180,21 @@ const DigitalFormScreen: React.FC = () => {
           nonAdjuntoAnswers,
           adjuntoFile,
           selectedTeacher?.id,
+          recipientType,
+          recipientId,
         );
       } else {
-        await formsRepository.submitDigitalForm(formId, nonAdjuntoAnswers, selectedTeacher?.id);
+        await formsRepository.submitDigitalForm(
+          formId,
+          nonAdjuntoAnswers,
+          selectedTeacher?.id,
+          recipientType,
+          recipientId,
+        );
       }
       setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
       setTimeout(() => {
-        navigation.goBack();
+        navigation.navigate('FormsList');
       }, 2000);
     } catch {
       setSubmitStatus({
@@ -160,23 +206,21 @@ const DigitalFormScreen: React.FC = () => {
     }
   };
 
+  let content: React.ReactNode;
   if (loading) {
-    return (
+    content = (
       <View style={styles.center}>
         <ActivityIndicator size="large" />
       </View>
     );
-  }
-
-  if (!form) {
-    return (
+  } else if (!form) {
+    content = (
       <View style={styles.center}>
         <Text style={styles.errorText}>Formulario no disponible.</Text>
       </View>
     );
-  }
-
-  return (
+  } else {
+    content = (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.card}>
         <Text style={styles.title}>{form.form_name}</Text>
@@ -226,6 +270,20 @@ const DigitalFormScreen: React.FC = () => {
           </View>
         )}
 
+        {(form.ownership_group.members ?? []).length > 1 && (
+          <RecipientSelector
+            members={form.ownership_group.members}
+            selectedEntityType={recipientEntityType}
+            selectedEntityId={recipientEntityId}
+            onSelect={(entityType, entityId) => {
+              setRecipientEntityType(entityType);
+              setRecipientEntityId(entityId);
+              setRecipientError(null);
+            }}
+            error={recipientError}
+          />
+        )}
+
         {submitStatus ? (
           <View
             style={[
@@ -258,6 +316,21 @@ const DigitalFormScreen: React.FC = () => {
         </View>
       </View>
     </ScrollView>
+    );
+  }
+
+  return (
+    <>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+      {content}
+    </>
   );
 };
 
@@ -270,6 +343,7 @@ interface FieldInputProps {
 }
 
 const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange, fileValue, onFileChange }) => {
+  const [fieldAlertDialog, setFieldAlertDialog] = useState<{ title: string; message: string } | null>(null);
   const type = field.form_field_type.value;
 
   if (type === 'checkbox') {
@@ -325,12 +399,21 @@ const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange, fileVal
           file: (asset as any).file ?? undefined,
         });
       } catch {
-        Alert.alert('Error', 'No se pudo seleccionar el archivo.');
+        setFieldAlertDialog({ title: 'Error', message: 'No se pudo seleccionar el archivo.' });
       }
     };
 
     return (
-      <TouchableOpacity style={styles.filePicker} onPress={handlePick} activeOpacity={0.8}>
+      <>
+        <AlertDialog
+          visible={fieldAlertDialog !== null}
+          title={fieldAlertDialog?.title ?? ''}
+          message={fieldAlertDialog?.message ?? ''}
+          mode="info"
+          confirmLabel="Aceptar"
+          onConfirm={() => setFieldAlertDialog(null)}
+        />
+        <TouchableOpacity style={styles.filePicker} onPress={handlePick} activeOpacity={0.8}>
         <MaterialIcon
           name={fileValue ? 'file-check' : 'upload'}
           fontSize={22}
@@ -348,6 +431,7 @@ const FieldInput: React.FC<FieldInputProps> = ({ field, value, onChange, fileVal
           </TouchableOpacity>
         ) : null}
       </TouchableOpacity>
+      </>
     );
   }
 

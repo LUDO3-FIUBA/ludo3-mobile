@@ -19,6 +19,7 @@ export interface Notification {
     image?: string | null;
     sender_name?: string | null;
     semester_info?: SemesterInfo | null;
+    action_url?: string | null;
 }
 
 export interface UserNotification {
@@ -110,10 +111,18 @@ async function fetchSemesterNotifications(semesterId: number): Promise<TeacherSe
     return response as TeacherSentNotification[];
 }
 
+async function fetchStudentSemesterNotifications(semesterId: number): Promise<Notification[]> {
+    const response = await authenticatedRepository.get(
+        `${domainUrl}/semester/${semesterId}`,
+    );
+    return response as Notification[];
+}
+
 export default {
     fetchMyNotifications,
     markNotificationAsRead,
     deleteNotification,
     sendCommissionNotification,
     fetchSemesterNotifications,
+    fetchStudentSemesterNotifications,
 };

@@ -43,6 +43,24 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+function resolveCatedraStartTime(event: CalendarEvent & { type: 'catedra' }): string | undefined {
+  if (event.classOccurrence) return event.classOccurrence.startTime;
+  const schedules = event.inscription?.semester?.schedules ?? [];
+  const jsDay = new Date(event.data.date).getDay();
+  const backendDay = jsDay === 0 ? 6 : jsDay - 1;
+  const match = schedules.find(s => s.day_of_week === backendDay) ?? schedules[0];
+  return match?.start_time;
+}
+
+function resolveCatedraEndTime(event: CalendarEvent & { type: 'catedra' }): string | undefined {
+  if (event.classOccurrence) return event.classOccurrence.endTime;
+  const schedules = event.inscription?.semester?.schedules ?? [];
+  const jsDay = new Date(event.data.date).getDay();
+  const backendDay = jsDay === 0 ? 6 : jsDay - 1;
+  const match = schedules.find(s => s.day_of_week === backendDay) ?? schedules[0];
+  return match?.end_time;
+}
+
 function getEventTop(event: CalendarEvent): number {
   let h: number;
   let m: number;
@@ -57,6 +75,11 @@ function getEventTop(event: CalendarEvent): number {
     m = t.m;
   } else if (event.type === 'institutional') {
     return 0;
+  } else if (event.type === 'catedra') {
+    const startTime = resolveCatedraStartTime(event);
+    const t = parseTime(startTime ?? '00:00:00');
+    h = t.h;
+    m = t.m;
   } else {
     // final
     const dateVal = event.data.date;
@@ -72,6 +95,17 @@ function getEventTop(event: CalendarEvent): number {
 }
 
 function getEventHeight(event: CalendarEvent): number {
+  if (event.type === 'catedra') {
+    const startTime = resolveCatedraStartTime(event);
+    const endTime   = resolveCatedraEndTime(event);
+    if (startTime && endTime) {
+      const start = parseTime(startTime);
+      const end   = parseTime(endTime);
+      const durationHours = (end.h * 60 + end.m - (start.h * 60 + start.m)) / 60;
+      return Math.max(durationHours * HOUR_HEIGHT, 40);
+    }
+    return 44;
+  }
   if (event.type !== 'class') return 44;
 
   const start = parseTime(event.data.startTime);
@@ -160,6 +194,30 @@ const EventBlock = ({ event, onPress }: EventBlockProps) => {
   if (event.type === 'institutional') {
     // institutional events are shown in the all-day banner, not in the time grid
     return null;
+  }
+
+  if (event.type === 'catedra') {
+    const { data } = event;
+    const startStr = resolveCatedraStartTime(event)?.slice(0, 5) ?? '—';
+    const endStr   = resolveCatedraEndTime(event)?.slice(0, 5) ?? '';
+    const label    = data.class_number ? `Clase ${data.class_number}` : data.topic;
+    return (
+      <TouchableOpacity
+        style={[
+          styles.eventBlock,
+          { top, height, backgroundColor: CLASS_COLOR + '33', borderLeftColor: CLASS_COLOR },
+        ]}
+        onPress={() => onPress(event)}
+        activeOpacity={0.7}
+      >
+        <Text style={[styles.eventBlockTitle, { color: CLASS_COLOR }]} numberOfLines={2}>
+          {label}
+        </Text>
+        <Text style={[styles.eventBlockTime, { color: CLASS_COLOR }]}>
+          {startStr}{endStr ? ` – ${endStr}` : ''}
+        </Text>
+      </TouchableOpacity>
+    );
   }
 
   // final

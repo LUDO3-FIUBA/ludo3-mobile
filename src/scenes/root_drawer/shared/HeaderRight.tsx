@@ -2,6 +2,10 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { lightModeColors } from '../../../styles/colorPalette';
+import User from '../../../models/User';
+import UserAvatar from '../../../components/UserAvatar';
+import { useAppSelector } from '../../../redux/hooks';
+import { selectCurrentUserProfilePhoto } from '../../../redux/reducers/currentUserSlice';
 
 type Colors = typeof lightModeColors;
 
@@ -12,6 +16,8 @@ type Props = {
   unreadCount: number;
   onBellPress: () => void;
   colors: Colors;
+  user: User | null;
+  onUserPress?: () => void;
 };
 
 const HeaderRight: React.FC<Props> = ({
@@ -21,7 +27,12 @@ const HeaderRight: React.FC<Props> = ({
   unreadCount,
   onBellPress,
   colors,
-}) => (
+  user,
+  onUserPress,
+}) => {
+  const storedPhoto = useAppSelector(selectCurrentUserProfilePhoto);
+  const photoUrl = storedPhoto !== undefined ? storedPhoto : user?.profilePhoto;
+  return (
   <View style={styles.container}>
     {canToggle && (
       <View style={styles.roleToggle}>
@@ -55,8 +66,24 @@ const HeaderRight: React.FC<Props> = ({
         </View>
       )}
     </TouchableOpacity>
+    {user && (
+      <TouchableOpacity
+        onPress={onUserPress}
+        style={styles.userButton}
+        accessibilityLabel="Mi perfil"
+        disabled={!onUserPress}
+      >
+        <UserAvatar photoUrl={photoUrl} size={32} />
+        {!!(user.firstName || user.lastName) && (
+          <Text style={[styles.userName, { color: colors.mainContrastColor }]} numberOfLines={1}>
+            {`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()}
+          </Text>
+        )}
+      </TouchableOpacity>
+    )}
   </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   container: { flexDirection: 'row', alignItems: 'center', marginRight: 16 },
@@ -74,6 +101,11 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#fff',
   },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
+  userButton: {
+    flexDirection: 'row', alignItems: 'center',
+    marginLeft: 12, paddingVertical: 4, paddingHorizontal: 6, maxWidth: 220,
+  },
+  userName: { fontSize: 13, fontWeight: '600', marginLeft: 8 },
 });
 
 export default HeaderRight;

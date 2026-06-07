@@ -31,15 +31,17 @@ type Props = {
   onChange: (q: string) => void;
   onSelect: (room: RoomResult) => void;
   onClear: () => void;
+  /** Distance from the top of the positioned container. Defaults to 16. */
+  topOffset?: number;
 };
 
-export default function MapSearchBar({ query, results, onChange, onSelect, onClear }: Props) {
+export default function MapSearchBar({ query, results, onChange, onSelect, onClear, topOffset = 16 }: Props) {
   const inputRef = useRef<TextInput>(null);
   const [dismissed, setDismissed] = React.useState(false);
   const showSuggestions = query.length > 0 && results.length > 0 && !dismissed;
 
   return (
-    <View pointerEvents="box-none" style={styles.wrapper}>
+    <View pointerEvents="box-none" style={[styles.wrapper, { top: topOffset }]}>
       <View style={styles.bar}>
         <MaterialCommunityIcons name="magnify" size={20} color={lightModeColors.darkGray} style={styles.searchIcon} />
         <TextInput

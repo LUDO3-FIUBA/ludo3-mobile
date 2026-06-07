@@ -70,7 +70,7 @@ const teacherUserDataSlice = createSlice({
       })
       .addCase(fetchUserDataAsync.fulfilled, (state, action) => {
         const dataAsTeacher: TeacherModel = {
-          id: action.payload.userId,
+          id: Number(action.payload.userId),
           firstName: action.payload.user.firstName,
           lastName: action.payload.user.lastName,
           dni: action.payload.user.dni,

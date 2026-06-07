@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Dimensions } from "react-native";
+import { Dimensions } from "react-native";
+import AlertDialog from '../../components/AlertDialog';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Loading } from '../../components';
 import * as Progress from 'react-native-progress';
@@ -20,6 +21,7 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
 
   const [loading, setLoading] = useState(true);
   const [semesterStats, setSemesterStats] = useState<SemesterStats | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     fetchData(semester.id);
@@ -35,11 +37,7 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
     } catch (error) {
       setLoading(false);
       console.log('Error', error);
-      Alert.alert(
-        '¿Qué pasó?',
-        'No sabemos pero no pudimos buscar tu información. ' +
-        'Volvé a intentar en unos minutos.'
-      );
+      setAlertDialog({ title: '¿Qué pasó?', message: 'No sabemos pero no pudimos buscar tu información. Volvé a intentar en unos minutos.' });
     }
   };
 
@@ -61,6 +59,14 @@ const Stats: React.FC<StatsProps> = ({ route }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
       <Text style={styles.header}>Métricas del cuatrimestre actual</Text>
       <Text style={styles.header2}>{semester.commission.subjectName}</Text>
 

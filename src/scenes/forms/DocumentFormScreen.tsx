@@ -5,13 +5,13 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   StyleSheet,
   Linking,
 } from 'react-native';
+import AlertDialog from '../../components/AlertDialog';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import { MaterialIcon, RoundedButton, TeacherSearch } from '../../components';
+import { MaterialIcon, RoundedButton, TeacherSearch, RecipientSelector } from '../../components';
 import { formsRepository } from '../../repositories';
 import { LocalFile } from '../../repositories/forms';
 import FormDetail from '../../models/FormDetail';
@@ -41,41 +41,42 @@ const DocumentFormScreen: React.FC = () => {
   const [fileError, setFileError] = useState<string | null>(null);
   const [selectedTeacher, setSelectedTeacher] = useState<TeacherModelSnakeCase | null>(null);
   const [teacherError, setTeacherError] = useState<string | null>(null);
+  const [recipientEntityType, setRecipientEntityType] = useState<string | null>(null);
+  const [recipientEntityId, setRecipientEntityId] = useState<number | null>(null);
+  const [recipientError, setRecipientError] = useState<string | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          style={{ marginLeft: 16, padding: 4 }}
+          onPress={() => navigation.navigate('FormsList')}
+        >
+          <MaterialIcon name="arrow-left" fontSize={24} color="#333" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   useEffect(() => {
     formsRepository
       .fetchFormDetail(formId)
       .then(setForm)
-      .catch(() => Alert.alert('Error', 'No se pudo cargar el formulario.'))
+      .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar el formulario.' }))
       .finally(() => setLoading(false));
   }, [formId]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (!form) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Formulario no disponible.</Text>
-      </View>
-    );
-  }
-
   const handleDownload = async () => {
-    if (!form.document_source) {
-      Alert.alert('Error', 'No hay documento disponible para descargar.');
+    if (!form?.document_source) {
+      setAlertDialog({ title: 'Error', message: 'No hay documento disponible para descargar.' });
       return;
     }
     try {
       const presignedUrl = await formsRepository.getPresignedDocumentUrl(form.document_source);
       await Linking.openURL(presignedUrl);
     } catch {
-      Alert.alert('Error', 'No se pudo abrir el documento.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo abrir el documento.' });
     }
   };
 
@@ -98,7 +99,7 @@ const DocumentFormScreen: React.FC = () => {
       });
       setFileError(null);
     } catch {
-      Alert.alert('Error', 'No se pudo seleccionar el archivo.');
+      setAlertDialog({ title: 'Error', message: 'No se pudo seleccionar el archivo.' });
     }
   };
 
@@ -114,14 +115,24 @@ const DocumentFormScreen: React.FC = () => {
     }
     setTeacherError(null);
 
+    const members = form.ownership_group.members ?? [];
+    if (members.length > 1 && (recipientEntityType === null || recipientEntityId === null)) {
+      setRecipientError('Debés seleccionar un destinatario para enviar este formulario.');
+      return;
+    }
+    setRecipientError(null);
+
+    const recipientType = members.length > 1 ? recipientEntityType : null;
+    const recipientId = members.length > 1 ? recipientEntityId : null;
+
     setSubmitting(true);
     setFileError(null);
     setSubmitStatus(null);
     try {
-      await formsRepository.submitDocumentForm(formId, pickedFile, selectedTeacher?.id);
+      await formsRepository.submitDocumentForm(formId, pickedFile, selectedTeacher?.id, recipientType, recipientId);
       setSubmitStatus({ type: 'success', message: 'Formulario enviado correctamente.' });
       setTimeout(() => {
-        navigation.goBack();
+        navigation.navigate('FormsList');
       }, 2000);
     } catch {
       setSubmitStatus({
@@ -133,7 +144,21 @@ const DocumentFormScreen: React.FC = () => {
     }
   };
 
-  return (
+  let content: React.ReactNode;
+  if (loading) {
+    content = (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  } else if (!form) {
+    content = (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>Formulario no disponible.</Text>
+      </View>
+    );
+  } else {
+    content = (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <View style={styles.card}>
         <Text style={styles.title}>{form.form_name}</Text>
@@ -193,6 +218,23 @@ const DocumentFormScreen: React.FC = () => {
           </>
         )}
 
+        {(form.ownership_group.members ?? []).length > 1 && (
+          <>
+            <View style={styles.divider} />
+            <RecipientSelector
+              members={form.ownership_group.members}
+              selectedEntityType={recipientEntityType}
+              selectedEntityId={recipientEntityId}
+              onSelect={(entityType, entityId) => {
+                setRecipientEntityType(entityType);
+                setRecipientEntityId(entityId);
+                setRecipientError(null);
+              }}
+              error={recipientError}
+            />
+          </>
+        )}
+
         {submitStatus ? (
           <View
             style={[
@@ -225,6 +267,21 @@ const DocumentFormScreen: React.FC = () => {
         </View>
       </View>
     </ScrollView>
+    );
+  }
+
+  return (
+    <>
+      {content}
+      <AlertDialog
+        visible={alertDialog !== null}
+        title={alertDialog?.title ?? ''}
+        message={alertDialog?.message ?? ''}
+        mode="info"
+        confirmLabel="Aceptar"
+        onConfirm={() => setAlertDialog(null)}
+      />
+    </>
   );
 };
 
