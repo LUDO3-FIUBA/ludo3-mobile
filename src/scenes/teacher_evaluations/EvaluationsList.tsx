@@ -10,7 +10,7 @@ import { TeacherSemester } from '../../models/TeacherSemester';
 import { makeRequest } from '../../networking/makeRequest';
 import { teacherEvaluationsRepository } from '../../repositories';
 import { EvaluationsListHeaderRight } from './EvaluationsListHeaderRight';
-import { FontAwesome } from '@expo/vector-icons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 interface EvaluationsProps {
   // No specific props if not needed

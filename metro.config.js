@@ -1,5 +1,6 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
+const fs = require('fs');
 
 const config = getDefaultConfig(__dirname);
 
@@ -15,6 +16,19 @@ const originalResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (platform === 'web' && webMocks[moduleName]) {
     return { filePath: webMocks[moduleName], type: 'sourceFile' };
+  }
+  // On native, Expo CLI aliases `react-native-vector-icons` -> `@expo/vector-icons`,
+  // whose runtime Font.loadAsync registration doesn't apply on Android in this setup
+  // (icons render blank). Bypass the alias on native so the real package is used, which
+  // renders with the fonts embedded natively via the expo-font plugin in app.json.
+  if (platform !== 'web') {
+    const m = moduleName.match(/^react-native-vector-icons\/(.+)$/);
+    if (m) {
+      const real = path.resolve(__dirname, 'node_modules/react-native-vector-icons', `${m[1]}.js`);
+      if (fs.existsSync(real)) {
+        return { filePath: real, type: 'sourceFile' };
+      }
+    }
   }
   if (originalResolveRequest) {
     return originalResolveRequest(context, moduleName, platform);

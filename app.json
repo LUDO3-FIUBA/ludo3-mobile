@@ -54,7 +54,17 @@
       ],
       "@react-native-community/datetimepicker",
       "expo-secure-store",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf",
+            "./node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf",
+            "./node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"
+          ]
+        }
+      ]
     ]
   }
 }

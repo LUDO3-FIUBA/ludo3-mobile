@@ -9,7 +9,7 @@ import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/nativ
 import { makeRequest } from '../../networking/makeRequest';
 import FinalsListItem from './FinalsListItem';
 import { FinalsListHeaderRight } from './FinalsListHeaderRight';
-import { FontAwesome } from '@expo/vector-icons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useAppSelector } from '../../redux/hooks';
 import { selectUserData } from '../../redux/reducers/teacherUserDataSlice';
 import { selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
