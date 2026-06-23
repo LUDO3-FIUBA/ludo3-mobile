@@ -29,12 +29,19 @@ const StudentIdentityViewerScreen: React.FC = () => {
   const [identity, setIdentity] = useState<StudentIdentity | null>(null);
   const [loading, setLoading] = useState(true);
   const [expired, setExpired] = useState(false);
+  const [errored, setErrored] = useState(false);
 
   useEffect(() => {
+    setExpired(false);
+    setErrored(false);
+    setLoading(true);
     fetchIdentityByToken(token)
       .then(setIdentity)
       .catch(e => {
+        // Solo es "expirada" si el backend devolvió 400/401/404.
+        // Cualquier otro fallo (red inalcanzable, CORS) es un error de conexión.
         if (e instanceof CredentialExpired) setExpired(true);
+        else setErrored(true);
       })
       .finally(() => setLoading(false));
   }, [token]);
@@ -47,12 +54,24 @@ const StudentIdentityViewerScreen: React.FC = () => {
     );
   }
 
-  if (expired || !identity) {
+  if (expired) {
     return (
       <View style={[styles.center, styles.errorBackground]}>
         <MaterialIcon name="alert-circle" fontSize={72} color="white" />
         <Text style={styles.expiredTitle}>Credencial inválida o expirada</Text>
         <Text style={styles.expiredSubtitle}>El alumno debe generar un nuevo QR</Text>
+      </View>
+    );
+  }
+
+  if (errored || !identity) {
+    return (
+      <View style={styles.center}>
+        <MaterialIcon name="wifi-off" fontSize={72} color="#c0392b" />
+        <Text style={[styles.expiredTitle, { color: '#c0392b' }]}>No se pudo conectar</Text>
+        <Text style={[styles.expiredSubtitle, { color: '#888' }]}>
+          No se pudo verificar la credencial con el servidor. Revisá la conexión e intentá de nuevo.
+        </Text>
       </View>
     );
   }

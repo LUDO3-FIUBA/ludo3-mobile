@@ -24,7 +24,6 @@ function convertJsonToSubjectsList(json: any): SiuSubject[] {
                 subject.code,
                 subject.name,
                 subject.professor,
-                subject.department_id,
                 subject.correlatives
             ))
         : [];

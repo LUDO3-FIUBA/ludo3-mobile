@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
-  Image,
   Text,
   StyleSheet,
   ScrollView,
@@ -9,17 +8,21 @@ import {
   TouchableOpacity,
   Appearance,
   Linking,
+  Platform,
 } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
+import { useNavigation } from '@react-navigation/native';
 import { usersRepository } from '../../repositories';
-import { fetchMyQRBase64, fetchMyIdentityLink } from '../../repositories/studentIdentity';
+import { fetchMyIdentityLink } from '../../repositories/studentIdentity';
 import User from '../../models/User';
 import { darkModeColors, lightModeColors } from '../../styles/colorPalette';
 import { MaterialIcon } from '../../components';
 
 const StudentCredentialScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
   const colors = Appearance.getColorScheme() === 'dark' ? darkModeColors : lightModeColors;
   const [user, setUser] = useState<User | null>(null);
-  const [qrBase64, setQrBase64] = useState<string | null>(null);
+  const [identityUrl, setIdentityUrl] = useState<string | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [qrLoading, setQrLoading] = useState(false);
   const [qrError, setQrError] = useState(false);
@@ -30,21 +33,34 @@ const StudentCredentialScreen: React.FC = () => {
     setLinkLoading(true);
     setLinkError(false);
     try {
-      const { url } = await fetchMyIdentityLink();
-      await Linking.openURL(url);
+      // Reusamos el link ya cargado para el QR; si no está, lo pedimos.
+      const url = identityUrl ?? (await fetchMyIdentityLink()).url;
+      if (Platform.OS === 'web') {
+        await Linking.openURL(url);
+      } else {
+        // En nativo el link apunta a FRONTEND_BASE_URL (p. ej. localhost:8081),
+        // que no es alcanzable desde el dispositivo/emulador y no se rutea al
+        // viewer in-app. Extraemos el token y abrimos el viewer directamente:
+        // este consulta la API por API_URL, que sí es alcanzable.
+        const token = url.match(/\/credencial\/(.+)$/)?.[1];
+        if (!token) throw new Error('No token in identity link');
+        navigation.navigate('StudentIdentityViewer', { token });
+      }
     } catch {
       setLinkError(true);
     } finally {
       setLinkLoading(false);
     }
-  }, []);
+  }, [navigation, identityUrl]);
 
   const loadQR = useCallback(async () => {
     setQrLoading(true);
     setQrError(false);
     try {
-      const base64 = await fetchMyQRBase64();
-      setQrBase64(base64);
+      // El QR se renderiza en el cliente a partir del identity link. Así
+      // evitamos el fetch binario (blob + FileReader), poco confiable en RN.
+      const { url } = await fetchMyIdentityLink();
+      setIdentityUrl(url);
     } catch {
       setQrError(true);
     } finally {
@@ -84,12 +100,8 @@ const StudentCredentialScreen: React.FC = () => {
               <Text style={styles.buttonText}>Reintentar</Text>
             </TouchableOpacity>
           </View>
-        ) : qrBase64 ? (
-          <Image
-            source={{ uri: `data:image/png;base64,${qrBase64}` }}
-            style={styles.qrImage}
-            resizeMode="contain"
-          />
+        ) : identityUrl ? (
+          <QRCode value={identityUrl} size={240} quietZone={10} />
         ) : null}
       </View>
 
