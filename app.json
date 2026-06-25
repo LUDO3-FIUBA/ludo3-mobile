@@ -36,7 +36,12 @@
           "cameraPermissionText": "LUDO necesita acceso a la cámara para tomar fotos"
         }
       ],
-      "@react-native-google-signin/google-signin",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.1059998034268-689easbpt9lrrico5gs7og6c96ilss0k"
+        }
+      ],
       "expo-notifications",
       [
         "expo-build-properties",

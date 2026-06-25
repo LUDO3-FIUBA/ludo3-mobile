@@ -1,0 +1,328 @@
+diff --git a/node_modules/react-native-vector-icons/RNVectorIcons.podspec b/node_modules/react-native-vector-icons/RNVectorIcons.podspec
+index 907066a..56084f4 100644
+--- a/node_modules/react-native-vector-icons/RNVectorIcons.podspec
++++ b/node_modules/react-native-vector-icons/RNVectorIcons.podspec
+@@ -13,7 +13,9 @@ Pod::Spec.new do |s|
+   s.source         = { :git => package["repository"]["url"], :tag => "v#{s.version}" }
+ 
+   s.source_files   = 'RNVectorIconsManager/**/*.{h,m,mm,swift}'
+-  s.resources      = "Fonts/*.ttf"
++  # Fonts are embedded via the expo-font config plugin (see app.json). Letting the
++  # pod also copy them causes "Multiple commands produce *.ttf" on iOS builds.
++  # s.resources      = "Fonts/*.ttf"
+   s.preserve_paths = "**/*.js"
+   # React Native Core dependency
+   if defined? install_modules_dependencies
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/0fa6a1ca6b2255dd705e8ba35f34b9e6/results.bin b/node_modules/react-native-vector-icons/android/build/.transforms/0fa6a1ca6b2255dd705e8ba35f34b9e6/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/.transforms/0fa6a1ca6b2255dd705e8ba35f34b9e6/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/0fa6a1ca6b2255dd705e8ba35f34b9e6/transformed/classes/classes_dex/classes.dex b/node_modules/react-native-vector-icons/android/build/.transforms/0fa6a1ca6b2255dd705e8ba35f34b9e6/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..41f4f2c
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/.transforms/0fa6a1ca6b2255dd705e8ba35f34b9e6/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/results.bin b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/results.bin
+new file mode 100644
+index 0000000..7ed749e
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/results.bin
+@@ -0,0 +1 @@
++o/bundleLibRuntimeToDirDebug
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/BuildConfig.dex b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/BuildConfig.dex
+new file mode 100644
+index 0000000..aab942f
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/BuildConfig.dex differ
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModule$Errors.dex b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModule$Errors.dex
+new file mode 100644
+index 0000000..7d01bfb
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModule$Errors.dex differ
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModule.dex b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModule.dex
+new file mode 100644
+index 0000000..7610a11
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModule.dex differ
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModuleImpl.dex b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModuleImpl.dex
+new file mode 100644
+index 0000000..755e99c
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsModuleImpl.dex differ
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsPackage.dex b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsPackage.dex
+new file mode 100644
+index 0000000..841fa04
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/oblador/vectoricons/VectorIconsPackage.dex differ
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin
+new file mode 100644
+index 0000000..14fb400
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/.transforms/30ef6e043b3712a7a9a504e31bc4dd88/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin differ
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/626bd902719b419432e3f2676fdd06b3/results.bin b/node_modules/react-native-vector-icons/android/build/.transforms/626bd902719b419432e3f2676fdd06b3/results.bin
+new file mode 100644
+index 0000000..0d259dd
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/.transforms/626bd902719b419432e3f2676fdd06b3/results.bin
+@@ -0,0 +1 @@
++o/classes
+diff --git a/node_modules/react-native-vector-icons/android/build/.transforms/626bd902719b419432e3f2676fdd06b3/transformed/classes/classes_dex/classes.dex b/node_modules/react-native-vector-icons/android/build/.transforms/626bd902719b419432e3f2676fdd06b3/transformed/classes/classes_dex/classes.dex
+new file mode 100644
+index 0000000..dd684f0
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/.transforms/626bd902719b419432e3f2676fdd06b3/transformed/classes/classes_dex/classes.dex differ
+diff --git a/node_modules/react-native-vector-icons/android/build/generated/source/buildConfig/debug/com/oblador/vectoricons/BuildConfig.java b/node_modules/react-native-vector-icons/android/build/generated/source/buildConfig/debug/com/oblador/vectoricons/BuildConfig.java
+new file mode 100644
+index 0000000..776fcb2
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/generated/source/buildConfig/debug/com/oblador/vectoricons/BuildConfig.java
+@@ -0,0 +1,12 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.oblador.vectoricons;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = Boolean.parseBoolean("true");
++  public static final String LIBRARY_PACKAGE_NAME = "com.oblador.vectoricons";
++  public static final String BUILD_TYPE = "debug";
++  // Field from default config.
++  public static final boolean IS_NEW_ARCHITECTURE_ENABLED = false;
++}
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/react-native-vector-icons/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..c5c667b
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.oblador.vectoricons" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json b/node_modules/react-native-vector-icons/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+new file mode 100644
+index 0000000..8c253a8
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.oblador.vectoricons",
++  "variantName": "debug",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/react-native-vector-icons/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+new file mode 100644
+index 0000000..1211b1e
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+@@ -0,0 +1,6 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=1
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
++coreLibraryDesugaringEnabled=false
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json b/node_modules/react-native-vector-icons/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/react-native-vector-icons/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
+new file mode 100644
+index 0000000..7562b23
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/react-native-vector-icons/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
+new file mode 100644
+index 0000000..6531d76
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt b/node_modules/react-native-vector-icons/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+new file mode 100644
+index 0000000..7e268ab
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+@@ -0,0 +1 @@
++#Mon Jun 22 21:37:23 ART 2026
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+new file mode 100644
+index 0000000..dec86a6
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/build/generated/res/resValues/debug"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/build/generated/res/resValues/debug"/></dataSet><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..047c620
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/debug/jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/incremental/mergeDebugShaders/merger.xml b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+new file mode 100644
+index 0000000..6cbdbc0
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/mergeDebugShaders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/shaders"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/debug/shaders"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/incremental/packageDebugAssets/merger.xml b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/packageDebugAssets/merger.xml
+new file mode 100644
+index 0000000..b897542
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/incremental/packageDebugAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/assets"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/debug/assets"/></dataSet><dataSet config="generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/build/intermediates/shader_assets/debug/compileDebugShaders/out"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/BuildConfig.class b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/BuildConfig.class
+new file mode 100644
+index 0000000..765f181
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/BuildConfig.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModule$Errors.class b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModule$Errors.class
+new file mode 100644
+index 0000000..95ff13a
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModule$Errors.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModule.class b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModule.class
+new file mode 100644
+index 0000000..b9c20bd
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModule.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModuleImpl.class b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModuleImpl.class
+new file mode 100644
+index 0000000..2ce170a
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsModuleImpl.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsPackage.class b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsPackage.class
+new file mode 100644
+index 0000000..0252b38
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/oblador/vectoricons/VectorIconsPackage.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/react-native-vector-icons/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+new file mode 100644
+index 0000000..78ac5b8
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+@@ -0,0 +1,2 @@
++R_DEF: Internal format may change without notice
++local
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt b/node_modules/react-native-vector-icons/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+new file mode 100644
+index 0000000..64542e4
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+@@ -0,0 +1,7 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.oblador.vectoricons" >
++4
++5    <uses-sdk android:minSdkVersion="24" />
++6
++7</manifest>
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml b/node_modules/react-native-vector-icons/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+new file mode 100644
+index 0000000..c5c667b
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.oblador.vectoricons" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json b/node_modules/react-native-vector-icons/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt b/node_modules/react-native-vector-icons/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+new file mode 100644
+index 0000000..08f4ebe
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+@@ -0,0 +1 @@
++0 Warning/Error
+\ No newline at end of file
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/BuildConfig.class b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/BuildConfig.class
+new file mode 100644
+index 0000000..765f181
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/BuildConfig.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModule$Errors.class b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModule$Errors.class
+new file mode 100644
+index 0000000..95ff13a
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModule$Errors.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModule.class b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModule.class
+new file mode 100644
+index 0000000..b9c20bd
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModule.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModuleImpl.class b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModuleImpl.class
+new file mode 100644
+index 0000000..2ce170a
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsModuleImpl.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsPackage.class b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsPackage.class
+new file mode 100644
+index 0000000..0252b38
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/oblador/vectoricons/VectorIconsPackage.class differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar
+new file mode 100644
+index 0000000..e0eb89c
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar differ
+diff --git a/node_modules/react-native-vector-icons/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/react-native-vector-icons/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+new file mode 100644
+index 0000000..fc7e952
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+@@ -0,0 +1 @@
++com.oblador.vectoricons
+diff --git a/node_modules/react-native-vector-icons/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/react-native-vector-icons/android/build/outputs/logs/manifest-merger-debug-report.txt
+new file mode 100644
+index 0000000..ab68432
+--- /dev/null
++++ b/node_modules/react-native-vector-icons/android/build/outputs/logs/manifest-merger-debug-report.txt
+@@ -0,0 +1,17 @@
++-- Merging decision tree log ---
++manifest
++ADDED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml:1:1-2:12
++INJECTED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml:1:1-2:12
++	package
++		ADDED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml:1:70-103
++		INJECTED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml
++	xmlns:android
++		ADDED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml:1:11-69
++uses-sdk
++INJECTED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml
++INJECTED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from /Users/joaquin.andresen/Developer/ludo3-mobile/node_modules/react-native-vector-icons/android/src/main/AndroidManifest.xml
+diff --git a/node_modules/react-native-vector-icons/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/react-native-vector-icons/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..d871226
+Binary files /dev/null and b/node_modules/react-native-vector-icons/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
