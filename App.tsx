@@ -207,7 +207,10 @@ const App = () => {
           <NavigationContainer theme={isDarkTheme() ? DarkTheme : DefaultTheme} linking={Platform.OS === 'web' ? webLinking : undefined}>
             <Stack.Navigator
               initialRouteName="Splash"
-              screenOptions={{ gestureEnabled: false }}
+              // headerBackButtonDisplayMode 'minimal' shows only the chevron on
+              // iOS, hiding the previous screen's title (e.g. "RootDrawer") as
+              // the back-button label. Android never shows that label.
+              screenOptions={{ gestureEnabled: false, headerBackButtonDisplayMode: 'minimal' }}
             >
               <Stack.Screen
                 name="RootDrawer"
