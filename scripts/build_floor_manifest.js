@@ -35,7 +35,9 @@ function discoverFloors(assetsDir) {
     .map(f => {
       const base = path.basename(f, path.extname(f));
       const floorId = base.toLowerCase();
-      const label = base.replace(/([a-zA-Z])(\d)/g, '$1 $2');
+      const label = base
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([a-zA-Z])(\d)/g, '$1 $2');
       return { floorId, label, svgFile: f };
     });
 }
@@ -241,15 +243,24 @@ function bboxContains(bbox, px, py) {
          py >= bbox.y && py <= bbox.y + bbox.height;
 }
 
+// Namespace prefixes that are Inkscape/Sodipodi/RDF metadata — not SVG, strip from output.
+const STRIP_ATTR_PREFIXES = ['inkscape:', 'sodipodi:', 'dc:', 'cc:', 'rdf:'];
+// Element tag names (or prefixes) that are Inkscape-only and should be omitted entirely.
+const STRIP_ELEMENT_TAGS = ['sodipodi:namedview', 'metadata'];
+const STRIP_ELEMENT_PREFIXES = ['inkscape:', 'sodipodi:'];
+
 function serializeNode(node) {
   if (node.nodeType === 3) return node.nodeValue || '';
   if (node.nodeType !== 1) return '';
   const tag = node.tagName;
+  if (STRIP_ELEMENT_TAGS.includes(tag)) return '';
+  if (STRIP_ELEMENT_PREFIXES.some(p => tag.startsWith(p))) return '';
   const attrs = [];
   if (node.attributes) {
     for (let i = 0; i < node.attributes.length; i++) {
       const a = node.attributes[i];
       if (a.name === 'xml:space' || a.name.startsWith('xmlns:')) continue;
+      if (STRIP_ATTR_PREFIXES.some(p => a.name.startsWith(p))) continue;
       attrs.push(`${a.name}="${a.value.replace(/"/g, '&quot;')}"`);
     }
   }
@@ -293,7 +304,11 @@ function processFloor(svgSrc) {
   // happens to overlap its anchor.
   function findGroup(node, groupId) {
     if (!node || node.nodeType !== 1) return null;
-    if (node.getAttribute && node.getAttribute('id') === groupId) return node;
+    if (node.getAttribute) {
+      if (node.getAttribute('id') === groupId) return node;
+      // Inkscape stores layer names in inkscape:label when id was not explicitly set
+      if (node.getAttribute('inkscape:label') === groupId && node.tagName.toLowerCase() === 'g') return node;
+    }
     if (node.childNodes) {
       for (let i = 0; i < node.childNodes.length; i++) {
         const found = findGroup(node.childNodes[i], groupId);
@@ -329,15 +344,7 @@ function processFloor(svgSrc) {
     collectShapes(doc.documentElement);
   }
 
-  let labelsGroup = null;
-  function findLabels(node) {
-    if (!node || node.nodeType !== 1) return;
-    if (node.getAttribute && node.getAttribute('id') === 'labels') { labelsGroup = node; return; }
-    if (node.childNodes) {
-      for (let i = 0; i < node.childNodes.length; i++) findLabels(node.childNodes[i]);
-    }
-  }
-  findLabels(doc.documentElement);
+  const labelsGroup = findGroup(doc.documentElement, 'labels');
 
   if (!labelsGroup) throw new Error('Could not find <g id="labels">');
 
