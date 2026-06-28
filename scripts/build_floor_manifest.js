@@ -35,7 +35,9 @@ function discoverFloors(assetsDir) {
     .map(f => {
       const base = path.basename(f, path.extname(f));
       const floorId = base.toLowerCase();
-      const label = base.replace(/([a-zA-Z])(\d)/g, '$1 $2');
+      const label = base
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([a-zA-Z])(\d)/g, '$1 $2');
       return { floorId, label, svgFile: f };
     });
 }
@@ -241,15 +243,24 @@ function bboxContains(bbox, px, py) {
          py >= bbox.y && py <= bbox.y + bbox.height;
 }
 
+// Namespace prefixes that are Inkscape/Sodipodi/RDF metadata — not SVG, strip from output.
+const STRIP_ATTR_PREFIXES = ['inkscape:', 'sodipodi:', 'dc:', 'cc:', 'rdf:'];
+// Element tag names (or prefixes) that are Inkscape-only and should be omitted entirely.
+const STRIP_ELEMENT_TAGS = ['sodipodi:namedview', 'metadata'];
+const STRIP_ELEMENT_PREFIXES = ['inkscape:', 'sodipodi:'];
+
 function serializeNode(node) {
   if (node.nodeType === 3) return node.nodeValue || '';
   if (node.nodeType !== 1) return '';
   const tag = node.tagName;
+  if (STRIP_ELEMENT_TAGS.includes(tag)) return '';
+  if (STRIP_ELEMENT_PREFIXES.some(p => tag.startsWith(p))) return '';
   const attrs = [];
   if (node.attributes) {
     for (let i = 0; i < node.attributes.length; i++) {
       const a = node.attributes[i];
       if (a.name === 'xml:space' || a.name.startsWith('xmlns:')) continue;
+      if (STRIP_ATTR_PREFIXES.some(p => a.name.startsWith(p))) continue;
       attrs.push(`${a.name}="${a.value.replace(/"/g, '&quot;')}"`);
     }
   }
@@ -287,11 +298,30 @@ function processFloor(svgSrc) {
   const doc = parser.parseFromString(svgSrc, 'image/svg+xml');
   const viewBox = parseViewBox(doc.documentElement);
 
+  // Candidate room shapes live inside <g id="rooms">. Restricting to that group
+  // keeps wall slivers (<g id="walls">) and other layers out of the
+  // label→shape matching, so a label never snaps to a narrow wall rect that
+  // happens to overlap its anchor.
+  function findGroup(node, groupId) {
+    if (!node || node.nodeType !== 1) return null;
+    if (node.getAttribute) {
+      if (node.getAttribute('id') === groupId) return node;
+      // Inkscape stores layer names in inkscape:label when id was not explicitly set
+      if (node.getAttribute('inkscape:label') === groupId && node.tagName.toLowerCase() === 'g') return node;
+    }
+    if (node.childNodes) {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        const found = findGroup(node.childNodes[i], groupId);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
   const allShapes = [];
   function collectShapes(node) {
     if (!node || node.nodeType !== 1) return;
-    const id = node.getAttribute && node.getAttribute('id');
-    if (id === 'labels') return;
+    if (node.getAttribute && node.getAttribute('id') === 'labels') return;
     const tag = node.tagName && node.tagName.toLowerCase();
     if (tag === 'rect' || tag === 'path') {
       const local = tag === 'rect' ? rectBbox(node) : pathBbox(node);
@@ -304,17 +334,17 @@ function processFloor(svgSrc) {
       for (let i = 0; i < node.childNodes.length; i++) collectShapes(node.childNodes[i]);
     }
   }
-  collectShapes(doc.documentElement);
 
-  let labelsGroup = null;
-  function findLabels(node) {
-    if (!node || node.nodeType !== 1) return;
-    if (node.getAttribute && node.getAttribute('id') === 'labels') { labelsGroup = node; return; }
-    if (node.childNodes) {
-      for (let i = 0; i < node.childNodes.length; i++) findLabels(node.childNodes[i]);
-    }
+  const roomsGroup = findGroup(doc.documentElement, 'rooms');
+  if (roomsGroup) {
+    collectShapes(roomsGroup);
+  } else {
+    // No dedicated rooms layer: fall back to scanning everything except labels.
+    console.warn('  No <g id="rooms"> found; matching against all shapes (walls included)');
+    collectShapes(doc.documentElement);
   }
-  findLabels(doc.documentElement);
+
+  const labelsGroup = findGroup(doc.documentElement, 'labels');
 
   if (!labelsGroup) throw new Error('Could not find <g id="labels">');
 
@@ -326,6 +356,10 @@ function processFloor(svgSrc) {
 
   const slugCounts = {};
   const rooms = [];
+  // Tracks which shape element each room claimed, so two labels that resolve to
+  // the same shape (e.g. a room labelled twice) collapse into one room instead
+  // of minting a second id that overwrites the first on the SVG element.
+  const shapeToRoom = new Map();
 
   for (const textEl of textEls) {
     const tspans = [];
@@ -353,6 +387,16 @@ function processFloor(svgSrc) {
       }
     }
 
+    // A second label landing on an already-claimed shape is a duplicate label
+    // for the same room: fold its aliases into the existing room and move on.
+    if (best && shapeToRoom.has(best.el)) {
+      const existing = shapeToRoom.get(best.el);
+      for (const alias of buildAliases(label)) {
+        if (!existing.aliases.includes(alias)) existing.aliases.push(alias);
+      }
+      continue;
+    }
+
     const baseSlug = slugify(label);
     slugCounts[baseSlug] = (slugCounts[baseSlug] || 0) + 1;
     const count = slugCounts[baseSlug];
@@ -360,14 +404,16 @@ function processFloor(svgSrc) {
 
     if (best) best.el.setAttribute('id', roomId);
 
-    rooms.push({
+    const room = {
       id: roomId,
       label,
       aliases: buildAliases(label),
       category: categorize(label),
       bbox: best ? best.bbox : { x: ax - 30, y: ay - 20, width: 60, height: 40 },
       shapeId: roomId,
-    });
+    };
+    rooms.push(room);
+    if (best) shapeToRoom.set(best.el, room);
   }
 
   return { cleanedSvg: serializeNode(doc.documentElement), rooms, viewBox };
