@@ -1,0 +1,19 @@
+e2e/playwright.config.ts
+  s_02f0eeef9a1287::t_bd1f1d7e2f4b0d 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "37817d49a04d513afd497e65230dc2ceee7d0596",
+  "prompts": {},
+  "sessions": {
+    "s_02f0eeef9a1287": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "302e402c-fe7b-4e61-9103-a51382abbb2a",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
