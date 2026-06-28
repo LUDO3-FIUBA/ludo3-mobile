@@ -10,10 +10,29 @@ function resolveDownloadUrl(url: string): string {
   return `${baseUrl}/${url}`;
 }
 
+// Filenames coming from the document picker can arrive percent-encoded
+// (e.g. "Equipo%20150.pdf"). Decode them so they read naturally both in the
+// UI and on disk.
+export function decodeFileName(name: string): string {
+  try {
+    return decodeURIComponent(name);
+  } catch {
+    return name.replace(/%/g, ' ');
+  }
+}
+
+function sanitizeFileName(name: string): string {
+  // A raw '%' (and other reserved chars) breaks Android's Uri.parse on the
+  // destination path, so DownloadManager fails with "the file does not
+  // downloaded to destination". Decode first, then strip characters that are
+  // invalid in a file path.
+  return decodeFileName(name).replace(/[\\/:*?"<>|%]/g, '_').trim() || 'archivo';
+}
+
 export async function downloadFile(url?: string, downloadName?: string | null, submissionDownloadUrl?: string | null): Promise<void> {
   if (!url || !downloadName) return;
 
-  const safeFileName = downloadName.replace(/[\\/]/g, '_');
+  const safeFileName = sanitizeFileName(downloadName);
   const downloadUrl = resolveDownloadUrl(url);
   const resolvedSubmissionDownloadUrl = submissionDownloadUrl ? resolveDownloadUrl(submissionDownloadUrl) : null;
 
