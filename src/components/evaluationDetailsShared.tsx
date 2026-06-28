@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Linking, Platform } from 'react-native';
 import { Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
-import downloadFile from '../utils/downloadFile';
+import downloadFile, { decodeFileName } from '../utils/downloadFile';
 import { lightModeColors } from '../styles/colorPalette';
 import MaterialIcon from './materialIcon';
 import { evaluationDetailsSharedStyles as styles, evaluationDetailsTextStyles } from '../styles/evaluationDetails';
@@ -213,7 +213,7 @@ export function GraderUpdatedCard({
 }
 
 export function SubmissionFileCard({ submissionFile, originalFilename, downloadUrl }: { submissionFile?: string | null; originalFilename?: string | null; downloadUrl?: string | null }) {
-  const fileName = originalFilename || (submissionFile ? 'Archivo' : null);
+  const fileName = originalFilename ? decodeFileName(originalFilename) : (submissionFile ? 'Archivo' : null);
 
   const handleDownload = async (url?: string, downloadName?: string | null, submissionDownloadUrl?: string | null) => {
     try {
