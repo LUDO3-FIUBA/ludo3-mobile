@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { baseUrl } from '../networking';
 import SessionManager from '../managers/sessionManager';
 import { convertSnakeToCamelCase } from '../utils/convertSnakeToCamelCase';
@@ -40,7 +41,15 @@ export async function createNotification(payload: CreateNotificationPayload): Pr
     payload.recipientGroups.forEach(g => formData.append('recipient_groups', g));
 
     if (payload.image) {
-        formData.append('image', payload.image as any);
+        if (Platform.OS === 'web') {
+            // Browsers require a real Blob/File — fetch the blob: or data: URI and wrap it
+            const res = await fetch(payload.image.uri);
+            const blob = await res.blob();
+            formData.append('image', new File([blob], payload.image.name, { type: payload.image.type }));
+        } else {
+            // React Native's FormData polyfill handles { uri, type, name } natively
+            formData.append('image', payload.image as any);
+        }
     }
 
     if (payload.departmentId !== undefined && payload.departmentId !== null) {

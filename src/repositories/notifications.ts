@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { baseUrl } from '../networking';
 import SessionManager from '../managers/sessionManager';
 import authenticatedRepository from './authenticatedRepository';
@@ -81,7 +82,15 @@ async function sendCommissionNotification(
     formData.append('message', payload.message);
     formData.append('is_urgent', String(payload.isUrgent));
     if (payload.image) {
-        formData.append('image', payload.image as any);
+        if (Platform.OS === 'web') {
+            // Browsers require a real Blob/File — fetch the blob: or data: URI and wrap it
+            const res = await fetch(payload.image.uri);
+            const blob = await res.blob();
+            formData.append('image', new File([blob], payload.image.name, { type: payload.image.type }));
+        } else {
+            // React Native's FormData polyfill handles { uri, type, name } natively
+            formData.append('image', payload.image as any);
+        }
     }
 
     console.log(`POST ${baseUrl}/${teacherDomainUrl}/ (FormData with title: ${payload.title}, message: ${payload.message}, isUrgent: ${payload.isUrgent})`);

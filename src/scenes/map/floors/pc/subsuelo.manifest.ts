@@ -2,8 +2,8 @@
 export type { RoomCategory, Room, FloorManifest } from '../types';
 import type { FloorManifest } from '../types';
 
-const subsuelo1Manifest: FloorManifest = {
-  "floorId": "subsuelo1",
+const subsueloManifest: FloorManifest = {
+  "floorId": "subsuelo",
   "viewBox": [
     0,
     0,
@@ -141,9 +141,9 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "oficina",
       "bbox": {
-        "x": 790.276612,
+        "x": 788.367132,
         "y": 428.569755,
-        "width": 178.52198999999996,
+        "width": 180.43146000000002,
         "height": 57.44633900000008
       },
       "shapeId": "room-oficinas-de-lab-de-fluido-dinamico"
@@ -221,7 +221,7 @@ const subsuelo1Manifest: FloorManifest = {
         "x": 493.911622,
         "y": 705.352005,
         "width": 81.96385200000003,
-        "height": 84.94023100000004
+        "height": 88.03649900000005
       },
       "shapeId": "room-aula-e5"
     },
@@ -266,7 +266,7 @@ const subsuelo1Manifest: FloorManifest = {
         "x": 641.876892,
         "y": 484.151845,
         "width": 117.30956000000003,
-        "height": 26.411133000000063
+        "height": 28.858754999999974
       },
       "shapeId": "room-jardin-maternal"
     },
@@ -278,9 +278,9 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1311.9490819999999,
+        "x": 1310.0860819999998,
         "y": 733.298545,
-        "width": 92.07536299999992,
+        "width": 93.93843100000004,
         "height": 90.42941299999995
       },
       "shapeId": "room-aula-e8"
@@ -294,9 +294,9 @@ const subsuelo1Manifest: FloorManifest = {
       "category": "aula",
       "bbox": {
         "x": 1296.8921819999998,
-        "y": 644.2091849999999,
+        "y": 641.634475,
         "width": 75.228386,
-        "height": 88.48519099999999
+        "height": 91.059891
       },
       "shapeId": "room-aula-e10"
     },
@@ -309,9 +309,9 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "otro",
       "bbox": {
-        "x": 1155.784782,
+        "x": 1157.577282,
         "y": 752.414085,
-        "width": 58.741424999999936,
+        "width": 56.94896700000004,
         "height": 50.699509000000035
       },
       "shapeId": "room-gab-e11"
@@ -324,9 +324,9 @@ const subsuelo1Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 610.447512,
+        "x": 608.541322,
         "y": 753.126545,
-        "width": 153.15375000000006,
+        "width": 155.05991000000006,
         "height": 68.30915100000004
       },
       "shapeId": "room-aula-e9"
@@ -349,4 +349,4 @@ const subsuelo1Manifest: FloorManifest = {
   ]
 };
 
-export default subsuelo1Manifest;
+export default subsueloManifest;

@@ -340,21 +340,6 @@ const piso3Manifest: FloorManifest = {
       "shapeId": "room-sala-pc"
     },
     {
-      "id": "room-sala-pc-2",
-      "label": "SALA PC",
-      "aliases": [
-        "sala pc"
-      ],
-      "category": "sala",
-      "bbox": {
-        "x": 1341.3878,
-        "y": 645.73553,
-        "width": 80.856529,
-        "height": 139.10065
-      },
-      "shapeId": "room-sala-pc-2"
-    },
-    {
       "id": "room-servicio-de-computacion",
       "label": "Servicio de computación",
       "aliases": [
@@ -409,10 +394,10 @@ const piso3Manifest: FloorManifest = {
       ],
       "category": "aula",
       "bbox": {
-        "x": 1273.7219,
-        "y": 462.86615,
-        "width": 5.7981277,
-        "height": 80.770897
+        "x": 1276.2915,
+        "y": 429.88971,
+        "width": 37.687,
+        "height": 108.26553
       },
       "shapeId": "room-aula-430"
     },
@@ -523,21 +508,6 @@ const piso3Manifest: FloorManifest = {
         "height": 232.29123
       },
       "shapeId": "room-deposito"
-    },
-    {
-      "id": "room-deposito-2",
-      "label": "DEPÓSITO",
-      "aliases": [
-        "deposito"
-      ],
-      "category": "deposito",
-      "bbox": {
-        "x": 1049.4821,
-        "y": 170.1895,
-        "width": 110.3212,
-        "height": 232.29123
-      },
-      "shapeId": "room-deposito-2"
     },
     {
       "id": "room-sector-de-investigacion",

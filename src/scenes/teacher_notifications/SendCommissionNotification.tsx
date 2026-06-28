@@ -93,7 +93,7 @@ const SendCommissionNotification: React.FC = () => {
                 isUrgent,
                 image,
             });
-            setAlertDialog({ title: 'Aviso enviado', message: 'Los alumnos del cuatrimestre lo van a recibir.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
+            setAlertDialog({ title: 'Aviso enviado', message: 'Los alumnos del cuatrimestre lo van a recibir.', onConfirm: () => { setAlertDialog(null); setTitle(''); setMessage(''); setIsUrgent(false); setImage(null); navigation.goBack(); } });
         } catch {
             setAlertDialog({ title: 'Error', message: 'No se pudo enviar el aviso. Intentá de nuevo.' });
         } finally {

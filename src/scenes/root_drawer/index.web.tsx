@@ -715,7 +715,7 @@ const RootDrawer = () => {
         onClose={() => setShowNotificationsDropdown(false)}
         onNotificationPress={onNotificationPress}
         onDeleteNotification={onDeleteNotification}
-        onSeeAll={() => { setShowNotificationsDropdown(false); navigation.navigate('Notifications'); }}
+        onSeeAll={() => { setShowNotificationsDropdown(false); navigation.navigate('RootDrawer' as never, { screen: 'Notifications' } as never); }}
         formatDate={formatDate}
       />
 

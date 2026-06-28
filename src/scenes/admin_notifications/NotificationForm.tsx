@@ -108,6 +108,17 @@ const NotificationForm: React.FC = () => {
         }
     };
 
+    const resetForm = () => {
+        setTitle('');
+        setMessage('');
+        setIsUrgent(false);
+        setSendPush(false);
+        setSendEmail(false);
+        setSelectedGroups([]);
+        setImage(null);
+        setSelectedDepartmentId(null);
+    };
+
     const handleSubmit = async () => {
         if (!title.trim()) {
             setAlertDialog({ title: 'Error', message: 'El título es obligatorio.' });
@@ -134,7 +145,7 @@ const NotificationForm: React.FC = () => {
                 image,
                 departmentId: isSuperAdmin ? selectedDepartmentId : undefined,
             });
-            setAlertDialog({ title: 'Enviada', message: 'La notificación fue enviada correctamente.', onConfirm: () => { setAlertDialog(null); navigation.goBack(); } });
+            setAlertDialog({ title: 'Enviada', message: 'La notificación fue enviada correctamente.', onConfirm: () => { setAlertDialog(null); resetForm(); navigation.goBack(); } });
         } catch {
             setAlertDialog({ title: 'Error', message: 'No se pudo enviar la notificación. Intentá de nuevo.' });
         } finally {
@@ -217,8 +228,13 @@ const NotificationForm: React.FC = () => {
 
                 <Field label="Opciones">
                     <ToggleRow label="Urgente" value={isUrgent} onValueChange={setIsUrgent} />
-                    <ToggleRow label="Enviar push" value={sendPush} onValueChange={setSendPush} />
-                    <ToggleRow label="Enviar email" value={sendEmail} onValueChange={setSendEmail} />
+                    {/* TODO: re-habilitar cuando el backend efectivamente envíe push/email.
+                        Hoy estos flags se guardan en el modelo pero nadie los consume para
+                        enviar nada (ver backend NotificationService / EmailService), así que
+                        se ocultan para no confundir. El estado sendPush/sendEmail queda en
+                        false y se sigue mandando al backend por compatibilidad. */}
+                    {/* <ToggleRow label="Enviar push" value={sendPush} onValueChange={setSendPush} /> */}
+                    {/* <ToggleRow label="Enviar email" value={sendEmail} onValueChange={setSendEmail} /> */}
                 </Field>
 
                 <Field label="Imagen (opcional)">
