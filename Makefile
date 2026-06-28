@@ -4,6 +4,9 @@ test:
 	cd e2e/tests && npm run test
 .PHONY: test
 
+up-web:
+	npm run web
+
 up-android:
 	npx expo run:android
 
