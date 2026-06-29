@@ -57,6 +57,15 @@ export const studentMenu: MenuItem[] = [
     children: [
       {
         kind: 'direct',
+        key: 'my-account',
+        label: 'Mi perfil',
+        icon: 'account-cog',
+        iconOutline: 'account-cog-outline',
+        route: 'MyAccount',
+        scope: 'shared',
+      },
+      {
+        kind: 'direct',
         key: 'student-credential',
         label: 'Mi credencial',
         icon: 'card-account-details',
@@ -94,15 +103,6 @@ export const studentMenu: MenuItem[] = [
         scope: 'student',
         conditional: 'faceNotRegistered',
         platform: 'mobile',
-      },
-      {
-        kind: 'direct',
-        key: 'my-account',
-        label: 'Mi perfil',
-        icon: 'account-cog',
-        iconOutline: 'account-cog-outline',
-        route: 'MyAccount',
-        scope: 'shared',
       },
       {
         kind: 'direct',

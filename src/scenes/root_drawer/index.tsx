@@ -57,6 +57,14 @@ const RootDrawer = () => {
   const hasLoadedNotificationsRef = useRef(false);
   const knownNotificationIdsRef = useRef<Set<number>>(new Set());
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Mantener el estado del dropdown en un ref para que `loadNotifications` sea
+  // estable (deps []). Si dependiera del estado, el efecto del poller se
+  // re-dispararía en cada cambio y podía entrar en un loop de fetch que
+  // saturaba el hilo JS y congelaba la UI.
+  const showDropdownRef = useRef(false);
+  useEffect(() => {
+    showDropdownRef.current = showNotificationsDropdown;
+  }, [showNotificationsDropdown]);
 
   const unreadCount = useMemo(
     () => notifications.filter(n => !n.is_read).length,
@@ -83,7 +91,7 @@ const RootDrawer = () => {
           i => !knownNotificationIdsRef.current.has(i.id) && !i.is_read,
         );
         knownNotificationIdsRef.current = new Set(sorted.map(i => i.id));
-        if (incomingUnread && !showNotificationsDropdown) {
+        if (incomingUnread && !showDropdownRef.current) {
           setToastNotification(incomingUnread);
           setShowToast(true);
           if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -94,7 +102,7 @@ const RootDrawer = () => {
     } catch (e) {
       console.log('RootDrawer: Failed to fetch notifications', e);
     }
-  }, [showNotificationsDropdown]);
+  }, []);
 
   useEffect(() => {
     async function fetchUser() {

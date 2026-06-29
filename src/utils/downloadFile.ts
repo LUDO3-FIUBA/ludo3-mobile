@@ -1,4 +1,4 @@
-import { Platform, Alert } from 'react-native';
+import { Platform } from 'react-native';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { baseUrl } from '../networking';
 import { downloadSubmissionFile } from '../repositories/submissionFiles';
@@ -70,17 +70,15 @@ export async function downloadFile(url?: string, downloadName?: string | null, s
 
     // iOS
     const filePath = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/${safeFileName}`;
-    await ReactNativeBlobUtil.config({ fileCache: true, path: filePath }).fetch('GET', downloadUrl);
-  } catch (err) {
+    const res = await ReactNativeBlobUtil.config({ fileCache: true, path: filePath }).fetch('GET', downloadUrl);
     try {
-      if (Platform.OS === 'web') {
-        window.alert('No se pudo descargar el archivo.');
-      } else {
-        Alert.alert('No se pudo descargar el archivo.');
-      }
+      // Abrir el share sheet de iOS para que el usuario pueda guardar/compartir el archivo.
+      await ReactNativeBlobUtil.ios.openDocument(res.path());
     } catch (e) {
-      //ignore
+      // Si falla la apertura del share sheet, la descarga igual fue exitosa.
     }
+  } catch (err) {
+    // El feedback al usuario lo maneja quien llama (ver SubmissionFileCard).
     throw err;
   }
 }

@@ -76,10 +76,10 @@ const AddFinal: React.FC<Props> = () => {
       })
       .catch(() => {
         if (cancelled) return;
-        Alert.alert(
-          'Te fallamos',
-          'No pudimos cargar las comisiones para compartir. Vas a poder crear el final solo en esta comisión.',
-        );
+        setAlertDialog({
+          title: 'Te fallamos',
+          message: 'No pudimos cargar las comisiones para compartir. Vas a poder crear el final solo en esta comisión.',
+        });
       })
       .finally(() => {
         if (!cancelled) setLoadingCommissions(false);

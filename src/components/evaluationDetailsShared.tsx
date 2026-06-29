@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Linking, Platform } from 'react-native';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import downloadFile, { decodeFileName } from '../utils/downloadFile';
 import { lightModeColors } from '../styles/colorPalette';
@@ -214,14 +214,34 @@ export function GraderUpdatedCard({
 
 export function SubmissionFileCard({ submissionFile, originalFilename, downloadUrl }: { submissionFile?: string | null; originalFilename?: string | null; downloadUrl?: string | null }) {
   const fileName = originalFilename ? decodeFileName(originalFilename) : (submissionFile ? 'Archivo' : null);
+  const [downloading, setDownloading] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (feedbackTimer.current) clearTimeout(feedbackTimer.current); }, []);
+
+  const showFeedback = (type: 'success' | 'error', text: string) => {
+    setFeedback({ type, text });
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    feedbackTimer.current = setTimeout(() => setFeedback(null), 3500);
+  };
 
   const handleDownload = async (url?: string, downloadName?: string | null, submissionDownloadUrl?: string | null) => {
+    if (downloading) return;
+    setDownloading(true);
     try {
       await downloadFile(url, downloadName, submissionDownloadUrl);
+      showFeedback('success', Platform.OS === 'android' ? 'Archivo descargado en Descargas' : 'Archivo descargado');
     } catch (error) {
       console.error('No se pudo descargar el archivo.', error);
+      showFeedback('error', 'No se pudo descargar el archivo');
+    } finally {
+      setDownloading(false);
     }
   };
+
+  const isSuccess = feedback?.type === 'success';
+  const feedbackColor = isSuccess ? '#155724' : '#721c24';
 
   return (
     <View style={[styles.card]}>
@@ -229,18 +249,52 @@ export function SubmissionFileCard({ submissionFile, originalFilename, downloadU
       {!fileName || !submissionFile ? (
         <Text style={styles.emptyText}>No se ha entregado ningún archivo.</Text>
       ) : (
-        <View style={styles.cardItem}>
-          <MaterialIcon name="file-document" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
-          <View style={styles.filenameContainer}>
-            <Text style={styles.submissionTextSingleLine} numberOfLines={1} ellipsizeMode="tail">
-              {fileName}
-            </Text>
+        <>
+          <View style={styles.cardItem}>
+            <MaterialIcon name="file-document" fontSize={24} color={lightModeColors.institutional} style={styles.iconMargin} />
+            <View style={styles.filenameContainer}>
+              <Text style={styles.submissionTextSingleLine} numberOfLines={1} ellipsizeMode="tail">
+                {fileName}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.downloadButton}
+              disabled={downloading}
+              onPress={() => handleDownload(submissionFile, fileName, downloadUrl)}
+            >
+              {downloading
+                ? <ActivityIndicator size="small" color={lightModeColors.institutional} />
+                : <MaterialIcon name="download" fontSize={24} color={lightModeColors.institutional} />}
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.downloadButton} onPress={() => handleDownload(submissionFile, fileName, downloadUrl)}>
-            <MaterialIcon name="download" fontSize={24} color={lightModeColors.institutional} />
-          </TouchableOpacity>
-        </View>
+          {feedback && (
+            <View style={[downloadFeedbackStyles.banner, isSuccess ? downloadFeedbackStyles.success : downloadFeedbackStyles.error]}>
+              <MaterialIcon
+                name={isSuccess ? 'check-circle' : 'alert-circle'}
+                fontSize={18}
+                color={feedbackColor}
+                style={downloadFeedbackStyles.icon}
+              />
+              <Text style={[downloadFeedbackStyles.text, { color: feedbackColor }]}>{feedback.text}</Text>
+            </View>
+          )}
+        </>
       )}
     </View>
   );
 }
+
+const downloadFeedbackStyles = StyleSheet.create({
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  success: { backgroundColor: '#d4edda' },
+  error: { backgroundColor: '#f8d7da' },
+  icon: { marginRight: 6 },
+  text: { fontSize: 13, flexShrink: 1 },
+});
