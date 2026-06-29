@@ -154,7 +154,7 @@ const webLinking = {
 // Route names that render INSIDE the mobile Tab Navigator; on mobile they must
 // not also live at the Stack root, or the tab bar would be hidden when visited.
 const MOBILE_TAB_EMBEDDED_ROUTES = new Set<string>([
-  'FormsList', 'DigitalForm', 'DocumentForm', 'FormsManager', 'FormDesigner',
+  'FormsList', 'DigitalForm', 'DocumentForm', 'FormDesigner',
   'OwnershipGroupEditor',
 ]);
 
