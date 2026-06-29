@@ -33,13 +33,16 @@ const SecretaryDetail: React.FC = () => {
   const navigation = useNavigation<any>();
   const route =
     useRoute<RouteProp<SecretaryDetailRouteParams, 'AdminSecretaryDetail'>>();
-  const {secretaryId, isAdmin} = route.params;
+  const {secretaryId} = route.params;
+  // URL params arrive as strings on web — normalise to boolean
+  const isAdmin = route.params.isAdmin === true || (route.params.isAdmin as any) === 'true';
 
   const [secretary, setSecretary] = useState<Secretary | null>(null);
   const [parentName, setParentName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isTeacher, setIsTeacher] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
 
   const [editingGroups, setEditingGroups] = useState(false);
   const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
@@ -74,8 +77,10 @@ const SecretaryDetail: React.FC = () => {
     ])
       .then(([sec, user]) => {
         setSecretary(sec);
-        setIsSuperAdmin(user.isSuperAdmin?.() ?? false);
+        const superAdmin = user.isSuperAdmin?.() ?? false;
+        setIsSuperAdmin(superAdmin);
         setIsTeacher(user.isTeacher() && !user.isAdmin());
+        setCanEdit(superAdmin || user.secretaryId === sec.id);
       })
       .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar la secretaría.' }))
       .finally(() => setLoading(false));
@@ -214,7 +219,7 @@ const SecretaryDetail: React.FC = () => {
               key={sub.id}
               style={styles.subItem}
               onPress={() =>
-                navigation.navigate('AdminSecretaryDetail', {
+                navigation.navigate(isAdmin ? 'AdminSecretaryDetail' : 'StudentSecretaryDetail', {
                   secretaryId: sub.id,
                   isAdmin,
                 })
@@ -231,10 +236,10 @@ const SecretaryDetail: React.FC = () => {
         </Section>
       ) : null}
 
-      {/* Ownership groups section */}
-      <View style={styles.section}>
+      {/* Ownership groups section — hidden for teachers */}
+      {!isTeacher && <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Grupos de propiedad</Text>
+          <Text style={styles.sectionTitle}>Trámites disponibles</Text>
           {isSuperAdmin && !editingGroups && (
             <TouchableOpacity onPress={startEditingGroups} style={styles.editGroupsButton}>
               <Text style={styles.editGroupsButtonText}>Editar</Text>
@@ -259,9 +264,9 @@ const SecretaryDetail: React.FC = () => {
                     onPress={onPress}>
                     <View style={styles.groupItemContent}>
                       <Text style={styles.groupItemName}>{g.groupName}</Text>
-                      <Text style={styles.groupItemRole}>
-                        {g.isEditor ? 'Editor' : 'Lector'}
-                      </Text>
+                      {
+                        isAdmin && <Text style={styles.groupItemRole}>{g.isEditor ? 'Editor' : 'Lector'}</Text>
+                      }
                     </View>
                     {onPress ? <Text style={styles.groupItemArrow}>›</Text> : null}
                   </Wrapper>
@@ -269,7 +274,7 @@ const SecretaryDetail: React.FC = () => {
               })}
             </>
           ) : (
-            <Text style={styles.emptyText}>Sin grupos asignados</Text>
+            <Text style={styles.emptyText}>Sin trámites asignados</Text>
           )
         ) : (
           <View>
@@ -318,9 +323,9 @@ const SecretaryDetail: React.FC = () => {
             </View>
           </View>
         )}
-      </View>
+      </View>}
 
-      {isAdmin && (
+      {canEdit && (
         <View style={styles.adminActions}>
           <RoundedButton
             text="Editar"
@@ -329,9 +334,11 @@ const SecretaryDetail: React.FC = () => {
             }
             style={{}}
           />
+          {isSuperAdmin && (
           <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
             <Text style={styles.deleteButtonText}>Eliminar</Text>
           </TouchableOpacity>
+          )}
         </View>
       )}
     </ScrollView>

@@ -573,6 +573,7 @@ export type HiddenWebRoute = {
 
 export const hiddenWebRoutes: HiddenWebRoute[] = [
   { route: 'AdminDepartmentDetail', title: 'Departamento', roleFilter: 'admin' },
+  { route: 'StudentDepartmentDetail', title: 'Departamento' },
   { route: 'AdminDepartmentCreate', title: 'Nuevo Departamento', roleFilter: 'admin' },
   { route: 'AdminDepartmentEdit', title: 'Editar Departamento', roleFilter: 'admin' },
   { route: 'AdminCommissionCreate', title: 'Nueva Comisión', roleFilter: 'admin' },
@@ -630,6 +631,7 @@ export const hiddenWebRoutes: HiddenWebRoute[] = [
 
   // Admin Secretaries (from develop)
   { route: 'AdminSecretaryDetail', title: 'Secretaría', roleFilter: 'admin' },
+  { route: 'StudentSecretaryDetail', title: 'Secretaría' },
   { route: 'AdminSecretaryCreate', title: 'Nueva Secretaría', roleFilter: 'admin' },
   { route: 'AdminSecretaryEdit', title: 'Editar Secretaría', roleFilter: 'admin' },
   { route: 'OwnershipGroupEditor', title: 'Grupo de propiedad', roleFilter: 'admin' },

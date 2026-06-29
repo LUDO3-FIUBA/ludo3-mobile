@@ -34,11 +34,15 @@ interface PendingMembership {
 const DepartmentDetail: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<RouteProp<DepartmentDetailRouteParams, 'DepartmentDetail'>>();
-  const { departmentId, isAdmin } = route.params;
+  const { departmentId } = route.params;
+  // URL params arrive as strings on web — normalise to boolean
+  const isAdmin = route.params.isAdmin === true || (route.params.isAdmin as any) === 'true';
 
   const [department, setDepartment] = useState<Department | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isTeacher, setIsTeacher] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
 
   const [editingGroups, setEditingGroups] = useState(false);
   const [allGroups, setAllGroups] = useState<FormOwnershipGroup[]>([]);
@@ -54,7 +58,10 @@ const DepartmentDetail: React.FC = () => {
     ])
       .then(([dept, user]) => {
         setDepartment(dept);
-        setIsSuperAdmin(user.isSuperAdmin?.() ?? false);
+        const superAdmin = user.isSuperAdmin?.() ?? false;
+        setIsSuperAdmin(superAdmin);
+        setIsTeacher(user.isTeacher() && !user.isAdmin());
+        setCanEdit(superAdmin || user.departmentId === dept.id);
       })
       .catch(() => setAlertDialog({ title: 'Error', message: 'No se pudo cargar el departamento.' }))
       .finally(() => setLoading(false));
@@ -179,10 +186,10 @@ const DepartmentDetail: React.FC = () => {
           </Section>
         ) : null}
 
-      {/* Ownership groups section */}
-      <View style={styles.section}>
+      {/* Ownership groups section — hidden for teachers */}
+      {!isTeacher && <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Grupos de propiedad</Text>
+          <Text style={styles.sectionTitle}>Trámites disponibles</Text>
           {isSuperAdmin && !editingGroups && (
             <TouchableOpacity onPress={startEditingGroups} style={styles.editGroupsButton}>
               <Text style={styles.editGroupsButtonText}>Editar</Text>
@@ -192,21 +199,31 @@ const DepartmentDetail: React.FC = () => {
 
         {!editingGroups ? (
           department.ownershipGroups && department.ownershipGroups.length > 0 ? (
-            department.ownershipGroups.map(g => (
-              <TouchableOpacity
+            department.ownershipGroups.map(g => {
+              const onPress = isAdmin
+                ? () => navigation.navigate('FormsManager')
+                : isTeacher
+                ? undefined
+                : () => navigation.navigate('FormsList');
+              const Wrapper = onPress ? TouchableOpacity : View;
+              return (
+              <Wrapper
                 key={g.groupId}
                 style={styles.groupItem}
-                onPress={() => navigation.navigate('FormsManager')}
+                onPress={onPress}
               >
                 <View style={styles.groupItemContent}>
                   <Text style={styles.groupItemName}>{g.groupName}</Text>
-                  <Text style={styles.groupItemRole}>{g.isEditor ? 'Editor' : 'Lector'}</Text>
+                  {
+                    isAdmin && <Text style={styles.groupItemRole}>{g.isEditor ? 'Editor' : 'Lector'}</Text>
+                  } 
                 </View>
                 <Text style={styles.groupItemArrow}>›</Text>
-              </TouchableOpacity>
-            ))
+              </Wrapper>
+              );
+            })
           ) : (
-            <Text style={styles.emptyText}>Sin grupos asignados</Text>
+            <Text style={styles.emptyText}>Sin trámites asignados</Text>
           )
         ) : (
           <View>
@@ -255,9 +272,9 @@ const DepartmentDetail: React.FC = () => {
             </View>
           </View>
         )}
-      </View>
+      </View>}
 
-        {isAdmin && (
+        {canEdit && (
           <View style={styles.adminActions}>
             <RoundedButton
               text="Editar"
@@ -266,9 +283,11 @@ const DepartmentDetail: React.FC = () => {
               }
               style={{}}
             />
+            {isSuperAdmin && (
             <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
               <Text style={styles.deleteButtonText}>Eliminar</Text>
             </TouchableOpacity>
+            )}
           </View>
         )}
       </ScrollView>

@@ -10,7 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
 import AlertDialog from '../../components/AlertDialog';
-import { departmentsRepository } from '../../repositories';
+import { departmentsRepository, usersRepository } from '../../repositories';
 import Department from '../../models/Department';
 
 interface Props {
@@ -21,6 +21,7 @@ const DepartmentList: React.FC<Props> = ({ isAdmin }) => {
   const navigation = useNavigation<any>();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const loadDepartments = async () => {
@@ -35,13 +36,14 @@ const DepartmentList: React.FC<Props> = ({ isAdmin }) => {
   };
 
   useEffect(() => {
+    usersRepository.getInfo().then(u => setIsSuperAdmin(u.isSuperAdmin?.() ?? false)).catch(() => {});
     loadDepartments();
     const unsubscribe = navigation.addListener('focus', loadDepartments);
     return unsubscribe;
   }, [navigation]);
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isSuperAdmin) {
       navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
@@ -53,7 +55,7 @@ const DepartmentList: React.FC<Props> = ({ isAdmin }) => {
         ),
       });
     }
-  }, [navigation, isAdmin]);
+  }, [navigation, isSuperAdmin]);
 
   const content = loading ? (
     <View style={styles.centered}>
@@ -72,7 +74,7 @@ const DepartmentList: React.FC<Props> = ({ isAdmin }) => {
         <TouchableOpacity
           style={styles.item}
           onPress={() =>
-            navigation.navigate('AdminDepartmentDetail', { departmentId: item.id, isAdmin })
+            navigation.navigate(isAdmin ? 'AdminDepartmentDetail' : 'StudentDepartmentDetail', { departmentId: item.id, isAdmin })
           }
         >
           <View style={styles.itemContent}>

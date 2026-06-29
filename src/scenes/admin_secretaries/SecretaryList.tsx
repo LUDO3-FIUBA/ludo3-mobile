@@ -10,7 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
 import AlertDialog from '../../components/AlertDialog';
-import { secretariesRepository } from '../../repositories';
+import { secretariesRepository, usersRepository } from '../../repositories';
 import Secretary from '../../models/Secretary';
 
 interface Props {
@@ -21,6 +21,7 @@ const SecretaryList: React.FC<Props> = ({ isAdmin }) => {
   const navigation = useNavigation<any>();
   const [secretaries, setSecretaries] = useState<Secretary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [alertDialog, setAlertDialog] = useState<{ title: string; message: string } | null>(null);
 
   const loadSecretaries = async () => {
@@ -35,13 +36,14 @@ const SecretaryList: React.FC<Props> = ({ isAdmin }) => {
   };
 
   useEffect(() => {
+    usersRepository.getInfo().then(u => setIsSuperAdmin(u.isSuperAdmin?.() ?? false)).catch(() => {});
     loadSecretaries();
     const unsubscribe = navigation.addListener('focus', loadSecretaries);
     return unsubscribe;
   }, [navigation]);
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isSuperAdmin) {
       navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
@@ -53,12 +55,12 @@ const SecretaryList: React.FC<Props> = ({ isAdmin }) => {
         ),
       });
     }
-  }, [navigation, isAdmin]);
+  }, [navigation, isSuperAdmin]);
 
   const topLevel = secretaries.filter(s => s.parentSecretary === null);
 
   const navigateToDetail = (id: number) =>
-    navigation.navigate('AdminSecretaryDetail', { secretaryId: id, isAdmin });
+    navigation.navigate(isAdmin ? 'AdminSecretaryDetail' : 'StudentSecretaryDetail', { secretaryId: id, isAdmin });
 
   let content: React.ReactNode;
   if (loading) {
@@ -90,7 +92,7 @@ const SecretaryList: React.FC<Props> = ({ isAdmin }) => {
                 <Text style={styles.itemName}>{item.name}</Text>
                 {item.location ? <Text style={styles.itemLocation}>{item.location}</Text> : null}
               </View>
-              {isAdmin && (
+              {isSuperAdmin && (
                 <TouchableOpacity
                   onPress={() =>
                     navigation.navigate('AdminSecretaryCreate', { parentId: item.id })

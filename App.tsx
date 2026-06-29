@@ -176,9 +176,9 @@ const WEB_DRAWER_EMBEDDED_ROUTES = new Set<string>([
   'StudyGroups', 'GroupSchedule', 'GroupInvite',
   'CreateSemester', 'TeacherForms', 'AdminDepartmentList', 'AdminCommissionList',
   'AdminUserSearch', 'AdminNotificationList', 'FormsManager',
-  'BedeliaClassroomChange', 'AdminDepartmentDetail', 'AdminDepartmentCreate',
+  'BedeliaClassroomChange', 'AdminDepartmentDetail', 'StudentDepartmentDetail', 'AdminDepartmentCreate',
   'AdminDepartmentEdit', 'StudentSecretaryList', 'AdminSecretaryList',
-  'AdminSecretaryDetail', 'AdminSecretaryCreate', 'AdminSecretaryEdit',
+  'AdminSecretaryDetail', 'StudentSecretaryDetail', 'AdminSecretaryCreate', 'AdminSecretaryEdit',
   'AdminCommissionCreate', 'AdminCommissionDetail',
   'AdminCommissionEdit', 'AdminUserDetail', 'AdminNotificationCreate',
   'Notifications', 'StudentNewsList', 'AdminNewsList', 'NewsDetail',
@@ -364,10 +364,12 @@ const App = () => {
               {!skipOnWeb('BedeliaClassroomChange') && <Stack.Screen name="BedeliaClassroomChange" component={BedeliaClassroomChangeForm} options={{ headerShown: true, title: 'Cambio de aula' }} />}
               {/* Detail routes (formerly hidden drawer screens) */}
               {!skipOnWeb('AdminDepartmentDetail') && <Stack.Screen name="AdminDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />}
+              {!skipOnWeb('StudentDepartmentDetail') && <Stack.Screen name="StudentDepartmentDetail" component={DepartmentDetail} options={{ headerShown: true, title: 'Departamento' }} />}
               {!skipOnWeb('AdminDepartmentCreate') && <Stack.Screen name="AdminDepartmentCreate" component={DepartmentForm} options={{ headerShown: true, title: 'Nuevo Departamento' }} />}
               {!skipOnWeb('AdminDepartmentEdit') && <Stack.Screen name="AdminDepartmentEdit" component={DepartmentForm} options={{ headerShown: true, title: 'Editar Departamento' }} />}
               {!skipOnWeb('AdminSecretaryList') && <Stack.Screen name="AdminSecretaryList" component={AdminSecretaryListScreen} options={{ headerShown: true, title: 'Secretarías' }} />}
               {!skipOnWeb('AdminSecretaryDetail') && <Stack.Screen name="AdminSecretaryDetail" component={SecretaryDetail} options={{ headerShown: true, title: 'Secretaría' }} />}
+              {!skipOnWeb('StudentSecretaryDetail') && <Stack.Screen name="StudentSecretaryDetail" component={SecretaryDetail} options={{ headerShown: true, title: 'Secretaría' }} />}
               {!skipOnWeb('AdminSecretaryCreate') && <Stack.Screen name="AdminSecretaryCreate" component={SecretaryForm} options={{ headerShown: true, title: 'Nueva Secretaría' }} />}
               {!skipOnWeb('AdminSecretaryEdit') && <Stack.Screen name="AdminSecretaryEdit" component={SecretaryForm} options={{ headerShown: true, title: 'Editar Secretaría' }} />}
               {!skipOnWeb('AdminCommissionCreate') && <Stack.Screen name="AdminCommissionCreate" component={CommissionForm} options={{ headerShown: true, title: 'Nueva Comisión' }} />}
