@@ -634,6 +634,25 @@ const RootDrawer = () => {
   );
   const headerRight = () => <HeaderRightInDrawer />;
 
+  const customHeader = ({ options }: { options: any }) => (
+    <View style={{
+      flexDirection: 'row', alignItems: 'center', height: 56,
+      paddingHorizontal: 12, borderBottomWidth: 1,
+      borderBottomColor: lightModeColors.lightGray,
+      backgroundColor: '#fff',
+    }}>
+      <HeaderBackButton />
+      <Text
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={{ flex: 1, fontSize: 18, fontWeight: '600', color: lightModeColors.mainContrastColor, marginHorizontal: 8 }}
+      >
+        {options.title ?? ''}
+      </Text>
+      <HeaderRightInDrawer />
+    </View>
+  );
+
   const menuScreens = buildMenuScreens(user);
 
   // The routes that actually become Drawer.Screens below. initialRouteName must
@@ -663,10 +682,7 @@ const RootDrawer = () => {
             borderRightColor: lightModeColors.lightGray,
             ...(Platform.OS === 'web' ? { transition: 'width 0.2s ease' } as WebViewStyle : {})
           },
-          headerLeft: () => <HeaderBackButton />,
-          headerRight,
-          headerTintColor: lightModeColors.mainContrastColor,
-          headerStyle: { elevation: 0, shadowOpacity: 0, borderBottomWidth: 1, borderBottomColor: lightModeColors.lightGray },
+          header: customHeader,
           drawerActiveTintColor: lightModeColors.institutional,
           drawerInactiveTintColor: lightModeColors.darkGray,
         }}
