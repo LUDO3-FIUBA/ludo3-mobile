@@ -1,0 +1,20 @@
+src/scenes/root_drawer/index.web.tsx
+  s_5cff59427b3c40::t_6d6a91ec1c3c7c 637-655
+  s_5cff59427b3c40::t_c9defb39327063 685
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "df51b79675d33da949ae883fb346d92ed434238c",
+  "prompts": {},
+  "sessions": {
+    "s_5cff59427b3c40": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a02562e1-3153-4fae-9589-680000a44455",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Luca Salluzzi <luca.salluzzi@mercadolibre.com>"
+    }
+  }
+}
