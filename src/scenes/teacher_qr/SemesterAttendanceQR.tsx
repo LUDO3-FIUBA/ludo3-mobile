@@ -15,7 +15,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { getQrAttendanceStringFromQrId } from '../../utils/qrCodeStringFactory';
 
-const CAMPUSES: Campus[] = ['las_heras', 'paseo_colon'];
+const CAMPUSES: Campus[] = ['las_heras', 'paseo_colon', 'ciudad_universitaria'];
 
 const SemesterAttendanceQR: React.FC = () => {
   const dispatch = useAppDispatch();

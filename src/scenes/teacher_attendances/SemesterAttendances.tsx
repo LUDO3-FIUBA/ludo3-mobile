@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import AlertDialog from '../../components/AlertDialog';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { fetchSemesterAttendances, fetchSemesterDataAsync, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
+import { fetchSemesterAttendances, selectSemesterAttendances, selectSemesterData } from '../../redux/reducers/teacherSemesterSlice';
 import { ClassAttendance } from '../../models/ClassAttendance';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcon } from '../../components';
@@ -43,16 +43,6 @@ const SemesterAttendances: React.FC = () => {
 
     return focusUnsubscribe;
   }, [dispatch, navigation, semesterData?.id]);
-
-  useEffect(() => {
-    const beforeRemoveUnsubscribe = navigation.addListener('beforeRemove', () => {
-      if (semesterData?.commission?.id) {
-        dispatch(fetchSemesterDataAsync(semesterData.commission.id));
-      }
-    });
-
-    return beforeRemoveUnsubscribe;
-  }, [dispatch, navigation, semesterData?.commission?.id]);
 
   const handleDeleteSession = (item: ClassAttendance) => {
     const message = `¿Seguro que querés eliminar la sesión del ${moment(new Date(item.createdAt)).format('DD/MM/YYYY HH:mm')}? Se borrarán todas las asistencias registradas.`;

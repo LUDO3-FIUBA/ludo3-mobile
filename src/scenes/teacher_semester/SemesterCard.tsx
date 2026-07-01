@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { View, Text, SafeAreaView, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, ActivityIndicator, Platform, InteractionManager } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { fetchSemesterDataAsync, selectSemesterData, selectSemesterError, selectSemesterLoading } from '../../redux/reducers/teacherSemesterSlice';
@@ -106,8 +106,16 @@ export function SemesterCard({ route }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      dispatch(fetchSemesterDataAsync(commission.id));
-      dispatch(fetchStaffTeachers(commission.id));
+      // Defer the (heavy) semester refetch until the navigation transition has
+      // settled. This screen's payload is large (all students + submissions),
+      // so dispatching + re-rendering during the pop animation blocks the JS
+      // thread and freezes the screen on Android. Running after interactions
+      // lets the transition finish first.
+      const task = InteractionManager.runAfterInteractions(() => {
+        dispatch(fetchSemesterDataAsync(commission.id));
+        dispatch(fetchStaffTeachers(commission.id));
+      });
+      return () => task.cancel();
     }, [dispatch, commission.id]),
   );
 

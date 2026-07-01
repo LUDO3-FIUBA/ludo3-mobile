@@ -1,11 +1,12 @@
 import { StudentAttendance, StudentAttendanceSnakeCase } from "./StudentAttendance";
 
 export type AttendanceMode = 'qr' | 'qr_location';
-export type Campus = 'las_heras' | 'paseo_colon';
+export type Campus = 'las_heras' | 'paseo_colon' | 'ciudad_universitaria';
 
 export const CAMPUS_NAMES: Record<Campus, string> = {
     las_heras: 'Las Heras',
     paseo_colon: 'Paseo Colón',
+    ciudad_universitaria: 'Ciudad Universitaria',
 };
 
 export interface ClassAttendance {
